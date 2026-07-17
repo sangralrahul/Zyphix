@@ -1,10 +1,10 @@
-import React, { useState, Suspense, lazy } from "react";
+import React, { Suspense, lazy } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
-import { SplashScreen } from "@/components/SplashScreen";
+
 
 import { Home } from "@/pages/Home";
 import { AuthProvider } from "@/context/AuthContext";
@@ -110,15 +110,6 @@ function Router() {
 }
 
 function App() {
-  const [showSplash, setShowSplash] = useState(() => {
-    try { return !sessionStorage.getItem('zyphix_splash_seen'); } catch { return false; }
-  });
-
-  const handleSplashDone = () => {
-    try { sessionStorage.setItem('zyphix_splash_seen', '1'); } catch {}
-    setShowSplash(false);
-  };
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -131,7 +122,6 @@ function App() {
           </WouterRouter>
         </AuthProvider>
         <Toaster />
-        {showSplash && <SplashScreen onComplete={handleSplashDone} />}
       </TooltipProvider>
     </QueryClientProvider>
   );
