@@ -12,7 +12,7 @@ import {
 import { products, categories, restaurants, foodCategories, promoCodes, stores } from '@/data/mockData';
 import { useAuth } from '@/context/AuthContext';
 import { ZyphixLogo } from '../components/ZyphixLogo';
-import { SplashVideoCore } from './SplashVideo';
+
 
 type TabId = 'now' | 'eats' | 'map' | 'offers';
 
