@@ -110,15 +110,6 @@ function Router() {
 }
 
 function App() {
-  const [showSplash, setShowSplash] = useState(() => {
-    try { return !sessionStorage.getItem('zyphix_splash_seen'); } catch { return false; }
-  });
-
-  const handleSplashDone = () => {
-    try { sessionStorage.setItem('zyphix_splash_seen', '1'); } catch {}
-    setShowSplash(false);
-  };
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -131,7 +122,6 @@ function App() {
           </WouterRouter>
         </AuthProvider>
         <Toaster />
-        {showSplash && <SplashScreen onComplete={handleSplashDone} />}
       </TooltipProvider>
     </QueryClientProvider>
   );
