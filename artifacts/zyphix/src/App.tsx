@@ -1,10 +1,10 @@
-import React, { useState, Suspense, lazy } from "react";
+import React, { Suspense, lazy } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
-import { SplashScreen } from "@/components/SplashScreen";
+
 
 import { Home } from "@/pages/Home";
 import { AuthProvider } from "@/context/AuthContext";
