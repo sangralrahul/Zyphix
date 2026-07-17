@@ -2919,9 +2919,6 @@ export function Home() {
       <DualHeroBanners />
       <div id="quick-browse"><QuickBrowse /></div>
       <WaitlistSection />
-      <div style={{ width: '100%', height: 540, background: W, borderBottom: `1px solid ${BD}`, overflow: 'hidden' }}>
-        <SplashVideoCore />
-      </div>
       <WhyZyphixStrip />
       <div id="offers"><OfferCards /></div>
       <div id="stores"><KiranaCTA /></div>
