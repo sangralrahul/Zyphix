@@ -1,0 +1,26 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "mbuPSsthHOEVgJh9oXYoU"
+uri = "file://artifacts/zyphix-splash/public/images/jammu-bg.png"
+type = "image"
+title = "Jammu cityscape illustration"
+
+[[generated]]
+id = "xS1kGU9Sqr7vHoSTQ1ep2"
+uri = "file://artifacts/zyphix-splash/public/images/scooter.png"
+type = "image"
+title = "Delivery scooter"
+
+[[generated]]
+id = "PbGLjuWRVJ-5Iy4caMT9T"
+uri = "file://artifacts/zyphix-splash/public/images/groceries.png"
+type = "image"
+title = "Grocery bag"
+
+[[generated]]
+id = "6blJzb6_atjyt6B86TyN5"
+uri = "file://artifacts/zyphix-splash/public/images/food.png"
+type = "image"
+title = "Food bowl"

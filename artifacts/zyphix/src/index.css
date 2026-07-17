@@ -1,0 +1,138 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --font-sans: var(--app-font-sans);
+  --font-mono: var(--app-font-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 220 13% 7%;
+  --border: 220 13% 90%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 13% 7%;
+  --primary: 152 83% 42%;
+  --primary-foreground: 0 0% 100%;
+  --muted-foreground: 220 9% 46%;
+  --ring: 152 83% 42%;
+  --app-font-sans: 'Inter', 'Outfit', sans-serif;
+  --app-font-mono: Menlo, monospace;
+  --radius: 1rem;
+  --z-green: #00D97E;
+  --z-muted: rgba(255,255,255,0.4);
+  --z-orange: #F97316;
+  --z-sky: #38BDF8;
+  --z-teal: #00C9A7;
+  --z-gold: #D4AF37;
+}
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--app-font-sans);
+    background: #F8F9FA;
+    color: #111827;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection { background: rgba(13,163,102,.15); color: #0A6840; }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 99px; }
+  button { cursor: pointer; border: none; background: none; padding: 0; font-family: inherit; }
+  a { text-decoration: none; }
+  img { display: block; }
+}
+
+@layer utilities {
+  /* Carousel */
+  .carousel {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 4px;
+  }
+  .carousel::-webkit-scrollbar { display: none; }
+
+  /* Image utilities */
+  .img-cover { object-fit: cover; width: 100%; height: 100%; }
+
+  /* Pulse dot animation */
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .6; transform: scale(.8); }
+  }
+
+  /* Marquee scroll */
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* Smooth fade-in */
+  @keyframes fadein {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Spinner for loading buttons */
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .fadein { animation: fadein .4s ease both; }
+
+  /* Hover scale utility */
+  .hover-scale { transition: transform .2s; }
+  .hover-scale:hover { transform: scale(1.03); }
+
+  /* No scrollbar */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Dark navbar button styles */
+  .btn-ghost {
+    background: transparent;
+    color: rgba(255,255,255,0.7);
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.15s, background 0.15s;
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.06); color: #fff; }
+
+  .btn-primary {
+    background: var(--z-green);
+    color: #0A0E1A;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+
+  /* pb-safe for bottom nav on notch devices */
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom, 8px); }
+}

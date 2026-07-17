@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "ZYPHIX - India's SuperLocal App"
+version = "1.0.0"
+id = "artifacts/zyphix"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20968
+
+[services.development]
+run = "pnpm --filter @workspace/zyphix run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/zyphix", "run", "build" ]
+publicDir = "artifacts/zyphix/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20968"
+BASE_PATH = "/"

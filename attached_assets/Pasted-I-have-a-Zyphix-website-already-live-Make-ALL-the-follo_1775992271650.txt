@@ -1,0 +1,232 @@
+I have a Zyphix website already live. Make ALL the following changes exactly as described. Do NOT rebuild from scratch. Do NOT change anything not mentioned below. Just add and fix what is listed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 1 — CRITICAL FIX (Do this first)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+REMOVE the brand logos bar showing Haldirams, Dabur, Patanjali, HUL, MDH, Fortune, Mother Dairy, Godrej.
+
+REPLACE it with a new section called "What you can order on Zyphix" with this exact layout:
+- Section heading (centered): "Everything from your neighbourhood — delivered in 30 minutes"
+- Subheading: "1,000+ products across 10 categories, sourced from kirana stores near you"
+- A 5-column grid (2 rows = 10 tiles total) of category cards:
+  Row 1: 🥦 Vegetables | 🥛 Dairy & Eggs | 💊 Medicine | 💡 Electronics | 🫙 Snacks
+  Row 2: 🧹 Household | 🍎 Fruits | 🧴 Personal Care | 🌾 Grains & Dal | 🐕 Pet Care
+- Each tile: colored icon box (teal background, white emoji), category name below in dark text
+- On mobile: 4 columns in row 1, 4+2 in row 2 (or auto-wrap)
+- Style: white background section, light border on tiles, slight hover effect
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 2 — ADD 9 NEW SECTIONS
+Place these below the existing hero/waitlist section in this exact order.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SECTION 1 — SAVINGS CALCULATOR
+Place: Right after the hero/waitlist section
+Heading: "See exactly how much you save switching to Zyphix"
+Subheading: "Most Jammu families spend ₹3,000–₹8,000/month on food & groceries"
+
+Build an interactive calculator:
+- Slider: "My monthly food + grocery spend" from ₹500 to ₹10,000 (default ₹3,000), step ₹100
+- Show slider value updating live
+- Calculate and display 3 results that update in real time:
+  * "You save per order" = 30% of (monthly spend / 20 orders) — shown in big teal text
+  * "You save per month" = monthly spend × 0.28 — shown in big green text
+  * "You save per year" = monthly × 12 × 0.28 — shown in biggest gold text
+- Below yearly saving: fun equivalent text like "That's enough for a Gulmarg trip!" (if >₹10,000) or "That's a new phone!" (if >₹5,000) or "That's 3 months of chai!" (if <₹5,000)
+- CTA button below: "Start saving — Join Waitlist →" (scrolls to waitlist form)
+- Style: dark section background (#0A0E1A), teal/green/gold numbers on cards, very premium feel
+
+SECTION 2 — RECEIPT COMPARISON
+Place: After savings calculator
+Heading: "The same ₹300 food order. Very different total bill."
+
+Two side-by-side receipt cards:
+LEFT CARD — "Other apps" (do not name Zomato/Swiggy specifically to avoid legal issues):
+  - Header: dark red background, "Other Delivery Apps"
+  - Line items:
+    Food value: ₹300
+    Delivery fee: ₹60 (highlighted red)
+    Platform fee: ₹10 (highlighted red)
+    Surge charge: ₹40 (highlighted red with "peak hours" label)
+    Packing charge: ₹15 (highlighted red)
+    TOTAL: ₹425 (big bold red)
+  - Bottom label: "Hidden charges added"
+
+RIGHT CARD — "Zyphix" (green theme):
+  - Header: teal/green background, "Zyphix"
+  - Line items:
+    Food value: ₹300
+    Delivery fee: ₹20 (highlighted green)
+    Platform fee: ₹2 (highlighted green, "just gateway cost")
+    Surge charge: ₹0 (highlighted green, "NEVER" badge)
+    Packing charge: ₹0 (highlighted green)
+    TOTAL: ₹322 (big bold green)
+  - Bottom label: "What you see is what you pay"
+
+Below both cards — centered bold text:
+"You save ₹103 on every order. That's ₹2,060 every month. ₹24,720 every year."
+CTA: "Stop overpaying — Join Zyphix →"
+
+SECTION 3 — HOW IT WORKS
+Place: After receipt comparison
+Heading: "Order in 3 simple steps"
+
+3 steps in a horizontal row (stack on mobile):
+Step 1: Icon = search/magnifier in teal circle
+  Title: "Search your kirana"
+  Text: "Find products from stores within 2 km of your location"
+
+Step 2: Icon = shopping cart in teal circle
+  Title: "Order in 2 taps"
+  Text: "Add items, choose delivery or pickup, pay however you want"
+
+Step 3: Icon = delivery bike in teal circle
+  Title: "Delivered in 30 minutes"
+  Text: "A local delivery partner brings it straight to your door"
+
+Connect the 3 steps with a dashed arrow line on desktop.
+Style: light background section, numbered teal circles, clean minimal design.
+
+SECTION 4 — WHY KIRANA NOT DARK STORES
+Place: After How It Works
+Heading: "We don't use dark stores. We use your neighbourhood."
+Subheading: "Other quick commerce apps build expensive warehouses. We digitise the shops already near you."
+
+Two column layout:
+LEFT COLUMN — "Dark store model" (grey/red theme):
+  Title: "Other apps — dark stores"
+  4 bullet points with ❌:
+  ❌ ₹50–200L investment per warehouse
+  ❌ Only works in 8–10 metro cities
+  ❌ Kirana stores lose customers
+  ❌ Cold, impersonal, corporate
+
+RIGHT COLUMN — "Zyphix kirana model" (green/teal theme):
+  Title: "Zyphix — your local kirana"
+  4 bullet points with ✓:
+  ✓ ₹0 capex — shops already exist
+  ✓ Works in any Indian city or town
+  ✓ Kirana owners earn more digitally
+  ✓ Warm, local, trusted neighbours
+
+Bottom centered stat: "14,000,000+ kirana stores in India. All waiting to go digital."
+
+SECTION 5 — LIVE WAITLIST COUNTER WITH CITIES
+Place: After kirana section
+Heading: "Your neighbours are already waiting"
+
+- Large animated number counter showing total signups
+  - Read count from localStorage key "zyphix_waitlist" (array length)
+  - Add 500 as base (existing signups before this session)
+  - Animate from 0 to final number on scroll into view
+- Below counter: "people have joined the Zyphix waitlist"
+- City breakdown — 3 progress bars:
+  Jammu — show 60% of total
+  Srinagar — show 25% of total
+  Chandigarh — show 15% of total
+  Each bar: city name left, count right, teal progress bar
+- Bottom text: "Launching first in Jammu, J&K · Srinagar & Chandigarh coming soon"
+- CTA: "Secure your spot now →" (scrolls to waitlist)
+
+SECTION 6 — KIRANA OWNER QUOTES
+Place: After counter section
+Heading: "Kirana stores across Jammu are joining us"
+Subheading: "Real shop owners. Real excitement."
+
+3 quote cards:
+Card 1:
+  Quote: "Main bahut saalon se apni dukaan chalata hoon. Zyphix se pehli baar mujhe lagaa ki main bhi online aa sakta hoon bina kuch kharche ke."
+  Name: Rajesh Sharma
+  Shop: Sharma General Store
+  Location: 📍 Bakshi Nagar, Jammu
+  Badge: "Waitlisted ✓"
+
+Card 2:
+  Quote: "Mere paas medicines hain, customers hain — bas ek platform chahiye tha jo unhe connect kare. Zyphix wahi kar raha hai."
+  Name: Dr. Vikram Gupta
+  Shop: City Medical & Pharmacy
+  Location: 📍 Gandhi Nagar, Jammu
+  Badge: "Waitlisted ✓"
+
+Card 3:
+  Quote: "Ab customers ghar baithe order karenge aur main deliver karwa sakta hoon. Pehle ye possible nahi tha mere jaisa chhota dukandaar ke liye."
+  Name: Rajan Khajuria
+  Shop: Rajan Provision Store
+  Location: 📍 Raghunath Bazaar, Jammu
+  Badge: "Waitlisted ✓"
+
+Style: dark card background, teal quote marks, Hindi text in normal font, green Waitlisted badge.
+
+SECTION 7 — APP PRODUCT PREVIEW MOCKUP
+Place: After quotes
+Heading: "Here's a peek at what's coming"
+
+Split layout:
+LEFT side — "ZyphixNow" preview:
+  Teal header bar: "⚡ ZyphixNow · Groceries"
+  4 small product cards in 2x2 grid:
+  - Fresh Vegetables 500g · ₹89
+  - Amul Milk 1L · ₹68
+  - Dolo 650 Strip · ₹28
+  - Parle-G 800g · ₹45
+  Each card: colored emoji box, name, price, "+ Add" button
+
+RIGHT side — "ZyphixEats" preview:
+  Gold header bar: "🍱 ZyphixEats · Food"
+  3 restaurant cards:
+  - Sharma Dhaba · ★4.6 · 28 min · Free delivery
+  - Chicken Corner · ★4.5 · 35 min · North Indian
+  - Mithai Palace · ★4.7 · 20 min · Sweets
+  Each card: food emoji, name, rating, time
+
+Both sides wrapped in a phone/app frame look (rounded dark container with subtle border).
+Heading below: "Full app launching Q3 2025 in Jammu"
+
+SECTION 8 — REFER AND EARN
+Place: After app preview
+Heading: "Invite friends. Both of you earn ₹100."
+
+Dark green card (full width):
+  Left side:
+    Big heading: "Share Zyphix, earn ₹100 launch credit"
+    Subtext: "For every friend who joins the waitlist using your link, you both get ₹100 Zyphix Cash credited on launch day."
+    How it works — 3 steps inline:
+    1. Share your link → 2. Friend joins → 3. Both get ₹100
+  
+  Right side:
+    "Your referral link:"
+    Input box showing: "zyphix.in/ref/JAMMU" (static for now)
+    Two buttons side by side:
+      Button 1: "📋 Copy Link" — copies text to clipboard, shows "Copied!" for 2 seconds
+      Button 2: "💬 Share on WhatsApp" — opens wa.me with this pre-filled message:
+        "Hey! Zyphix is launching in Jammu soon — order groceries from your local kirana store in 30 minutes. No surge pricing, no hidden fees. Join the waitlist and get ₹125 launch credit: https://zyphix.in 🎉"
+
+SECTION 9 — TRUST / MEDIA BAR
+Place: Just before footer
+Background: light grey strip
+Heading (small, centered, muted): "Built for Bharat · Backed by local trust"
+
+Two rows:
+Row 1 — "Coverage coming soon" with greyed out text logos: YourStory · Inc42 · The Ken · NDTV India · Entrepreneur India
+Row 2 — 4 trust badges in a row:
+  🔒 Secure Payments via Razorpay
+  📍 Verified Kirana Partners
+  🇮🇳 Made in Jammu, J&K
+  ⚡ 30-Min Delivery Promise
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 3 — GENERAL RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Do NOT change hero section, navbar, waitlist form, or any existing content
+2. Do NOT use any real brand logos (Haldirams, HUL, Dabur etc) anywhere — only text or emojis
+3. All new sections must match existing site color scheme (dark navy + teal + white)
+4. Every CTA button in new sections must scroll smoothly to the waitlist form
+5. All sections must be fully responsive — perfect on 375px mobile AND 1280px desktop
+6. Savings calculator must update numbers in real time as slider moves (no page reload)
+7. WhatsApp button must open wa.me link in new tab
+8. Animated counter in Section 5 must trigger on scroll into viewport (IntersectionObserver)
+9. After all changes, scroll through entire page and confirm no broken layouts
+10. The page order from top to bottom must be:
+    Promo bar → Navbar → Hero + Waitlist → Category Grid → Savings Calculator → Receipt Comparison → How It Works → Why Kirana → Live Counter → Kirana Quotes → App Preview → Refer & Earn → Trust Bar → Footer

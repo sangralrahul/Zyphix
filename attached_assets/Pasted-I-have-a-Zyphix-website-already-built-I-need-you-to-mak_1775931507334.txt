@@ -1,0 +1,138 @@
+I have a Zyphix website already built. I need you to make specific fixes and improvements to it. Do NOT rebuild from scratch — only make the changes listed below. Every single change must be made exactly as described.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CRITICAL P1 FIXES — DO THESE FIRST
+These are false claims that will hurt credibility with investors and users.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FIX 1 — Hero panel: Change delivery time promise
+FIND: Any text saying "10 min delivery", "10 minutes", "Groceries in 10 minutes"
+CHANGE TO: "30 min delivery" on the ZyphixNow hero panel
+Change the green badge that says "Now · 10 min delivery" to "Now · 30 min delivery"
+Change the headline "Groceries in 10 minutes." to "Groceries in 30 minutes."
+Reason: You have kirana stores, not dark stores. 30 min is honest and still fast.
+
+FIX 2 — Stats bar: Remove all fake numbers
+FIND: The bottom stats bar showing "10,000+ Verified partner stores" and "30+ Cities"
+REPLACE the entire stats bar with these 4 honest stats:
+
+  Stat 1: Icon = lightning bolt
+  Number: "30 Min"
+  Label: "Guaranteed delivery"
+
+  Stat 2: Icon = store/shop
+  Number: "Jammu First"
+  Label: "Launching in J&K"
+
+  Stat 3: Icon = location pin
+  Number: "Tier 2 India"
+  Label: "Built for Bharat"
+
+  Stat 4: Icon = rupee
+  Number: "₹0 Surge"
+  Label: "Always fair pricing"
+
+FIX 3 — Remove "30+ Cities" claim everywhere
+Search entire codebase for "30+ Cities", "30+ cities", "10,000+", "10000+", "2,000+ restaurants", "2000+ restaurants"
+Replace every instance with either:
+  - "Jammu, J&K" (for city references)
+  - "200+ partner stores" (for store count — this is your waitlist number, honest)
+  - "Local restaurants" (for restaurant count)
+Also find "ZYPHIX EATS · 2,000+ restaurants" badge on the right hero panel and change to "ZYPHIX EATS · Local restaurants near you"
+Find "ZYPHIX NOW · 10 min delivery" badge and change to "ZYPHIX NOW · 30 min delivery"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+P2 FIXES — IMPORTANT IMPROVEMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FIX 4 — "Order Groceries" and "Order Food" buttons
+Currently these buttons likely go to a dead page or non-functional route.
+Change BOTH buttons to scroll smoothly to a waitlist section instead:
+  onClick: document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' })
+  Change button text:
+    Left panel: "Join Waitlist →" (keep green color)
+    Right panel: "Join Waitlist →" (keep orange-red color)
+  Add a small subtitle below each button:
+    Left: "Launching soon in Jammu"
+    Right: "Be first to order"
+
+FIX 5 — Add a Waitlist Section
+Add a new section with id="waitlist" directly below the hero panels.
+Style: dark background matching the site theme, centered, max-width 520px, padding 60px 20px
+
+Content:
+  Small badge at top: "🚀 Now accepting early access"
+  Big headline: "Zyphix is launching in Jammu, J&K"
+  Subtext: "Join 500+ people already on the waitlist. Get ₹200 launch credit when we go live."
+
+  Form with these fields:
+    - Full Name (text input, placeholder "Your full name")
+    - Phone Number (tel input, placeholder "10-digit mobile number", pattern="[0-9]{10}")
+    - City (select dropdown: Jammu | Srinagar | Chandigarh | Delhi | Other)
+    - I am a: (3 radio button cards side by side)
+        [ 🛒 Customer ] [ 🏪 Merchant ] [ 🛵 Delivery Partner ]
+        Style: each is a clickable card, selected = teal border + teal background tint
+
+  Submit button: full width, bg teal (#00C9A7), text dark, "Join the Waitlist →"
+  
+  On submit:
+    - Validate: name required, phone must be 10 digits, city required, role required
+    - Show success state: hide form, show "🎉 You're on the list! We'll reach out before launch." in green
+    - Store to localStorage as JSON array (key: "zyphix_waitlist") so entries persist
+    - Show live counter below button: "Join [X] others already waiting" — X comes from localStorage count, starts at 500 (to represent existing signups), increments on each new submission
+
+FIX 6 — Add kirana differentiator line to hero
+In the ZyphixNow (left green) panel, below the category pills (Vegetables, Dairy, Snacks etc), add one line of text:
+  "Sourced from kirana stores near you — not dark warehouses"
+  Style: font-size small (13px), color white with 70% opacity, italic
+
+FIX 7 — Mobile responsiveness check
+The two side-by-side hero panels need to stack on mobile.
+Find the hero panels container and ensure:
+  - On screens below 768px: flex-direction column, each panel full width, min-height 320px
+  - On screens 768px and above: flex-direction row, each panel 50% width
+  - Category pills should wrap properly on small screens (flex-wrap: wrap)
+  - Headline font sizes: 36px desktop → 26px on mobile (use responsive classes or media queries)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+P3 ENHANCEMENTS — POLISH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FIX 8 — Add "Why Zyphix" strip between hero and stats
+Add a thin horizontal strip between the hero panels and the stats bar.
+Background: slightly lighter than page bg (#131D30 or similar dark)
+Content: one line centered, 3 points separated by · symbols:
+"✓ No dark stores — real kirana shops near you  ·  ✓ Lower commission than Swiggy/Zomato  ·  ✓ Your neighbourhood, now digital"
+Font: 13px, color: #00C9A7 (teal), padding: 12px 20px
+
+FIX 9 — Promo bar improvement
+Find the top promo bar "Use code ZYPHIX50 — 50% off your first order"
+Make it a rotating announcement bar that cycles through 3 messages every 3 seconds:
+  Message 1: "🎉 Use code ZYPHIX50 — 50% off your first order"
+  Message 2: "🚀 Zyphix is launching in Jammu, J&K — Join the waitlist"
+  Message 3: "🏪 Are you a kirana store owner? List for free → Register now"
+Use CSS animation (opacity fade) for transition between messages.
+The "Register now" text should scroll to the waitlist section on click.
+
+FIX 10 — Footer honest update
+Find the footer section.
+Make sure these are updated:
+  - Remove any fake city/store count claims
+  - Add: "Currently launching in Jammu, J&K · Expanding to Srinagar & Chandigarh in 2025"
+  - Keep: "© 2025 Clavix Technologies Pvt. Ltd. All rights reserved."
+  - Add WhatsApp contact button if not already present: href="https://wa.me/919682394363"
+  - Social links: LinkedIn → https://linkedin.com/in/rahulsangral
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IMPORTANT RULES FOR THIS TASK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Do NOT change the overall design, color scheme, or layout — only the specific things listed above
+2. Do NOT remove the // logo, navbar, or hero panel structure
+3. Do NOT change the green/orange-red color scheme of the two panels
+4. Keep all existing category pills (Vegetables, Dairy, Biryani, Pizza etc)
+5. Keep the existing font choices and spacing
+6. After all fixes, do a full text search of the codebase for these strings and confirm they are gone:
+   "10 min" | "10 minutes" | "10,000+" | "30+ Cities" | "2,000+ restaurants"
+   If any still exist, fix them before finishing.
+7. Test on both desktop (1280px) and mobile (375px) before declaring done.

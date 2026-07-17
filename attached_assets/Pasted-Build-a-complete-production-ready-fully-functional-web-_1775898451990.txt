@@ -1,0 +1,618 @@
+Build a complete, production-ready, fully functional web application called ZYPHIX — India's SuperLocal App. This is a full-stack consumer app similar to Flipkart/Blinkit but for Tier 2 India using kirana stores. Build it with React + Vite + TypeScript + Tailwind CSS. Every page must be fully built — no placeholders, no lorem ipsum, no "coming soon" content.
+
+═══════════════════════════════════════════════
+TECH STACK
+═══════════════════════════════════════════════
+- Frontend: React 18 + Vite + TypeScript
+- Styling: Tailwind CSS with custom config
+- Routing: React Router v6
+- Auth: Firebase Authentication (Email/Password + Google OAuth)
+- Database/State: Firebase Firestore + React Context
+- Maps: Google Maps JavaScript API (@react-google-maps/api)
+- Animations: Framer Motion
+- Icons: Lucide React
+- Notifications: react-hot-toast
+- Forms: React Hook Form
+- HTTP: Axios (for any external calls)
+- Package manager: npm
+
+Install all dependencies in package.json before building.
+
+═══════════════════════════════════════════════
+BRAND & DESIGN SYSTEM
+═══════════════════════════════════════════════
+Dark theme only. Premium feel. iOS-grade polish.
+
+tailwind.config.js custom colors:
+  dark:    #0A0E1A  (page background)
+  navy:    #0F1B35  (card/navbar bg)
+  blue:    #1E4FC2  (brand blue)
+  teal:    #00C9A7  (primary accent — CTAs, highlights)
+  gold:    #F5A623  (ZyphixEats accent)
+  orange:  #FF6B35  (ZyphixBook accent)
+  sky:     #2D9CDB  (info/links)
+  muted:   #5A7A9A  (secondary text)
+  border:  #1E3A6E  (card borders)
+
+Font: Inter (import from Google Fonts in index.html)
+Font weights: 400, 500, 600, 700
+
+Design rules:
+- All cards: bg-navy border border-border rounded-xl
+- Hover: border-blue or border-teal transition
+- All primary CTAs: bg-teal text-dark font-bold rounded-lg
+- Secondary CTAs: border border-blue text-white rounded-lg
+- All inputs: bg-navy border border-border rounded-lg text-white placeholder-muted
+- Section titles: text-white font-semibold text-sm
+- Subtitles: text-muted text-xs
+- Page bg: bg-dark
+
+═══════════════════════════════════════════════
+FILE STRUCTURE
+═══════════════════════════════════════════════
+src/
+  components/
+    layout/
+      Navbar.tsx         ← sticky top navbar
+      Footer.tsx         ← full footer
+      BottomNav.tsx      ← mobile bottom navigation
+      Sidebar.tsx        ← filter sidebar (desktop)
+    ui/
+      ProductCard.tsx
+      RestaurantCard.tsx
+      ServiceCard.tsx
+      KiranaCard.tsx
+      PromoCard.tsx
+      CategoryPill.tsx
+      SlotPicker.tsx
+      MapView.tsx        ← Google Maps component
+      SearchBar.tsx
+      Toast.tsx
+      Badge.tsx
+      Modal.tsx
+      LoadingSpinner.tsx
+    auth/
+      LoginModal.tsx
+      SignupModal.tsx
+      ProtectedRoute.tsx
+  pages/
+    Home.tsx
+    ZyphixNow.tsx        ← grocery/product delivery
+    ZyphixEats.tsx       ← food delivery
+    ZyphixBook.tsx       ← appointment booking
+    KiranaMap.tsx        ← Google Maps page for store discovery
+    StoreDetail.tsx      ← individual store page
+    RestaurantDetail.tsx ← individual restaurant page
+    ServiceDetail.tsx    ← individual service business page
+    Cart.tsx
+    Checkout.tsx
+    OrderTracking.tsx
+    Account.tsx
+    MyOrders.tsx
+    MyBookings.tsx
+    Offers.tsx
+    MerchantSignup.tsx
+    DeliveryPartnerSignup.tsx
+    About.tsx
+    Contact.tsx
+    PrivacyPolicy.tsx
+    TermsOfService.tsx
+  context/
+    AuthContext.tsx
+    CartContext.tsx
+    LocationContext.tsx
+  hooks/
+    useNearbyStores.ts
+    useGeolocation.ts
+    useCart.ts
+  data/
+    mockStores.ts        ← sample kirana stores with lat/lng for Jammu
+    mockRestaurants.ts
+    mockServices.ts
+    mockProducts.ts
+    mockMenuItems.ts
+  firebase/
+    config.ts
+    auth.ts
+    firestore.ts
+  utils/
+    distance.ts          ← Haversine formula for store distance
+    formatPrice.ts
+    timeSlots.ts
+  types/
+    index.ts             ← all TypeScript interfaces
+  App.tsx
+  main.tsx
+  index.css
+
+═══════════════════════════════════════════════
+FIREBASE SETUP
+═══════════════════════════════════════════════
+In src/firebase/config.ts use these env variables:
+  VITE_FIREBASE_API_KEY
+  VITE_FIREBASE_AUTH_DOMAIN
+  VITE_FIREBASE_PROJECT_ID
+  VITE_FIREBASE_STORAGE_BUCKET
+  VITE_FIREBASE_MESSAGING_SENDER_ID
+  VITE_FIREBASE_APP_ID
+
+Auth features:
+- Email/password signup + login
+- Google OAuth one-tap login
+- Persistent session (localStorage)
+- User profile stored in Firestore: {name, email, phone, city, role: 'customer'|'merchant'|'delivery'}
+- Protected routes for Cart, Checkout, Account, MyOrders, MyBookings
+
+═══════════════════════════════════════════════
+GOOGLE MAPS INTEGRATION
+═══════════════════════════════════════════════
+API Key env var: VITE_GOOGLE_MAPS_API_KEY
+Package: @react-google-maps/api
+
+MapView component features:
+- Center on user's current location (navigator.geolocation)
+- Show all nearby kirana stores as custom markers (teal pin)
+- Show restaurants as gold markers
+- Show service businesses as orange markers
+- Click marker → show InfoWindow with: name, distance, rating, "Order Now" / "Book Slot" button
+- Zoom controls, street view disabled, dark map style (use this style array):
+  styles: [
+    {elementType:'geometry',stylers:[{color:'#0A0E1A'}]},
+    {elementType:'labels.text.fill',stylers:[{color:'#7BAFD4'}]},
+    {elementType:'labels.text.stroke',stylers:[{color:'#0F1B35'}]},
+    {featureType:'road',elementType:'geometry',stylers:[{color:'#1E3A6E'}]},
+    {featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#0F1B35'}]},
+    {featureType:'water',elementType:'geometry',stylers:[{color:'#0D2247'}]},
+    {featureType:'poi',stylers:[{visibility:'off'}]},
+    {featureType:'transit',stylers:[{visibility:'off'}]}
+  ]
+
+KiranaMap page (/map):
+- Full width Google Map (height: calc(100vh - 56px))
+- Left sidebar (320px) showing list of stores sorted by distance
+- Filter buttons: All | Kirana | Food | Services
+- Each store card in sidebar has distance badge, rating, open/closed status
+- Clicking sidebar card → pan map to that marker + open InfoWindow
+
+Mock store data (in mockStores.ts) — create 8 stores near Jammu city center (lat: 32.7266, lng: 74.8570):
+  - Sharma General Store (32.7280, 74.8590) — kirana
+  - City Medical & Pharmacy (32.7255, 74.8555) — medical
+  - Rajan Provision Store (32.7270, 74.8610) — kirana
+  - Sonu Electronics (32.7290, 74.8540) — electronics
+  - Gupta Atta Chakki (32.7240, 74.8580) — kirana
+  - Mohit Auto Garage (32.7310, 74.8530) — garage
+  - Raja Barber Shop (32.7260, 74.8600) — salon
+  - Sharma Dhaba (32.7275, 74.8565) — restaurant
+
+═══════════════════════════════════════════════
+NAVBAR (Navbar.tsx)
+═══════════════════════════════════════════════
+Desktop layout (sticky, bg-navy, border-b border-border, h-14):
+  [ZYPHIX logo] [Location selector ▾] [Search bar] [Login/Avatar] [Cart button]
+
+Logo: "ZYPHIX" bold white, border-left-4 border-teal pl-2
+
+Location selector:
+  - Shows "Deliver to: Jammu, J&K ▾"
+  - Click → small dropdown with city search input
+  - Cities: Jammu, Srinagar, Chandigarh, Delhi, Mumbai
+
+Search bar (flex-1, max-w-lg):
+  - Full dark input with magnifier icon
+  - Placeholder: "Search groceries, food, services..."
+  - On submit → navigate to /search?q=...
+
+Right side:
+  - If logged out: [Login] [Sign Up] buttons
+  - If logged in: Avatar circle (initials), dropdown: My Account | My Orders | My Bookings | Logout
+  - Cart button: bg-teal text-dark, shows item count badge
+
+Sub-navbar below main navbar:
+  - Tabs: Home | ⚡ ZyphixNow | 🍱 ZyphixEats | 📅 ZyphixBook | 🗺️ Kirana Map | 🏷️ Offers
+  - Active tab: border-b-2 border-teal text-teal
+  - Sticky below main navbar
+
+Mobile: hamburger menu → slide-in drawer with all nav items + auth
+
+═══════════════════════════════════════════════
+HOME PAGE (/)
+═══════════════════════════════════════════════
+Build exactly these sections in order:
+
+1. HERO BANNER CAROUSEL (3 slides, auto-rotate every 4s, dot indicators):
+   Slide 1 — ZyphixNow: bg-gradient from #0D3B2E to #0A0E1A
+     "Groceries in 30 min from your kirana" · teal CTA "Order Now"
+   Slide 2 — ZyphixEats: bg-gradient from #3B2500 to #0A0E1A
+     "Food from your local dhaba. Only 12% commission." · gold CTA "Order Food"
+   Slide 3 — ZyphixBook: bg-gradient from #2A1A00 to #0A0E1A
+     "Book a haircut, car service, or doctor visit." · orange CTA "Book Now"
+
+2. PROMO STRIP (scrollable horizontal):
+   ZYPHIX50 — 50% off first order | EATSFREE — Free delivery on food | BOOKFIRST — ₹50 off booking | REFER100 — Refer & earn ₹100
+
+3. SHOP BY CATEGORY (5-column grid on desktop, 4 on mobile):
+   Vegetables 🥦 | Dairy 🥛 | Medicine 💊 | Electronics 💡 | Personal Care 🧴
+   Grains 🍚 | Snacks 🫙 | Household 🧹 | Fruits 🍎 | Pet Care 🐕
+
+4. THREE PRODUCT CARDS (ZyphixNow, ZyphixEats, ZyphixBook):
+   Each card: colored border accent, icon, headline, subtext, CTA button, 2 feature bullets
+
+5. TRENDING PRODUCTS (2x2 grid on mobile, 4-col on desktop):
+   Show 8 products from mockProducts with Add button, price, store name, distance
+
+6. RESTAURANTS NEARBY (horizontal scroll on mobile, list on desktop):
+   Show 4 restaurants from mockRestaurants with rating, ETA, cuisine tags
+
+7. BOOK A SERVICE (3-col grid):
+   Barber ✂️ · Garage 🔧 · Tailor 👔 · Doctor 🩺 · Home Services 🏠 · Electronics 💡
+   Each shows: "Next slot: 3PM today" or "2 available today"
+
+8. NEARBY KIRANA STORES (map preview + list):
+   Small Google Maps embed (300px height, non-interactive preview)
+   "See full map →" link to /map page
+   Below: 3 kirana store cards with distance, rating, open/closed
+
+9. HOW ZYPHIX WORKS (3 tab panels: Customer / Merchant / Delivery Partner):
+   Each tab: 4 numbered steps with icon + description
+
+10. APP DOWNLOAD SECTION:
+    "Launching Q3 2025 in Jammu, J&K"
+    Waitlist form: Name + Phone + City + Role (radio) + Submit button
+    On submit: save to Firestore collection "waitlist", show success toast
+    Greyed-out App Store + Google Play badges
+
+11. FOOTER
+
+═══════════════════════════════════════════════
+ZYPHIXNOW PAGE (/now)
+═══════════════════════════════════════════════
+Layout: Left sidebar (filters) + Main product grid
+
+Sidebar filters:
+  - Category (checkboxes): Vegetables, Dairy, Medicine, Snacks, Household, Electronics
+  - Distance: slider 0.5km to 5km
+  - Sort by: Nearest | Price Low-High | Price High-Low | Rating
+  - Open now toggle
+  - Price range slider: ₹0 to ₹500
+
+Main area:
+  - Filter pill bar at top (scrollable)
+  - Store sections: each kirana store gets its own section header
+    "[Store Name] · [distance] · Open until [time]" with "View Store →" link
+  - Under each store: 2-row horizontal scroll of product cards
+  - Product card: image (emoji in colored box), name, weight/unit, price, original price, discount %, "Add to Cart" button
+  - Show 4 stores with 6 products each from mock data
+  - "Load more stores" button at bottom
+
+Mobile: filter opens as bottom sheet modal
+
+═══════════════════════════════════════════════
+ZYPHIXEATS PAGE (/eats)
+═══════════════════════════════════════════════
+Layout: Full page restaurant listing (Zomato-style)
+
+Top section:
+  - Cuisine filter pills: All | North Indian | Chinese | Pizza | Biryani | Sweets | Snacks | South Indian
+  - Sort: Relevance | Rating | Delivery Time | Cost: Low to High
+
+Restaurant cards (full width list, 2-col on desktop):
+  Each card:
+  - Food category colored image box (emoji, 80x80)
+  - Name + cuisine tags
+  - Star rating (gold) + delivery time (teal) + "Free delivery" badge if applicable
+  - "Zyphix commission: only 12–15%" small badge (gold)
+  - Cost for 2
+  - "Order Now →" button
+
+Show 6 restaurants from mockRestaurants data.
+
+Restaurant Detail page (/restaurant/:id):
+  - Header: name, rating, cuisine, hours, delivery time
+  - Menu tabs: Starters | Main Course | Bread | Rice | Desserts | Drinks
+  - Menu items: name, description, price, veg/non-veg indicator, Add button
+  - "Add to Cart" → updates global cart state
+  - Show 4-5 items per category
+
+═══════════════════════════════════════════════
+ZYPHIXBOOK PAGE (/book)
+═══════════════════════════════════════════════
+Layout: Category selector + Service business listing
+
+Category grid (top, 6 tiles):
+  ✂️ Salons & Barbers
+  🔧 Auto Garages
+  🩺 Doctors & Clinics
+  👔 Tailors
+  🏠 Home Services
+  📸 Photography
+
+Service listing cards:
+  - Business name, address, distance
+  - Services offered with prices: "Haircut ₹80 | Shave ₹40 | Massage ₹200"
+  - Star rating + reviews count
+  - "Open Now" / "Opens at 9AM" badge
+  - Available today slots (horizontal pill buttons: "3PM" "4PM" "5PM" greyed if full)
+  - "Book Now →" button (opens booking modal)
+
+Booking Modal:
+  - Select service (dropdown)
+  - Select date (date picker — next 7 days)
+  - Select time slot (grid of available slots, disabled if full)
+  - Your name (pre-filled if logged in)
+  - Phone number
+  - Notes (optional)
+  - "Confirm Booking →" button
+  - On confirm: save to Firestore "bookings" collection, show success toast with booking ID
+
+Show 6 service businesses from mockServices data.
+
+═══════════════════════════════════════════════
+KIRANA MAP PAGE (/map)
+═══════════════════════════════════════════════
+Full viewport Google Maps experience:
+
+Layout:
+  Left sidebar (w-80, scrollable):
+    - "Stores Near You" title
+    - Filter buttons: All | Kirana | Food | Services | Garage | Medical
+    - Search within map input
+    - Store cards (sorted by distance):
+      Each card: emoji icon, name, type badge, distance, rating, open status, "Order →" button
+      Hover card → highlight marker on map
+      Click card → pan to marker, open InfoWindow
+
+  Right: Full height Google Map
+    - Custom dark style (from style array above)
+    - User location: blue pulsing dot marker
+    - Store markers: custom colored pins (teal=kirana, gold=food, orange=service, red=garage)
+    - InfoWindow on click:
+      - Store name + type
+      - Distance from user
+      - Rating stars
+      - Open/closed status
+      - "View Store" + "Get Directions" buttons
+      - Get Directions → opens Google Maps directions in new tab
+
+  Mobile: Map takes full screen, stores list is a bottom drawer (draggable)
+
+═══════════════════════════════════════════════
+CART PAGE (/cart)
+═══════════════════════════════════════════════
+Two-column layout (desktop):
+  Left (items):
+    - Group items by store/restaurant
+    - Each item: image, name, price, qty -/+ buttons, remove
+    - Store delivery info per group
+  Right (summary):
+    - Order summary card
+    - Items total
+    - Delivery fee (₹20 fixed, ₹0 if over ₹199)
+    - Platform fee ₹2
+    - Promo code input + Apply button
+    - Grand total
+    - "Proceed to Checkout →" button (requires login)
+
+If cart empty: illustration + "Start shopping" button
+
+═══════════════════════════════════════════════
+CHECKOUT PAGE (/checkout)
+═══════════════════════════════════════════════
+Step 1: Delivery Address
+  - Saved addresses (if any) as selectable cards
+  - "Add new address" form: flat/house, street, landmark, city, pincode
+  
+Step 2: Delivery Time
+  - ASAP (30 min) | Schedule for later (time slot picker)
+
+Step 3: Payment
+  - UPI (text input for UPI ID)
+  - Card (number, expiry, CVV fields — UI only, no real payment)
+  - Cash on Delivery
+  - Wallet (Zyphix Cash balance: ₹0.00)
+
+Step 4: Review & Place Order
+  - Order summary
+  - "Place Order →" button
+  - On click: save order to Firestore "orders" collection, navigate to /tracking/:orderId with mock tracking
+
+═══════════════════════════════════════════════
+ORDER TRACKING PAGE (/tracking/:id)
+═══════════════════════════════════════════════
+- Order ID display
+- Status progress bar: Order Placed → Confirmed → Packed → Out for Delivery → Delivered
+- Animated status steps (each with timestamp)
+- Delivery partner info (mock): name, phone, vehicle number
+- Small Google Map showing delivery route (static mock path)
+- ETA countdown timer
+- "Call Support" button
+
+═══════════════════════════════════════════════
+ACCOUNT PAGE (/account)
+═══════════════════════════════════════════════
+Sidebar navigation:
+  - My Profile
+  - My Orders
+  - My Bookings
+  - Saved Addresses
+  - Wallet & Offers
+  - Refer & Earn
+  - Help & Support
+  - Logout
+
+My Profile:
+  - Avatar with initials circle
+  - Edit name, email, phone
+  - Save to Firestore on submit
+
+My Orders:
+  - List of past orders (from Firestore)
+  - Each: order ID, date, items summary, amount, status badge
+  - "Reorder" button
+
+My Bookings:
+  - List of past/upcoming appointments
+  - Each: service name, business, date/time, status (Confirmed/Completed/Cancelled)
+  - Cancel button for upcoming bookings
+
+Refer & Earn:
+  - Unique referral code: "ZYPHIX-[uid first 6 chars]"
+  - Copy code button
+  - Share via WhatsApp button (wa.me link)
+  - Referral stats: 0 invited / ₹0 earned
+
+═══════════════════════════════════════════════
+AUTH MODALS (LoginModal.tsx / SignupModal.tsx)
+═══════════════════════════════════════════════
+Login Modal (centered overlay, dark card):
+  - ZYPHIX logo at top
+  - "Welcome back!" heading
+  - Email + Password inputs
+  - "Forgot password?" link (Firebase sendPasswordResetEmail)
+  - Login button
+  - Divider "or"
+  - "Continue with Google" button (Google OAuth)
+  - "Don't have an account? Sign up" link → switch to signup modal
+
+Signup Modal:
+  - Full name, email, phone, password, confirm password
+  - Role selector: Customer / Merchant / Delivery Partner
+  - Terms checkbox
+  - Sign Up button
+  - Google OAuth option
+  - On success: create Firestore user doc, show welcome toast
+
+═══════════════════════════════════════════════
+MERCHANT SIGNUP PAGE (/merchant-signup)
+═══════════════════════════════════════════════
+Multi-step form (3 steps):
+
+Step 1: Business Info
+  - Business name, type (Kirana/Restaurant/Salon/Garage/Other)
+  - Owner name, phone, email
+  - GST number (optional)
+
+Step 2: Location
+  - Full address + pincode
+  - "Pick on Map" button → opens Google Maps picker
+    User can drag a pin to exact location
+    Captures lat/lng automatically
+
+Step 3: Products/Services
+  - Upload business photos (UI only — file input)
+  - Add 3 sample products/services with price
+  - Operating hours (open/close time per day of week)
+
+Submit → save to Firestore "merchant_applications", show success with "We'll contact you within 24 hours"
+
+═══════════════════════════════════════════════
+DELIVERY PARTNER SIGNUP (/delivery-signup)
+═══════════════════════════════════════════════
+Form fields:
+  - Name, phone, email, city
+  - Vehicle type: Bicycle | Scooter/Bike | Car
+  - Vehicle number
+  - Aadhaar number (last 4 digits only)
+  - Working hours preference: Morning | Evening | Night | Flexible
+  - Bank account for payouts (account number + IFSC)
+  - Submit → Firestore "delivery_applications" + success toast
+
+Earnings calculator widget:
+  - Slider: hours per day (2–10)
+  - Shows: estimated daily earnings (₹120 × hours × 0.75)
+  - Weekly earnings, monthly earnings
+  - "₹600–₹1200/day guaranteed in first 2 weeks"
+
+═══════════════════════════════════════════════
+OFFERS PAGE (/offers)
+═══════════════════════════════════════════════
+- 4 promo code cards (teal/gold/orange/purple accents)
+- Bank offers section: "Get ₹50 cashback with SBI cards"
+- Loyalty points section: "Earn 1 Zyphix Point per ₹10 spent"
+- Refer & Earn banner
+
+═══════════════════════════════════════════════
+FOOTER (Footer.tsx)
+═══════════════════════════════════════════════
+Background: bg-navy, border-t border-border
+
+Top section (4-column grid):
+  Col 1: Logo + tagline "India's #1 SuperLocal App" + "Made with ❤️ in Jammu, J&K"
+         Social icons: LinkedIn, Twitter/X, Instagram (href="#")
+
+  Col 2: Products
+    ZyphixNow — 30-min delivery
+    ZyphixEats — Food delivery
+    ZyphixBook — Appointments
+    Kirana Map — Find stores
+
+  Col 3: Company
+    About Us | Blog | Careers | Press Kit | Investors | Contact Us
+
+  Col 4: Partners
+    List Your Store | Partner Restaurant | Delivery Partner | Advertise with Us
+
+Bottom bar (border-t border-border, flex between):
+  "© 2025 Clavix Technologies Pvt. Ltd. All rights reserved."
+  Links: Privacy Policy | Terms of Service | Cookie Policy | Refund Policy
+
+WhatsApp floating button (bottom-right, fixed):
+  - Circular bg-green-500 button, WhatsApp icon
+  - href="https://wa.me/919682394363"
+  - Tooltip: "Chat with us"
+
+═══════════════════════════════════════════════
+BOTTOM NAVIGATION (mobile only, BottomNav.tsx)
+═══════════════════════════════════════════════
+Fixed bottom bar (bg-navy border-t, h-14):
+  🏠 Home | ⚡ Now | 🍱 Eats | 📅 Book | 👤 Account
+  Active item: text-teal, icon teal
+  Cart badge on Home icon if items in cart
+
+═══════════════════════════════════════════════
+MOCK DATA (required in /data/ folder)
+═══════════════════════════════════════════════
+mockStores.ts — 8 stores near Jammu (lat/lng included, see above)
+mockProducts.ts — 20 products across categories with price, image emoji, store ID
+mockRestaurants.ts — 6 restaurants with menu, cuisine, rating, ETA
+mockServices.ts — 6 service businesses with slots, services, prices
+mockMenuItems.ts — 30 menu items across 6 restaurants
+
+TypeScript interfaces in types/index.ts:
+  Store, Product, Restaurant, MenuItem, ServiceBusiness, TimeSlot,
+  Order, Booking, User, CartItem, Address, PromoCode
+
+═══════════════════════════════════════════════
+IMPORTANT REQUIREMENTS
+═══════════════════════════════════════════════
+1. Every page must be FULLY built — no skeleton screens left empty
+2. All routes must work: wrap App in BrowserRouter, handle 404 with NotFound page
+3. Cart state persists in localStorage via CartContext
+4. Auth state persists via Firebase onAuthStateChanged
+5. All forms show react-hot-toast success/error notifications
+6. Google Maps must use dark style array provided above
+7. All distances calculated with Haversine formula (utils/distance.ts)
+8. Mobile-first responsive: works perfectly at 375px, 768px, 1280px+
+9. index.html must include:
+   - Google Fonts Inter 400,500,600,700
+   - Meta description: "Zyphix — India's #1 SuperLocal App. 30-min delivery, food ordering, and appointment booking from shops near you."
+   - og:title, og:description, og:image (placeholder URL)
+   - Favicon: inline SVG data URI of teal "Z" on dark background
+10. tailwind.config.js must extend theme with all brand colors listed above
+11. vite.config.ts: set base: '/' for clean URL routing
+12. .env.example file with all required env variable names
+13. README.md with: setup instructions, env vars needed, npm run dev + build commands
+14. Add smooth page transition: pages fade in on mount (Framer Motion)
+15. All "Add to Cart" buttons update CartContext immediately with optimistic UI
+
+═══════════════════════════════════════════════
+DEPLOYMENT
+═══════════════════════════════════════════════
+This must run on Replit with:
+  npm install
+  npm run dev   → development server on port 5173
+  npm run build → production build in /dist
+
+Add to package.json scripts:
+  "dev": "vite --host 0.0.0.0 --port 5173"
+
+The site must be fully functional using mock data even without real Firebase/Google Maps keys — gracefully fall back: if VITE_GOOGLE_MAPS_API_KEY is empty, show a styled placeholder div saying "Map available after setup" instead of crashing.

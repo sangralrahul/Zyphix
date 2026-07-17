@@ -1,0 +1,1 @@
+- [Product images for ZYPHIX mock data](zyphix-product-images.md) — use real downloaded brand photos in `public/images/products/`, not Unsplash stock, for FMCG product cards.
