@@ -106,6 +106,9 @@
     "artifacts/zyphix": {
       "name": "@workspace/zyphix",
       "version": "0.0.0",
+      "dependencies": {
+        "@supabase/supabase-js": "^2.110.7",
+      },
       "devDependencies": {
         "@hookform/resolvers": "^3.10.0",
         "@radix-ui/react-accordion": "^1.2.4",
