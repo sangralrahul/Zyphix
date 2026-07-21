@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api';
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, Utensils, Clock, FileText, Star, FileDown } from 'lucide-react';
@@ -808,7 +809,7 @@ export function RestaurantSetup() {
   const handleOperationsNext = async () => {
     setSubmitting(true);
     try {
-      await fetch('/api/partner-register', {
+      await apiFetch('/api/partner-register', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: restData.owner || restData.name,

@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api';
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, User, Phone, Check, AlertCircle, Zap, ShoppingCart, CalendarCheck, ArrowRight, ChevronLeft } from 'lucide-react';
@@ -303,7 +304,7 @@ export function AuthModal() {
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setErrors({}); setApiError(''); setLoading(true);
     try {
-      const res = await fetch('/api/send-email-otp', {
+      const res = await apiFetch('/api/send-email-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: form.email.trim(), name: form.name.trim() || undefined }),
@@ -322,7 +323,7 @@ export function AuthModal() {
     if (code.length < 6) { setErrors({ emailOtp: 'Enter the complete 6-digit OTP' }); return; }
     setErrors({}); setApiError(''); setLoading(true);
     try {
-      const res = await fetch('/api/verify-email-otp', {
+      const res = await apiFetch('/api/verify-email-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: form.email.trim(), otp: code }),
@@ -343,7 +344,7 @@ export function AuthModal() {
     setEmailOtp(['', '', '', '', '', '']); setApiError('');
     setLoading(true);
     try {
-      const res = await fetch('/api/send-email-otp', {
+      const res = await apiFetch('/api/send-email-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: form.email.trim(), name: form.name.trim() || undefined }),
