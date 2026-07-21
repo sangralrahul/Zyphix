@@ -234,7 +234,7 @@ function Navbar({ tab = 'now', setTab }: { tab?: TabId; setTab?: (t: TabId) => v
 
         {/* Logo */}
         <a href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
-          <LogoMark size={28} dark />
+          <LogoMark size={28} />
         </a>
 
         {/* ── Location picker ── */}
