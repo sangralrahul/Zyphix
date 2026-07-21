@@ -351,8 +351,9 @@ export function AuthModal() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: form.email.trim(), name: form.name.trim() || undefined }),
       });
-      const data = await res.json() as { success?: boolean; error?: string };
-      if (!res.ok || !data.success) { setApiError(data.error ?? 'Failed to resend OTP.'); }
+      const data = await res.json() as { success?: boolean; error?: string; token?: string };
+      if (!res.ok || !data.success || !data.token) { setApiError(data.error ?? 'Failed to resend OTP.'); }
+      else { setEmailOtpToken(data.token); }
     } catch {
       setApiError('Network error.');
     }
