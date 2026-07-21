@@ -247,6 +247,7 @@ export function AuthModal() {
   const [apiError, setApiError]     = useState('');
   const [form, setForm]             = useState({ name: '', email: '' });
   const [errors, setErrors]         = useState<Record<string, string>>({});
+  const [emailOtpToken, setEmailOtpToken] = useState('');
 
   const set = (k: string) => (v: string) => setForm(f => ({ ...f, [k]: v }));
 
