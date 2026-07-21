@@ -1,1 +1,10 @@
 project_id = "awbccdtdszdxcxnsossy"
+
+[functions.notify]
+verify_jwt = false
+
+[functions.email-otp]
+verify_jwt = false
+
+[functions.partner-register]
+verify_jwt = false
