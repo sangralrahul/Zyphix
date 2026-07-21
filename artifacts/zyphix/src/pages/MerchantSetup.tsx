@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api';
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, Store, Clock, FileText, Sparkles, FileDown } from 'lucide-react';
@@ -1023,7 +1024,7 @@ export function MerchantSetup() {
         const items = [...(selectedSubs[id] ?? [])];
         return items.length ? `${id}: ${items.join(', ')}` : id;
       }).join(' | ');
-      await fetch('/api/partner-register', {
+      await apiFetch('/api/partner-register', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: storeData.ownerName || storeData.name,

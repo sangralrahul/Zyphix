@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, ArrowRight, Check, Bell, ChevronLeft } from 'lucide-react';
@@ -153,7 +154,7 @@ export function AppComingSoon() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/notify', {
+      const res = await apiFetch('/api/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, source: 'app-page' }),

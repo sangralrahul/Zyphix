@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, Upload, User, Bike, Calendar, CreditCard, FileDown } from 'lucide-react';
@@ -735,7 +736,7 @@ export function DeliverySetup() {
   const handleAvailabilityNext = async () => {
     setSubmitting(true);
     try {
-      await fetch('/api/partner-register', {
+      await apiFetch('/api/partner-register', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: personal.name,

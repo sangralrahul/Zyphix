@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api';
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, User, Phone, Check, AlertCircle, Zap, ShoppingCart, CalendarCheck, ArrowRight, ChevronLeft } from 'lucide-react';
@@ -246,6 +247,7 @@ export function AuthModal() {
   const [apiError, setApiError]     = useState('');
   const [form, setForm]             = useState({ name: '', email: '' });
   const [errors, setErrors]         = useState<Record<string, string>>({});
+  const [emailOtpToken, setEmailOtpToken] = useState('');
 
   const set = (k: string) => (v: string) => setForm(f => ({ ...f, [k]: v }));
 
@@ -303,13 +305,14 @@ export function AuthModal() {
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setErrors({}); setApiError(''); setLoading(true);
     try {
-      const res = await fetch('/api/send-email-otp', {
+      const res = await apiFetch('/api/send-email-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: form.email.trim(), name: form.name.trim() || undefined }),
       });
-      const data = await res.json() as { success?: boolean; error?: string };
-      if (!res.ok || !data.success) { setApiError(data.error ?? 'Failed to send OTP. Please try again.'); setLoading(false); return; }
+      const data = await res.json() as { success?: boolean; error?: string; token?: string };
+      if (!res.ok || !data.success || !data.token) { setApiError(data.error ?? 'Failed to send OTP. Please try again.'); setLoading(false); return; }
+      setEmailOtpToken(data.token);
       setLoading(false); setEmailStep('otp'); setCanResend(false); setCountdownKey(k => k + 1);
     } catch {
       setApiError('Network error. Please check your connection.'); setLoading(false);
@@ -322,10 +325,10 @@ export function AuthModal() {
     if (code.length < 6) { setErrors({ emailOtp: 'Enter the complete 6-digit OTP' }); return; }
     setErrors({}); setApiError(''); setLoading(true);
     try {
-      const res = await fetch('/api/verify-email-otp', {
+      const res = await apiFetch('/api/verify-email-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: form.email.trim(), otp: code }),
+        body: JSON.stringify({ email: form.email.trim(), otp: code, token: emailOtpToken }),
       });
       const data = await res.json() as { success?: boolean; name?: string | null; error?: string };
       if (!res.ok || !data.success) { setErrors({ emailOtp: data.error ?? 'Incorrect OTP. Please try again.' }); setLoading(false); return; }
@@ -343,13 +346,14 @@ export function AuthModal() {
     setEmailOtp(['', '', '', '', '', '']); setApiError('');
     setLoading(true);
     try {
-      const res = await fetch('/api/send-email-otp', {
+      const res = await apiFetch('/api/send-email-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: form.email.trim(), name: form.name.trim() || undefined }),
       });
-      const data = await res.json() as { success?: boolean; error?: string };
-      if (!res.ok || !data.success) { setApiError(data.error ?? 'Failed to resend OTP.'); }
+      const data = await res.json() as { success?: boolean; error?: string; token?: string };
+      if (!res.ok || !data.success || !data.token) { setApiError(data.error ?? 'Failed to resend OTP.'); }
+      else { setEmailOtpToken(data.token); }
     } catch {
       setApiError('Network error.');
     }

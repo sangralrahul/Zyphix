@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api';
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -1554,7 +1555,7 @@ function AppDownload() {
     setNotifyLoading(true);
     setNotifyError('');
     try {
-      const res = await fetch('/api/notify', {
+      const res = await apiFetch('/api/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, source: 'homepage' }),
@@ -2384,7 +2385,7 @@ function WaitlistSection() {
       const details = form.role === 'restaurant' ? restaurant : form.role === 'merchant' ? merchant : form.role === 'delivery' ? delivery : {};
       const payload = { ...form, details };
       if (PARTNER_ROLES.includes(form.role)) {
-        const res = await fetch('/api/partner-register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        const res = await apiFetch('/api/partner-register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
         const data = await res.json() as { success?: boolean; error?: string };
         if (!res.ok || !data.success) { setApiError(data.error ?? 'Something went wrong. Please try again.'); setLoading(false); return; }
       }
