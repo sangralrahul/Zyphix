@@ -328,7 +328,7 @@ export function AuthModal() {
       const res = await apiFetch('/api/verify-email-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: form.email.trim(), otp: code }),
+        body: JSON.stringify({ email: form.email.trim(), otp: code, token: emailOtpToken }),
       });
       const data = await res.json() as { success?: boolean; name?: string | null; error?: string };
       if (!res.ok || !data.success) { setErrors({ emailOtp: data.error ?? 'Incorrect OTP. Please try again.' }); setLoading(false); return; }
