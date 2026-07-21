@@ -310,8 +310,9 @@ export function AuthModal() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: form.email.trim(), name: form.name.trim() || undefined }),
       });
-      const data = await res.json() as { success?: boolean; error?: string };
-      if (!res.ok || !data.success) { setApiError(data.error ?? 'Failed to send OTP. Please try again.'); setLoading(false); return; }
+      const data = await res.json() as { success?: boolean; error?: string; token?: string };
+      if (!res.ok || !data.success || !data.token) { setApiError(data.error ?? 'Failed to send OTP. Please try again.'); setLoading(false); return; }
+      setEmailOtpToken(data.token);
       setLoading(false); setEmailStep('otp'); setCanResend(false); setCountdownKey(k => k + 1);
     } catch {
       setApiError('Network error. Please check your connection.'); setLoading(false);
