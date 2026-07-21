@@ -66,7 +66,7 @@ export function Navbar() {
 
           {/* ── Logo ── */}
           <Link href="/" className="shrink-0 transition-opacity hover:opacity-90">
-            <ZyphixLogo key={location} size={34} ixColor={isLight ? '#111827' : '#ffffff'} />
+            <ZyphixLogo key={location} size={34} ixColor="#000000" />
           </Link>
 
           {/* ── Location ── */}
