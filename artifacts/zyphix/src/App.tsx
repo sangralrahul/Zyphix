@@ -9,6 +9,7 @@ import NotFound from "@/pages/not-found";
 import { Home } from "@/pages/Home";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
+import { PromoProvider } from "@/context/PromoContext";
 import { AuthModal } from "@/components/AuthModal";
 import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -37,6 +38,7 @@ const ProductDetail = lazy(() => import("@/pages/ProductDetail").then(m => ({ de
 const CartPage = lazy(() => import("@/pages/Cart").then(m => ({ default: m.Cart })));
 const CheckoutPage = lazy(() => import("@/pages/Checkout").then(m => ({ default: m.Checkout })));
 const OrderConfirmation = lazy(() => import("@/pages/OrderConfirmation").then(m => ({ default: m.OrderConfirmation })));
+const WalletPage = lazy(() => import("@/pages/Wallet").then(m => ({ default: m.Wallet })));
 
 
 function RouteFallback() {
@@ -106,6 +108,10 @@ function Router() {
       <Route path="/now/order/:id">
         {params => <LightLayout><OrderConfirmation /></LightLayout>}
       </Route>
+      <Route path="/wallet">
+        <LightLayout><WalletPage /></LightLayout>
+      </Route>
+
 
       <Route path="/eats">
         <LightLayout><ZyphixEats /></LightLayout>
@@ -135,12 +141,14 @@ function App() {
       <TooltipProvider>
         <AuthProvider>
           <CartProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Suspense fallback={<RouteFallback />}>
-                <Router />
-              </Suspense>
-              <AuthModal />
-            </WouterRouter>
+            <PromoProvider>
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                <Suspense fallback={<RouteFallback />}>
+                  <Router />
+                </Suspense>
+                <AuthModal />
+              </WouterRouter>
+            </PromoProvider>
           </CartProvider>
         </AuthProvider>
         <Toaster />

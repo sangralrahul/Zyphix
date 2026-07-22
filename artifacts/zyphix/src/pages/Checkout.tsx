@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
 import { ChevronLeft, MapPin, Wallet, CreditCard, Check } from 'lucide-react';
 import { useCart, saveOrder, type Order } from '@/context/CartContext';
+import { usePromo, maxWalletUsable, cashbackFor } from '@/context/PromoContext';
+import { findCoupon, evaluateCoupon } from '@/data/coupons';
 
 const G = '#0DA366';
 const G_LIGHT = 'rgba(13,163,102,0.08)';
@@ -9,6 +11,12 @@ const G_BORDER = 'rgba(13,163,102,0.25)';
 
 export function Checkout() {
   const { items, subtotal, clear } = useCart();
+  const {
+    appliedCoupon, applyCoupon,
+    walletBalance, useWalletAtCheckout, setUseWalletAtCheckout,
+    debitWallet, creditWallet,
+    hasPreviousOrders, recordOrderPlaced,
+  } = usePromo();
   const [, navigate] = useLocation();
 
   const [name, setName] = useState(() => { try { return JSON.parse(localStorage.getItem('zyphix_user') || 'null')?.name || ''; } catch { return ''; } });
@@ -21,8 +29,19 @@ export function Checkout() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [placing, setPlacing] = useState(false);
 
-  const deliveryFee = subtotal === 0 ? 0 : subtotal >= 149 ? 0 : 25;
-  const grand = subtotal + deliveryFee;
+  const baseDelivery = subtotal === 0 ? 0 : subtotal >= 149 ? 0 : 25;
+
+  const activeCoupon = appliedCoupon ? findCoupon(appliedCoupon) : null;
+  const evalResult = useMemo(() => activeCoupon ? evaluateCoupon(activeCoupon, subtotal, hasPreviousOrders) : null, [activeCoupon, subtotal, hasPreviousOrders]);
+  const itemDiscount = evalResult?.ok ? evalResult.itemDiscount : 0;
+  const shippingWaived = !!(evalResult?.ok && evalResult.shippingWaived);
+  const deliveryFee = shippingWaived ? 0 : baseDelivery;
+
+  const beforeWallet = Math.max(0, subtotal - itemDiscount + deliveryFee);
+  const walletCap = maxWalletUsable(beforeWallet, walletBalance);
+  const walletApplied = useWalletAtCheckout ? walletCap : 0;
+  const grand = Math.max(0, beforeWallet - walletApplied);
+  const totalSavings = itemDiscount + (shippingWaived ? baseDelivery : 0) + walletApplied;
 
   if (items.length === 0) {
     return (
@@ -48,12 +67,17 @@ export function Checkout() {
     if (!validate()) return;
     setPlacing(true);
     const id = 'ZNW' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
+    const cashback = cashbackFor(grand);
     const order: Order = {
       id,
       createdAt: new Date().toISOString(),
       items,
       subtotal,
       deliveryFee,
+      couponCode: activeCoupon?.code || null,
+      couponDiscount: itemDiscount,
+      walletUsed: walletApplied,
+      cashbackEarned: cashback,
       total: grand,
       address: { name: name.trim(), phone: phone.trim(), line1: line1.trim(), city: city.trim(), pincode: pincode.trim(), notes: notes.trim() || undefined },
       paymentMode: payment,
@@ -61,8 +85,17 @@ export function Checkout() {
       etaMinutes: 30,
     };
     saveOrder(order);
-    // simulate small delay
-    await new Promise(r => setTimeout(r, 500));
+
+    // Ledger effects
+    if (walletApplied > 0) debitWallet(walletApplied, `Paid for order`, id);
+    if (cashback > 0)      creditWallet(cashback, `2% cashback on order`, id);
+
+    // Reset promos for next order
+    applyCoupon(null);
+    setUseWalletAtCheckout(false);
+    recordOrderPlaced();
+
+    await new Promise(r => setTimeout(r, 450));
     clear();
     navigate(`/now/order/${id}`);
   };
@@ -80,7 +113,6 @@ export function Checkout() {
         <style>{`@media (max-width: 820px){ .co-grid { grid-template-columns: 1fr !important; } .co-sum { position: static !important; } }`}</style>
 
         <div>
-          {/* Address */}
           <Section title="Delivery Address" icon={<MapPin size={16} color={G} />}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <Field label="Full Name" value={name} onChange={setName} error={errors.name} />
@@ -94,7 +126,6 @@ export function Checkout() {
             <Field label="Delivery notes (optional)" value={notes} onChange={setNotes} placeholder="e.g., Ring the bell twice" />
           </Section>
 
-          {/* Payment */}
           <Section title="Payment Method">
             <PayOption
               active={payment === 'COD'} onClick={() => setPayment('COD')}
@@ -104,12 +135,11 @@ export function Checkout() {
             <PayOption
               active={payment === 'ONLINE'} onClick={() => setPayment('ONLINE')}
               icon={<CreditCard size={18} color={payment === 'ONLINE' ? G : '#6B7280'} />}
-              title="Online Payment" sub="UPI / Cards / Netbanking (demo)"
+              title="Online Payment" sub="UPI / Cards / Netbanking (coming soon)"
             />
           </Section>
         </div>
 
-        {/* Summary */}
         <div className="co-sum" style={{ position: 'sticky', top: 76, alignSelf: 'start' }}>
           <div style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 16, padding: 16 }}>
             <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 15, color: '#111827', marginBottom: 10 }}>Order Summary</div>
@@ -126,9 +156,22 @@ export function Checkout() {
               ))}
             </div>
             <SumRow label="Subtotal" value={`₹${subtotal}`} />
+            {itemDiscount > 0 && <SumRow label={`Coupon (${activeCoupon?.code})`} value={`− ₹${itemDiscount}`} valueColor={G} />}
             <SumRow label="Delivery" value={deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`} valueColor={deliveryFee === 0 ? G : undefined} />
+            {walletApplied > 0 && <SumRow label="Wallet" value={`− ₹${walletApplied}`} valueColor={G} />}
             <div style={{ borderTop: '1px dashed #E5E7EB', margin: '8px 0' }} />
             <SumRow label="Total" value={`₹${grand}`} bold />
+
+            {totalSavings > 0 && (
+              <div style={{ marginTop: 10, background: G_LIGHT, color: G, border: `1px dashed ${G_BORDER}`, borderRadius: 8, padding: '7px 10px', fontSize: 11.5, fontWeight: 800, textAlign: 'center' }}>
+                🎉 You save ₹{totalSavings} on this order
+              </div>
+            )}
+            {cashbackFor(grand) > 0 && (
+              <div style={{ marginTop: 6, fontSize: 11.5, color: '#6B7280', textAlign: 'center' }}>
+                You'll earn <strong style={{ color: G }}>₹{cashbackFor(grand)} cashback</strong> to your wallet
+              </div>
+            )}
 
             <button onClick={placeOrder} disabled={placing}
               style={{ width: '100%', marginTop: 14, padding: '14px', background: placing ? '#9CA3AF' : `linear-gradient(135deg, ${G}, #0A8C58)`, color: '#fff', fontWeight: 800, fontSize: 15, border: 'none', borderRadius: 12, cursor: placing ? 'not-allowed' : 'pointer', boxShadow: '0 6px 20px rgba(13,163,102,.35)', fontFamily: "'Outfit',sans-serif" }}>

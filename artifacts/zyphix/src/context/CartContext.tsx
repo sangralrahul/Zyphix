@@ -93,7 +93,11 @@ export type Order = {
   items: CartLine[];
   subtotal: number;
   deliveryFee: number;
-  total: number;
+  couponCode?: string | null;
+  couponDiscount?: number;   // ₹ off items
+  walletUsed?: number;       // ₹ paid from wallet
+  cashbackEarned?: number;   // ₹ credited back to wallet
+  total: number;             // final ₹ paid via COD/Online
   address: { name: string; phone: string; line1: string; city: string; pincode: string; notes?: string };
   paymentMode: 'COD' | 'ONLINE';
   status: 'CONFIRMED';
