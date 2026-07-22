@@ -10,6 +10,9 @@ import { Home } from "@/pages/Home";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { PromoProvider } from "@/context/PromoContext";
+import { WishlistProvider } from "@/context/WishlistContext";
+import { ReviewsProvider } from "@/context/ReviewsContext";
+import { NotificationsProvider } from "@/context/NotificationsContext";
 import { AuthModal } from "@/components/AuthModal";
 import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -39,6 +42,10 @@ const CartPage = lazy(() => import("@/pages/Cart").then(m => ({ default: m.Cart 
 const CheckoutPage = lazy(() => import("@/pages/Checkout").then(m => ({ default: m.Checkout })));
 const OrderConfirmation = lazy(() => import("@/pages/OrderConfirmation").then(m => ({ default: m.OrderConfirmation })));
 const WalletPage = lazy(() => import("@/pages/Wallet").then(m => ({ default: m.Wallet })));
+const WishlistPage = lazy(() => import("@/pages/Wishlist").then(m => ({ default: m.Wishlist })));
+const NotificationsPage = lazy(() => import("@/pages/Notifications").then(m => ({ default: m.Notifications })));
+const Admin = lazy(() => import("@/pages/Admin").then(m => ({ default: m.Admin })));
+const PartnerDashboard = lazy(() => import("@/pages/PartnerDashboard").then(m => ({ default: m.PartnerDashboard })));
 
 
 function RouteFallback() {
@@ -51,8 +58,6 @@ function RouteFallback() {
 }
 
 const queryClient = new QueryClient();
-
-const DARK_ROUTES = ['/now', '/eats', '/book', '/offers', '/kirana-map'];
 
 function DarkLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -111,6 +116,18 @@ function Router() {
       <Route path="/wallet">
         <LightLayout><WalletPage /></LightLayout>
       </Route>
+      <Route path="/wishlist">
+        <LightLayout><WishlistPage /></LightLayout>
+      </Route>
+      <Route path="/notifications">
+        <LightLayout><NotificationsPage /></LightLayout>
+      </Route>
+      <Route path="/admin">
+        <LightLayout><Admin /></LightLayout>
+      </Route>
+      <Route path="/partner-dashboard">
+        <LightLayout><PartnerDashboard /></LightLayout>
+      </Route>
 
 
       <Route path="/eats">
@@ -140,16 +157,22 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <CartProvider>
-            <PromoProvider>
-              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-                <Suspense fallback={<RouteFallback />}>
-                  <Router />
-                </Suspense>
-                <AuthModal />
-              </WouterRouter>
-            </PromoProvider>
-          </CartProvider>
+          <NotificationsProvider>
+            <WishlistProvider>
+              <ReviewsProvider>
+                <CartProvider>
+                  <PromoProvider>
+                    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                      <Suspense fallback={<RouteFallback />}>
+                        <Router />
+                      </Suspense>
+                      <AuthModal />
+                    </WouterRouter>
+                  </PromoProvider>
+                </CartProvider>
+              </ReviewsProvider>
+            </WishlistProvider>
+          </NotificationsProvider>
         </AuthProvider>
         <Toaster />
       </TooltipProvider>
@@ -158,4 +181,3 @@ function App() {
 }
 
 export default App;
-
