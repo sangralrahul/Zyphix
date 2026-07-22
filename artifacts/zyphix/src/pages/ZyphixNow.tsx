@@ -1,10 +1,13 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingCart, Plus, Minus, X, Clock, ChevronRight, Zap, Tag, Truck } from 'lucide-react';
-import { products, GROCERY_CATEGORIES, stores } from '@/data/mockData';
-import { useLocation } from 'wouter';
+import { Search, ShoppingCart, Plus, Minus, X, Clock, ChevronRight, Zap, Tag, Truck, SlidersHorizontal } from 'lucide-react';
+import { products, GROCERY_CATEGORIES } from '@/data/mockData';
+import { Link, useLocation } from 'wouter';
+import { useCart } from '@/context/CartContext';
 
-type CartState = Record<string, number>;
+type SortKey = 'featured' | 'price_asc' | 'price_desc' | 'discount';
+
+
 
 const G = '#0DA366';
 const G_LIGHT = 'rgba(13,163,102,0.08)';
@@ -16,40 +19,53 @@ export function ZyphixNow() {
   };
 
   const [activeCat, setActiveCat] = useState<string>(initCat);
-  const [cart, setCart] = useState<CartState>({});
   const [search, setSearch] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<SortKey>('featured');
+  const [onlyDiscounted, setOnlyDiscounted] = useState(false);
   const sideRef = useRef<HTMLDivElement>(null);
   const [, navigate] = useLocation();
 
-  const add = (id: string) => setCart(c => ({ ...c, [id]: (c[id] || 0) + 1 }));
-  const remove = (id: string) => setCart(c => {
-    const n = { ...c };
-    if ((n[id] || 0) > 1) n[id]--;
-    else delete n[id];
-    return n;
-  });
+  const { items: cartItems, add: addToCart, remove: removeFromCart, totalItems, subtotal: totalPrice } = useCart();
+  const cart: Record<string, number> = useMemo(() => {
+    const m: Record<string, number> = {};
+    cartItems.forEach(i => { m[i.id] = i.qty; });
+    return m;
+  }, [cartItems]);
 
-  const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
-  const totalPrice = Object.entries(cart).reduce((sum, [id, qty]) => {
-    const p = products.find(x => x.id === id);
-    return sum + (p ? p.price * qty : 0);
-  }, 0);
+  const add = (id: string) => {
+    const p = products.find(x => x.id === id); if (!p) return;
+    addToCart({ id: p.id, name: p.name, brand: p.brand, price: p.price, origPrice: p.origPrice, image: p.image, weight: p.weight });
+  };
+  const remove = (id: string) => removeFromCart(id);
 
   const catData = GROCERY_CATEGORIES.find(c => c.name === activeCat);
 
-  const filtered = products.filter(p => {
-    const catMatch = p.category === activeCat;
-    const searchMatch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase());
-    return catMatch && searchMatch;
-  });
+  const sortFn = (a: typeof products[number], b: typeof products[number]) => {
+    if (sortBy === 'price_asc') return a.price - b.price;
+    if (sortBy === 'price_desc') return b.price - a.price;
+    if (sortBy === 'discount') {
+      const da = a.origPrice ? (1 - a.price / a.origPrice) : 0;
+      const db = b.origPrice ? (1 - b.price / b.origPrice) : 0;
+      return db - da;
+    }
+    return 0;
+  };
 
-  const allSearched = search ? products.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.brand.toLowerCase().includes(search.toLowerCase())
-  ) : [];
+  const filtered = useMemo(() => products
+    .filter(p => p.category === activeCat)
+    .filter(p => !onlyDiscounted || (p.origPrice && p.price < p.origPrice))
+    .filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase()))
+    .slice().sort(sortFn), [activeCat, onlyDiscounted, search, sortBy]);
+
+  const allSearched = useMemo(() => search ? products
+    .filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase()))
+    .filter(p => !onlyDiscounted || (p.origPrice && p.price < p.origPrice))
+    .slice().sort(sortFn) : [], [search, onlyDiscounted, sortBy]);
 
   const displayProducts = search ? allSearched : filtered;
+
+
 
   const scrollCatIntoView = (name: string) => {
     if (!sideRef.current) return;
@@ -181,9 +197,24 @@ export function ZyphixNow() {
                   <p style={{ fontSize: 11, color: '#6B7280', margin: 0, marginTop: 1 }}>{filtered.length} items available</p>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: '#6B7280' }}>
-                <Tag size={11} /> Best price guaranteed
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <button
+                  onClick={() => setOnlyDiscounted(v => !v)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: onlyDiscounted ? '#fff' : G, background: onlyDiscounted ? G : G_LIGHT, border: `1px solid ${G_BORDER}`, borderRadius: 20, padding: '5px 10px', cursor: 'pointer' }}>
+                  <Tag size={11} /> Deals
+                </button>
+                <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                  <SlidersHorizontal size={11} style={{ position: 'absolute', left: 8, color: '#6B7280', pointerEvents: 'none' }} />
+                  <select value={sortBy} onChange={e => setSortBy(e.target.value as SortKey)}
+                    style={{ appearance: 'none', border: '1px solid #E5E7EB', background: '#fff', borderRadius: 20, padding: '5px 22px 5px 24px', fontSize: 11, fontWeight: 700, color: '#111827', cursor: 'pointer', fontFamily: 'inherit' }}>
+                    <option value="featured">Featured</option>
+                    <option value="price_asc">Price ↑</option>
+                    <option value="price_desc">Price ↓</option>
+                    <option value="discount">Discount</option>
+                  </select>
+                </div>
               </div>
+
             </div>
           )}
 
@@ -291,7 +322,7 @@ export function ZyphixNow() {
                     <span>Grand Total</span><span>₹{totalPrice}</span>
                   </div>
                   <button
-                    onClick={() => { setCartOpen(false); navigate('/offers'); }}
+                    onClick={() => { setCartOpen(false); navigate('/now/cart'); }}
                     style={{ width: '100%', padding: '14px', borderRadius: 14, background: `linear-gradient(135deg, ${G}, #0A8C58)`, color: '#fff', fontWeight: 800, fontSize: 15, border: 'none', cursor: 'pointer', boxShadow: '0 6px 24px rgba(13,163,102,.35)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: "'Outfit',sans-serif" }}>
                     <span>Proceed to Checkout</span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>₹{totalPrice} <ChevronRight size={16} /></span>
@@ -348,12 +379,14 @@ function ProductCard({ product: p, qty, onAdd, onRemove }: { product: Product; q
       style={{ borderRadius: 16, background: '#FFFFFF', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid #F0F0F0' }}>
 
       {/* Image */}
-      <div style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden', background: '#F8F9FA' }}>
+      <Link href={`/now/product/${p.id}`}>
+        <a style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden', background: '#F8F9FA', display: 'block', textDecoration: 'none' }}>
         <img src={p.image} alt={p.name} draggable={false}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .3s' }}
           onMouseEnter={e => (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.05)'}
           onMouseLeave={e => (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)'}
         />
+
         {/* Top-left badge: discount takes priority over tag */}
         {discount > 0 ? (
           <div style={{ position: 'absolute', top: 0, left: 0, background: '#EF4444', color: '#fff', fontSize: 9.5, fontWeight: 800, padding: '4px 7px', borderBottomRightRadius: 10 }}>
@@ -372,9 +405,11 @@ function ProductCard({ product: p, qty, onAdd, onRemove }: { product: Product; q
         <div style={{ position: 'absolute', bottom: 8, right: 8, fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 6, background: 'rgba(0,0,0,0.62)', color: '#fff', backdropFilter: 'blur(6px)', letterSpacing: '.02em' }}>
           {p.weight}
         </div>
-      </div>
+        </a>
+      </Link>
 
       {/* Info */}
+
       <div style={{ padding: '10px 10px 10px', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <p style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 600, marginBottom: 3, letterSpacing: '.03em', textTransform: 'uppercase' }}>{p.brand}</p>
         <p style={{ fontSize: 12.5, fontWeight: 700, color: '#1F2937', lineHeight: 1.35, marginBottom: 8, flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</p>

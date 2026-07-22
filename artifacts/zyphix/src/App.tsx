@@ -8,9 +8,11 @@ import NotFound from "@/pages/not-found";
 
 import { Home } from "@/pages/Home";
 import { AuthProvider } from "@/context/AuthContext";
+import { CartProvider } from "@/context/CartContext";
 import { AuthModal } from "@/components/AuthModal";
 import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
+
 
 const HomeLight = lazy(() => import("@/pages/HomeLight").then(m => ({ default: m.HomeLight })));
 const Privacy = lazy(() => import("@/pages/Privacy").then(m => ({ default: m.Privacy })));
@@ -31,6 +33,11 @@ const Offers = lazy(() => import("@/pages/Offers").then(m => ({ default: m.Offer
 const AppComingSoon = lazy(() => import("@/pages/AppComingSoon").then(m => ({ default: m.AppComingSoon })));
 const Account = lazy(() => import("@/pages/Account").then(m => ({ default: m.Account })));
 const PartnerLanding = lazy(() => import("@/pages/PartnerLanding").then(m => ({ default: m.PartnerLanding })));
+const ProductDetail = lazy(() => import("@/pages/ProductDetail").then(m => ({ default: m.ProductDetail })));
+const CartPage = lazy(() => import("@/pages/Cart").then(m => ({ default: m.Cart })));
+const CheckoutPage = lazy(() => import("@/pages/Checkout").then(m => ({ default: m.Checkout })));
+const OrderConfirmation = lazy(() => import("@/pages/OrderConfirmation").then(m => ({ default: m.OrderConfirmation })));
+
 
 function RouteFallback() {
   return (
@@ -87,6 +94,19 @@ function Router() {
       <Route path="/now">
         <LightLayout><ZyphixNow /></LightLayout>
       </Route>
+      <Route path="/now/product/:id">
+        {params => <LightLayout><ProductDetail /></LightLayout>}
+      </Route>
+      <Route path="/now/cart">
+        <LightLayout><CartPage /></LightLayout>
+      </Route>
+      <Route path="/now/checkout">
+        <LightLayout><CheckoutPage /></LightLayout>
+      </Route>
+      <Route path="/now/order/:id">
+        {params => <LightLayout><OrderConfirmation /></LightLayout>}
+      </Route>
+
       <Route path="/eats">
         <LightLayout><ZyphixEats /></LightLayout>
       </Route>
@@ -114,12 +134,14 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Suspense fallback={<RouteFallback />}>
-              <Router />
-            </Suspense>
-            <AuthModal />
-          </WouterRouter>
+          <CartProvider>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <Suspense fallback={<RouteFallback />}>
+                <Router />
+              </Suspense>
+              <AuthModal />
+            </WouterRouter>
+          </CartProvider>
         </AuthProvider>
         <Toaster />
       </TooltipProvider>
@@ -128,3 +150,4 @@ function App() {
 }
 
 export default App;
+
