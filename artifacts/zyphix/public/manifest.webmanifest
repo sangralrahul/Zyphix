@@ -1,0 +1,23 @@
+{
+  "name": "ZyphixNOW - India's SuperLocal App",
+  "short_name": "ZyphixNOW",
+  "description": "Groceries, food and home services delivered in minutes from your local Kirana, restaurants and partners.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A0F1A",
+  "theme_color": "#0DA366",
+  "categories": ["shopping", "food", "lifestyle"],
+  "lang": "en-IN",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/favicon.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/favicon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "ZyphixNOW - Groceries", "short_name": "Now", "url": "/now", "description": "10-minute groceries" },
+    { "name": "Offers", "short_name": "Offers", "url": "/offers" },
+    { "name": "Wallet", "short_name": "Wallet", "url": "/wallet" }
+  ]
+}
