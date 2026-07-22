@@ -1,10 +1,13 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingCart, Plus, Minus, X, Clock, ChevronRight, Zap, Tag, Truck } from 'lucide-react';
-import { products, GROCERY_CATEGORIES, stores } from '@/data/mockData';
-import { useLocation } from 'wouter';
+import { Search, ShoppingCart, Plus, Minus, X, Clock, ChevronRight, Zap, Tag, Truck, SlidersHorizontal } from 'lucide-react';
+import { products, GROCERY_CATEGORIES } from '@/data/mockData';
+import { Link, useLocation } from 'wouter';
+import { useCart } from '@/context/CartContext';
 
-type CartState = Record<string, number>;
+type SortKey = 'featured' | 'price_asc' | 'price_desc' | 'discount';
+
+
 
 const G = '#0DA366';
 const G_LIGHT = 'rgba(13,163,102,0.08)';
