@@ -161,8 +161,12 @@ export function ProductDetail() {
               Delivered in ~30 minutes to your doorstep.
             </p>
           </div>
+
+          {/* reviews */}
+          <Reviews productId={product.id} />
         </div>
       </div>
+
 
       {/* related */}
       {related.length > 0 && (
