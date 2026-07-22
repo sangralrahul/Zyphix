@@ -27,6 +27,8 @@ export function Navbar() {
   };
 
   const { user, logout, openModal } = useAuth();
+  const { count: wishCount } = useWishlist();
+  const { unread: notifUnread } = useNotifications();
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 10);
