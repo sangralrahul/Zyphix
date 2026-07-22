@@ -8,9 +8,11 @@ import NotFound from "@/pages/not-found";
 
 import { Home } from "@/pages/Home";
 import { AuthProvider } from "@/context/AuthContext";
+import { CartProvider } from "@/context/CartContext";
 import { AuthModal } from "@/components/AuthModal";
 import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
+
 
 const HomeLight = lazy(() => import("@/pages/HomeLight").then(m => ({ default: m.HomeLight })));
 const Privacy = lazy(() => import("@/pages/Privacy").then(m => ({ default: m.Privacy })));
