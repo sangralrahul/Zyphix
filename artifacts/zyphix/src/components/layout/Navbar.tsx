@@ -203,6 +203,24 @@ export function Navbar() {
               </button>
             )}
 
+            {/* Wishlist */}
+            <Link href="/wishlist" aria-label="Wishlist"
+              style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, borderRadius: 12, border: isLight ? '1px solid #E5E7EB' : '1px solid rgba(255,255,255,0.08)', background: isLight ? '#F9FAFB' : 'rgba(255,255,255,0.04)', color: isLight ? '#374151' : '#fff', textDecoration: 'none' }}>
+              <Heart size={17} />
+              {wishCount > 0 && (
+                <span style={{ position: 'absolute', top: -4, right: -4, minWidth: 16, height: 16, padding: '0 4px', borderRadius: 10, background: '#EF4444', color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{wishCount}</span>
+              )}
+            </Link>
+
+            {/* Notifications */}
+            <Link href="/notifications" aria-label="Notifications"
+              style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, borderRadius: 12, border: isLight ? '1px solid #E5E7EB' : '1px solid rgba(255,255,255,0.08)', background: isLight ? '#F9FAFB' : 'rgba(255,255,255,0.04)', color: isLight ? '#374151' : '#fff', textDecoration: 'none' }}>
+              <Bell size={17} />
+              {notifUnread > 0 && (
+                <span style={{ position: 'absolute', top: -4, right: -4, minWidth: 16, height: 16, padding: '0 4px', borderRadius: 10, background: '#0DA366', color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{notifUnread}</span>
+              )}
+            </Link>
+
             {/* Cart */}
             <button onClick={() => nav('/now')}
               className="relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm btn-primary">
