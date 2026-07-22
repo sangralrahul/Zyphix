@@ -19,40 +19,53 @@ export function ZyphixNow() {
   };
 
   const [activeCat, setActiveCat] = useState<string>(initCat);
-  const [cart, setCart] = useState<CartState>({});
   const [search, setSearch] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<SortKey>('featured');
+  const [onlyDiscounted, setOnlyDiscounted] = useState(false);
   const sideRef = useRef<HTMLDivElement>(null);
   const [, navigate] = useLocation();
 
-  const add = (id: string) => setCart(c => ({ ...c, [id]: (c[id] || 0) + 1 }));
-  const remove = (id: string) => setCart(c => {
-    const n = { ...c };
-    if ((n[id] || 0) > 1) n[id]--;
-    else delete n[id];
-    return n;
-  });
+  const { items: cartItems, add: addToCart, remove: removeFromCart, totalItems, subtotal: totalPrice } = useCart();
+  const cart: Record<string, number> = useMemo(() => {
+    const m: Record<string, number> = {};
+    cartItems.forEach(i => { m[i.id] = i.qty; });
+    return m;
+  }, [cartItems]);
 
-  const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
-  const totalPrice = Object.entries(cart).reduce((sum, [id, qty]) => {
-    const p = products.find(x => x.id === id);
-    return sum + (p ? p.price * qty : 0);
-  }, 0);
+  const add = (id: string) => {
+    const p = products.find(x => x.id === id); if (!p) return;
+    addToCart({ id: p.id, name: p.name, brand: p.brand, price: p.price, origPrice: p.origPrice, image: p.image, weight: p.weight });
+  };
+  const remove = (id: string) => removeFromCart(id);
 
   const catData = GROCERY_CATEGORIES.find(c => c.name === activeCat);
 
-  const filtered = products.filter(p => {
-    const catMatch = p.category === activeCat;
-    const searchMatch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase());
-    return catMatch && searchMatch;
-  });
+  const sortFn = (a: typeof products[number], b: typeof products[number]) => {
+    if (sortBy === 'price_asc') return a.price - b.price;
+    if (sortBy === 'price_desc') return b.price - a.price;
+    if (sortBy === 'discount') {
+      const da = a.origPrice ? (1 - a.price / a.origPrice) : 0;
+      const db = b.origPrice ? (1 - b.price / b.origPrice) : 0;
+      return db - da;
+    }
+    return 0;
+  };
 
-  const allSearched = search ? products.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.brand.toLowerCase().includes(search.toLowerCase())
-  ) : [];
+  const filtered = useMemo(() => products
+    .filter(p => p.category === activeCat)
+    .filter(p => !onlyDiscounted || (p.origPrice && p.price < p.origPrice))
+    .filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase()))
+    .slice().sort(sortFn), [activeCat, onlyDiscounted, search, sortBy]);
+
+  const allSearched = useMemo(() => search ? products
+    .filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase()))
+    .filter(p => !onlyDiscounted || (p.origPrice && p.price < p.origPrice))
+    .slice().sort(sortFn) : [], [search, onlyDiscounted, sortBy]);
 
   const displayProducts = search ? allSearched : filtered;
+
+
 
   const scrollCatIntoView = (name: string) => {
     if (!sideRef.current) return;
