@@ -92,8 +92,15 @@ export function OrderConfirmation() {
           ))}
           <div style={{ marginTop: 10 }}>
             <Row label="Subtotal" value={`₹${order.subtotal}`} />
+            {(order.couponDiscount ?? 0) > 0 && <Row label={`Coupon (${order.couponCode})`} value={`− ₹${order.couponDiscount}`} valueColor={G} />}
             <Row label="Delivery" value={order.deliveryFee === 0 ? 'FREE' : `₹${order.deliveryFee}`} valueColor={order.deliveryFee === 0 ? G : undefined} />
+            {(order.walletUsed ?? 0) > 0 && <Row label="Wallet applied" value={`− ₹${order.walletUsed}`} valueColor={G} />}
             <Row label={`Payment · ${order.paymentMode === 'COD' ? 'Cash on Delivery' : 'Online'}`} value={`₹${order.total}`} bold />
+            {(order.cashbackEarned ?? 0) > 0 && (
+              <div style={{ marginTop: 10, background: G_LIGHT, color: G, border: `1px dashed ${G_BORDER}`, borderRadius: 8, padding: '8px 10px', fontSize: 12, fontWeight: 800, textAlign: 'center' }}>
+                🎁 ₹{order.cashbackEarned} cashback credited to your wallet
+              </div>
+            )}
           </div>
         </div>
 

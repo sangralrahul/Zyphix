@@ -9,6 +9,7 @@ import NotFound from "@/pages/not-found";
 import { Home } from "@/pages/Home";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
+import { PromoProvider } from "@/context/PromoContext";
 import { AuthModal } from "@/components/AuthModal";
 import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
