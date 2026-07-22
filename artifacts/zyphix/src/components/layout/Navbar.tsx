@@ -270,6 +270,9 @@ export function Navbar() {
                 { icon: '📅', label: 'Zyphix Book',   href: '/book' },
                 { icon: '🗺️', label: 'Kirana Near Me', href: '/kirana-map' },
                 { icon: '🏷️', label: 'Offers',        href: '/offers' },
+                { icon: '❤️', label: `Wishlist${wishCount ? ` (${wishCount})` : ''}`, href: '/wishlist' },
+                { icon: '🔔', label: `Notifications${notifUnread ? ` (${notifUnread})` : ''}`, href: '/notifications' },
+                { icon: '💰', label: 'Wallet', href: '/wallet' },
               ].map(({ icon, label, href }) => (
                 <Link key={label} href={href} onClick={() => setMobileOpen(false)}
                   style={{ color: isLight ? '#374151' : 'rgba(255,255,255,0.8)' }}
