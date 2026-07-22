@@ -197,9 +197,24 @@ export function ZyphixNow() {
                   <p style={{ fontSize: 11, color: '#6B7280', margin: 0, marginTop: 1 }}>{filtered.length} items available</p>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: '#6B7280' }}>
-                <Tag size={11} /> Best price guaranteed
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <button
+                  onClick={() => setOnlyDiscounted(v => !v)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: onlyDiscounted ? '#fff' : G, background: onlyDiscounted ? G : G_LIGHT, border: `1px solid ${G_BORDER}`, borderRadius: 20, padding: '5px 10px', cursor: 'pointer' }}>
+                  <Tag size={11} /> Deals
+                </button>
+                <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                  <SlidersHorizontal size={11} style={{ position: 'absolute', left: 8, color: '#6B7280', pointerEvents: 'none' }} />
+                  <select value={sortBy} onChange={e => setSortBy(e.target.value as SortKey)}
+                    style={{ appearance: 'none', border: '1px solid #E5E7EB', background: '#fff', borderRadius: 20, padding: '5px 22px 5px 24px', fontSize: 11, fontWeight: 700, color: '#111827', cursor: 'pointer', fontFamily: 'inherit' }}>
+                    <option value="featured">Featured</option>
+                    <option value="price_asc">Price ↑</option>
+                    <option value="price_desc">Price ↓</option>
+                    <option value="discount">Discount</option>
+                  </select>
+                </div>
               </div>
+
             </div>
           )}
 
