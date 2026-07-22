@@ -120,10 +120,25 @@ export function OrderConfirmation() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-          <button onClick={() => navigate('/now')} style={{ flex: 1, padding: '13px', background: '#fff', color: '#111827', border: '1.5px solid #E5E7EB', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>Continue Shopping</button>
-          <button onClick={() => navigate('/account')} style={{ flex: 1, padding: '13px', background: `linear-gradient(135deg, ${G}, #0A8C58)`, color: '#fff', border: 'none', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>My Orders</button>
+        <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
+          <button onClick={() => navigate('/now')} style={{ flex: '1 1 140px', padding: '13px', background: '#fff', color: '#111827', border: '1.5px solid #E5E7EB', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>Continue Shopping</button>
+          <button onClick={() => navigate('/account')} style={{ flex: '1 1 140px', padding: '13px', background: `linear-gradient(135deg, ${G}, #0A8C58)`, color: '#fff', border: 'none', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>My Orders</button>
         </div>
+        <div style={{ display: 'flex', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
+          <a href={`https://wa.me/?text=${encodeURIComponent(`My ZyphixNOW order ${order.id} is confirmed! Total ₹${order.total}. Track: ${typeof window !== 'undefined' ? window.location.href : ''}`)}`}
+             target="_blank" rel="noreferrer"
+             style={{ flex: '1 1 140px', padding: '12px', background: '#25D366', color: '#fff', borderRadius: 12, fontWeight: 800, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <MessageCircle size={16} /> Share on WhatsApp
+          </a>
+          <button onClick={() => {
+            const url = typeof window !== 'undefined' ? window.location.href : '';
+            if (typeof navigator !== 'undefined' && (navigator as any).share) (navigator as any).share({ title: 'ZyphixNOW Order', text: `Order ${order.id} confirmed`, url }).catch(() => {});
+            else navigator.clipboard?.writeText(url);
+          }} style={{ flex: '1 1 140px', padding: '12px', background: '#fff', color: '#111827', border: '1.5px solid #E5E7EB', borderRadius: 12, fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <Share2 size={16} /> Share link
+          </button>
+        </div>
+
       </div>
     </div>
   );
