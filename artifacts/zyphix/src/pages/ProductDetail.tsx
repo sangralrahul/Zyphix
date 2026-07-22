@@ -1,9 +1,13 @@
 import React, { useMemo } from 'react';
 import { Link, useLocation, useParams } from 'wouter';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Plus, Minus, Clock, Truck, ShieldCheck, Star } from 'lucide-react';
+import { ChevronLeft, Plus, Minus, Clock, Truck, ShieldCheck, Star, Heart, Share2 } from 'lucide-react';
 import { products } from '@/data/mockData';
 import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
+import { useReviews } from '@/context/ReviewsContext';
+import { Reviews } from '@/components/Reviews';
+
 
 const G = '#0DA366';
 const G_LIGHT = 'rgba(13,163,102,0.08)';
@@ -13,6 +17,8 @@ export function ProductDetail() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { qty, add, remove } = useCart();
+  const { has: isWished, toggle: toggleWish } = useWishlist();
+  const { summary } = useReviews();
 
   const product = useMemo(() => products.find(p => p.id === params.id), [params.id]);
   const related = useMemo(() => {
