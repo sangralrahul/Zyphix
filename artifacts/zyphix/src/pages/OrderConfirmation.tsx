@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'wouter';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Clock, MapPin, Truck, ShoppingBag, Home } from 'lucide-react';
+import { CheckCircle2, Clock, MapPin, Truck, ShoppingBag, Home, MessageCircle, Share2 } from 'lucide-react';
 import { getOrder, type Order } from '@/context/CartContext';
+import { useNotifications } from '@/context/NotificationsContext';
 
 const G = '#0DA366';
 const G_LIGHT = 'rgba(13,163,102,0.08)';
@@ -12,8 +13,23 @@ export function OrderConfirmation() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const [order, setOrder] = useState<Order | null>(null);
+  const { push } = useNotifications();
+  const notified = useRef(false);
 
   useEffect(() => { setOrder(getOrder(params.id)); }, [params.id]);
+
+  useEffect(() => {
+    if (order && !notified.current) {
+      notified.current = true;
+      push({
+        kind: 'order',
+        title: `Order ${order.id} confirmed`,
+        body: `Arriving in ~${order.etaMinutes} min. Total ₹${order.total} · ${order.paymentMode}.`,
+        href: `/now/order/${order.id}`,
+      });
+    }
+  }, [order, push]);
+
 
   if (!order) {
     return (
