@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Search, MapPin, ShoppingCart, User, ChevronDown, Menu, X, LogOut, Settings, Package, Users } from 'lucide-react';
+import { Search, MapPin, ShoppingCart, User, ChevronDown, Menu, X, LogOut, Settings, Package, Users, Heart, Bell } from 'lucide-react';
 import { ZyphixLogo } from '../ZyphixLogo';
 import { useAuth } from '@/context/AuthContext';
+import { useWishlist } from '@/context/WishlistContext';
+import { useNotifications } from '@/context/NotificationsContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const G = '#0DA366';
