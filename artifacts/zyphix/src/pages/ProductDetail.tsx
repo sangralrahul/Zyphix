@@ -69,8 +69,22 @@ export function ProductDetail() {
                 {discount}% OFF
               </div>
             )}
+            <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <button onClick={() => toggleWish(snap)} title={isWished(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                style={{ width: 38, height: 38, borderRadius: '50%', background: '#fff', border: '1px solid #EAEAEA', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                <Heart size={18} fill={isWished(product.id) ? '#EF4444' : 'none'} stroke={isWished(product.id) ? '#EF4444' : '#374151'} />
+              </button>
+              <button title="Share" onClick={() => {
+                const url = window.location.href;
+                if (navigator.share) { navigator.share({ title: product.name, url }).catch(() => {}); }
+                else { navigator.clipboard?.writeText(url); }
+              }} style={{ width: 38, height: 38, borderRadius: '50%', background: '#fff', border: '1px solid #EAEAEA', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                <Share2 size={16} color="#374151" />
+              </button>
+            </div>
           </div>
         </div>
+
 
         {/* info */}
         <div>
@@ -78,12 +92,19 @@ export function ProductDetail() {
           <h1 style={{ fontFamily: "'Outfit',sans-serif", fontSize: 24, fontWeight: 900, color: '#111827', margin: '4px 0 6px', letterSpacing: '-.02em' }}>
             {product.name}
           </h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#6B7280', fontSize: 13, fontWeight: 500 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: G_LIGHT, color: G, padding: '3px 8px', borderRadius: 6, fontWeight: 700 }}>
-              <Star size={11} fill={G} stroke={G} /> 4.4
-            </span>
-            <span>· {product.weight} · {product.storeName}</span>
-          </div>
+          {(() => {
+            const s = summary(product.id);
+            const display = s.count > 0 ? s.avg.toFixed(1) : '4.4';
+            const countText = s.count > 0 ? ` (${s.count})` : '';
+            return (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#6B7280', fontSize: 13, fontWeight: 500 }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: G_LIGHT, color: G, padding: '3px 8px', borderRadius: 6, fontWeight: 700 }}>
+                  <Star size={11} fill={G} stroke={G} /> {display}{countText}
+                </span>
+                <span>· {product.weight} · {product.storeName}</span>
+              </div>
+            );
+          })()}
 
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, margin: '18px 0 4px' }}>
             <span style={{ fontFamily: "'Outfit',sans-serif", fontSize: 30, fontWeight: 900, color: '#111827' }}>₹{product.price}</span>
