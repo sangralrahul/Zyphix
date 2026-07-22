@@ -405,9 +405,11 @@ function ProductCard({ product: p, qty, onAdd, onRemove }: { product: Product; q
         <div style={{ position: 'absolute', bottom: 8, right: 8, fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 6, background: 'rgba(0,0,0,0.62)', color: '#fff', backdropFilter: 'blur(6px)', letterSpacing: '.02em' }}>
           {p.weight}
         </div>
-      </div>
+        </a>
+      </Link>
 
       {/* Info */}
+
       <div style={{ padding: '10px 10px 10px', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <p style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 600, marginBottom: 3, letterSpacing: '.03em', textTransform: 'uppercase' }}>{p.brand}</p>
         <p style={{ fontSize: 12.5, fontWeight: 700, color: '#1F2937', lineHeight: 1.35, marginBottom: 8, flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</p>
