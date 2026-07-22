@@ -379,12 +379,14 @@ function ProductCard({ product: p, qty, onAdd, onRemove }: { product: Product; q
       style={{ borderRadius: 16, background: '#FFFFFF', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid #F0F0F0' }}>
 
       {/* Image */}
-      <div style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden', background: '#F8F9FA' }}>
+      <Link href={`/now/product/${p.id}`}>
+        <a style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden', background: '#F8F9FA', display: 'block', textDecoration: 'none' }}>
         <img src={p.image} alt={p.name} draggable={false}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .3s' }}
           onMouseEnter={e => (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.05)'}
           onMouseLeave={e => (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)'}
         />
+
         {/* Top-left badge: discount takes priority over tag */}
         {discount > 0 ? (
           <div style={{ position: 'absolute', top: 0, left: 0, background: '#EF4444', color: '#fff', fontSize: 9.5, fontWeight: 800, padding: '4px 7px', borderBottomRightRadius: 10 }}>
