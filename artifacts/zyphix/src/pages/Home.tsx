@@ -1,6 +1,6 @@
 import { apiFetch } from '@/lib/api';
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, MapPin, ChevronDown, ShoppingCart, User, LogOut,
@@ -418,12 +418,12 @@ function Navbar({ tab = 'now', setTab }: { tab?: TabId; setTab?: (t: TabId) => v
             </button>
           )}
           {/* Become a Partner CTA */}
-          <a href="/partner"
+          <Link href="/partner"
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 10, background: G, fontSize: 13, fontWeight: 800, color: '#fff', border: 'none', cursor: 'pointer', transition: 'background .13s', whiteSpace: 'nowrap', boxShadow: `0 2px 12px ${G}40`, textDecoration: 'none' }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = G2}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = G}>
             Become a Partner →
-          </a>
+          </Link>
           <button
             style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 10, background: G, fontSize: 13.5, fontWeight: 700, color: '#fff', border: 'none', cursor: 'pointer', transition: 'background .13s', boxShadow: `0 2px 10px rgba(13,163,102,.28)`, whiteSpace: 'nowrap' }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = G2}
@@ -1743,9 +1743,9 @@ function AppDownload() {
                 </div>
               ))}
             </div>
-            <a href="/app" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700, color: '#00D97E', textDecoration: 'none' }}>
+            <Link href="/app" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700, color: '#00D97E', textDecoration: 'none' }}>
               See full details →
-            </a>
+            </Link>
           </div>
         </div>
       </div>
