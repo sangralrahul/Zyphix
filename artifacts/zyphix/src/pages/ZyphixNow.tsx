@@ -322,7 +322,7 @@ export function ZyphixNow() {
                     <span>Grand Total</span><span>₹{totalPrice}</span>
                   </div>
                   <button
-                    onClick={() => { setCartOpen(false); navigate('/offers'); }}
+                    onClick={() => { setCartOpen(false); navigate('/now/cart'); }}
                     style={{ width: '100%', padding: '14px', borderRadius: 14, background: `linear-gradient(135deg, ${G}, #0A8C58)`, color: '#fff', fontWeight: 800, fontSize: 15, border: 'none', cursor: 'pointer', boxShadow: '0 6px 24px rgba(13,163,102,.35)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: "'Outfit',sans-serif" }}>
                     <span>Proceed to Checkout</span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>₹{totalPrice} <ChevronRight size={16} /></span>
