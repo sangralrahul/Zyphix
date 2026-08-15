@@ -1,9 +1,17 @@
 // Production build launcher for the Zyphix monorepo frontend.
-// Runs the Vite build for @workspace/zyphix (pnpm workspace) and copies the
-// static output into ./build so the runtime can serve it dependency-free.
+// If a prebuilt static ./build already exists (shipped in the repo), this is a
+// no-op so the cloud build step needs no pnpm/network. Otherwise it runs the
+// Vite build for @workspace/zyphix and copies output into ./build.
 const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
+
+const dest = path.join(__dirname, "build");
+
+if (fs.existsSync(path.join(dest, "index.html"))) {
+  console.log("[build] Prebuilt static output found at " + dest + " — skipping build.");
+  process.exit(0);
+}
 
 const root = path.resolve(__dirname, "..");
 const env = {
@@ -35,7 +43,6 @@ run("pnpm install --no-frozen-lockfile");
 run("pnpm --filter @workspace/zyphix run build");
 
 const src = path.join(root, "artifacts", "zyphix", "dist", "public");
-const dest = path.join(__dirname, "build");
 if (!fs.existsSync(src)) {
   throw new Error("Expected Vite build output at " + src + " but it was not found.");
 }
