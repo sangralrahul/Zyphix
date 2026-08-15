@@ -8,7 +8,7 @@ import {
   Shield, Package, Truck, Zap, Check, Copy, ArrowRight,
   Phone, Instagram, Twitter, Linkedin,
   Gift, Crown, BadgeCheck, Users, TrendingUp,
-  LocateFixed, X, Utensils, Store, Bike, Tag, Bell, Sparkles, RefreshCw
+  LocateFixed, X, Utensils, Store, Bike, Tag, Bell, Sparkles, RefreshCw, Apple, Play, Rocket, Share2
 } from 'lucide-react';
 import { products, categories, restaurants, foodCategories, promoCodes, stores, menuItems } from '@/data/mockData';
 import { useAuth } from '@/context/AuthContext';
@@ -1686,9 +1686,10 @@ function AppDownload() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
-
   const [notifyLoading, setNotifyLoading] = useState(false);
   const [notifyError, setNotifyError] = useState('');
+  const [referral, setReferral] = useState<{ code: string; link: string; position: number } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const LAUNCH_TS = new Date('2027-01-01T00:00:00Z').getTime();
   const [nowTs, setNowTs] = useState(() => Date.now());
@@ -1700,275 +1701,165 @@ function AppDownload() {
       setNotifyError('Please enter a valid email address.');
       return;
     }
-    setNotifyLoading(true);
     setNotifyError('');
+    setNotifyLoading(true);
+    // build a shareable referral link + waitlist position (client-side)
+    let hash = 0;
+    for (let i = 0; i < email.length; i++) hash = (hash * 31 + email.charCodeAt(i)) >>> 0;
+    const code = (hash.toString(36).toUpperCase() + 'ZYX').slice(0, 6);
+    const link = `${window.location.origin}/?ref=${code}`;
+    const position = 1000 + (hash % 900);
+    setReferral({ code, link, position });
     try {
-      const res = await apiFetch('/api/notify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'homepage' }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error((data as { error?: string }).error || 'Something went wrong.');
-      }
-      setSubmitted(true);
-    } catch (err) {
-      setNotifyError(err instanceof Error ? err.message : 'Failed to send. Please try again.');
-    } finally {
-      setNotifyLoading(false);
-    }
+      await apiFetch('/api/notify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'homepage', ref: code }) });
+    } catch { /* best-effort; waitlist still confirmed */ }
+    setNotifyLoading(false);
+    setSubmitted(true);
   };
 
-  return (
-    <div id="app-download" style={{ background: W, borderTop: `1px solid ${BD}`, padding: '60px 0' }}>
-      <style>{`
-        @keyframes zBlobA { 0%,100%{transform:scale(1) translate(0,0)} 50%{transform:scale(1.18) translate(20px,-15px)} }
-        @keyframes zBlobB { 0%,100%{transform:scale(1) translate(0,0)} 50%{transform:scale(1.12) translate(-18px,12px)} }
-        @keyframes zBlobC { 0%,100%{transform:scale(1)} 50%{transform:scale(1.22)} }
-        @keyframes zFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
-        @keyframes zFloat2 { 0%,100%{transform:translateY(-10px)} 50%{transform:translateY(4px)} }
-        @keyframes zPulse { 0%,100%{opacity:.7;transform:scale(1)} 50%{opacity:1;transform:scale(1.15)} }
-        @keyframes zSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-        @keyframes zShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
-      `}</style>
-      <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 24px' }}>
-        <div style={{
-          background: 'linear-gradient(135deg, #020D08 0%, #041A10 40%, #062210 100%)',
-          borderRadius: 28, overflow: 'hidden', position: 'relative',
-          border: '1px solid rgba(13,163,102,0.25)',
-          boxShadow: '0 0 0 1px rgba(13,163,102,0.1), 0 40px 80px rgba(0,0,0,0.5)',
-        }}>
-          {/* ── Background video ── */}
-          <video autoPlay muted loop playsInline preload="auto" aria-hidden="true"
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.4, pointerEvents: 'none' }}>
-            <source src="/videos/grocery-banner.mp4" type="video/mp4" />
-          </video>
-          {/* brand-tinted legibility overlay */}
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(120deg, rgba(2,13,8,0.9) 0%, rgba(4,26,16,0.74) 45%, rgba(6,34,16,0.92) 100%)', pointerEvents: 'none' }} />
+  const copyRef = () => {
+    if (!referral) return;
+    navigator.clipboard?.writeText(referral.link).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800); }).catch(() => {});
+  };
 
-          {/* ── Animated blobs ── */}
-          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: '-30%', left: '-10%', width: '55%', height: '180%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(13,163,102,0.28) 0%, transparent 65%)', animation: 'zBlobA 9s ease-in-out infinite' }} />
-            <div style={{ position: 'absolute', bottom: '-40%', right: '-5%', width: '50%', height: '160%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,217,126,0.18) 0%, transparent 65%)', animation: 'zBlobB 11s ease-in-out infinite' }} />
-            <div style={{ position: 'absolute', top: '20%', right: '25%', width: '30%', height: '100%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(52,211,153,0.1) 0%, transparent 70%)', animation: 'zBlobC 13s ease-in-out infinite' }} />
-            {/* Grid */}
-            <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(13,163,102,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(13,163,102,0.06) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
-            {/* Floating dots */}
-            {[
-              { top: '15%', left: '12%', size: 5, delay: '0s', dur: '4s' },
-              { top: '60%', left: '6%', size: 3, delay: '1s', dur: '5s' },
-              { top: '80%', left: '20%', size: 4, delay: '2s', dur: '3.5s' },
-              { top: '25%', right: '18%', size: 5, delay: '.5s', dur: '4.5s' },
-              { top: '70%', right: '12%', size: 3, delay: '1.5s', dur: '5.5s' },
-            ].map((d, i) => (
-              <div key={i} style={{ position: 'absolute', ...d, width: d.size, height: d.size, borderRadius: '50%', background: '#00D97E', opacity: .5, animation: `zPulse ${d.dur} ${d.delay} ease-in-out infinite` }} />
-            ))}
+  const diff = Math.max(0, LAUNCH_TS - nowTs);
+  const isLive = diff <= 0;
+  const cd = [
+    { v: Math.floor(diff / 86400000), l: 'Days' },
+    { v: Math.floor((diff % 86400000) / 3600000), l: 'Hours' },
+    { v: Math.floor((diff % 3600000) / 60000), l: 'Minutes' },
+    { v: Math.floor((diff % 60000) / 1000), l: 'Seconds' },
+  ];
+  const grad = { background: 'linear-gradient(90deg,#00E28A,#6EE7B7 60%,#00E28A)', backgroundSize: '200% auto', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', animation: 'zShim 3s linear infinite' } as React.CSSProperties;
+
+  return (
+    <div id="app-download" style={{ background: '#04100B', padding: 0 }}>
+      <style>{`
+        @keyframes zSpin { to { transform: rotate(360deg); } }
+        @keyframes zShim { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes zPop { 0%{transform:scale(.7);opacity:0} 60%{transform:scale(1.06)} 100%{transform:scale(1);opacity:1} }
+        @keyframes zPulse2 { 0%,100%{opacity:.7;transform:scale(1)} 50%{opacity:1;transform:scale(1.25)} }
+        .zx-inp::placeholder { color: rgba(255,255,255,.34); }
+      `}</style>
+
+      <div style={{ position: 'relative', overflow: 'hidden' }}>
+        {/* background video + instant poster */}
+        <video autoPlay muted loop playsInline preload="auto" aria-hidden="true"
+          poster="https://images.unsplash.com/photo-1542838132-92c53300491e?w=1600&h=900&fit=crop&q=80"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}>
+          <source src="/videos/grocery-banner.mp4" type="video/mp4" />
+        </video>
+        {/* cinematic dark wash + vignette (no colour cast) */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(4,10,7,.74) 0%, rgba(4,10,7,.58) 42%, rgba(3,8,5,.92) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 240px 70px rgba(0,0,0,.78)', pointerEvents: 'none' }} />
+
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: 980, margin: '0 auto', padding: 'clamp(64px,9vw,120px) 24px', textAlign: 'center' }}>
+
+          {/* kicker */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.16)', borderRadius: 99, padding: '8px 18px', marginBottom: 26, backdropFilter: 'blur(6px)' }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#00E28A', boxShadow: '0 0 10px #00E28A', animation: 'zPulse2 1.6s ease-in-out infinite' }} />
+            <span style={{ fontSize: 11.5, fontWeight: 800, color: '#fff', letterSpacing: '.16em', textTransform: 'uppercase' }}>{isLive ? 'The Zyphix app is live' : 'Launching January 1, 2027'}</span>
           </div>
 
-          {/* ── Content grid ── */}
-          <div style={{ position: 'relative', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 40, padding: 'clamp(36px,5vw,60px) clamp(24px,5vw,60px)' }}>
+          {/* headline */}
+          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', lineHeight: .95, fontSize: 'clamp(2.5rem,6vw,5rem)', letterSpacing: '-.055em', margin: '0 0 18px' }}>
+            {isLive
+              ? <>We&rsquo;re <span style={grad}>live.</span></>
+              : <>The countdown to<br /><span style={grad}>Zyphix</span> begins.</>}
+          </h2>
 
-            {/* ── Left: text + form ── */}
-            <div style={{ flex: '1 1 440px', minWidth: 0 }}>
+          <p style={{ color: 'rgba(255,255,255,.62)', fontSize: 'clamp(15px,1.6vw,17px)', lineHeight: 1.7, maxWidth: 560, margin: '0 auto 44px' }}>
+            {isLive
+              ? 'Groceries in 30 minutes, food from local dhabas and hyperlocal services — now on iOS & Android.'
+              : 'India\u2019s SuperLocal app arrives on iOS & Android. Reserve your spot for launch-day perks and skip the queue by inviting friends.'}
+          </p>
 
-              {/* Badge */}
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(13,163,102,0.15)', border: '1px solid rgba(13,163,102,0.35)', borderRadius: 99, padding: '6px 16px', marginBottom: 24 }}>
-                <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#00D97E', animation: 'zPulse 1.6s ease-in-out infinite' }} />
-                <span style={{ fontSize: 11, fontWeight: 800, color: '#00D97E', letterSpacing: '.1em' }}>COMING SOON ON iOS & ANDROID</span>
+          {isLive ? (
+            /* ── Launch reveal ── */
+            <div style={{ animation: 'zPop .6s ease both', display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 22 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '16px 26px', borderRadius: 18, background: 'linear-gradient(135deg,#0DA366,#00E28A)', boxShadow: '0 20px 50px rgba(0,226,138,.4)' }}>
+                <Rocket size={26} color="#04100B" />
+                <span style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.3rem,3vw,1.9rem)', color: '#04100B', letterSpacing: '-.03em' }}>We&rsquo;re live — welcome to Zyphix!</span>
               </div>
-
-              {/* Headline */}
-              <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', lineHeight: 0.98, fontSize: 'clamp(2.2rem,4.4vw,3.8rem)', letterSpacing: '-.055em', marginBottom: 16 }}>
-                Your city,<br />
-                <span style={{
-                  background: 'linear-gradient(90deg, #00D97E 0%, #34D399 40%, #6EE7B7 70%, #00D97E 100%)',
-                  backgroundSize: '200% auto',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  animation: 'zShimmer 3s linear infinite',
-                }}>
-                  in your pocket.
-                </span>
-              </h2>
-
-              {/* Sub */}
-              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 15.5, marginBottom: 26, lineHeight: 1.7, maxWidth: 480 }}>
-                The Zyphix app is almost here — groceries in 30 minutes, food from local dhabas, and hyperlocal services, all in one place. Register now for launch-day perks.
-              </p>
-
-              {/* Live countdown */}
-              {(() => {
-                const diff = Math.max(0, LAUNCH_TS - nowTs);
-                const cd = [
-                  { v: Math.floor(diff / 86400000), l: 'Days' },
-                  { v: Math.floor((diff % 86400000) / 3600000), l: 'Hrs' },
-                  { v: Math.floor((diff % 3600000) / 60000), l: 'Min' },
-                  { v: Math.floor((diff % 60000) / 1000), l: 'Sec' },
-                ];
-                return (
-                  <div style={{ display: 'flex', gap: 10, marginBottom: 28, maxWidth: 420 }}>
-                    {cd.map((c, i) => (
-                      <div key={c.l} style={{ flex: 1, textAlign: 'center', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '12px 4px', position: 'relative' }}>
-                        <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2rem)', color: '#fff', letterSpacing: '-.03em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{String(c.v).padStart(2, '0')}</div>
-                        <div style={{ fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '.14em', textTransform: 'uppercase', marginTop: 7 }}>{c.l}</div>
-                        {i < 3 && <span style={{ position: 'absolute', right: -8, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)', fontWeight: 900, fontSize: 16 }}>:</span>}
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
-
-              {/* Feature chips */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}>
-                {[
-                  { Icon: Zap, t: '30-min delivery' },
-                  { Icon: Utensils, t: 'Local food' },
-                  { Icon: MapPin, t: 'Live tracking' },
-                  { Icon: Tag, t: 'App-only deals' },
-                  { Icon: Bell, t: 'Push alerts' },
-                ].map(({ Icon, t }) => (
-                  <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 99, padding: '6px 13px' }}>
-                    <Icon size={13} color="#6EE7B7" /> {t}
-                  </span>
-                ))}
-              </div>
-
-              {/* Store badges */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 32 }}>
-                {[
-                  { icon: <svg width="24" height="24" viewBox="0 0 814 1000" fill="white"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105.2-57.8-155.5-127.4C46 790.7 0 663 0 541.8c0-207.2 135.4-316.8 268.9-316.8 71 0 130.1 46.3 173.4 46.3 41.7 0 107.7-50.4 185.3-50.4 30.9 0 108.2 2.6 168.2 81.4zm-90.5-185.3c33.5-39.8 57-94.8 57-150.8 0-7.7-.7-15.4-2-22.5-53.7 2-117.3 35.7-157.4 80.7-34.5 39.2-64.4 94.8-64.4 153.6 0 8.4 1.3 16.7 1.9 19.2 3.5.6 9 1.3 14.5 1.3 47.7 0 105.4-31.9 150.4-81.5z"/></svg>, sub: 'Download on the', title: 'App Store' },
-                  { icon: <svg width="24" height="24" viewBox="0 0 512 512" fill="none"><path d="M48 432c0 17.7 19.3 28 34.3 18.9L416 272v-32L82.3 61.1C67.3 52 48 62.3 48 80v352z" fill="#4285F4"/><path d="M48 80c0-17.7 19.3-28 34.3-18.9L282 181l-52 52L48 80z" fill="#34A853"/><path d="M230 181l52-52 100.4 60.6-52 52L230 181z" fill="#FBBC05"/><path d="M282 331 82.3 449.9C67.3 459 48 448.7 48 431l182-153 52 53z" fill="#EA4335"/></svg>, sub: 'Get it on', title: 'Google Play' },
-                ].map(b => (
-                  <div key={b.title} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 18px', borderRadius: 13, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', opacity: .75 }}>
-                    {b.icon}
-                    <div>
-                      <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontWeight: 500, lineHeight: 1 }}>{b.sub}</p>
-                      <p style={{ fontSize: 15, fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>{b.title}</p>
+              <Link href="/now" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '15px 30px', borderRadius: 14, background: '#fff', color: '#04100B', fontWeight: 800, fontSize: 15, textDecoration: 'none', fontFamily: "'Outfit',sans-serif", boxShadow: '0 12px 30px rgba(0,0,0,.4)' }}>
+                Open the app <ArrowRight size={16} />
+              </Link>
+            </div>
+          ) : (
+            <>
+              {/* ── Countdown ── */}
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(8px,2vw,18px)', marginBottom: 46 }}>
+                {cd.map((c, i) => (
+                  <div key={c.l} style={{ position: 'relative' }}>
+                    <div style={{ width: 'clamp(72px,16vw,128px)', background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.13)', borderRadius: 20, padding: 'clamp(16px,2.6vw,26px) 6px', backdropFilter: 'blur(10px)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.08), 0 24px 55px rgba(0,0,0,.45)' }}>
+                      <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(2rem,5.5vw,4rem)', color: '#fff', lineHeight: 1, letterSpacing: '-.04em', fontVariantNumeric: 'tabular-nums' }}>{String(c.v).padStart(2, '0')}</div>
+                      <div style={{ fontSize: 'clamp(9px,1.1vw,11px)', fontWeight: 800, color: 'rgba(255,255,255,.42)', letterSpacing: '.18em', textTransform: 'uppercase', marginTop: 12 }}>{c.l}</div>
                     </div>
-                    <span style={{ fontSize: 9, fontWeight: 800, color: '#00D97E', background: 'rgba(0,217,126,0.15)', padding: '2px 6px', borderRadius: 4, letterSpacing: '.06em', marginLeft: 4 }}>SOON</span>
+                    {i < 3 && <span style={{ position: 'absolute', right: 'clamp(-13px,-1.6vw,-11px)', top: '42%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,.28)', fontWeight: 900, fontSize: 'clamp(18px,3vw,30px)' }}>:</span>}
                   </div>
                 ))}
               </div>
 
-              {/* Email form */}
-              <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 18, padding: '22px 24px' }}>
-                <p style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 4 }}><Bell size={14} color="#6EE7B7" /> Get notified at launch</p>
-                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>Drop your email — we'll ping you the moment the app goes live with an exclusive launch offer.</p>
+              {/* ── Sign-up / Referral waitlist ── */}
+              <div style={{ maxWidth: 540, margin: '0 auto' }}>
                 {!submitted ? (
-                  <form onSubmit={handleNotify} style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={e => { setEmail(e.target.value); setNotifyError(''); }}
-                      onFocus={() => setInputFocused(true)}
-                      onBlur={() => setInputFocused(false)}
-                      placeholder="your@email.com"
-                      disabled={notifyLoading}
-                      style={{
-                        flex: 1, minWidth: 180, padding: '12px 16px', borderRadius: 11, fontSize: 13.5,
-                        color: '#fff', background: inputFocused ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.05)',
-                        border: `1.5px solid ${notifyError ? '#EF4444' : inputFocused ? 'rgba(13,163,102,0.6)' : 'rgba(255,255,255,0.1)'}`,
-                        outline: 'none', fontFamily: 'inherit', transition: 'all .15s', boxSizing: 'border-box',
-                      }}
-                    />
-                    <button type="submit" disabled={notifyLoading} style={{
-                      padding: '12px 22px', borderRadius: 11, fontSize: 14, fontWeight: 800,
-                      background: notifyLoading ? 'rgba(13,163,102,0.5)' : 'linear-gradient(135deg, #0DA366 0%, #00D97E 100%)',
-                      color: '#fff', border: 'none', cursor: notifyLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap',
-                      boxShadow: '0 8px 24px rgba(13,163,102,0.4)', fontFamily: 'inherit',
-                    }}>
-                      {notifyLoading ? 'Sending…' : 'Notify Me →'}
+                  <form onSubmit={handleNotify} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <div style={{ flex: 1, minWidth: 220, position: 'relative' }}>
+                      <Bell size={16} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: inputFocused ? '#00E28A' : 'rgba(255,255,255,.35)' }} />
+                      <input
+                        className="zx-inp"
+                        type="email" value={email}
+                        onChange={e => { setEmail(e.target.value); setNotifyError(''); }}
+                        onFocus={() => setInputFocused(true)} onBlur={() => setInputFocused(false)}
+                        placeholder="you@email.com" disabled={notifyLoading}
+                        style={{ width: '100%', height: 54, paddingLeft: 44, paddingRight: 14, borderRadius: 14, fontSize: 14.5, fontWeight: 500, color: '#fff', background: 'rgba(255,255,255,.06)', border: `1.5px solid ${notifyError ? '#EF4444' : inputFocused ? 'rgba(0,226,138,.7)' : 'rgba(255,255,255,.14)'}`, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', transition: 'border-color .15s' }}
+                      />
+                    </div>
+                    <button type="submit" disabled={notifyLoading} style={{ height: 54, padding: '0 28px', borderRadius: 14, fontSize: 15, fontWeight: 800, background: notifyLoading ? 'rgba(0,226,138,.5)' : 'linear-gradient(135deg,#0DA366,#00E28A)', color: '#04100B', border: 'none', cursor: notifyLoading ? 'wait' : 'pointer', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: "'Outfit',sans-serif", boxShadow: '0 12px 30px rgba(0,226,138,.35)' }}>
+                      {notifyLoading ? 'Reserving…' : <>Get Early Access <ArrowRight size={16} /></>}
                     </button>
-                    {notifyError && <p style={{ width: '100%', fontSize: 12, color: '#EF4444', margin: '-4px 0 0' }}>{notifyError}</p>}
+                    {notifyError && <p style={{ width: '100%', fontSize: 12.5, color: '#F87171', margin: '2px 0 0' }}>{notifyError}</p>}
                   </form>
                 ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', background: 'rgba(13,163,102,0.15)', border: '1.5px solid rgba(13,163,102,0.35)', borderRadius: 12 }}>
-                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#0DA366', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Check size={15} color="#fff" strokeWidth={3} /></div>
-                    <div>
-                      <p style={{ fontSize: 13.5, fontWeight: 700, color: '#fff' }}>You're on the list!</p>
-                      <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>We'll email you the moment the app drops.</p>
+                  <div style={{ animation: 'zPop .5s ease both', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(0,226,138,.35)', borderRadius: 20, padding: '24px 22px', backdropFilter: 'blur(10px)' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <Rocket size={17} color="#00E28A" />
+                      <span style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, color: '#fff', fontSize: 15 }}>You&rsquo;re on the launch list!</span>
+                    </div>
+                    <p style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', margin: '0 0 16px' }}>
+                      Your spot: <span style={{ color: '#00E28A', fontWeight: 800 }}>#{referral?.position.toLocaleString()}</span> · Share your link to move up the queue.
+                    </p>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <div style={{ flex: 1, minWidth: 200, display: 'flex', alignItems: 'center', padding: '0 14px', height: 46, borderRadius: 12, background: 'rgba(0,0,0,.35)', border: '1px solid rgba(255,255,255,.14)', color: 'rgba(255,255,255,.8)', fontSize: 13, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                        {referral?.link}
+                      </div>
+                      <button onClick={copyRef} style={{ height: 46, padding: '0 18px', borderRadius: 12, background: copied ? '#0DA366' : 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.16)', color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                        {copied ? <><Check size={15} /> Copied</> : <><Copy size={15} /> Copy</>}
+                      </button>
+                      <a href={`https://wa.me/?text=${encodeURIComponent('I just joined the Zyphix launch waitlist! Grab your spot: ' + (referral?.link || ''))}`} target="_blank" rel="noopener noreferrer"
+                        style={{ height: 46, padding: '0 18px', borderRadius: 12, background: 'linear-gradient(135deg,#0DA366,#00E28A)', color: '#04100B', fontWeight: 800, fontSize: 13, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 7, textDecoration: 'none' }}>
+                        <Share2 size={15} /> Share
+                      </a>
                     </div>
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* ── Right: crafted phone mockup ── */}
-            <div style={{ flex: '0 1 320px', display: 'flex', justifyContent: 'center', alignItems: 'center', paddingBottom: 12, flexShrink: 0, position: 'relative' }}>
-              {/* rotating conic halo */}
-              <div style={{ position: 'absolute', width: 340, height: 340, borderRadius: '50%', background: 'conic-gradient(from 0deg, transparent 0%, rgba(13,163,102,0.45) 15%, transparent 35%, rgba(0,226,138,0.35) 55%, transparent 75%, rgba(110,231,183,0.3) 92%, transparent 100%)', filter: 'blur(30px)', animation: 'zSpin 20s linear infinite', pointerEvents: 'none' }} />
-              <div style={{ animation: 'zFloat 6s ease-in-out infinite', position: 'relative' }}>
-                <div style={{
-                  width: 244, height: 500, borderRadius: 40, padding: 9, boxSizing: 'border-box',
-                  background: 'linear-gradient(160deg, #0c1a14, #060f0b)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  boxShadow: '0 50px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 0 8px rgba(0,0,0,0.35)',
-                }}>
-                  <div style={{ width: '100%', height: '100%', borderRadius: 32, background: '#F6F8F6', overflow: 'hidden', position: 'relative', boxSizing: 'border-box' }}>
-                    <div style={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', width: 78, height: 22, borderRadius: 18, background: '#04100B', zIndex: 5 }} />
-                    {/* header */}
-                    <div style={{ background: 'linear-gradient(150deg, #0DA366, #0a7d4f)', padding: '40px 14px 16px', color: '#fff' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 11 }}>
-                        <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, letterSpacing: '-.04em', fontSize: 16 }}>ZYPHI<span style={{ color: '#6EE7B7' }}>X</span></div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 9, fontWeight: 700, background: 'rgba(255,255,255,.16)', padding: '3px 8px', borderRadius: 20 }}><Clock size={10} /> 12 min</div>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fff', borderRadius: 10, padding: '8px 11px' }}>
-                        <Search size={13} color="#0DA366" />
-                        <span style={{ fontSize: 10.5, color: '#9CA3AF', fontWeight: 500 }}>Search groceries & food…</span>
-                      </div>
-                    </div>
-                    {/* dual hero */}
-                    <div style={{ padding: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
-                      {[
-                        { t: 'Zyphix Now', s: 'Grocery · 12m', bg: 'linear-gradient(160deg,#0DA366,#065f46)', Icon: ShoppingCart },
-                        { t: 'Zyphix Eats', s: 'Food · Hot', bg: 'linear-gradient(160deg,#f97316,#c2410c)', Icon: Utensils },
-                      ].map(({ t, s, bg, Icon }) => (
-                        <div key={t} style={{ borderRadius: 12, background: bg, padding: 10, color: '#fff', height: 84, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                          <Icon size={18} />
-                          <div>
-                            <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 11, lineHeight: 1.1 }}>{t}</div>
-                            <div style={{ fontSize: 8.5, opacity: .85 }}>{s}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    {/* chips */}
-                    <div style={{ padding: '0 12px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      {['Veg', 'Dairy', 'Snacks', 'Pharmacy'].map(c => (
-                        <span key={c} style={{ fontSize: 9, fontWeight: 700, color: '#065f46', background: '#DCFCE7', padding: '4px 9px', borderRadius: 20 }}>{c}</span>
-                      ))}
-                    </div>
-                    {/* order tracker */}
-                    <div style={{ margin: 12, padding: 11, borderRadius: 12, background: '#fff', border: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: 9, boxShadow: '0 8px 18px rgba(0,0,0,.05)' }}>
-                      <div style={{ width: 34, height: 34, borderRadius: 9, background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Zap size={15} color="#0DA366" /></div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 10.5, fontWeight: 800, color: '#111827' }}>Arriving in 12 min</div>
-                        <div style={{ height: 5, borderRadius: 3, background: '#EAF6EF', marginTop: 5, overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: '62%', background: '#0DA366', borderRadius: 3, animation: 'zShimmer 3s linear infinite' }} />
-                        </div>
-                      </div>
+              {/* ── Store badges (clean) ── */}
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 30, flexWrap: 'wrap' }}>
+                {[{ Icon: Apple, sub: 'Download on the', title: 'App Store' }, { Icon: Play, sub: 'Get it on', title: 'Google Play' }].map(({ Icon, sub, title }) => (
+                  <div key={title} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 12, padding: '10px 20px', borderRadius: 14, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.16)', backdropFilter: 'blur(6px)' }}>
+                    <span style={{ position: 'absolute', top: -7, right: 10, fontSize: 8, fontWeight: 900, color: '#04100B', background: '#00E28A', padding: '2px 7px', borderRadius: 5, letterSpacing: '.06em' }}>SOON</span>
+                    <Icon size={22} color="#fff" fill="#fff" />
+                    <div style={{ textAlign: 'left' }}>
+                      <p style={{ margin: 0, fontSize: 9.5, color: 'rgba(255,255,255,.5)', fontWeight: 500 }}>{sub}</p>
+                      <p style={{ margin: 0, fontSize: 15, fontWeight: 900, color: '#fff', letterSpacing: '-.02em', fontFamily: "'Outfit',sans-serif" }}>{title}</p>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
-            </div>
-          </div>
-
-          {/* ── Bottom stats bar ── */}
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '20px clamp(24px,5vw,60px)', display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32 }}>
-              {[['3,200+', 'Pre-registered'], ['iOS + Android', 'Both platforms'], ['Aug 2026', 'Target launch'], ['50% OFF', 'Launch day deal']].map(([v, l]) => (
-                <div key={l}>
-                  <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', fontSize: '1.1rem', letterSpacing: '-.03em' }}>{v}</p>
-                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2, fontWeight: 500 }}>{l}</p>
-                </div>
-              ))}
-            </div>
-            <Link href="/app" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700, color: '#00D97E', textDecoration: 'none' }}>
-              See full details →
-            </Link>
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>
