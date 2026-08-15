@@ -1548,59 +1548,58 @@ function HowItWorks() {
     },
   ];
   return (
-    <div style={{ background: W, borderTop: `1px solid ${BD}`, padding: '80px 0' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+    <div style={{ background: 'linear-gradient(180deg,#FFFFFF 0%,#F4F9F6 100%)', borderTop: `1px solid ${BD}`, padding: '96px 0', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 700, height: 700, borderRadius: '50%', background: `radial-gradient(circle, ${G}0d 0%, transparent 65%)`, pointerEvents: 'none' }} />
+      <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
 
         {/* Section header */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'flex-end', gap: 24, marginBottom: 52 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'flex-end', gap: 24, marginBottom: 56 }}>
           <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(13,163,102,.12)', border: '1px solid rgba(13,163,102,.3)', borderRadius: 999, padding: '4px 12px', marginBottom: 16 }}>
-              <Zap size={11} color={G} fill={G} />
-              <span style={{ fontSize: 11, fontWeight: 700, color: G, letterSpacing: '.08em', textTransform: 'uppercase' }}>How it works</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(13,163,102,.1)', border: '1px solid rgba(13,163,102,.28)', borderRadius: 999, padding: '5px 14px', marginBottom: 18 }}>
+              <Zap size={12} color={G} fill={G} />
+              <span style={{ fontSize: 11, fontWeight: 800, color: G, letterSpacing: '.1em', textTransform: 'uppercase' }}>How it works</span>
             </div>
-            <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(2rem,4vw,3rem)', color: T1, letterSpacing: '-.05em', lineHeight: 1.05, margin: 0 }}>
+            <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(2.1rem,4.2vw,3.2rem)', color: T1, letterSpacing: '-.05em', lineHeight: 1.02, margin: 0 }}>
               Order to doorstep<br />
-              <span style={{ color: G }}>in under 30 minutes.</span>
+              <span style={{ background: `linear-gradient(105deg,${G},#059E5C)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>in under 30 minutes.</span>
             </h2>
           </div>
-          <p style={{ fontSize: 14, color: T2, maxWidth: 260, lineHeight: 1.7, marginBottom: 4, textAlign: 'right' }}>
+          <p style={{ fontSize: 14, color: T2, maxWidth: 260, lineHeight: 1.7, marginBottom: 6, textAlign: 'right' }}>
             Three steps. Zero complexity.<br />Hyperlocal delivery built for India.
           </p>
         </div>
 
         {/* Step cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 18, marginBottom: 48 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 56 }}>
           {steps.map((s, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.13, duration: 0.42 }}>
-              <div
+            <motion.div key={i} initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.13, duration: 0.45 }}>
+              <div className="hiw-card"
                 style={{
-                  borderRadius: 24, overflow: 'hidden', height: '100%',
-                  background: s.highlight ? `linear-gradient(145deg, #065F46 0%, ${G} 100%)` : W,
+                  borderRadius: 26, overflow: 'hidden', height: '100%',
+                  background: s.highlight ? `linear-gradient(150deg, #065F46 0%, ${G} 100%)` : W,
                   border: s.highlight ? 'none' : `1px solid ${BD}`,
-                  boxShadow: s.highlight ? '0 16px 48px rgba(13,163,102,.25)' : SH,
-                  transition: 'transform .22s, box-shadow .22s',
+                  boxShadow: s.highlight ? '0 20px 56px rgba(13,163,102,.28)' : SH,
+                  transition: 'transform .25s, box-shadow .25s',
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-5px)'; (e.currentTarget as HTMLElement).style.boxShadow = s.highlight ? '0 24px 64px rgba(13,163,102,.35)' : SH2; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = s.highlight ? '0 16px 48px rgba(13,163,102,.25)' : SH; }}
+                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = 'translateY(-6px)'; el.style.boxShadow = s.highlight ? '0 30px 72px rgba(13,163,102,.4)' : SH2; const img = el.querySelector('img'); if (img) (img as HTMLElement).style.transform = 'scale(1.06)'; }}
+                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = 'none'; el.style.boxShadow = s.highlight ? '0 20px 56px rgba(13,163,102,.28)' : SH; const img = el.querySelector('img'); if (img) (img as HTMLElement).style.transform = 'scale(1)'; }}
               >
                 {/* Image */}
-                <div style={{ height: 188, overflow: 'hidden', position: 'relative' }}>
-                  <img src={s.img} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .4s' }} />
-                  <div style={{ position: 'absolute', inset: 0, background: s.highlight ? 'rgba(6,95,70,.45)' : 'linear-gradient(180deg,transparent 50%,rgba(0,0,0,.18) 100%)' }} />
-                  {/* Step number */}
-                  <div style={{ position: 'absolute', top: 16, left: 16, fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: '2.4rem', color: s.highlight ? 'rgba(255,255,255,.3)' : 'rgba(255,255,255,.55)', letterSpacing: '-.04em', lineHeight: 1, textShadow: '0 2px 10px rgba(0,0,0,.25)' }}>{s.n}</div>
-                  {/* Icon badge */}
-                  <div style={{ position: 'absolute', bottom: 16, right: 16, width: 40, height: 40, borderRadius: 12, background: s.highlight ? G : 'rgba(255,255,255,.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(0,0,0,.15)' }}>
-                    {s.icon}
+                <div style={{ height: 196, overflow: 'hidden', position: 'relative' }}>
+                  <img src={s.img} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .45s ease' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: s.highlight ? 'linear-gradient(180deg,rgba(6,95,70,.25),rgba(6,95,70,.55))' : 'linear-gradient(180deg,transparent 45%,rgba(0,0,0,.22) 100%)' }} />
+                  <div style={{ position: 'absolute', top: 18, left: 18, fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: '2.6rem', color: 'rgba(255,255,255,.5)', letterSpacing: '-.05em', lineHeight: 1, textShadow: '0 2px 14px rgba(0,0,0,.3)' }}>{s.n}</div>
+                  <div style={{ position: 'absolute', bottom: 16, right: 16, width: 44, height: 44, borderRadius: 13, background: s.highlight ? '#fff' : 'rgba(255,255,255,.94)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px rgba(0,0,0,.18)' }}>
+                    {s.highlight ? <Zap size={20} color={G} /> : s.icon}
                   </div>
                 </div>
                 {/* Body */}
-                <div style={{ padding: '22px 24px 28px' }}>
-                  <h3 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 16.5, letterSpacing: '-.025em', color: s.highlight ? '#fff' : T1, marginBottom: 10, lineHeight: 1.25 }}>{s.title}</h3>
-                  <p style={{ fontSize: 13.5, color: s.highlight ? 'rgba(255,255,255,.75)' : T2, lineHeight: 1.7, margin: 0 }}>{s.desc}</p>
+                <div style={{ padding: '24px 26px 30px' }}>
+                  <h3 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 17.5, letterSpacing: '-.025em', color: s.highlight ? '#fff' : T1, marginBottom: 11, lineHeight: 1.25 }}>{s.title}</h3>
+                  <p style={{ fontSize: 13.5, color: s.highlight ? 'rgba(255,255,255,.78)' : T2, lineHeight: 1.7, margin: 0 }}>{s.desc}</p>
                   {s.highlight && (
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 18, background: 'rgba(255,255,255,.12)', borderRadius: 999, padding: '5px 12px', border: '1px solid rgba(255,255,255,.2)' }}>
-                      <Check size={11} color='#fff' />
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 18, background: 'rgba(255,255,255,.14)', borderRadius: 999, padding: '6px 13px', border: '1px solid rgba(255,255,255,.24)' }}>
+                      <Check size={12} color='#fff' />
                       <span style={{ fontSize: 11.5, fontWeight: 700, color: '#fff', letterSpacing: '.04em' }}>Zero surge pricing · Always</span>
                     </div>
                   )}
@@ -1611,26 +1610,28 @@ function HowItWorks() {
         </div>
 
         {/* Stats bar */}
-        <div style={{ background: T1, borderRadius: 22, padding: '32px 40px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0 }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: .5 }}
+          style={{ background: 'linear-gradient(135deg,#0A1611 0%,#0F2419 100%)', borderRadius: 26, padding: '38px 40px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, position: 'relative', overflow: 'hidden', boxShadow: '0 24px 60px rgba(10,22,17,.3)' }}>
+          <div style={{ position: 'absolute', top: -60, left: '20%', width: 260, height: 260, borderRadius: '50%', background: `radial-gradient(circle, ${G}22 0%, transparent 65%)`, pointerEvents: 'none' }} />
           {[
-            { v: '< 30 min', l: 'Guaranteed delivery time', icon: <Zap size={16} color={G} fill={G} />, accent: G },
-            { v: '4.8 / 5', l: 'Average customer rating', icon: <Star size={16} color='#F59E0B' fill='#F59E0B' />, accent: '#F59E0B' },
+            { v: '< 30 min', l: 'Guaranteed delivery time', icon: <Zap size={16} color={G} fill={G} />, accent: '#34D399' },
+            { v: '4.8 / 5', l: 'Average customer rating', icon: <Star size={16} color='#F59E0B' fill='#F59E0B' />, accent: '#FBBF24' },
             { v: '200+', l: 'Partner stores across India', icon: <Package size={16} color='#60A5FA' />, accent: '#60A5FA' },
-            { v: '₹0', l: 'Surge pricing — ever', icon: <Shield size={16} color='#A78BFA' />, accent: '#A78BFA' },
+            { v: '₹0', l: 'Surge pricing — ever', icon: <Shield size={16} color='#A78BFA' />, accent: '#C4B5FD' },
           ].map(({ v, l, icon, accent }, i) => (
-            <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * .07 }}>
-              <div style={{ padding: '0 28px', borderLeft: i > 0 ? '1px solid rgba(255,255,255,.08)' : 'none', textAlign: 'center' }}>
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: `${accent}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * .09 }}>
+              <div style={{ padding: '0 28px', borderLeft: i > 0 ? '1px solid rgba(255,255,255,.09)' : 'none', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 11, background: `${accent}1f`, border: `1px solid ${accent}33`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {icon}
                   </div>
                 </div>
-                <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.4rem,2.5vw,1.75rem)', color: accent, letterSpacing: '-.04em', lineHeight: 1, marginBottom: 6 }}>{v}</p>
-                <p style={{ fontSize: 12, color: 'rgba(255,255,255,.45)', fontWeight: 500, lineHeight: 1.4 }}>{l}</p>
+                <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,2.6vw,1.9rem)', color: accent, letterSpacing: '-.04em', lineHeight: 1, marginBottom: 7 }}>{v}</p>
+                <p style={{ fontSize: 12, color: 'rgba(255,255,255,.5)', fontWeight: 500, lineHeight: 1.4 }}>{l}</p>
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </div>
   );
@@ -1639,31 +1640,37 @@ function HowItWorks() {
 /* ═══════════════ SOCIAL PROOF ═══════════════ */
 function SocialProof() {
   return (
-    <div style={{ background: BG, borderTop: `1px solid ${BD}`, padding: '52px 0' }}>
+    <div style={{ background: 'linear-gradient(180deg,#F4F9F6 0%,#FFFFFF 100%)', borderTop: `1px solid ${BD}`, padding: '80px 0' }}>
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 24px' }}>
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: G, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 10 }}>Trusted by millions</p>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.8rem,3.5vw,2.6rem)', color: T1, letterSpacing: '-.04em', lineHeight: 1.08 }}>
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(13,163,102,.1)', border: '1px solid rgba(13,163,102,.28)', borderRadius: 999, padding: '5px 14px', marginBottom: 16 }}>
+            <Star size={12} color={G} fill={G} />
+            <span style={{ fontSize: 11, fontWeight: 800, color: G, letterSpacing: '.1em', textTransform: 'uppercase' }}>Trusted by millions</span>
+          </div>
+          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.9rem,3.6vw,2.8rem)', color: T1, letterSpacing: '-.045em', lineHeight: 1.06 }}>
             What our customers say
           </h2>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 22 }}>
           {[
-            { name: 'Priya Sharma', city: 'Delhi', rating: 5, text: 'Ordered groceries at 11pm and they arrived in 28 minutes. Unbelievable! The app is so smooth and the prices are the same as my local kirana.' },
-            { name: 'Rahul Verma', city: 'Mumbai', rating: 5, text: 'Ordered from my favourite biryani place on ZyphixEats — they delivered in 22 minutes. The food was hot, the app was smooth, and the price was the same as eating there.' },
-            { name: 'Anjali Patel', city: 'Bengaluru', rating: 5, text: 'ZyphixEats is my go-to for ordering from that small biryani place nearby. They\'re not on Swiggy but they\'re on Zyphix. Love that!' },
+            { name: 'Priya Sharma', city: 'Delhi', rating: 5, grad: 'linear-gradient(135deg,#0DA366,#00C878)', text: 'Ordered groceries at 11pm and they arrived in 28 minutes. Unbelievable! The app is so smooth and the prices are the same as my local kirana.' },
+            { name: 'Rahul Verma', city: 'Mumbai', rating: 5, grad: 'linear-gradient(135deg,#EA580C,#F59E0B)', text: 'Ordered from my favourite biryani place on ZyphixEats — they delivered in 22 minutes. The food was hot, the app was smooth, and the price was the same as eating there.' },
+            { name: 'Anjali Patel', city: 'Bengaluru', rating: 5, grad: 'linear-gradient(135deg,#7C3AED,#A78BFA)', text: 'ZyphixEats is my go-to for ordering from that small biryani place nearby. They\'re not on Swiggy but they\'re on Zyphix. Love that!' },
           ].map((r, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * .1 }}>
-              <div style={{ background: W, border: `1px solid ${BD}`, borderRadius: 20, padding: '24px 22px', boxShadow: SH, height: '100%' }}>
-                <div style={{ display: 'flex', gap: 3, marginBottom: 14 }}>
-                  {Array.from({ length: r.rating }).map((_, i) => <Star key={i} size={14} fill="#D97706" color="#D97706" />)}
+            <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * .1, duration: .45 }}>
+              <div style={{ position: 'relative', background: W, border: `1px solid ${BD}`, borderRadius: 22, padding: '30px 26px 26px', boxShadow: SH, height: '100%', transition: 'transform .22s, box-shadow .22s', overflow: 'hidden' }}
+                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = 'translateY(-5px)'; el.style.boxShadow = SH2; }}
+                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = 'none'; el.style.boxShadow = SH; }}>
+                <span style={{ position: 'absolute', top: 8, right: 20, fontFamily: 'Georgia,serif', fontSize: 100, lineHeight: 1, color: `${G}14`, fontWeight: 700, pointerEvents: 'none' }}>”</span>
+                <div style={{ display: 'flex', gap: 3, marginBottom: 16, position: 'relative' }}>
+                  {Array.from({ length: r.rating }).map((_, i) => <Star key={i} size={15} fill="#F59E0B" color="#F59E0B" />)}
                 </div>
-                <p style={{ fontSize: 14, color: T1, lineHeight: 1.7, marginBottom: 20, fontWeight: 400 }}>"{r.text}"</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: `rgba(13,163,102,.1)`, border: '1px solid rgba(13,163,102,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: G, fontSize: 14 }}>{r.name[0]}</div>
+                <p style={{ fontSize: 14.5, color: T1, lineHeight: 1.75, marginBottom: 22, fontWeight: 400, position: 'relative' }}>{r.text}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: r.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff', fontSize: 16, fontFamily: "'Outfit',sans-serif", boxShadow: '0 4px 12px rgba(0,0,0,.12)' }}>{r.name[0]}</div>
                   <div>
-                    <p style={{ fontWeight: 700, color: T1, fontSize: 13 }}>{r.name}</p>
-                    <p style={{ fontSize: 11, color: T3 }}>{r.city}</p>
+                    <p style={{ fontWeight: 800, color: T1, fontSize: 14 }}>{r.name}</p>
+                    <p style={{ fontSize: 12, color: T3 }}>{r.city}</p>
                   </div>
                 </div>
               </div>
@@ -1671,10 +1678,12 @@ function SocialProof() {
           ))}
         </div>
         {/* Media mentions */}
-        <div style={{ marginTop: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 11.5, fontWeight: 600, color: T3, marginRight: 8 }}>AS FEATURED IN</span>
+        <div style={{ marginTop: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: T3, marginRight: 8, letterSpacing: '.14em', textTransform: 'uppercase' }}>As featured in</span>
           {['The Hindu', 'Economic Times', 'YourStory', 'Inc42', 'Entrackr'].map(m => (
-            <span key={m} style={{ padding: '6px 16px', background: W, border: `1px solid ${BD}`, borderRadius: 8, fontSize: 12, fontWeight: 700, color: T2, boxShadow: SH }}>{m}</span>
+            <span key={m} style={{ padding: '8px 18px', background: W, border: `1px solid ${BD}`, borderRadius: 10, fontSize: 13, fontWeight: 800, color: T3, boxShadow: SH, filter: 'grayscale(1)', opacity: .7, transition: 'all .2s', cursor: 'default' }}
+              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.filter = 'none'; el.style.opacity = '1'; el.style.color = T1; }}
+              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.filter = 'grayscale(1)'; el.style.opacity = '.7'; el.style.color = T3; }}>{m}</span>
           ))}
         </div>
       </div>
@@ -2236,44 +2245,40 @@ function WhyZyphixStrip() {
   ];
   const doubled = [...ITEMS, ...ITEMS];
   const ref = useRef<HTMLDivElement>(null);
+  const GRAIN = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")";
 
   return (
-    <div style={{ background: W, borderTop: `1px solid ${BD}`, borderBottom: `1px solid ${BD}`, overflow: 'hidden', position: 'relative' }}>
+    <div style={{ background: 'linear-gradient(90deg,#04120C 0%,#063D26 50%,#04120C 100%)', overflow: 'hidden', position: 'relative', padding: '6px 0' }}>
       <style>{`
         @keyframes stripScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
       `}</style>
 
-      {/* Left fade */}
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 100, background: `linear-gradient(to right, ${W} 30%, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
-      {/* Right fade */}
-      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 100, background: `linear-gradient(to left, ${W} 30%, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
+      {/* texture */}
+      <div style={{ position: 'absolute', inset: 0, opacity: .5, mixBlendMode: 'overlay', backgroundImage: GRAIN, pointerEvents: 'none' }} />
+      {/* Edge fades */}
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 130, background: 'linear-gradient(to right, #04120C 20%, transparent)', zIndex: 2, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 130, background: 'linear-gradient(to left, #04120C 20%, transparent)', zIndex: 2, pointerEvents: 'none' }} />
 
       <div
         ref={ref}
-        style={{ display: 'flex', width: 'max-content', animation: 'stripScroll 38s linear infinite' }}
+        style={{ display: 'flex', width: 'max-content', animation: 'stripScroll 40s linear infinite', position: 'relative' }}
         onMouseEnter={() => { if (ref.current) ref.current.style.animationPlayState = 'paused'; }}
         onMouseLeave={() => { if (ref.current) ref.current.style.animationPlayState = 'running'; }}
       >
-        {doubled.map(({ Icon, title, sub, color, iconBg }, i) => (
-          <React.Fragment key={i}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '15px 30px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%', background: iconBg,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                boxShadow: `0 0 0 1px ${color}22`,
-              }}>
-                <Icon size={15} color={color} strokeWidth={2.3} />
-              </div>
-              <div>
-                <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 13, color: T1, letterSpacing: '-.02em', lineHeight: 1.2 }}>{title}</p>
-                <p style={{ fontSize: 11, color: T3, fontWeight: 500, marginTop: 1.5, letterSpacing: '.01em' }}>{sub}</p>
-              </div>
+        {doubled.map(({ Icon, title, sub, color }, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 13, margin: '14px 10px', padding: '11px 20px 11px 12px', flexShrink: 0, whiteSpace: 'nowrap', background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.09)', borderRadius: 99, backdropFilter: 'blur(6px)' }}>
+            <div style={{
+              width: 38, height: 38, borderRadius: '50%', background: `${color}22`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              boxShadow: `0 0 0 1px ${color}44, 0 0 14px ${color}33`,
+            }}>
+              <Icon size={16} color={color} strokeWidth={2.4} />
             </div>
-            {/* Dot separator */}
-            <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0, paddingRight: 4 }}>
-              <div style={{ width: 3, height: 3, borderRadius: '50%', background: BD }} />
+            <div>
+              <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 13.5, color: '#fff', letterSpacing: '-.02em', lineHeight: 1.2 }}>{title}</p>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', fontWeight: 500, marginTop: 2, letterSpacing: '.01em' }}>{sub}</p>
             </div>
-          </React.Fragment>
+          </div>
         ))}
       </div>
     </div>
@@ -2317,30 +2322,40 @@ function OfferCards() {
   const [copied, setCopied] = useState(false);
   const copy = () => { navigator.clipboard.writeText('ZYPHIX50'); setCopied(true); setTimeout(() => setCopied(false), 2500); };
   const cards = [
-    { tag: 'New User Offer', h: '50% off your first order', sub: 'Code ZYPHIX50 · Max ₹100 off', code: 'ZYPHIX50', img: 'https://images.unsplash.com/photo-1543168256-418811576931?w=900&h=380&fit=crop&q=85' },
-    { tag: 'Partner Stores', h: '200+ partner stores across India', sub: 'Zero surge pricing · Always fresh', code: '', img: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=900&h=380&fit=crop&q=85' },
-    { tag: 'Pharmacy', h: 'Medicines delivered fast', sub: 'Prescription & OTC · All brands', code: '', img: 'https://images.unsplash.com/photo-1585435557343-3b092031a831?w=900&h=380&fit=crop&q=85' },
+    { tag: 'New User Offer', h: '50% off your first order', sub: 'Code ZYPHIX50 · Max ₹100 off', code: 'ZYPHIX50', Icon: Gift, grad: 'linear-gradient(150deg,#0DA366 0%,#065F46 100%)', glow: 'rgba(13,163,102,.4)', img: 'https://images.unsplash.com/photo-1543168256-418811576931?w=900&h=380&fit=crop&q=85' },
+    { tag: 'Partner Stores', h: '200+ partner stores across India', sub: 'Zero surge pricing · Always fresh', code: '', Icon: Store, grad: 'linear-gradient(150deg,#1E293B 0%,#0F172A 100%)', glow: 'rgba(96,165,250,.35)', img: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=900&h=380&fit=crop&q=85' },
+    { tag: 'Pharmacy', h: 'Medicines delivered fast', sub: 'Prescription & OTC · All brands', code: '', Icon: Shield, grad: 'linear-gradient(150deg,#0E7490 0%,#155E75 100%)', glow: 'rgba(45,212,191,.35)', img: 'https://images.unsplash.com/photo-1585435557343-3b092031a831?w=900&h=380&fit=crop&q=85' },
   ];
   return (
-    <div style={{ background: BG, borderTop: `1px solid ${BD}`, padding: '40px 24px' }}>
-      <div style={{ maxWidth: 1320, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
+    <div style={{ background: BG, borderTop: `1px solid ${BD}`, padding: '56px 24px' }}>
+      <div style={{ maxWidth: 1320, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20 }}>
         {cards.map((b, i) => (
-          <motion.div key={i} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
+          <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: .45 }}>
             <div
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.transform = 'none'}
-              style={{ height: 210, borderRadius: 20, overflow: 'hidden', position: 'relative', background: '#111', boxShadow: SH2, cursor: 'pointer', transition: 'transform .22s' }}>
-              <img src={b.img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: .35 }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(100deg,rgba(0,0,0,.92) 42%,rgba(0,0,0,.15))' }} />
-              <div style={{ position: 'absolute', inset: 0, padding: '22px 26px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <span style={{ display: 'inline-block', background: 'rgba(255,255,255,.14)', backdropFilter: 'blur(6px)', color: '#fff', fontSize: 10.5, fontWeight: 700, padding: '3px 10px', borderRadius: 7, border: '1px solid rgba(255,255,255,.2)', width: 'fit-content' }}>{b.tag}</span>
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-6px)'; (e.currentTarget as HTMLElement).style.boxShadow = `0 30px 60px ${b.glow}`; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = `0 14px 40px ${b.glow}`; }}
+              style={{ height: 232, borderRadius: 24, overflow: 'hidden', position: 'relative', background: b.grad, boxShadow: `0 14px 40px ${b.glow}`, cursor: 'pointer', transition: 'transform .25s, box-shadow .25s' }}>
+              {/* image texture */}
+              <img src={b.img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: .22, mixBlendMode: 'luminosity' }} />
+              <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(120deg,rgba(0,0,0,.35) 0%,transparent 70%)` }} />
+              {/* glow orb */}
+              <div style={{ position: 'absolute', top: -50, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,.14)', filter: 'blur(30px)', pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', inset: 0, padding: '24px 26px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(255,255,255,.16)', backdropFilter: 'blur(8px)', color: '#fff', fontSize: 10.5, fontWeight: 800, padding: '5px 12px', borderRadius: 99, border: '1px solid rgba(255,255,255,.28)', letterSpacing: '.04em', textTransform: 'uppercase' }}>{b.tag}</span>
+                  <div style={{ width: 42, height: 42, borderRadius: 13, background: 'rgba(255,255,255,.16)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,.24)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <b.Icon size={20} color="#fff" />
+                  </div>
+                </div>
                 <div>
-                  <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', fontSize: 'clamp(1.1rem,2.2vw,1.45rem)', lineHeight: 1.15, marginBottom: 5, letterSpacing: '-.03em' }}>{b.h}</p>
-                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,.6)', marginBottom: b.code ? 12 : 0 }}>{b.sub}</p>
+                  <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', fontSize: 'clamp(1.2rem,2.3vw,1.55rem)', lineHeight: 1.12, marginBottom: 6, letterSpacing: '-.035em' }}>{b.h}</p>
+                  <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,.72)', marginBottom: b.code ? 14 : 0 }}>{b.sub}</p>
                   {b.code && (
-                    <button onClick={copy} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 12.5, letterSpacing: '.08em', color: '#fff', background: 'rgba(255,255,255,.12)', border: '1.5px dashed rgba(255,255,255,.4)', padding: '5px 13px', borderRadius: 8, cursor: 'pointer' }}>
+                    <button data-testid="offer-copy-code" onClick={copy} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, fontWeight: 800, fontSize: 13, letterSpacing: '.08em', color: '#fff', background: 'rgba(255,255,255,.14)', border: '1.5px dashed rgba(255,255,255,.5)', padding: '7px 15px', borderRadius: 10, cursor: 'pointer', transition: 'background .15s' }}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.24)'}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.14)'}>
                       {b.code}
-                      {copied ? <Check size={12} color="#6EE7B7" /> : <Copy size={11} color="rgba(255,255,255,.6)" />}
+                      {copied ? <Check size={13} color="#6EE7B7" /> : <Copy size={12} color="rgba(255,255,255,.7)" />}
                     </button>
                   )}
                 </div>
@@ -2356,33 +2371,41 @@ function OfferCards() {
 /* ═══════════════ KIRANA CTA ═══════════════ */
 function KiranaCTA() {
   const chips = ['🥬 Fruits & Veg','🥛 Dairy','💊 Pharmacy','🍿 Snacks','🌾 Grains & Dal','🧹 Household'];
+  const GRAIN = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")";
   return (
-    <div style={{ background: W, borderTop: `1px solid ${BD}`, padding: '64px 24px' }}>
-      <div style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
-        <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: `${G}10`, border: `1px solid ${G}30`, borderRadius: 999, padding: '5px 16px', marginBottom: 18 }}>
-            <span style={{ fontSize: 13 }}>🚀</span>
-            <span style={{ fontSize: 11.5, fontWeight: 700, color: G, letterSpacing: '.05em' }}>Now live across India — Be first to shop</span>
+    <div style={{ background: W, borderTop: `1px solid ${BD}`, padding: '72px 24px' }}>
+      <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: .5 }}
+        style={{ maxWidth: 1080, margin: '0 auto', position: 'relative', borderRadius: 32, overflow: 'hidden', background: 'linear-gradient(150deg,#063D26 0%,#0A1611 100%)', boxShadow: '0 40px 90px rgba(6,61,38,.35)', padding: 'clamp(40px,6vw,72px) clamp(24px,5vw,64px)' }}>
+        {/* texture layers */}
+        <div style={{ position: 'absolute', inset: 0, opacity: .5, mixBlendMode: 'overlay', backgroundImage: GRAIN, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px)', backgroundSize: '46px 46px', maskImage: 'radial-gradient(circle at 50% 0%, black, transparent 75%)', WebkitMaskImage: 'radial-gradient(circle at 50% 0%, black, transparent 75%)', pointerEvents: 'none' }} />
+        <motion.div animate={{ scale: [1, 1.12, 1], opacity: [.5, .8, .5] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ position: 'absolute', top: -80, right: -60, width: 300, height: 300, borderRadius: '50%', background: `radial-gradient(circle, ${G}44 0%, transparent 65%)`, filter: 'blur(30px)', pointerEvents: 'none' }} />
+
+        <div style={{ position: 'relative', textAlign: 'center' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${G}22`, border: `1px solid ${G}55`, borderRadius: 999, padding: '6px 18px', marginBottom: 22 }}>
+            <Rocket size={13} color="#6EE7B7" />
+            <span style={{ fontSize: 11.5, fontWeight: 800, color: '#6EE7B7', letterSpacing: '.08em', textTransform: 'uppercase' }}>Now live across India — Be first to shop</span>
           </div>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.8rem,3.5vw,2.7rem)', color: T1, letterSpacing: '-.04em', lineHeight: 1.1, marginBottom: 16 }}>
-            Groceries from your<br /><span style={{ color: G }}>local kirana stores</span>
+          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(2rem,4vw,3.1rem)', color: '#fff', letterSpacing: '-.045em', lineHeight: 1.06, marginBottom: 18 }}>
+            Groceries from your<br /><span style={{ background: `linear-gradient(105deg,${G2} 0%,#6EE7B7 60%,#a7f3d0 100%)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>local kirana stores</span>
           </h2>
-          <p style={{ fontSize: 15, color: T2, lineHeight: 1.7, marginBottom: 28, maxWidth: 560, margin: '0 auto 28px' }}>
+          <p style={{ fontSize: 15.5, color: 'rgba(255,255,255,.6)', lineHeight: 1.7, marginBottom: 30, maxWidth: 580, margin: '0 auto 30px' }}>
             We're onboarding stores across India right now. Join the waitlist to shop 200+ categories — fresh produce, dairy, snacks, pharmacy and more — delivered in 30 minutes.
           </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginBottom: 32 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center', marginBottom: 36 }}>
             {chips.map(c => (
-              <span key={c} style={{ padding: '8px 16px', background: BG, border: `1.5px solid ${BD}`, borderRadius: 99, fontSize: 13.5, fontWeight: 600, color: T1 }}>{c}</span>
+              <span key={c} style={{ padding: '9px 17px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.14)', backdropFilter: 'blur(6px)', borderRadius: 99, fontSize: 13.5, fontWeight: 600, color: 'rgba(255,255,255,.9)' }}>{c}</span>
             ))}
-            <span style={{ padding: '8px 16px', background: BG, border: `1.5px solid ${BD}`, borderRadius: 99, fontSize: 13.5, fontWeight: 600, color: T3 }}>+ more</span>
+            <span style={{ padding: '9px 17px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.14)', borderRadius: 99, fontSize: 13.5, fontWeight: 600, color: 'rgba(255,255,255,.5)' }}>+ more</span>
           </div>
-          <button onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: BG, border: `2px solid ${BD}`, borderRadius: 14, padding: '16px 28px', cursor: 'pointer', fontSize: 15, fontWeight: 800, color: T2 }}>
-            <span style={{ fontSize: 22 }}>🛒</span>
-            <span>COMING SOON</span>
-          </button>
-        </motion.div>
-      </div>
+          <motion.button data-testid="kirana-cta-button" whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: .97 }}
+            onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: `linear-gradient(135deg,${G},${G2})`, border: 'none', borderRadius: 15, padding: '16px 34px', cursor: 'pointer', fontSize: 15.5, fontWeight: 800, color: '#fff', fontFamily: "'Outfit',sans-serif", boxShadow: `0 16px 36px ${G}55` }}>
+            <ShoppingCart size={18} /> Join the waitlist <ArrowRight size={17} />
+          </motion.button>
+        </div>
+      </motion.div>
     </div>
   );
 }
