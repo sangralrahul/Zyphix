@@ -14,6 +14,7 @@ import { products, categories, restaurants, foodCategories, promoCodes, stores, 
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { ZyphixLogo } from '../components/ZyphixLogo';
+import { WaitlistHero } from '../components/WaitlistHero';
 
 
 type TabId = 'now' | 'eats' | 'map' | 'offers';
@@ -3044,7 +3045,7 @@ export function Home() {
       <Navbar />
       <DualHeroBanners />
       <div id="quick-browse"><QuickBrowse /></div>
-      <WaitlistSection />
+      <WaitlistHero />
       <WhyZyphixStrip />
       <div id="offers"><OfferCards /></div>
       <div id="stores"><KiranaCTA /></div>
