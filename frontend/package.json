@@ -1,0 +1,8 @@
+{
+  "name": "zyphix-preview-launcher",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "cd /app && BASE_PATH=/ pnpm --filter @workspace/zyphix run dev"
+  }
+}
