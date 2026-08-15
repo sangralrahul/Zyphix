@@ -8,7 +8,7 @@ import {
   Shield, Package, Truck, Zap, Check, Copy, ArrowRight,
   Phone, Instagram, Twitter, Linkedin,
   Gift, Crown, BadgeCheck, Users, TrendingUp,
-  LocateFixed, X, Utensils, Store, Bike, Tag
+  LocateFixed, X, Utensils, Store, Bike, Tag, Bell, Sparkles, RefreshCw
 } from 'lucide-react';
 import { products, categories, restaurants, foodCategories, promoCodes, stores, menuItems } from '@/data/mockData';
 import { useAuth } from '@/context/AuthContext';
@@ -1690,6 +1690,10 @@ function AppDownload() {
   const [notifyLoading, setNotifyLoading] = useState(false);
   const [notifyError, setNotifyError] = useState('');
 
+  const LAUNCH_TS = new Date('2027-01-01T00:00:00Z').getTime();
+  const [nowTs, setNowTs] = useState(() => Date.now());
+  useEffect(() => { const t = setInterval(() => setNowTs(Date.now()), 1000); return () => clearInterval(t); }, []);
+
   const handleNotify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -1735,6 +1739,14 @@ function AppDownload() {
           border: '1px solid rgba(13,163,102,0.25)',
           boxShadow: '0 0 0 1px rgba(13,163,102,0.1), 0 40px 80px rgba(0,0,0,0.5)',
         }}>
+          {/* ── Background video ── */}
+          <video autoPlay muted loop playsInline preload="auto" aria-hidden="true"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.4, pointerEvents: 'none' }}>
+            <source src="/videos/grocery-banner.mp4" type="video/mp4" />
+          </video>
+          {/* brand-tinted legibility overlay */}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(120deg, rgba(2,13,8,0.9) 0%, rgba(4,26,16,0.74) 45%, rgba(6,34,16,0.92) 100%)', pointerEvents: 'none' }} />
+
           {/* ── Animated blobs ── */}
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: '-30%', left: '-10%', width: '55%', height: '180%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(13,163,102,0.28) 0%, transparent 65%)', animation: 'zBlobA 9s ease-in-out infinite' }} />
@@ -1767,8 +1779,8 @@ function AppDownload() {
               </div>
 
               {/* Headline */}
-              <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', lineHeight: 1.06, fontSize: 'clamp(1.9rem,3.5vw,3rem)', letterSpacing: '-.05em', marginBottom: 14 }}>
-                The Zyphix app is<br />
+              <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', lineHeight: 0.98, fontSize: 'clamp(2.2rem,4.4vw,3.8rem)', letterSpacing: '-.055em', marginBottom: 16 }}>
+                Your city,<br />
                 <span style={{
                   background: 'linear-gradient(90deg, #00D97E 0%, #34D399 40%, #6EE7B7 70%, #00D97E 100%)',
                   backgroundSize: '200% auto',
@@ -1776,19 +1788,49 @@ function AppDownload() {
                   WebkitTextFillColor: 'transparent',
                   animation: 'zShimmer 3s linear infinite',
                 }}>
-                  on its way.
+                  in your pocket.
                 </span>
               </h2>
 
               {/* Sub */}
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, marginBottom: 28, lineHeight: 1.7 }}>
-                Stay tuned — we're bringing hyperlocal delivery to your fingertips. Groceries, food, local services — all in one app. Register now to get exclusive early-access perks.
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 15.5, marginBottom: 26, lineHeight: 1.7, maxWidth: 480 }}>
+                The Zyphix app is almost here — groceries in 30 minutes, food from local dhabas, and hyperlocal services, all in one place. Register now for launch-day perks.
               </p>
+
+              {/* Live countdown */}
+              {(() => {
+                const diff = Math.max(0, LAUNCH_TS - nowTs);
+                const cd = [
+                  { v: Math.floor(diff / 86400000), l: 'Days' },
+                  { v: Math.floor((diff % 86400000) / 3600000), l: 'Hrs' },
+                  { v: Math.floor((diff % 3600000) / 60000), l: 'Min' },
+                  { v: Math.floor((diff % 60000) / 1000), l: 'Sec' },
+                ];
+                return (
+                  <div style={{ display: 'flex', gap: 10, marginBottom: 28, maxWidth: 420 }}>
+                    {cd.map((c, i) => (
+                      <div key={c.l} style={{ flex: 1, textAlign: 'center', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '12px 4px', position: 'relative' }}>
+                        <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2rem)', color: '#fff', letterSpacing: '-.03em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{String(c.v).padStart(2, '0')}</div>
+                        <div style={{ fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '.14em', textTransform: 'uppercase', marginTop: 7 }}>{c.l}</div>
+                        {i < 3 && <span style={{ position: 'absolute', right: -8, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)', fontWeight: 900, fontSize: 16 }}>:</span>}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
 
               {/* Feature chips */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}>
-                {['⚡ 30-min delivery', '🍱 Local food', '📍 Live tracking', '🏷️ App-only deals', '🔔 Push alerts'].map(f => (
-                  <span key={f} style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.65)', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 99, padding: '5px 13px' }}>{f}</span>
+                {[
+                  { Icon: Zap, t: '30-min delivery' },
+                  { Icon: Utensils, t: 'Local food' },
+                  { Icon: MapPin, t: 'Live tracking' },
+                  { Icon: Tag, t: 'App-only deals' },
+                  { Icon: Bell, t: 'Push alerts' },
+                ].map(({ Icon, t }) => (
+                  <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 99, padding: '6px 13px' }}>
+                    <Icon size={13} color="#6EE7B7" /> {t}
+                  </span>
                 ))}
               </div>
 
@@ -1811,7 +1853,7 @@ function AppDownload() {
 
               {/* Email form */}
               <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 18, padding: '22px 24px' }}>
-                <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 4 }}>🔔 Get notified at launch</p>
+                <p style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 4 }}><Bell size={14} color="#6EE7B7" /> Get notified at launch</p>
                 <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>Drop your email — we'll ping you the moment the app goes live with an exclusive launch offer.</p>
                 {!submitted ? (
                   <form onSubmit={handleNotify} style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -1842,45 +1884,81 @@ function AppDownload() {
                   </form>
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', background: 'rgba(13,163,102,0.15)', border: '1.5px solid rgba(13,163,102,0.35)', borderRadius: 12 }}>
-                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#0DA366', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>✓</div>
+                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#0DA366', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Check size={15} color="#fff" strokeWidth={3} /></div>
                     <div>
                       <p style={{ fontSize: 13.5, fontWeight: 700, color: '#fff' }}>You're on the list!</p>
-                      <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>We'll email you the moment the app drops. 🚀</p>
+                      <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>We'll email you the moment the app drops.</p>
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* ── Right: phone mockups ── */}
-            <div style={{ flex: '0 1 320px', display: 'flex', gap: 18, justifyContent: 'center', alignItems: 'flex-end', paddingBottom: 12, flexShrink: 0 }}>
-              {[
-                { icon: '🛒', label: 'Zyphix Now', color: '#0DA366', anim: 'zFloat 4s ease-in-out infinite', top: 0 },
-                { icon: '🍱', label: 'Zyphix Eats', color: '#F97316', anim: 'zFloat2 3.5s ease-in-out infinite', top: -24 },
-              ].map(p => (
-                <div key={p.label} style={{ animation: p.anim }}>
-                  <div style={{
-                    width: 120, height: 240, borderRadius: 26,
-                    background: 'linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03))',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, position: 'relative', overflow: 'hidden', marginTop: p.top,
-                    boxShadow: `0 28px 56px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08)`,
-                  }}>
-                    <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at 50% 40%, ${p.color}22, transparent 70%)` }} />
-                    <div style={{ position: 'absolute', top: 10, width: 36, height: 7, borderRadius: 4, background: 'rgba(0,0,0,0.4)' }} />
-                    <div style={{ width: 52, height: 52, borderRadius: 14, background: `linear-gradient(145deg, ${p.color}44, ${p.color}18)`, border: `1px solid ${p.color}55`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26 }}>{p.icon}</div>
-                    <p style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '.03em' }}>{p.label}</p>
-                    <div style={{ position: 'absolute', bottom: 12, width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.2)' }} />
+            {/* ── Right: crafted phone mockup ── */}
+            <div style={{ flex: '0 1 320px', display: 'flex', justifyContent: 'center', alignItems: 'center', paddingBottom: 12, flexShrink: 0, position: 'relative' }}>
+              {/* rotating conic halo */}
+              <div style={{ position: 'absolute', width: 340, height: 340, borderRadius: '50%', background: 'conic-gradient(from 0deg, transparent 0%, rgba(13,163,102,0.45) 15%, transparent 35%, rgba(0,226,138,0.35) 55%, transparent 75%, rgba(110,231,183,0.3) 92%, transparent 100%)', filter: 'blur(30px)', animation: 'zSpin 20s linear infinite', pointerEvents: 'none' }} />
+              <div style={{ animation: 'zFloat 6s ease-in-out infinite', position: 'relative' }}>
+                <div style={{
+                  width: 244, height: 500, borderRadius: 40, padding: 9, boxSizing: 'border-box',
+                  background: 'linear-gradient(160deg, #0c1a14, #060f0b)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  boxShadow: '0 50px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 0 8px rgba(0,0,0,0.35)',
+                }}>
+                  <div style={{ width: '100%', height: '100%', borderRadius: 32, background: '#F6F8F6', overflow: 'hidden', position: 'relative', boxSizing: 'border-box' }}>
+                    <div style={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', width: 78, height: 22, borderRadius: 18, background: '#04100B', zIndex: 5 }} />
+                    {/* header */}
+                    <div style={{ background: 'linear-gradient(150deg, #0DA366, #0a7d4f)', padding: '40px 14px 16px', color: '#fff' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 11 }}>
+                        <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, letterSpacing: '-.04em', fontSize: 16 }}>ZYPHI<span style={{ color: '#6EE7B7' }}>X</span></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 9, fontWeight: 700, background: 'rgba(255,255,255,.16)', padding: '3px 8px', borderRadius: 20 }}><Clock size={10} /> 12 min</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fff', borderRadius: 10, padding: '8px 11px' }}>
+                        <Search size={13} color="#0DA366" />
+                        <span style={{ fontSize: 10.5, color: '#9CA3AF', fontWeight: 500 }}>Search groceries & food…</span>
+                      </div>
+                    </div>
+                    {/* dual hero */}
+                    <div style={{ padding: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
+                      {[
+                        { t: 'Zyphix Now', s: 'Grocery · 12m', bg: 'linear-gradient(160deg,#0DA366,#065f46)', Icon: ShoppingCart },
+                        { t: 'Zyphix Eats', s: 'Food · Hot', bg: 'linear-gradient(160deg,#f97316,#c2410c)', Icon: Utensils },
+                      ].map(({ t, s, bg, Icon }) => (
+                        <div key={t} style={{ borderRadius: 12, background: bg, padding: 10, color: '#fff', height: 84, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                          <Icon size={18} />
+                          <div>
+                            <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 11, lineHeight: 1.1 }}>{t}</div>
+                            <div style={{ fontSize: 8.5, opacity: .85 }}>{s}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* chips */}
+                    <div style={{ padding: '0 12px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {['Veg', 'Dairy', 'Snacks', 'Pharmacy'].map(c => (
+                        <span key={c} style={{ fontSize: 9, fontWeight: 700, color: '#065f46', background: '#DCFCE7', padding: '4px 9px', borderRadius: 20 }}>{c}</span>
+                      ))}
+                    </div>
+                    {/* order tracker */}
+                    <div style={{ margin: 12, padding: 11, borderRadius: 12, background: '#fff', border: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: 9, boxShadow: '0 8px 18px rgba(0,0,0,.05)' }}>
+                      <div style={{ width: 34, height: 34, borderRadius: 9, background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Zap size={15} color="#0DA366" /></div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 10.5, fontWeight: 800, color: '#111827' }}>Arriving in 12 min</div>
+                        <div style={{ height: 5, borderRadius: 3, background: '#EAF6EF', marginTop: 5, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: '62%', background: '#0DA366', borderRadius: 3, animation: 'zShimmer 3s linear infinite' }} />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
 
           {/* ── Bottom stats bar ── */}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '20px clamp(24px,5vw,60px)', display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32 }}>
-              {[['3,200+', 'Pre-registered'], ['iOS + Android', 'Both platforms'], ['Q2 2025', 'Target launch'], ['50% OFF', 'Launch day deal']].map(([v, l]) => (
+              {[['3,200+', 'Pre-registered'], ['iOS + Android', 'Both platforms'], ['Aug 2026', 'Target launch'], ['50% OFF', 'Launch day deal']].map(([v, l]) => (
                 <div key={l}>
                   <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', fontSize: '1.1rem', letterSpacing: '-.03em' }}>{v}</p>
                   <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2, fontWeight: 500 }}>{l}</p>

@@ -31,6 +31,11 @@ User connected an existing GitHub site (Zyphix) and asked to (1) run it in the l
 - Frontend: `AuthContext.tsx` handles the OAuth redirect + `#session_id` callback exchange and server session verification; `loginWithGoogle()` redirects to `auth.emergentagent.com`. AuthModal "Continue with Google" now does the real redirect (was mocked). Navbar reflects logged-in user; Sign out revokes session.
 - Testing playbook saved at `/app/auth_testing.md`; credentials/seed at `/app/memory/test_credentials.md`.
 
+## Homepage "app is on its way" section (redesigned 2026-08-15)
+- Fully redesigned the `id="app-download"` section in Home.tsx: kinetic "Your city, in your pocket." headline, LIVE countdown (target **1 Jan 2027**), lucide-icon feature chips (no emoji), crafted phone mockup with a mini Zyphix UI, App Store/Google Play SOON badges. Working notify form kept (`/api/notify`).
+- Added a **professional background video** to the section using the bundled `/videos/grocery-banner.mp4` (autoplay/muted/loop/playsInline) with a brand-tinted gradient overlay for legibility.
+- Note: `/app` route (AppComingSoon.tsx) was ALSO redesigned earlier (separate page).
+
 ## Backlog / Next
 - **Razorpay (IN PROGRESS / PAUSED)**: Backend `server.py` has the razorpay client initialized (reads `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET` env, currently empty → disabled). Endpoints (create-order, verify) and Checkout "Online" wiring NOT yet added — paused when user switched to the app-page redesign. Resume: add `/api/payments/config|create-order|verify` + wire Checkout ONLINE path + load checkout.js.
 - P2: Same nested-`<a>` console warning exists (pre-existing) in Wishlist, Notifications, ZyphixNow, Wallet, ProductDetail — cosmetic only.

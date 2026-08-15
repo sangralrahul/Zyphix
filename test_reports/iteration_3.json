@@ -1,0 +1,40 @@
+{
+  "summary": "Verified the redesigned #app-download section on homepage '/'. New design is fully in place: 'Your city, in your pocket.' headline, countdown grid (Days/Hrs/Min/Sec), lucide SVG feature chips (30-min delivery, Local food, Live tracking, App-only deals, Push alerts), App Store + Google Play SOON badges, and detailed phone mockup (ZYPHIX header, search bar, Zyphix Now/Eats tiles, Veg/Dairy/Snacks/Pharmacy chips, 'Arriving in 12 min' tracker). No emojis in the section (13 SVGs rendered). Notify form success path works and displays 'You're on the list!'. Rest of homepage (dual hero, category grids) still loads without uncaught errors from Home.tsx.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Home.tsx #app-download countdown",
+        "issue": "Countdown displays 00:00:00:00 and does not tick. LAUNCH_TS is set to 2026-08-15T09:00:00Z (line 1693 of Home.tsx) which is already in the past at test time (system date is Aug 15, 2026 ~11:16 UTC). The Math.max(0, LAUNCH_TS - nowTs) clamps diff to 0, so Days/Hrs/Min/Sec all render '00' permanently. The countdown IS wired (setInterval every 1s), but the target date needs to be pushed to a future date (e.g. later in 2026 or 2027) for it to visibly tick.",
+        "selector": "#app-download (countdown boxes with labels DAYS/HRS/MIN/SEC)",
+        "priority": "HIGH"
+      },
+      {
+        "component": "Home.tsx notify form",
+        "issue": "Inline validation message 'Please enter a valid email address.' is implemented in handleNotify but never fires for input 'abc' because the <input type=\"email\"> triggers HTML5 native browser validation popup and blocks form submission before handleNotify runs. The custom validation only ever fires for an EMPTY email. Consider using type=\"text\" with noValidate, or ensure the inline error message is what the user actually sees.",
+        "selector": "#app-download input[type=email]",
+        "priority": "LOW"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/app_download_section.png"],
+  "action_items": [
+    "Update LAUNCH_TS in /app/artifacts/zyphix/src/pages/Home.tsx line 1693 to a future date so the live countdown actually ticks (currently expired -> all zeros).",
+    "Optional: switch email input off type='email' or add noValidate on the form so the custom 'Please enter a valid email address.' error is shown instead of the browser's native tooltip."
+  ],
+  "critical_code_review_comments": [
+    "Home.tsx is ~3147 lines — well beyond the 700-line guideline. The #app-download section alone spans ~150 lines with inline styles + keyframes. Recommend extracting into src/components/AppDownloadSection.tsx.",
+    "LAUNCH_TS is hardcoded inline. Better to expose it via env / config so marketing can update without touching component code, and to prevent 'expired countdown' regressions.",
+    "handleNotify swallows non-Error rejections as generic string. Fine for now, but consider logging the raw error for debugging in preview envs where /api/notify (Supabase edge) may 401/500."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend-only test)", "frontend": "90%"},
+  "test_credentials": "None required",
+  "seed_data_creation": "None",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "The redesign is visually confirmed via screenshot at /app/test_reports/app_download_section.png. The only functional issue is that LAUNCH_TS is already in the past so the countdown shows 00:00:00:00 and does not tick. Once main agent bumps the date, retest by scrolling to #app-download and confirming SEC value changes over 2 seconds.",
+  "rca of the issue": "Countdown non-ticking RCA: Home.tsx line 1693 `const LAUNCH_TS = new Date('2026-08-15T09:00:00Z').getTime();`. At the time of testing the wallclock is past that timestamp, so `Math.max(0, LAUNCH_TS - nowTs)` returns 0 every tick, producing 00/00/00/00. Fix: change to a future date (e.g. '2026-12-01T09:00:00Z' or move to env var). Reproduce: load '/', scroll to #app-download, observe SEC does not change over multiple seconds."
+}
