@@ -10,8 +10,9 @@ import {
   Gift, Crown, BadgeCheck, Users, TrendingUp,
   LocateFixed, X, Utensils, Store, Bike, Tag
 } from 'lucide-react';
-import { products, categories, restaurants, foodCategories, promoCodes, stores } from '@/data/mockData';
+import { products, categories, restaurants, foodCategories, promoCodes, stores, menuItems } from '@/data/mockData';
 import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/CartContext';
 import { ZyphixLogo } from '../components/ZyphixLogo';
 
 
@@ -151,7 +152,50 @@ function Navbar({ tab = 'now', setTab }: { tab?: TabId; setTab?: (t: TabId) => v
   const [locSearch, setLocSearch] = useState('');
   const [locating, setLocating] = useState(false);
   const locRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
   const { user, logout, openModal } = useAuth();
+  const cart = useCart();
+  const [, navigate] = useLocation();
+
+  useEffect(() => {
+    const h = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setFocus(false);
+      }
+    };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+
+  const query = q.trim().toLowerCase();
+  const groceryResults = query
+    ? products.filter(p =>
+        p.name.toLowerCase().includes(query) ||
+        p.brand.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query)
+      ).slice(0, 6)
+    : [];
+  const dishResults = query
+    ? menuItems.filter(m =>
+        m.name.toLowerCase().includes(query) ||
+        m.desc.toLowerCase().includes(query)
+      ).slice(0, 5)
+    : [];
+  const restaurantResults = query
+    ? restaurants.filter(r =>
+        r.name.toLowerCase().includes(query) ||
+        r.cuisine.toLowerCase().includes(query)
+      ).slice(0, 4)
+    : [];
+  const hasResults = groceryResults.length + dishResults.length + restaurantResults.length > 0;
+  const showSearch = focus && query.length > 0;
+
+  const addGrocery = (p: typeof products[0]) => {
+    cart.add({
+      id: p.id, name: p.name, brand: p.brand, price: p.price,
+      origPrice: p.origPrice ?? null, image: p.image, weight: p.weight,
+    });
+  };
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 6);
@@ -340,33 +384,129 @@ function Navbar({ tab = 'now', setTab }: { tab?: TabId; setTab?: (t: TabId) => v
         </div>
 
         {/* ── Search bar (Zepto-style pill, dominant center) ── */}
-        <div style={{ flex: 1, position: 'relative', minWidth: 0 }}>
-          <Search size={16} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: focus ? G : '#9CA3AF', transition: 'color .15s', pointerEvents: 'none' }} />
+        <div ref={searchRef} style={{ flex: 1, position: 'relative', minWidth: 0 }}>
+          <Search size={16} style={{ position: 'absolute', left: 16, top: 22, transform: 'translateY(-50%)', color: focus ? G : '#9CA3AF', transition: 'color .15s', pointerEvents: 'none', zIndex: 2 }} />
           <input
+            data-testid="global-search-input"
             value={q}
             onChange={e => setQ(e.target.value)}
             onFocus={() => setFocus(true)}
-            onBlur={() => setFocus(false)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && query) { setFocus(false); navigate(dishResults.length || restaurantResults.length ? '/eats' : '/now'); }
+              if (e.key === 'Escape') { setFocus(false); (e.target as HTMLInputElement).blur(); }
+            }}
             placeholder={`Search for ${tab === 'now' ? 'groceries, brands and more' : tab === 'eats' ? 'dishes, restaurants and more' : 'stores, offers and more'}`}
             style={{
               width: '100%',
               paddingLeft: 46,
-              paddingRight: 20,
+              paddingRight: q ? 40 : 20,
               paddingTop: 11,
               paddingBottom: 11,
-              borderRadius: 999,
+              borderRadius: showSearch ? '22px 22px 0 0' : 999,
               background: focus ? '#1E2A3B' : '#1A2332',
               border: `1.5px solid ${focus ? G + '55' : BD}`,
               fontSize: 13.5,
-              color: T1,
+              color: '#fff',
               fontFamily: 'inherit',
               fontWeight: 500,
               outline: 'none',
-              transition: 'all .18s',
+              transition: 'background .18s, border-color .18s',
               boxShadow: focus ? `0 0 0 3px ${G}14` : 'none',
               boxSizing: 'border-box',
             }}
           />
+          {q && (
+            <button data-testid="global-search-clear" onClick={() => { setQ(''); }} aria-label="Clear search"
+              style={{ position: 'absolute', right: 14, top: 22, transform: 'translateY(-50%)', background: 'rgba(255,255,255,.12)', border: 'none', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 2 }}>
+              <X size={12} color="#fff" />
+            </button>
+          )}
+
+          {/* ── Live search results dropdown ── */}
+          <AnimatePresence>
+            {showSearch && (
+              <motion.div
+                data-testid="global-search-results"
+                initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }} transition={{ duration: .12 }}
+                onMouseDown={e => e.preventDefault()}
+                style={{ position: 'absolute', top: 'calc(100% - 1px)', left: 0, right: 0, background: '#111827', border: `1.5px solid ${G}55`, borderTop: 'none', borderRadius: '0 0 18px 18px', boxShadow: '0 18px 40px rgba(0,0,0,.4)', zIndex: 500, maxHeight: 460, overflowY: 'auto', padding: '6px 0 10px' }}>
+                {!hasResults && (
+                  <div style={{ padding: '26px 18px', textAlign: 'center' }}>
+                    <p style={{ fontSize: 13.5, fontWeight: 700, color: '#fff' }}>No matches for “{q}”</p>
+                    <p style={{ fontSize: 12, color: 'rgba(255,255,255,.5)', marginTop: 4 }}>Try “tomatoes”, “biryani”, “pizza” or a brand name.</p>
+                  </div>
+                )}
+
+                {groceryResults.length > 0 && (
+                  <div>
+                    <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: '#34D399', padding: '10px 18px 6px' }}>Groceries · Zyphix Now</p>
+                    {groceryResults.map(p => (
+                      <div key={p.id} data-testid={`search-grocery-${p.id}`}
+                        onClick={() => { setFocus(false); navigate(`/now/product/${p.id}`); }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 18px', cursor: 'pointer', transition: 'background .1s' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,.05)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                        <img src={p.image} alt={p.name} style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', background: '#1A2332', flexShrink: 0 }} />
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</p>
+                          <p style={{ fontSize: 11, color: 'rgba(255,255,255,.5)' }}>{p.weight} · ₹{p.price}</p>
+                        </div>
+                        <button data-testid={`search-add-${p.id}`}
+                          onClick={e => { e.stopPropagation(); addGrocery(p); }}
+                          style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 8, background: G, color: '#fff', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                          onMouseEnter={e => (e.currentTarget.style.background = G2)}
+                          onMouseLeave={e => (e.currentTarget.style.background = G)}>
+                          <Plus size={13} /> Add
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {dishResults.length > 0 && (
+                  <div>
+                    <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: '#FB923C', padding: '12px 18px 6px' }}>Dishes · Zyphix Eats</p>
+                    {dishResults.map(m => (
+                      <div key={m.id} data-testid={`search-dish-${m.id}`}
+                        onClick={() => { setFocus(false); navigate('/eats'); }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 18px', cursor: 'pointer', transition: 'background .1s' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,.05)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                        <img src={m.image} alt={m.name} style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', background: '#1A2332', flexShrink: 0 }} />
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name}</p>
+                          <p style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.desc}</p>
+                        </div>
+                        <span style={{ flexShrink: 0, fontSize: 12.5, fontWeight: 800, color: '#fff' }}>₹{m.price}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {restaurantResults.length > 0 && (
+                  <div>
+                    <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: '#FB923C', padding: '12px 18px 6px' }}>Restaurants</p>
+                    {restaurantResults.map(r => (
+                      <div key={r.id} data-testid={`search-restaurant-${r.id}`}
+                        onClick={() => { setFocus(false); navigate('/eats'); }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 18px', cursor: 'pointer', transition: 'background .1s' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,.05)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                        <img src={r.image} alt={r.name} style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', background: '#1A2332', flexShrink: 0 }} />
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</p>
+                          <p style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.cuisine}</p>
+                        </div>
+                        <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 3, fontSize: 12, fontWeight: 700, color: '#34D399' }}>
+                          <Star size={12} fill="#34D399" color="#34D399" /> {r.rating}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* ── Right actions ── */}
@@ -425,12 +565,16 @@ function Navbar({ tab = 'now', setTab }: { tab?: TabId; setTab?: (t: TabId) => v
             Become a Partner →
           </Link>
           <button
+            data-testid="navbar-cart-button"
+            onClick={() => navigate('/now/cart')}
             style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 10, background: G, fontSize: 13.5, fontWeight: 700, color: '#fff', border: 'none', cursor: 'pointer', transition: 'background .13s', boxShadow: `0 2px 10px rgba(13,163,102,.28)`, whiteSpace: 'nowrap' }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = G2}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = G}>
             <ShoppingCart size={15} />
             <span className="nav-cart-text">Cart</span>
-            <span style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: '#EF4444', color: '#fff', fontSize: 9.5, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff' }}>3</span>
+            {cart.totalItems > 0 && (
+              <span data-testid="navbar-cart-count" style={{ position: 'absolute', top: -6, right: -6, minWidth: 18, height: 18, padding: '0 4px', borderRadius: 9, background: '#EF4444', color: '#fff', fontSize: 9.5, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff' }}>{cart.totalItems}</span>
+            )}
           </button>
         </div>
 

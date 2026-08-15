@@ -57,10 +57,8 @@ export function Cart() {
         <div style={{ fontSize: 64, marginBottom: 12 }}>🛒</div>
         <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 24, color: '#111827', margin: '0 0 6px' }}>Your cart is empty</h1>
         <p style={{ color: '#6B7280', marginBottom: 22 }}>Fresh groceries are just a tap away.</p>
-        <Link href="/now">
-          <a style={{ background: G, color: '#fff', padding: '13px 24px', borderRadius: 12, fontWeight: 800, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-            <ShoppingCart size={16} /> Start Shopping
-          </a>
+        <Link href="/now" style={{ background: G, color: '#fff', padding: '13px 24px', borderRadius: 12, fontWeight: 800, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <ShoppingCart size={16} /> Start Shopping
         </Link>
       </div>
     );
@@ -83,17 +81,13 @@ export function Cart() {
             {items.map(i => (
               <motion.div key={i.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }}
                 style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 14, padding: 12, marginBottom: 10, display: 'flex', gap: 12, alignItems: 'center' }}>
-                <Link href={`/now/product/${i.id}`}>
-                  <a style={{ flexShrink: 0 }}>
-                    <img src={i.image} alt={i.name} style={{ width: 72, height: 72, borderRadius: 10, objectFit: 'cover', border: '1px solid #EAEAEA' }} />
-                  </a>
+                <Link href={`/now/product/${i.id}`} style={{ flexShrink: 0 }}>
+                  <img src={i.image} alt={i.name} style={{ width: 72, height: 72, borderRadius: 10, objectFit: 'cover', border: '1px solid #EAEAEA' }} />
                 </Link>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 10.5, color: '#9CA3AF', fontWeight: 700, textTransform: 'uppercase' }}>{i.brand}</div>
-                  <Link href={`/now/product/${i.id}`}>
-                    <a style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111827', lineHeight: 1.3, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i.name}</div>
-                    </a>
+                  <Link href={`/now/product/${i.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111827', lineHeight: 1.3, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i.name}</div>
                   </Link>
                   <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 6 }}>{i.weight}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
