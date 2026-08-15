@@ -1,8 +1,9 @@
 {
-  "name": "zyphix-preview-launcher",
+  "name": "zyphix-frontend",
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "build": "node build.js",
     "start": "node start.js"
   }
 }
