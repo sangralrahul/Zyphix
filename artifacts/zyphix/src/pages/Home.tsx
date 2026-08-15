@@ -1548,8 +1548,7 @@ function HowItWorks() {
     },
   ];
   return (
-    <div style={{ background: 'linear-gradient(180deg,#FFFFFF 0%,#F4F9F6 100%)', borderTop: `1px solid ${BD}`, padding: '96px 0', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 700, height: 700, borderRadius: '50%', background: `radial-gradient(circle, ${G}0d 0%, transparent 65%)`, pointerEvents: 'none' }} />
+    <div style={{ background: W, borderTop: `1px solid ${BD}`, padding: '96px 0', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
 
         {/* Section header */}
@@ -1611,8 +1610,8 @@ function HowItWorks() {
 
         {/* Stats bar */}
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: .5 }}
-          style={{ background: 'linear-gradient(135deg,#0A1611 0%,#0F2419 100%)', borderRadius: 26, padding: '38px 40px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, position: 'relative', overflow: 'hidden', boxShadow: '0 24px 60px rgba(10,22,17,.3)' }}>
-          <div style={{ position: 'absolute', top: -60, left: '20%', width: 260, height: 260, borderRadius: '50%', background: `radial-gradient(circle, ${G}22 0%, transparent 65%)`, pointerEvents: 'none' }} />
+          style={{ background: '#0B0F14', borderRadius: 26, padding: '38px 40px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, position: 'relative', overflow: 'hidden', boxShadow: '0 24px 60px rgba(10,22,17,.3)' }}>
+          <div style={{ position: 'absolute', top: -60, left: '20%', width: 260, height: 260, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,.05) 0%, transparent 65%)', pointerEvents: 'none' }} />
           {[
             { v: '< 30 min', l: 'Guaranteed delivery time', icon: <Zap size={16} color={G} fill={G} />, accent: '#34D399' },
             { v: '4.8 / 5', l: 'Average customer rating', icon: <Star size={16} color='#F59E0B' fill='#F59E0B' />, accent: '#FBBF24' },
@@ -1640,7 +1639,7 @@ function HowItWorks() {
 /* ═══════════════ SOCIAL PROOF ═══════════════ */
 function SocialProof() {
   return (
-    <div style={{ background: 'linear-gradient(180deg,#F4F9F6 0%,#FFFFFF 100%)', borderTop: `1px solid ${BD}`, padding: '80px 0' }}>
+    <div style={{ background: BG, borderTop: `1px solid ${BD}`, padding: '80px 0' }}>
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 24px' }}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(13,163,102,.1)', border: '1px solid rgba(13,163,102,.28)', borderRadius: 999, padding: '5px 14px', marginBottom: 16 }}>
@@ -2248,7 +2247,7 @@ function WhyZyphixStrip() {
   const GRAIN = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")";
 
   return (
-    <div style={{ background: 'linear-gradient(90deg,#04120C 0%,#063D26 50%,#04120C 100%)', overflow: 'hidden', position: 'relative', padding: '6px 0' }}>
+    <div style={{ background: '#0B0F14', overflow: 'hidden', position: 'relative', padding: '6px 0' }}>
       <style>{`
         @keyframes stripScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
       `}</style>
@@ -2256,8 +2255,8 @@ function WhyZyphixStrip() {
       {/* texture */}
       <div style={{ position: 'absolute', inset: 0, opacity: .5, mixBlendMode: 'overlay', backgroundImage: GRAIN, pointerEvents: 'none' }} />
       {/* Edge fades */}
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 130, background: 'linear-gradient(to right, #04120C 20%, transparent)', zIndex: 2, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 130, background: 'linear-gradient(to left, #04120C 20%, transparent)', zIndex: 2, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 130, background: 'linear-gradient(to right, #0B0F14 20%, transparent)', zIndex: 2, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 130, background: 'linear-gradient(to left, #0B0F14 20%, transparent)', zIndex: 2, pointerEvents: 'none' }} />
 
       <div
         ref={ref}
@@ -2380,12 +2379,12 @@ function KiranaCTA() {
         @media (max-width: 900px){ .kc-grid { grid-template-columns: 1fr !important; } .kc-visual { min-height: 340px !important; } }
       `}</style>
       <motion.div initial={{ opacity: 0, y: 26 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: .55 }}
-        style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', borderRadius: 34, overflow: 'hidden', background: 'linear-gradient(150deg,#063D26 0%,#0A1611 100%)', boxShadow: '0 44px 100px rgba(6,61,38,.4)' }}>
+        style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', borderRadius: 34, overflow: 'hidden', background: '#0B0F14', boxShadow: '0 44px 100px rgba(0,0,0,.4)' }}>
         {/* texture layers */}
         <div style={{ position: 'absolute', inset: 0, opacity: .5, mixBlendMode: 'overlay', backgroundImage: GRAIN, pointerEvents: 'none', zIndex: 3 }} />
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px)', backgroundSize: '48px 48px', maskImage: 'radial-gradient(circle at 30% 0%, black, transparent 70%)', WebkitMaskImage: 'radial-gradient(circle at 30% 0%, black, transparent 70%)', pointerEvents: 'none', zIndex: 1 }} />
-        <motion.div animate={{ scale: [1, 1.14, 1], opacity: [.4, .7, .4] }} transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ position: 'absolute', top: -100, left: -60, width: 340, height: 340, borderRadius: '50%', background: `radial-gradient(circle, ${G}44 0%, transparent 65%)`, filter: 'blur(30px)', pointerEvents: 'none', zIndex: 1 }} />
+        <motion.div animate={{ scale: [1, 1.14, 1], opacity: [.3, .5, .3] }} transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ position: 'absolute', top: -100, left: -60, width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,.06) 0%, transparent 65%)', filter: 'blur(30px)', pointerEvents: 'none', zIndex: 1 }} />
 
         <div className="kc-grid" style={{ position: 'relative', zIndex: 2, display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: 0, alignItems: 'stretch' }}>
           {/* Left content */}
@@ -2415,7 +2414,7 @@ function KiranaCTA() {
           {/* Right visual */}
           <div className="kc-visual" style={{ position: 'relative', minHeight: 460, overflow: 'hidden' }}>
             <img src="https://images.unsplash.com/flagged/photo-1563884542782-13d6a05b17c0?w=900&q=85&auto=format&fit=crop" alt="Local kirana store" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(270deg, transparent 30%, rgba(10,22,17,.35) 70%, #0A1611 100%)' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(270deg, transparent 30%, rgba(11,15,20,.35) 70%, #0B0F14 100%)' }} />
             {/* floating stat cards */}
             <motion.div animate={{ y: [0, -12, 0] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
               style={{ position: 'absolute', top: 34, right: 28, display: 'flex', alignItems: 'center', gap: 11, background: 'rgba(255,255,255,.12)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,.22)', borderRadius: 16, padding: '12px 16px', boxShadow: '0 12px 34px rgba(0,0,0,.3)' }}>

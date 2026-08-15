@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
-const INK = '#04120B';
+const INK = '#0B0F14';
 const G = '#0DA366';
 const G2 = '#00E28A';
 const MINT = '#6EE7B7';
@@ -115,10 +115,10 @@ export function WaitlistHero() {
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
         {/* faint warm photo */}
         <div style={{ position: 'absolute', top: '-10%', right: '-8%', width: '55%', height: '120%', backgroundImage: `url(${HERO_IMG})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: .16, filter: 'blur(2px)', maskImage: 'radial-gradient(circle at 70% 40%, black, transparent 72%)', WebkitMaskImage: 'radial-gradient(circle at 70% 40%, black, transparent 72%)' }} />
-        <motion.div animate={{ scale: [1, 1.15, 1], opacity: [.5, .85, .5] }} transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ position: 'absolute', top: '-25%', left: '-12%', width: '55vw', height: '55vw', borderRadius: '50%', background: `radial-gradient(circle, ${G}3a 0%, transparent 62%)`, filter: 'blur(20px)' }} />
-        <motion.div animate={{ scale: [1, 1.1, 1], opacity: [.4, .7, .4] }} transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ position: 'absolute', bottom: '-30%', right: '-10%', width: '50vw', height: '50vw', borderRadius: '50%', background: `radial-gradient(circle, ${G2}26 0%, transparent 64%)`, filter: 'blur(20px)' }} />
+        <motion.div animate={{ scale: [1, 1.15, 1], opacity: [.35, .55, .35] }} transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ position: 'absolute', top: '-25%', left: '-12%', width: '55vw', height: '55vw', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,.05) 0%, transparent 62%)', filter: 'blur(20px)' }} />
+        <motion.div animate={{ scale: [1, 1.1, 1], opacity: [.3, .5, .3] }} transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ position: 'absolute', bottom: '-30%', right: '-10%', width: '50vw', height: '50vw', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,.04) 0%, transparent 64%)', filter: 'blur(20px)' }} />
         {/* grid */}
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px)', backgroundSize: '50px 50px', maskImage: 'radial-gradient(circle at 40% 35%, black, transparent 78%)', WebkitMaskImage: 'radial-gradient(circle at 40% 35%, black, transparent 78%)' }} />
         {/* grain */}
@@ -185,7 +185,7 @@ export function WaitlistHero() {
         {/* ── Right: glass form ── */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .12, duration: .65, ease: [0.22, 1, 0.36, 1] }}
           style={{ position: 'relative', background: 'rgba(255,255,255,.05)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)', borderRadius: 28, border: '1px solid rgba(255,255,255,.12)', boxShadow: '0 40px 100px rgba(0,0,0,.5)', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -90, right: -70, width: 220, height: 220, borderRadius: '50%', background: `radial-gradient(circle, ${G}33 0%, transparent 70%)`, pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: -90, right: -70, width: 220, height: 220, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
           <div style={{ height: 6, background: `linear-gradient(90deg,${G},${G2},${MINT},${G})`, backgroundSize: '200% auto', animation: 'wl-shim 3s linear infinite' }} />
           <div style={{ position: 'relative', padding: 'clamp(26px,3vw,36px)' }}>
             {!submitted ? (
