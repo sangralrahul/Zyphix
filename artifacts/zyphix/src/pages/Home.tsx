@@ -1531,19 +1531,19 @@ function HowItWorks() {
       n: '01', title: 'Set your location',
       desc: 'Enter your address or allow GPS. We instantly surface verified kirana stores, restaurants and pharmacies within your delivery radius.',
       icon: <MapPin size={20} color={G} />,
-      img: 'https://images.unsplash.com/photo-1512291313931-d4291048e7b6?w=480&h=300&fit=crop&q=85',
+      img: 'https://images.unsplash.com/photo-1597362925123-77861d3fbac7?w=560&q=85&auto=format&fit=crop',
     },
     {
       n: '02', title: 'Browse & place order',
       desc: 'Choose from 1,000+ grocery items, local restaurants or neighbourhood pharmacies — all in one unified app with real-time stock.',
       icon: <ShoppingCart size={20} color={G} />,
-      img: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=480&h=300&fit=crop&q=85',
+      img: 'https://images.unsplash.com/flagged/photo-1563884542782-13d6a05b17c0?w=560&q=85&auto=format&fit=crop',
     },
     {
       n: '03', title: 'Delivered in under 30 minutes',
       desc: 'Track your order live. Our hyperlocal riders pick up from the nearest partner store and reach your door — guaranteed no surge pricing, ever.',
       icon: <Zap size={20} color='#fff' />,
-      img: 'https://images.unsplash.com/photo-1526367790999-0150786686a2?w=480&h=300&fit=crop&q=85',
+      img: 'https://images.unsplash.com/photo-1753806901294-bb48ab9bede2?w=560&q=85&auto=format&fit=crop',
       highlight: true,
     },
   ];
@@ -2322,9 +2322,9 @@ function OfferCards() {
   const [copied, setCopied] = useState(false);
   const copy = () => { navigator.clipboard.writeText('ZYPHIX50'); setCopied(true); setTimeout(() => setCopied(false), 2500); };
   const cards = [
-    { tag: 'New User Offer', h: '50% off your first order', sub: 'Code ZYPHIX50 · Max ₹100 off', code: 'ZYPHIX50', Icon: Gift, grad: 'linear-gradient(150deg,#0DA366 0%,#065F46 100%)', glow: 'rgba(13,163,102,.4)', img: 'https://images.unsplash.com/photo-1543168256-418811576931?w=900&h=380&fit=crop&q=85' },
-    { tag: 'Partner Stores', h: '200+ partner stores across India', sub: 'Zero surge pricing · Always fresh', code: '', Icon: Store, grad: 'linear-gradient(150deg,#1E293B 0%,#0F172A 100%)', glow: 'rgba(96,165,250,.35)', img: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=900&h=380&fit=crop&q=85' },
-    { tag: 'Pharmacy', h: 'Medicines delivered fast', sub: 'Prescription & OTC · All brands', code: '', Icon: Shield, grad: 'linear-gradient(150deg,#0E7490 0%,#155E75 100%)', glow: 'rgba(45,212,191,.35)', img: 'https://images.unsplash.com/photo-1585435557343-3b092031a831?w=900&h=380&fit=crop&q=85' },
+    { tag: 'New User Offer', h: '50% off your first order', sub: 'Code ZYPHIX50 · Max ₹100 off', code: 'ZYPHIX50', Icon: Gift, grad: 'linear-gradient(150deg,#0DA366 0%,#065F46 100%)', glow: 'rgba(13,163,102,.4)', img: 'https://images.unsplash.com/photo-1597362925123-77861d3fbac7?w=900&q=85&auto=format&fit=crop' },
+    { tag: 'Partner Stores', h: '200+ partner stores across India', sub: 'Zero surge pricing · Always fresh', code: '', Icon: Store, grad: 'linear-gradient(150deg,#1E293B 0%,#0F172A 100%)', glow: 'rgba(96,165,250,.35)', img: 'https://images.unsplash.com/flagged/photo-1563884542782-13d6a05b17c0?w=900&q=85&auto=format&fit=crop' },
+    { tag: 'Pharmacy', h: 'Medicines delivered fast', sub: 'Prescription & OTC · All brands', code: '', Icon: Shield, grad: 'linear-gradient(150deg,#0E7490 0%,#155E75 100%)', glow: 'rgba(45,212,191,.35)', img: 'https://images.unsplash.com/photo-1642055514517-7b52288890ec?w=900&q=85&auto=format&fit=crop' },
   ];
   return (
     <div style={{ background: BG, borderTop: `1px solid ${BD}`, padding: '56px 24px' }}>
@@ -2334,28 +2334,29 @@ function OfferCards() {
             <div
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-6px)'; (e.currentTarget as HTMLElement).style.boxShadow = `0 30px 60px ${b.glow}`; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = `0 14px 40px ${b.glow}`; }}
-              style={{ height: 232, borderRadius: 24, overflow: 'hidden', position: 'relative', background: b.grad, boxShadow: `0 14px 40px ${b.glow}`, cursor: 'pointer', transition: 'transform .25s, box-shadow .25s' }}>
-              {/* image texture */}
-              <img src={b.img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: .22, mixBlendMode: 'luminosity' }} />
-              <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(120deg,rgba(0,0,0,.35) 0%,transparent 70%)` }} />
-              {/* glow orb */}
-              <div style={{ position: 'absolute', top: -50, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,.14)', filter: 'blur(30px)', pointerEvents: 'none' }} />
+              style={{ height: 250, borderRadius: 24, overflow: 'hidden', position: 'relative', background: b.grad, boxShadow: `0 14px 40px ${b.glow}`, cursor: 'pointer', transition: 'transform .25s, box-shadow .25s' }}>
+              {/* real photo */}
+              <img src={b.img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+              {/* color wash for brand identity + legibility */}
+              <div style={{ position: 'absolute', inset: 0, background: b.grad, opacity: .58, mixBlendMode: 'multiply' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(0,0,0,.1) 0%,transparent 35%,rgba(0,0,0,.55) 100%)' }} />
+              <div style={{ position: 'absolute', top: -50, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,.16)', filter: 'blur(34px)', pointerEvents: 'none' }} />
               <div style={{ position: 'absolute', inset: 0, padding: '24px 26px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(255,255,255,.16)', backdropFilter: 'blur(8px)', color: '#fff', fontSize: 10.5, fontWeight: 800, padding: '5px 12px', borderRadius: 99, border: '1px solid rgba(255,255,255,.28)', letterSpacing: '.04em', textTransform: 'uppercase' }}>{b.tag}</span>
-                  <div style={{ width: 42, height: 42, borderRadius: 13, background: 'rgba(255,255,255,.16)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,.24)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <b.Icon size={20} color="#fff" />
+                  <span style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(255,255,255,.18)', backdropFilter: 'blur(8px)', color: '#fff', fontSize: 10.5, fontWeight: 800, padding: '5px 12px', borderRadius: 99, border: '1px solid rgba(255,255,255,.3)', letterSpacing: '.04em', textTransform: 'uppercase' }}>{b.tag}</span>
+                  <div style={{ width: 44, height: 44, borderRadius: 13, background: 'rgba(255,255,255,.18)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,.28)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <b.Icon size={21} color="#fff" />
                   </div>
                 </div>
                 <div>
-                  <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', fontSize: 'clamp(1.2rem,2.3vw,1.55rem)', lineHeight: 1.12, marginBottom: 6, letterSpacing: '-.035em' }}>{b.h}</p>
-                  <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,.72)', marginBottom: b.code ? 14 : 0 }}>{b.sub}</p>
+                  <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', fontSize: 'clamp(1.25rem,2.3vw,1.6rem)', lineHeight: 1.1, marginBottom: 7, letterSpacing: '-.035em', textShadow: '0 2px 16px rgba(0,0,0,.4)' }}>{b.h}</p>
+                  <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,.85)', marginBottom: b.code ? 14 : 0, textShadow: '0 1px 8px rgba(0,0,0,.4)' }}>{b.sub}</p>
                   {b.code && (
-                    <button data-testid="offer-copy-code" onClick={copy} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, fontWeight: 800, fontSize: 13, letterSpacing: '.08em', color: '#fff', background: 'rgba(255,255,255,.14)', border: '1.5px dashed rgba(255,255,255,.5)', padding: '7px 15px', borderRadius: 10, cursor: 'pointer', transition: 'background .15s' }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.24)'}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.14)'}>
+                    <button data-testid="offer-copy-code" onClick={copy} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, fontWeight: 800, fontSize: 13, letterSpacing: '.08em', color: '#fff', background: 'rgba(255,255,255,.18)', border: '1.5px dashed rgba(255,255,255,.55)', padding: '7px 15px', borderRadius: 10, cursor: 'pointer', backdropFilter: 'blur(4px)', transition: 'background .15s' }}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.3)'}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.18)'}>
                       {b.code}
-                      {copied ? <Check size={13} color="#6EE7B7" /> : <Copy size={12} color="rgba(255,255,255,.7)" />}
+                      {copied ? <Check size={13} color="#6EE7B7" /> : <Copy size={12} color="rgba(255,255,255,.8)" />}
                     </button>
                   )}
                 </div>
@@ -2373,37 +2374,65 @@ function KiranaCTA() {
   const chips = ['🥬 Fruits & Veg','🥛 Dairy','💊 Pharmacy','🍿 Snacks','🌾 Grains & Dal','🧹 Household'];
   const GRAIN = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")";
   return (
-    <div style={{ background: W, borderTop: `1px solid ${BD}`, padding: '72px 24px' }}>
-      <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: .5 }}
-        style={{ maxWidth: 1080, margin: '0 auto', position: 'relative', borderRadius: 32, overflow: 'hidden', background: 'linear-gradient(150deg,#063D26 0%,#0A1611 100%)', boxShadow: '0 40px 90px rgba(6,61,38,.35)', padding: 'clamp(40px,6vw,72px) clamp(24px,5vw,64px)' }}>
+    <div style={{ background: W, borderTop: `1px solid ${BD}`, padding: '80px 24px' }}>
+      <style>{`
+        @keyframes kc-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+        @media (max-width: 900px){ .kc-grid { grid-template-columns: 1fr !important; } .kc-visual { min-height: 340px !important; } }
+      `}</style>
+      <motion.div initial={{ opacity: 0, y: 26 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: .55 }}
+        style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', borderRadius: 34, overflow: 'hidden', background: 'linear-gradient(150deg,#063D26 0%,#0A1611 100%)', boxShadow: '0 44px 100px rgba(6,61,38,.4)' }}>
         {/* texture layers */}
-        <div style={{ position: 'absolute', inset: 0, opacity: .5, mixBlendMode: 'overlay', backgroundImage: GRAIN, pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px)', backgroundSize: '46px 46px', maskImage: 'radial-gradient(circle at 50% 0%, black, transparent 75%)', WebkitMaskImage: 'radial-gradient(circle at 50% 0%, black, transparent 75%)', pointerEvents: 'none' }} />
-        <motion.div animate={{ scale: [1, 1.12, 1], opacity: [.5, .8, .5] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ position: 'absolute', top: -80, right: -60, width: 300, height: 300, borderRadius: '50%', background: `radial-gradient(circle, ${G}44 0%, transparent 65%)`, filter: 'blur(30px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, opacity: .5, mixBlendMode: 'overlay', backgroundImage: GRAIN, pointerEvents: 'none', zIndex: 3 }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px)', backgroundSize: '48px 48px', maskImage: 'radial-gradient(circle at 30% 0%, black, transparent 70%)', WebkitMaskImage: 'radial-gradient(circle at 30% 0%, black, transparent 70%)', pointerEvents: 'none', zIndex: 1 }} />
+        <motion.div animate={{ scale: [1, 1.14, 1], opacity: [.4, .7, .4] }} transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ position: 'absolute', top: -100, left: -60, width: 340, height: 340, borderRadius: '50%', background: `radial-gradient(circle, ${G}44 0%, transparent 65%)`, filter: 'blur(30px)', pointerEvents: 'none', zIndex: 1 }} />
 
-        <div style={{ position: 'relative', textAlign: 'center' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${G}22`, border: `1px solid ${G}55`, borderRadius: 999, padding: '6px 18px', marginBottom: 22 }}>
-            <Rocket size={13} color="#6EE7B7" />
-            <span style={{ fontSize: 11.5, fontWeight: 800, color: '#6EE7B7', letterSpacing: '.08em', textTransform: 'uppercase' }}>Now live across India — Be first to shop</span>
+        <div className="kc-grid" style={{ position: 'relative', zIndex: 2, display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: 0, alignItems: 'stretch' }}>
+          {/* Left content */}
+          <div style={{ padding: 'clamp(40px,5vw,64px)' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${G}22`, border: `1px solid ${G}55`, borderRadius: 999, padding: '6px 18px', marginBottom: 24 }}>
+              <Rocket size={13} color="#6EE7B7" />
+              <span style={{ fontSize: 11.5, fontWeight: 800, color: '#6EE7B7', letterSpacing: '.08em', textTransform: 'uppercase' }}>Now live across India</span>
+            </div>
+            <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(2.1rem,4vw,3.2rem)', color: '#fff', letterSpacing: '-.05em', lineHeight: 1.03, marginBottom: 20 }}>
+              Groceries from your<br /><span style={{ background: `linear-gradient(105deg,${G2} 0%,#6EE7B7 60%,#a7f3d0 100%)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>local kirana stores</span>
+            </h2>
+            <p style={{ fontSize: 15.5, color: 'rgba(255,255,255,.6)', lineHeight: 1.75, marginBottom: 28, maxWidth: 460 }}>
+              We're onboarding real neighbourhood stores across India — not dark warehouses. Shop 200+ categories with zero surge pricing, delivered in 30 minutes.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 9, marginBottom: 34 }}>
+              {chips.map(c => (
+                <span key={c} style={{ padding: '9px 16px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.14)', backdropFilter: 'blur(6px)', borderRadius: 99, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,.9)' }}>{c}</span>
+              ))}
+            </div>
+            <motion.button data-testid="kirana-cta-button" whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: .97 }}
+              onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: `linear-gradient(135deg,${G},${G2})`, border: 'none', borderRadius: 15, padding: '16px 34px', cursor: 'pointer', fontSize: 15.5, fontWeight: 800, color: '#fff', fontFamily: "'Outfit',sans-serif", boxShadow: `0 16px 36px ${G}55` }}>
+              <ShoppingCart size={18} /> Join the waitlist <ArrowRight size={17} />
+            </motion.button>
           </div>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(2rem,4vw,3.1rem)', color: '#fff', letterSpacing: '-.045em', lineHeight: 1.06, marginBottom: 18 }}>
-            Groceries from your<br /><span style={{ background: `linear-gradient(105deg,${G2} 0%,#6EE7B7 60%,#a7f3d0 100%)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>local kirana stores</span>
-          </h2>
-          <p style={{ fontSize: 15.5, color: 'rgba(255,255,255,.6)', lineHeight: 1.7, marginBottom: 30, maxWidth: 580, margin: '0 auto 30px' }}>
-            We're onboarding stores across India right now. Join the waitlist to shop 200+ categories — fresh produce, dairy, snacks, pharmacy and more — delivered in 30 minutes.
-          </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center', marginBottom: 36 }}>
-            {chips.map(c => (
-              <span key={c} style={{ padding: '9px 17px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.14)', backdropFilter: 'blur(6px)', borderRadius: 99, fontSize: 13.5, fontWeight: 600, color: 'rgba(255,255,255,.9)' }}>{c}</span>
-            ))}
-            <span style={{ padding: '9px 17px', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.14)', borderRadius: 99, fontSize: 13.5, fontWeight: 600, color: 'rgba(255,255,255,.5)' }}>+ more</span>
+
+          {/* Right visual */}
+          <div className="kc-visual" style={{ position: 'relative', minHeight: 460, overflow: 'hidden' }}>
+            <img src="https://images.unsplash.com/flagged/photo-1563884542782-13d6a05b17c0?w=900&q=85&auto=format&fit=crop" alt="Local kirana store" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(270deg, transparent 30%, rgba(10,22,17,.35) 70%, #0A1611 100%)' }} />
+            {/* floating stat cards */}
+            <motion.div animate={{ y: [0, -12, 0] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ position: 'absolute', top: 34, right: 28, display: 'flex', alignItems: 'center', gap: 11, background: 'rgba(255,255,255,.12)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,.22)', borderRadius: 16, padding: '12px 16px', boxShadow: '0 12px 34px rgba(0,0,0,.3)' }}>
+              <div style={{ width: 40, height: 40, borderRadius: 11, background: `linear-gradient(135deg,${G},${G2})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Store size={19} color="#fff" />
+              </div>
+              <div>
+                <p style={{ margin: 0, fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 20, color: '#fff', lineHeight: 1 }}>200+</p>
+                <p style={{ margin: '2px 0 0', fontSize: 10.5, color: 'rgba(255,255,255,.7)', fontWeight: 600 }}>Partner stores</p>
+              </div>
+            </motion.div>
+            <motion.div animate={{ y: [0, 12, 0] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ position: 'absolute', bottom: 30, right: 34, display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,.12)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,.22)', borderRadius: 14, padding: '10px 15px', boxShadow: '0 12px 34px rgba(0,0,0,.3)' }}>
+              <Zap size={16} color="#6EE7B7" fill="#6EE7B7" />
+              <span style={{ fontSize: 12.5, fontWeight: 800, color: '#fff' }}>Delivered in 30 min</span>
+            </motion.div>
           </div>
-          <motion.button data-testid="kirana-cta-button" whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: .97 }}
-            onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: `linear-gradient(135deg,${G},${G2})`, border: 'none', borderRadius: 15, padding: '16px 34px', cursor: 'pointer', fontSize: 15.5, fontWeight: 800, color: '#fff', fontFamily: "'Outfit',sans-serif", boxShadow: `0 16px 36px ${G}55` }}>
-            <ShoppingCart size={18} /> Join the waitlist <ArrowRight size={17} />
-          </motion.button>
         </div>
       </motion.div>
     </div>
