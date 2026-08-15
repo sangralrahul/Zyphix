@@ -32,6 +32,7 @@ User connected an existing GitHub site (Zyphix) and asked to (1) run it in the l
 - Testing playbook saved at `/app/auth_testing.md`; credentials/seed at `/app/memory/test_credentials.md`.
 
 ## Backlog / Next
+- **Razorpay (IN PROGRESS / PAUSED)**: Backend `server.py` has the razorpay client initialized (reads `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET` env, currently empty → disabled). Endpoints (create-order, verify) and Checkout "Online" wiring NOT yet added — paused when user switched to the app-page redesign. Resume: add `/api/payments/config|create-order|verify` + wire Checkout ONLINE path + load checkout.js.
 - P2: Same nested-`<a>` console warning exists (pre-existing) in Wishlist, Notifications, ZyphixNow, Wallet, ProductDetail — cosmetic only.
 - P2: Add data-testids to Checkout form fields for easier automation.
 - P1 ideas: connect homepage product-grid Add buttons (currently local state) to CartContext for full consistency; wire search Enter to a dedicated results page.

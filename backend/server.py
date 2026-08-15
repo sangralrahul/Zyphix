@@ -3,7 +3,9 @@ import uuid
 from datetime import datetime, timezone, timedelta
 
 import httpx
+import razorpay
 from dotenv import load_dotenv
+from pydantic import BaseModel
 from fastapi import FastAPI, APIRouter, Request, Response, Header, HTTPException, Cookie
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -13,6 +15,11 @@ load_dotenv()
 MONGO_URL = os.environ["MONGO_URL"]
 DB_NAME = os.environ["DB_NAME"]
 APP_URL = os.environ.get("APP_URL", "")
+
+RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "").strip()
+RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "").strip()
+RAZORPAY_ENABLED = bool(RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET)
+razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)) if RAZORPAY_ENABLED else None
 
 EMERGENT_SESSION_URL = "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data"
 SESSION_TTL_DAYS = 7

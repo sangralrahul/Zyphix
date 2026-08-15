@@ -1,139 +1,133 @@
 import { apiFetch } from '@/lib/api';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, ArrowRight, Check, Bell, ChevronLeft } from 'lucide-react';
+import {
+  Mail, ArrowRight, Check, Bell, ChevronLeft, Apple, Play,
+  Zap, MapPin, Tag, ShoppingBag, UtensilsCrossed, RefreshCw,
+  Sparkles, Search, Clock, Star,
+} from 'lucide-react';
 
+/* ── Brand tokens ── */
+const INK = '#04100B';
 const G = '#0DA366';
-const G2 = '#00D97E';
+const G2 = '#00E28A';
+const MINT = '#6EE7B7';
 
-/* ── Floating particle canvas ── */
-function ParticleCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+/* Launch target — a fixed future date used for the live countdown */
+const LAUNCH_TARGET = new Date('2026-08-15T09:00:00Z').getTime();
 
+function useCountdown(target: number) {
+  const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animId: number;
-    const particles: { x: number; y: number; vx: number; vy: number; r: number; alpha: number; color: string }[] = [];
-    const COLORS = ['#0DA366', '#00D97E', '#34D399', '#6EE7B7', '#ffffff'];
-
-    const resize = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    for (let i = 0; i < 80; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4 - 0.1,
-        r: Math.random() * 2.5 + 0.5,
-        alpha: Math.random() * 0.5 + 0.1,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      });
-    }
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = p.color + Math.round(p.alpha * 255).toString(16).padStart(2, '0');
-        ctx.fill();
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
-      });
-      animId = requestAnimationFrame(draw);
-    };
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', resize);
-    };
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
   }, []);
-
-  return (
-    <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
-  );
+  const diff = Math.max(0, target - now);
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  const p = (n: number) => String(n).padStart(2, '0');
+  return [
+    { v: p(d), l: 'Days' },
+    { v: p(h), l: 'Hours' },
+    { v: p(m), l: 'Minutes' },
+    { v: p(s), l: 'Seconds' },
+  ];
 }
 
-/* ── Animated phone mockup ── */
-function PhoneMockup({ icon, color, label, delay = 0 }: { icon: string; color: string; label: string; delay?: number }) {
+/* ── Crafted phone mockup with a mini Zyphix UI ── */
+function PhoneMock() {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      initial={{ opacity: 0, y: 60, rotateX: 18 }}
+      animate={{ opacity: 1, y: 0, rotateX: 0 }}
+      transition={{ delay: 0.35, duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      style={{ position: 'relative' }}
     >
+      {/* rotating conic halo */}
       <motion.div
-        animate={{ y: [0, -10, 0] }}
-        transition={{ duration: 3.5 + delay, repeat: Infinity, ease: 'easeInOut' }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
         style={{
-          width: 130, height: 260, borderRadius: 28,
-          background: 'linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04))',
-          border: '1px solid rgba(255,255,255,0.15)',
-          backdropFilter: 'blur(12px)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          gap: 10, position: 'relative', overflow: 'hidden',
-          boxShadow: `0 32px 64px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1)`,
+          position: 'absolute', inset: '-16% -22%', borderRadius: '50%',
+          background: `conic-gradient(from 0deg, transparent 0%, ${G}55 15%, transparent 35%, ${G2}44 55%, transparent 75%, ${MINT}33 92%, transparent 100%)`,
+          filter: 'blur(34px)', opacity: 0.8, pointerEvents: 'none',
+        }}
+      />
+      <motion.div
+        animate={{ y: [0, -14, 0] }}
+        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'relative', width: 288, height: 590, borderRadius: 46,
+          background: 'linear-gradient(160deg, #0c1a14, #060f0b)',
+          border: '1px solid rgba(255,255,255,0.10)',
+          boxShadow: '0 60px 120px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.10), 0 0 0 10px rgba(0,0,0,0.35)',
+          padding: 10, boxSizing: 'border-box',
         }}
       >
-        {/* Screen glow */}
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 100, height: 100, borderRadius: '50%', background: `radial-gradient(circle, ${color}33 0%, transparent 70%)`, pointerEvents: 'none' }} />
-        {/* Notch */}
-        <div style={{ position: 'absolute', top: 10, width: 40, height: 8, borderRadius: 4, background: 'rgba(0,0,0,0.4)' }} />
-        {/* App icon */}
-        <div style={{ width: 56, height: 56, borderRadius: 16, background: `linear-gradient(145deg, ${color}33, ${color}11)`, border: `1px solid ${color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>
-          {icon}
+        {/* screen */}
+        <div style={{ width: '100%', height: '100%', borderRadius: 38, background: '#F6F8F6', overflow: 'hidden', position: 'relative', boxSizing: 'border-box' }}>
+          {/* dynamic island */}
+          <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', width: 92, height: 26, borderRadius: 20, background: '#04100B', zIndex: 5 }} />
+          {/* app header */}
+          <div style={{ background: `linear-gradient(150deg, ${G} 0%, #0a7d4f 100%)`, padding: '46px 16px 18px', color: '#fff' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, letterSpacing: '-.04em', fontSize: 18 }}>ZYPHI<span style={{ color: MINT }}>X</span></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, background: 'rgba(255,255,255,.16)', padding: '4px 9px', borderRadius: 20 }}>
+                <Clock size={11} /> 12 min
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', borderRadius: 12, padding: '9px 12px' }}>
+              <Search size={14} color={G} />
+              <span style={{ fontSize: 11.5, color: '#9CA3AF', fontWeight: 500 }}>Search groceries & food…</span>
+            </div>
+          </div>
+          {/* dual hero */}
+          <div style={{ padding: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {[
+              { t: 'Zyphix Now', s: 'Grocery · 12m', bg: 'linear-gradient(160deg,#0DA366,#065f46)', Icon: ShoppingBag },
+              { t: 'Zyphix Eats', s: 'Food · Hot', bg: 'linear-gradient(160deg,#f97316,#c2410c)', Icon: UtensilsCrossed },
+            ].map(({ t, s, bg, Icon }) => (
+              <div key={t} style={{ borderRadius: 14, background: bg, padding: 12, color: '#fff', height: 96, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <Icon size={20} />
+                <div>
+                  <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 12.5, lineHeight: 1.1 }}>{t}</div>
+                  <div style={{ fontSize: 9.5, opacity: .85 }}>{s}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* category chips */}
+          <div style={{ padding: '0 14px', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {['Veg', 'Dairy', 'Snacks', 'Pharmacy'].map(c => (
+              <span key={c} style={{ fontSize: 10, fontWeight: 700, color: '#065f46', background: '#DCFCE7', padding: '5px 10px', borderRadius: 20 }}>{c}</span>
+            ))}
+          </div>
+          {/* order card */}
+          <div style={{ margin: 14, padding: 12, borderRadius: 14, background: '#fff', border: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: 10, boxShadow: '0 8px 20px rgba(0,0,0,.05)' }}>
+            <div style={{ width: 38, height: 38, borderRadius: 10, background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Zap size={17} color={G} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 11.5, fontWeight: 800, color: '#111827' }}>Arriving in 12 min</div>
+              <div style={{ height: 5, borderRadius: 3, background: '#EAF6EF', marginTop: 6, overflow: 'hidden' }}>
+                <motion.div animate={{ width: ['20%', '75%', '20%'] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }} style={{ height: '100%', background: G, borderRadius: 3 }} />
+              </div>
+            </div>
+          </div>
         </div>
-        <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '.04em' }}>{label}</p>
-        {/* Bottom bar */}
-        <div style={{ position: 'absolute', bottom: 12, width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.2)' }} />
       </motion.div>
     </motion.div>
   );
 }
 
-/* ── Store badge button ── */
-function StoreBadge({ icon, title, sub, comingSoon }: { icon: React.ReactNode; title: string; sub: string; comingSoon?: boolean }) {
-  const [hovered, setHovered] = useState(false);
+function Stat({ v, l }: { v: string; l: string }) {
   return (
-    <motion.button
-      whileHover={{ scale: 1.04, y: -2 }}
-      whileTap={{ scale: 0.97 }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: 'flex', alignItems: 'center', gap: 13, padding: '13px 22px',
-        borderRadius: 16,
-        background: hovered ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.08)',
-        border: `1px solid ${hovered ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.12)'}`,
-        cursor: 'pointer', transition: 'all .2s', position: 'relative', overflow: 'hidden',
-        backdropFilter: 'blur(8px)',
-      }}
-    >
-      {comingSoon && (
-        <div style={{ position: 'absolute', top: 6, right: 8, fontSize: 8, fontWeight: 800, color: G2, letterSpacing: '.06em', textTransform: 'uppercase', background: `${G2}18`, padding: '1px 5px', borderRadius: 4 }}>
-          Soon
-        </div>
-      )}
-      <div style={{ flexShrink: 0 }}>{icon}</div>
-      <div style={{ textAlign: 'left' }}>
-        <p style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.45)', fontWeight: 500, lineHeight: 1, marginBottom: 3 }}>{sub}</p>
-        <p style={{ fontSize: 17, fontWeight: 900, color: '#fff', lineHeight: 1, letterSpacing: '-.02em' }}>{title}</p>
-      </div>
-    </motion.button>
+    <div style={{ textAlign: 'center', minWidth: 62 }}>
+      <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.7rem, 4vw, 2.6rem)', color: '#fff', letterSpacing: '-.04em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{v}</div>
+      <div style={{ fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.4)', letterSpacing: '.14em', textTransform: 'uppercase', marginTop: 7 }}>{l}</div>
+    </div>
   );
 }
 
@@ -144,6 +138,7 @@ export function AppComingSoon() {
   const [error, setError] = useState('');
   const [focused, setFocused] = useState(false);
   const [loading, setLoading] = useState(false);
+  const countdown = useCountdown(LAUNCH_TARGET);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,243 +167,203 @@ export function AppComingSoon() {
   };
 
   const features = [
-    { icon: '⚡', text: '30-min grocery delivery' },
-    { icon: '🍱', text: 'Food from local dhabas' },
-    { icon: '📍', text: 'Live order tracking' },
-    { icon: '🏷️', text: 'App-exclusive deals' },
-    { icon: '🔔', text: 'Push notifications' },
-    { icon: '💳', text: 'One-tap reorder' },
+    { Icon: Zap, text: '30-minute grocery delivery' },
+    { Icon: UtensilsCrossed, text: 'Food from local dhabas' },
+    { Icon: MapPin, text: 'Live order tracking' },
+    { Icon: Tag, text: 'App-exclusive deals' },
+    { Icon: Bell, text: 'Instant push updates' },
+    { Icon: RefreshCw, text: 'One-tap reorder' },
   ];
 
-  return (
-    <div style={{ minHeight: '100vh', background: '#040A0F', position: 'relative', overflow: 'hidden' }}>
+  const marquee = ['Groceries', 'Street Food', 'Pharmacy', 'Dairy & Eggs', 'Biryani', 'Fresh Veg', 'Home Services', 'Sweets', 'Beverages', 'Snacks'];
 
-      {/* ── Animated gradient background ── */}
+  return (
+    <div data-testid="app-coming-soon" style={{ minHeight: '100vh', background: INK, position: 'relative', overflow: 'hidden', fontFamily: "'Inter',sans-serif" }}>
+      <style>{`
+        @keyframes zx-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes zx-spin { to { transform: rotate(360deg); } }
+        .zx-input::placeholder { color: rgba(255,255,255,.32); }
+        @media (max-width: 900px){ .zx-hero { grid-template-columns: 1fr !important; } .zx-phone-wrap { justify-content: center !important; margin-top: 12px; } }
+      `}</style>
+
+      {/* ── Background layers ── */}
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-        <motion.div
-          animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0.9, 0.6] }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ position: 'absolute', top: '-20%', left: '-10%', width: '60vw', height: '60vw', borderRadius: '50%', background: 'radial-gradient(circle, rgba(13,163,102,0.22) 0%, transparent 70%)' }}
-        />
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
-          style={{ position: 'absolute', bottom: '-15%', right: '-10%', width: '55vw', height: '55vw', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,217,126,0.15) 0%, transparent 70%)' }}
-        />
-        <motion.div
-          animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 6 }}
-          style={{ position: 'absolute', top: '40%', left: '40%', width: '40vw', height: '40vw', borderRadius: '50%', background: 'radial-gradient(circle, rgba(52,211,153,0.1) 0%, transparent 70%)' }}
-        />
+        <div style={{ position: 'absolute', top: '-25%', left: '-12%', width: '65vw', height: '65vw', borderRadius: '50%', background: `radial-gradient(circle, ${G}33 0%, transparent 62%)`, filter: 'blur(20px)' }} />
+        <div style={{ position: 'absolute', bottom: '-30%', right: '-15%', width: '60vw', height: '60vw', borderRadius: '50%', background: `radial-gradient(circle, ${G2}22 0%, transparent 64%)`, filter: 'blur(20px)' }} />
+        {/* fine grid */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px)', backgroundSize: '48px 48px', maskImage: 'radial-gradient(circle at 50% 30%, black, transparent 78%)', WebkitMaskImage: 'radial-gradient(circle at 50% 30%, black, transparent 78%)' }} />
+        {/* grain */}
+        <div style={{ position: 'absolute', inset: 0, opacity: 0.5, mixBlendMode: 'overlay', backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")" }} />
       </div>
 
-      {/* Grid overlay */}
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(13,163,102,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(13,163,102,0.04) 1px, transparent 1px)', backgroundSize: '60px 60px', pointerEvents: 'none' }} />
-
-      {/* Particle canvas */}
-      <ParticleCanvas />
-
-      {/* ── Navigation bar ── */}
-      <div style={{ position: 'relative', zIndex: 10, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: 1200, margin: '0 auto' }}>
+      {/* ── Nav ── */}
+      <div style={{ position: 'relative', zIndex: 10, maxWidth: 1200, margin: '0 auto', padding: '22px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <a href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${G} 0%, ${G2} 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#fff', fontWeight: 900, fontSize: 16, fontFamily: "'Outfit', sans-serif" }}>//</span>
+          <div style={{ width: 36, height: 36, borderRadius: 11, background: `linear-gradient(135deg, ${G}, ${G2})`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 6px 18px ${G}55` }}>
+            <span style={{ color: '#fff', fontWeight: 900, fontStyle: 'italic', fontSize: 15, fontFamily: "'Outfit',sans-serif" }}>//</span>
           </div>
-          <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: 20, letterSpacing: '-.04em', color: '#fff' }}>
-            ZYPHI<span style={{ color: '#34D399' }}>X</span>
-          </span>
+          <span style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 20, letterSpacing: '-.05em', color: '#fff' }}>ZYPHI<span style={{ color: MINT }}>X</span></span>
         </a>
-        <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.55)', textDecoration: 'none', transition: 'color .15s' }}
+        <a data-testid="back-home-link" href="/" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,.55)', textDecoration: 'none', transition: 'color .15s' }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#fff'}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.55)'}>
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,.55)'}>
           <ChevronLeft size={15} /> Back to Home
         </a>
       </div>
 
-      {/* ── Main content ── */}
-      <div style={{ position: 'relative', zIndex: 10, maxWidth: 1200, margin: '0 auto', padding: '40px 24px 80px', display: 'flex', alignItems: 'center', gap: 60, flexWrap: 'wrap', justifyContent: 'center' }}>
+      {/* ── Hero ── */}
+      <div className="zx-hero" style={{ position: 'relative', zIndex: 10, maxWidth: 1200, margin: '0 auto', padding: '30px 24px 40px', display: 'grid', gridTemplateColumns: '1.05fr 0.95fr', gap: 48, alignItems: 'center' }}>
 
-        {/* ── Left: Text + CTA ── */}
-        <div style={{ flex: '1 1 480px', minWidth: 0 }}>
-
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${G}18`, border: `1px solid ${G}40`, borderRadius: 99, padding: '7px 16px', marginBottom: 28 }}
-          >
-            <motion.span animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
-              <Bell size={13} color={G2} strokeWidth={2.5} />
-            </motion.span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: G2, letterSpacing: '.04em' }}>LAUNCHING ON iOS & ANDROID</span>
+        {/* Left */}
+        <div>
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .55 }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: `${G}1f`, border: `1px solid ${G}45`, borderRadius: 99, padding: '7px 15px', marginBottom: 26 }}>
+            <span style={{ position: 'relative', display: 'flex', width: 8, height: 8 }}>
+              <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: G2, animation: 'zx-spin 1s linear infinite', boxShadow: `0 0 0 0 ${G2}` }} />
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: G2, boxShadow: `0 0 10px ${G2}` }} />
+            </span>
+            <span style={{ fontSize: 11.5, fontWeight: 800, color: MINT, letterSpacing: '.12em', textTransform: 'uppercase' }}>Launching on iOS &amp; Android</span>
           </motion.div>
 
-          {/* Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.7 }}
-            style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: 'clamp(2.2rem, 5vw, 3.8rem)', color: '#fff', lineHeight: 1.05, letterSpacing: '-.05em', marginBottom: 18 }}
-          >
-            Zyphix is coming<br />
-            <span style={{ background: `linear-gradient(135deg, ${G2} 0%, #34D399 50%, #6EE7B7 100%)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              to your phone.
-            </span>
+          <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .08, duration: .7 }}
+            style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(2.6rem, 6vw, 4.6rem)', color: '#fff', lineHeight: 0.98, letterSpacing: '-.055em', margin: '0 0 20px' }}>
+            Your city,<br />
+            <span style={{ background: `linear-gradient(105deg, ${G2} 0%, ${MINT} 55%, #a7f3d0 100%)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>in your pocket.</span>
           </motion.h1>
 
-          {/* Sub */}
-          <motion.p
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.6 }}
-            style={{ fontSize: 16, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 32, maxWidth: 480 }}
-          >
-            India's SuperLocal app is arriving on the App Store and Google Play. Get groceries, food, and local services delivered — all in one app. Be the first to know when we launch.
+          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .16, duration: .6 }}
+            style={{ fontSize: 16.5, color: 'rgba(255,255,255,.55)', lineHeight: 1.7, margin: '0 0 30px', maxWidth: 500 }}>
+            The Zyphix app is almost here — groceries in 30 minutes, food from local dhabas, and hyperlocal services, all in one place. Register now for launch-day perks.
           </motion.p>
 
-          {/* Feature pills */}
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 0.6 }}
-            style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 36 }}
-          >
-            {features.map((f, i) => (
-              <motion.span
-                key={f.text}
-                initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.06 }}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 99, padding: '6px 14px', fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}
-              >
-                {f.icon} {f.text}
-              </motion.span>
+          {/* Countdown */}
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .24, duration: .6 }}
+            style={{ display: 'flex', alignItems: 'stretch', gap: 10, marginBottom: 32 }}>
+            {countdown.map((c, i) => (
+              <React.Fragment key={c.l}>
+                <div style={{ background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.10)', borderRadius: 16, padding: '14px 4px', flex: 1, textAlign: 'center', backdropFilter: 'blur(8px)' }}>
+                  <Stat v={c.v} l={c.l} />
+                </div>
+                {i < countdown.length - 1 && <div style={{ alignSelf: 'center', color: 'rgba(255,255,255,.2)', fontWeight: 900, fontSize: 22 }}>:</div>}
+              </React.Fragment>
             ))}
           </motion.div>
 
-          {/* Store badges */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.6 }}
-            style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 40 }}
-          >
-            <StoreBadge
-              icon={<svg width="28" height="28" viewBox="0 0 814 1000" fill="white"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105.2-57.8-155.5-127.4C46 790.7 0 663 0 541.8c0-207.2 135.4-316.8 268.9-316.8 71 0 130.1 46.3 173.4 46.3 41.7 0 107.7-50.4 185.3-50.4 30.9 0 108.2 2.6 168.2 81.4zm-90.5-185.3c33.5-39.8 57-94.8 57-150.8 0-7.7-.7-15.4-2-22.5-53.7 2-117.3 35.7-157.4 80.7-34.5 39.2-64.4 94.8-64.4 153.6 0 8.4 1.3 16.7 1.9 19.2 3.5.6 9 1.3 14.5 1.3 47.7 0 105.4-31.9 150.4-81.5z"/></svg>}
-              sub="Download on the" title="App Store" comingSoon
-            />
-            <StoreBadge
-              icon={<svg width="28" height="28" viewBox="0 0 512 512" fill="none"><path d="M48 432c0 17.7 19.3 28 34.3 18.9L416 272v-32L82.3 61.1C67.3 52 48 62.3 48 80v352z" fill="#4285F4"/><path d="M48 80c0-17.7 19.3-28 34.3-18.9L282 181l-52 52L48 80z" fill="#34A853"/><path d="M230 181l52-52 100.4 60.6-52 52L230 181z" fill="#FBBC05"/><path d="M282 331 82.3 449.9C67.3 459 48 448.7 48 431l182-153 52 53z" fill="#EA4335"/></svg>}
-              sub="Get it on" title="Google Play" comingSoon
-            />
-          </motion.div>
+          {/* Notify form */}
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .3, duration: .6 }}
+            style={{ maxWidth: 500 }}>
+            <AnimatePresence mode="wait">
+              {!submitted ? (
+                <motion.form key="form" onSubmit={handleSubmit} exit={{ opacity: 0 }}
+                  style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: 210, position: 'relative' }}>
+                    <Mail size={16} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', color: focused ? G2 : 'rgba(255,255,255,.35)', transition: 'color .15s' }} />
+                    <input
+                      data-testid="notify-email-input"
+                      className="zx-input"
+                      type="email"
+                      value={email}
+                      onChange={e => { setEmail(e.target.value); setError(''); }}
+                      onFocus={() => setFocused(true)}
+                      onBlur={() => setFocused(false)}
+                      placeholder="you@email.com"
+                      style={{
+                        width: '100%', paddingLeft: 44, paddingRight: 14, height: 52,
+                        borderRadius: 14, fontSize: 14.5, color: '#fff', fontFamily: 'inherit', outline: 'none', fontWeight: 500,
+                        background: focused ? 'rgba(255,255,255,.09)' : 'rgba(255,255,255,.05)',
+                        border: `1.5px solid ${error ? '#EF4444' : focused ? `${G}90` : 'rgba(255,255,255,.12)'}`,
+                        boxSizing: 'border-box', transition: 'all .15s',
+                        boxShadow: focused ? `0 0 0 4px ${G}22` : 'none',
+                      }}
+                    />
+                  </div>
+                  <motion.button
+                    data-testid="notify-submit-button"
+                    whileHover={loading ? {} : { scale: 1.03, y: -1 }} whileTap={loading ? {} : { scale: 0.97 }}
+                    type="submit" disabled={loading}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 26px', height: 52, borderRadius: 14, background: loading ? `${G}80` : `linear-gradient(135deg, ${G}, ${G2})`, color: '#fff', fontSize: 15, fontWeight: 800, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', boxShadow: `0 10px 30px ${G}55`, fontFamily: "'Outfit',sans-serif" }}>
+                    {loading ? 'Sending…' : <>Notify Me <ArrowRight size={16} /></>}
+                  </motion.button>
+                  {error && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ width: '100%', fontSize: 12.5, color: '#F87171', margin: '2px 0 0' }}>{error}</motion.p>}
+                </motion.form>
+              ) : (
+                <motion.div key="ok" initial={{ opacity: 0, scale: .94 }} animate={{ opacity: 1, scale: 1 }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '16px 20px', background: `${G}1c`, border: `1.5px solid ${G}55`, borderRadius: 14 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: '50%', background: G, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 0 18px ${G}77` }}>
+                    <Check size={17} color="#fff" strokeWidth={3} />
+                  </div>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#fff' }}>You're on the launch list!</p>
+                    <p style={{ margin: '2px 0 0', fontSize: 12.5, color: 'rgba(255,255,255,.55)' }}>We'll email your exclusive offer the day we go live.</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          {/* Email form */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.6 }}
-          >
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '24px', backdropFilter: 'blur(12px)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                <Bell size={15} color={G2} />
-                <p style={{ fontSize: 13.5, fontWeight: 700, color: '#fff' }}>Get notified when we launch</p>
+            {/* social proof */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginTop: 16 }}>
+              <div style={{ display: 'flex' }}>
+                {[0, 1, 2, 3].map(i => (
+                  <div key={i} style={{ width: 26, height: 26, borderRadius: '50%', background: `linear-gradient(135deg, ${G}, ${G2})`, border: `2px solid ${INK}`, marginLeft: i ? -9 : 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Star size={11} color="#fff" fill="#fff" />
+                  </div>
+                ))}
               </div>
-              <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.4)', marginBottom: 16, lineHeight: 1.6 }}>
-                Join 3,000+ people waiting for the Zyphix app. We'll send you a launch-day exclusive offer.
+              <p style={{ margin: 0, fontSize: 12.5, color: 'rgba(255,255,255,.45)' }}>
+                <span style={{ color: MINT, fontWeight: 800 }}>3,200+</span> people already waiting
               </p>
-
-              <AnimatePresence mode="wait">
-                {!submitted ? (
-                  <motion.form key="form" onSubmit={handleSubmit} style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                    <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
-                      <Mail size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: focused ? G2 : 'rgba(255,255,255,0.3)', transition: 'color .15s' }} />
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={e => { setEmail(e.target.value); setError(''); }}
-                        onFocus={() => setFocused(true)}
-                        onBlur={() => setFocused(false)}
-                        placeholder="your@email.com"
-                        style={{
-                          width: '100%', paddingLeft: 40, paddingRight: 14, paddingTop: 13, paddingBottom: 13,
-                          borderRadius: 12, fontSize: 13.5, color: '#fff', fontFamily: 'inherit', outline: 'none',
-                          background: focused ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.05)',
-                          border: `1.5px solid ${error ? '#EF4444' : focused ? `${G}80` : 'rgba(255,255,255,0.1)'}`,
-                          boxSizing: 'border-box', transition: 'all .15s',
-                        }}
-                      />
-                    </div>
-                    <motion.button
-                      whileHover={loading ? {} : { scale: 1.04 }} whileTap={loading ? {} : { scale: 0.97 }}
-                      type="submit"
-                      disabled={loading}
-                      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '13px 24px', borderRadius: 12, background: loading ? `${G}80` : `linear-gradient(135deg, ${G} 0%, ${G2} 100%)`, color: '#fff', fontSize: 14, fontWeight: 800, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', boxShadow: `0 8px 24px ${G}44` }}
-                    >
-                      {loading ? 'Sending…' : <><span>Notify Me</span> <ArrowRight size={15} /></>}
-                    </motion.button>
-                    {error && (
-                      <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} style={{ width: '100%', fontSize: 12, color: '#EF4444', marginTop: -4 }}>{error}</motion.p>
-                    )}
-                  </motion.form>
-                ) : (
-                  <motion.div
-                    key="success"
-                    initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 20px', background: `${G}18`, border: `1.5px solid ${G}40`, borderRadius: 12 }}
-                  >
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: G, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Check size={16} color="#fff" strokeWidth={3} />
-                    </div>
-                    <div>
-                      <p style={{ fontSize: 13.5, fontWeight: 700, color: '#fff' }}>You're on the list!</p>
-                      <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>We'll email you the moment the app drops. 🚀</p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
           </motion.div>
 
-          {/* Social proof */}
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
-            style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 20 }}
-          >
-            <div style={{ display: 'flex' }}>
-              {['🧑', '👩', '👨', '🙋'].map((e, i) => (
-                <div key={i} style={{ width: 28, height: 28, borderRadius: '50%', background: `linear-gradient(135deg, ${G}44, ${G2}22)`, border: '2px solid #040A0F', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, marginLeft: i ? -8 : 0 }}>{e}</div>
-              ))}
-            </div>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
-              <span style={{ color: G2, fontWeight: 700 }}>3,200+</span> people already signed up
-            </p>
+          {/* store badges */}
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .4, duration: .6 }}
+            style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 26 }}>
+            {[
+              { Icon: Apple, sub: 'Download on the', title: 'App Store' },
+              { Icon: Play, sub: 'Get it on', title: 'Google Play' },
+            ].map(({ Icon, sub, title }) => (
+              <div key={title} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '11px 20px', borderRadius: 14, background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.12)', opacity: .85 }}>
+                <div style={{ position: 'absolute', top: 6, right: 8, fontSize: 8, fontWeight: 900, color: INK, background: MINT, padding: '1px 6px', borderRadius: 5, letterSpacing: '.06em' }}>SOON</div>
+                <Icon size={24} color="#fff" fill="#fff" />
+                <div style={{ textAlign: 'left' }}>
+                  <p style={{ margin: 0, fontSize: 9.5, color: 'rgba(255,255,255,.5)', fontWeight: 500 }}>{sub}</p>
+                  <p style={{ margin: 0, fontSize: 16, fontWeight: 900, color: '#fff', letterSpacing: '-.02em', fontFamily: "'Outfit',sans-serif" }}>{title}</p>
+                </div>
+              </div>
+            ))}
           </motion.div>
         </div>
 
-        {/* ── Right: Phone mockups ── */}
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
-          style={{ flex: '0 1 380px', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 20, paddingBottom: 20 }}
-        >
-          <PhoneMockup icon="🛒" color="#0DA366" label="Zyphix Now" delay={0.4} />
-          <div style={{ transform: 'translateY(-28px)' }}>
-            <PhoneMockup icon="🍱" color="#F97316" label="Zyphix Eats" delay={0.55} />
-          </div>
-          <PhoneMockup icon="📅" color="#6366F1" label="Zyphix Book" delay={0.7} />
-        </motion.div>
+        {/* Right — phone + feature list */}
+        <div className="zx-phone-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 30 }}>
+          <PhoneMock />
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .6, duration: .6 }}
+            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, width: '100%', maxWidth: 380 }}>
+            {features.map(({ Icon, text }, i) => (
+              <motion.div key={text} initial={{ opacity: 0, scale: .9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .65 + i * 0.05 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.09)', borderRadius: 12, padding: '10px 12px' }}>
+                <div style={{ width: 28, height: 28, borderRadius: 8, background: `${G}22`, border: `1px solid ${G}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Icon size={14} color={MINT} />
+                </div>
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,.75)', lineHeight: 1.2 }}>{text}</span>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
       </div>
 
-      {/* ── Bottom stats strip ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.6 }}
-        style={{ position: 'relative', zIndex: 10, borderTop: '1px solid rgba(255,255,255,0.06)', padding: '28px 24px' }}
-      >
-        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 40 }}>
-          {[
-            { icon: '⭐', value: '4.8', label: 'Expected App Rating' },
-            { icon: '🚀', value: 'Q2 2025', label: 'Target Launch' },
-            { icon: '📱', value: 'iOS + Android', label: 'Both Platforms' },
-            { icon: '🎁', value: '50% OFF', label: 'Launch Day Offer' },
-          ].map(s => (
-            <div key={s.label} style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: 11, marginBottom: 4 }}>{s.icon}</p>
-              <p style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, color: '#fff', fontSize: '1.35rem', letterSpacing: '-.03em', lineHeight: 1 }}>{s.value}</p>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 4, fontWeight: 500 }}>{s.label}</p>
-            </div>
+      {/* ── Marquee strip ── */}
+      <div style={{ position: 'relative', zIndex: 10, borderTop: '1px solid rgba(255,255,255,.07)', borderBottom: '1px solid rgba(255,255,255,.07)', padding: '16px 0', overflow: 'hidden', maskImage: 'linear-gradient(90deg, transparent, black 8%, black 92%, transparent)', WebkitMaskImage: 'linear-gradient(90deg, transparent, black 8%, black 92%, transparent)' }}>
+        <div style={{ display: 'flex', width: 'max-content', animation: 'zx-marquee 26s linear infinite' }}>
+          {[...marquee, ...marquee].map((m, i) => (
+            <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '0 26px', fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 18, color: 'rgba(255,255,255,.28)', letterSpacing: '-.02em', whiteSpace: 'nowrap' }}>
+              {m} <Sparkles size={13} color={G} />
+            </span>
           ))}
         </div>
-      </motion.div>
+      </div>
 
-      {/* Subtle bottom gradient */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 200, background: 'linear-gradient(to top, rgba(13,163,102,0.06), transparent)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 220, background: `linear-gradient(to top, ${G}12, transparent)`, pointerEvents: 'none' }} />
     </div>
   );
 }
