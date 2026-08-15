@@ -1,0 +1,37 @@
+{
+  "summary": "Tested Emergent Google Auth on Zyphix (backend + frontend). Backend: 8/8 pytest cases passed covering POST /api/auth/session (missing header 400, invalid id 401), GET /api/auth/me (bearer & cookie success, no auth 401, invalid token 401), POST /api/auth/logout (revokes session, no-token still 200). Frontend: (1) Login button opens AuthModal, 'Google' tab renders 'Continue with Google', click redirects to https://auth.emergentagent.com/?redirect=... (verified via URL chain landing on Google's OAuth). (2) Seeded Mongo user+session and set session_token cookie -> navbar shows seeded user's first name 'Alice' with avatar circle, 'Login' button disappears; opening the user menu and clicking 'Sign out' calls /api/auth/logout and restores the 'Login' button. (3) Loading '/#session_id=fakevalue' briefly shows the auth-callback-screen (data-testid confirmed), POST fails with 401, then app renders normally with Login button visible.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Google OAuth callback fragment cleanup",
+        "issue": "After processing '#session_id=...', window.location.hash still contains the fragment. AuthContext.tsx calls window.history.replaceState(null, '', window.location.pathname + window.location.search) at the top of bootstrap, but after the effect completes the hash is still present in window.location.hash (verified via page.evaluate). Non-critical because session_id is single-use on backend, but the ugly URL persists in the address bar and would be re-processed if user manually reloads. Likely cause: wouter's WouterRouter may be restoring the initial location on mount, or a race with React 19 concurrent rendering. Suggested fix: also call replaceState after the fetch completes (or use setTimeout to defer), or clear the hash explicitly via window.location.hash = '' with care to avoid navigation.",
+        "affected_selectors": ["[data-testid=\"auth-callback-screen\"]"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_auth.py",
+    "/app/test_reports/pytest/auth_results.xml"
+  ],
+  "action_items": [
+    "Optional: Ensure hash fragment '#session_id=...' is cleared from the address bar after the callback completes (currently persists even though the callback screen and /api/auth/session POST both fire correctly)."
+  ],
+  "critical_code_review_comments": [
+    "server.py POST /api/auth/session sets cookie with samesite='none' + secure=True which is correct for cross-site cookie usage; good.",
+    "_get_user_from_token correctly excludes MongoDB _id via projection ({\"_id\":0}) — good.",
+    "AuthContext.tsx: consider guarding against replaceState being reverted by wouter/router by clearing the hash inside a microtask or after the fetch resolves.",
+    "AuthModal Phone OTP flow is UI-only mock (accepts any 6-digit code) — flagged for awareness; not part of this scope."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_auth.py (new)"
+  ],
+  "success_rate": { "backend": "100%", "frontend": "95%" },
+  "test_credentials": "Seeded per /app/auth_testing.md. DB name 'zyphix'. Test data uses TEST_/test_session_ prefixes and is cleaned up automatically.",
+  "seed_data_creation": "Pytest fixture seeds/cleans one user+session per module. Playwright test seeded a second user (user_pw_<ts>) and cleaned it up in the same script.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All auth endpoints and UI flows work. Only nit is the URL fragment not being cleared after callback screen. Backend tests live at /app/backend/tests/test_auth.py and can be re-run with: pytest /app/backend/tests/test_auth.py -v"
+}

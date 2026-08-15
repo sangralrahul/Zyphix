@@ -24,6 +24,12 @@ User connected an existing GitHub site (Zyphix) and asked to (1) run it in the l
 
 ## Testing
 - iteration_1.json: 5/5 core features pass (100%). Only MEDIUM issue (nested `<a>` on Cart) — fixed.
+- iteration_2.json: Emergent Google Auth — backend 100% (8/8 pytest), frontend 95%. Only nit (lingering `#session_id` in URL) — fixed with deferred hash clear.
+
+## Emergent Google Auth (added 2026-08-15)
+- NEW FastAPI backend at `/app/backend/server.py` (port 8001, routed via `/api`): `POST /api/auth/session` (X-Session-ID → Emergent session-data exchange, upserts user, sets httpOnly `session_token` cookie), `GET /api/auth/me`, `POST /api/auth/logout`. MongoDB db `zyphix`, collections `users` + `user_sessions`.
+- Frontend: `AuthContext.tsx` handles the OAuth redirect + `#session_id` callback exchange and server session verification; `loginWithGoogle()` redirects to `auth.emergentagent.com`. AuthModal "Continue with Google" now does the real redirect (was mocked). Navbar reflects logged-in user; Sign out revokes session.
+- Testing playbook saved at `/app/auth_testing.md`; credentials/seed at `/app/memory/test_credentials.md`.
 
 ## Backlog / Next
 - P2: Same nested-`<a>` console warning exists (pre-existing) in Wishlist, Notifications, ZyphixNow, Wallet, ProductDetail — cosmetic only.

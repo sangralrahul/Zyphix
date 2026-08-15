@@ -232,7 +232,7 @@ type PhoneStep = 'enter' | 'otp';
 type EmailStep = 'enter' | 'otp';
 
 export function AuthModal() {
-  const { showModal, closeModal, login } = useAuth();
+  const { showModal, closeModal, login, loginWithGoogle } = useAuth();
   const [method, setMethod]         = useState<AuthMethod>('phone');
   const [phoneStep, setPhoneStep]   = useState<PhoneStep>('enter');
   const [emailStep, setEmailStep]   = useState<EmailStep>('enter');
@@ -288,12 +288,11 @@ export function AuthModal() {
     setOtp(['', '', '', '', '', '']); setCanResend(false); setCountdownKey(k => k + 1);
   };
 
-  /* ── Google ── */
+  /* ── Google (Emergent-managed OAuth) ── */
   const handleGoogle = async () => {
     setGoogleLoading(true);
-    await new Promise(r => setTimeout(r, 1800));
-    setGoogleLoading(false);
-    login({ name: 'Google User', email: 'user@gmail.com', avatar: 'G' });
+    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+    loginWithGoogle();
   };
 
   /* ── Email OTP (real) ── */
