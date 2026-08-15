@@ -319,12 +319,12 @@ export function AppComingSoon() {
           <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .4, duration: .6 }}
             style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 26 }}>
             {[
-              { Icon: Apple, sub: 'Download on the', title: 'App Store' },
-              { Icon: Play, sub: 'Get it on', title: 'Google Play' },
-            ].map(({ Icon, sub, title }) => (
+              { logo: '/images/appstore.webp', sub: 'Download on the', title: 'App Store' },
+              { logo: '/images/googleplay.webp', sub: 'Get it on', title: 'Google Play' },
+            ].map(({ logo, sub, title }) => (
               <div key={title} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '11px 20px', borderRadius: 14, background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.12)', opacity: .85 }}>
                 <div style={{ position: 'absolute', top: 6, right: 8, fontSize: 8, fontWeight: 900, color: INK, background: MINT, padding: '1px 6px', borderRadius: 5, letterSpacing: '.06em' }}>SOON</div>
-                <Icon size={24} color="#fff" fill="#fff" />
+                <img src={logo} alt={title} style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0 }} />
                 <div style={{ textAlign: 'left' }}>
                   <p style={{ margin: 0, fontSize: 9.5, color: 'rgba(255,255,255,.5)', fontWeight: 500 }}>{sub}</p>
                   <p style={{ margin: 0, fontSize: 16, fontWeight: 900, color: '#fff', letterSpacing: '-.02em', fontFamily: "'Outfit',sans-serif" }}>{title}</p>

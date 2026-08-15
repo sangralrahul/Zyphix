@@ -1861,7 +1861,7 @@ function AppDownload() {
                   onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
                   onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}>
                   <span style={{ position: 'absolute', top: -8, right: 10, fontSize: 8, fontWeight: 900, color: '#000', background: '#00E28A', padding: '2px 7px', borderRadius: 5, letterSpacing: '.06em' }}>SOON</span>
-                  <svg width="26" height="26" viewBox="0 0 814 1000" fill="#fff"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105.2-57.8-155.5-127.4C46 790.7 0 663 0 541.8c0-207.2 135.4-316.8 268.9-316.8 71 0 130.1 46.3 173.4 46.3 41.7 0 107.7-50.4 185.3-50.4 30.9 0 108.2 2.6 168.2 81.4zm-90.5-185.3c33.5-39.8 57-94.8 57-150.8 0-7.7-.7-15.4-2-22.5-53.7 2-117.3 35.7-157.4 80.7-34.5 39.2-64.4 94.8-64.4 153.6 0 8.4 1.3 16.7 1.9 19.2 3.5.6 9 1.3 14.5 1.3 47.7 0 105.4-31.9 150.4-81.5z"/></svg>
+                  <img src="/images/appstore.webp" alt="App Store" style={{ width: 30, height: 30, borderRadius: 7, flexShrink: 0 }} />
                   <div style={{ textAlign: 'left', lineHeight: 1 }}>
                     <p style={{ margin: 0, fontSize: 10, color: '#fff', fontWeight: 500, letterSpacing: '.01em' }}>Download on the</p>
                     <p style={{ margin: '3px 0 0', fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '-.02em', fontFamily: "'Outfit',sans-serif" }}>App Store</p>
@@ -1872,7 +1872,7 @@ function AppDownload() {
                   onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
                   onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}>
                   <span style={{ position: 'absolute', top: -8, right: 10, fontSize: 8, fontWeight: 900, color: '#000', background: '#00E28A', padding: '2px 7px', borderRadius: 5, letterSpacing: '.06em' }}>SOON</span>
-                  <svg width="24" height="26" viewBox="0 0 512 512"><path d="M48 59.49v393a4.33 4.33 0 0 0 7.37 3.07L260 256 55.37 56.42A4.33 4.33 0 0 0 48 59.49z" fill="#00D3FF"/><path d="M345.8 174 89.22 32.64l-.16-.09c-4.42-2.4-8.62 3.58-5 7.06L260 256z" fill="#00F076"/><path d="M345.8 338 260 256 84.09 431.9c-3.64 3.48.56 9.46 5 7.06l.16-.09L345.8 338z" fill="#FF3A44"/><path d="M449.38 231.37 374.59 191 288 273.86l86.59 82.85 74.79-40.35c26.16-14.13 26.16-70.86 0-84.99z" fill="#FFC900"/></svg>
+                  <img src="/images/googleplay.webp" alt="Google Play" style={{ width: 28, height: 28, flexShrink: 0 }} />
                   <div style={{ textAlign: 'left', lineHeight: 1 }}>
                     <p style={{ margin: 0, fontSize: 10, color: '#fff', fontWeight: 500, letterSpacing: '.06em', textTransform: 'uppercase' }}>Get it on</p>
                     <p style={{ margin: '3px 0 0', fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '-.02em', fontFamily: "'Outfit',sans-serif" }}>Google Play</p>
