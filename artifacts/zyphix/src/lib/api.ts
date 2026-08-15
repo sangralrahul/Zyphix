@@ -1,6 +1,11 @@
 // Thin fetch wrapper that routes /api/* calls to Supabase Edge Functions.
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+// Fallbacks keep email (Brevo) flows working even if build-time env vars are missing.
+const SUPABASE_URL =
+  (import.meta.env.VITE_SUPABASE_URL as string | undefined) ||
+  "https://awbccdtdszdxcxnsossy.supabase.co";
+const SUPABASE_KEY =
+  (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ||
+  "sb_publishable_YE-BT6c07paKhTvlCiItZw_Mm2k6z5A";
 
 const ROUTE_MAP: Record<string, { fn: string; extra?: Record<string, unknown> }> = {
   "/api/notify": { fn: "notify" },
