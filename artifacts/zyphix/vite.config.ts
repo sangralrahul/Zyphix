@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import { copyFile, mkdir } from "node:fs/promises";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 const rawPort = process.env.PORT;
@@ -26,11 +27,36 @@ if (!basePath) {
   );
 }
 
+const directRoutes = [
+  "light", "privacy", "terms", "about", "contact", "blog", "investors",
+  "merchant-setup", "delivery-setup", "restaurant-setup", "now", "wallet",
+  "wishlist", "notifications", "admin", "partner-dashboard", "eats", "book",
+  "offers", "kirana-map", "partner", "app", "account",
+];
+
+function directRouteEntries() {
+  return {
+    name: "direct-route-entries",
+    apply: "build" as const,
+    async closeBundle() {
+      const outputDirectory = path.resolve(import.meta.dirname, "dist/public");
+      const appEntry = path.join(outputDirectory, "index.html");
+
+      await Promise.all(directRoutes.map(async (route) => {
+        const routeDirectory = path.join(outputDirectory, route);
+        await mkdir(routeDirectory, { recursive: true });
+        await copyFile(appEntry, path.join(routeDirectory, "index.html"));
+      }));
+    },
+  };
+}
+
 export default defineConfig({
   base: basePath,
   plugins: [
     react(),
     tailwindcss(),
+    directRouteEntries(),
     runtimeErrorOverlay(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
