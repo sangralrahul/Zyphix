@@ -28,7 +28,7 @@ if (!basePath) {
 }
 
 const directRoutes = [
-  "light", "privacy", "terms", "about", "contact", "blog", "investors",
+  "light", "terms", "about", "contact", "blog", "investors",
   "merchant-setup", "delivery-setup", "restaurant-setup", "now", "wallet",
   "wishlist", "notifications", "admin", "partner-dashboard", "eats", "book",
   "offers", "kirana-map", "partner", "app", "account",
@@ -85,6 +85,12 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(import.meta.dirname, "index.html"),
+        privacy: path.resolve(import.meta.dirname, "privacy/index.html"),
+      },
+    },
   },
   server: {
     port,
