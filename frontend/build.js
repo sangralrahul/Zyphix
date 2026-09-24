@@ -8,8 +8,11 @@ const path = require("path");
 
 const dest = path.join(__dirname, "build");
 
-if (fs.existsSync(path.join(dest, "index.html"))) {
-  console.log("[build] Prebuilt static output found at " + dest + " — skipping build.");
+if (
+  fs.existsSync(path.join(dest, "index.html")) &&
+  fs.existsSync(path.join(dest, "privacy", "index.html"))
+) {
+  console.log("[build] Complete prebuilt static output found at " + dest + " — skipping build.");
   process.exit(0);
 }
 
