@@ -3,15 +3,30 @@
   "compileOnSave": false,
   "compilerOptions": {
     "jsx": "react-jsx",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "baseUrl": ".",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "paths": {
-      "@/*": ["artifacts/zyphix/src/*"],
-      "@assets/*": ["attached_assets/*"]
+      "@/*": [
+        "artifacts/zyphix/src/*"
+      ],
+      "@assets/*": [
+        "attached_assets/*"
+      ]
     },
-    "types": ["vite/client"]
+    "types": [
+      "vite/client"
+    ]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "artifacts/zyphix/src/**/*.ts", "artifacts/zyphix/src/**/*.tsx", "vite.config.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "artifacts/zyphix/src/**/*.ts",
+    "artifacts/zyphix/src/**/*.tsx",
+    "vite.config.ts"
+  ],
   "references": [
     {
       "path": "./lib/db"
