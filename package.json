@@ -4,9 +4,9 @@
   "license": "MIT",
   "scripts": {
     "preinstall": "node -e \"process.exit(0)\"",
-    "dev": "PORT=8080 BASE_PATH=/ pnpm --filter @workspace/zyphix run dev",
-    "build": "PORT=8080 BASE_PATH=/ pnpm --filter @workspace/zyphix run build && rm -rf dist && cp -r artifacts/zyphix/dist/public dist",
-    "build:dev": "PORT=8080 BASE_PATH=/ pnpm --filter @workspace/zyphix run build && rm -rf dist && cp -r artifacts/zyphix/dist/public dist",
+    "dev": "vite dev --host 0.0.0.0 --port 8080",
+    "build": "vite build",
+    "build:dev": "vite build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
