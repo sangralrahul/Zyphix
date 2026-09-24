@@ -4,16 +4,22 @@
   "license": "MIT",
   "scripts": {
     "preinstall": "node -e \"process.exit(0)\"",
-    "dev": "PORT=8080 BASE_PATH=/ pnpm --filter @workspace/zyphix run dev",
-    "build": "PORT=8080 BASE_PATH=/ pnpm --filter @workspace/zyphix run build && rm -rf dist && cp -r artifacts/zyphix/dist/public dist",
-    "build:dev": "PORT=8080 BASE_PATH=/ pnpm --filter @workspace/zyphix run build && rm -rf dist && cp -r artifacts/zyphix/dist/public dist",
+    "dev": "vite dev --host 0.0.0.0 --port 8080",
+    "build": "vite build",
+    "build:dev": "vite build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
   "private": true,
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/router-plugin": "^1.168.40",
+    "@vitejs/plugin-react": "^6.1.1",
+    "prettier": "^3.8.1",
+    "tailwindcss": "^4.3.3",
     "typescript": "~5.9.2",
-    "prettier": "^3.8.1"
+    "vite": "^8.3.0",
+    "vite-tsconfig-paths": "^6.1.1"
   },
   "workspaces": {
     "packages": [
@@ -135,6 +141,10 @@
     "esbuild": "0.27.3"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.110.7"
+    "@supabase/supabase-js": "^2.110.7",
+    "@tanstack/react-query": "^5.103.2",
+    "@tanstack/react-router": "^1.170.39",
+    "@tanstack/react-router-devtools": "^1.167.2",
+    "@tanstack/react-start": "^1.168.58"
   }
 }
