@@ -10,10 +10,10 @@
     ],
     "paths": {
       "@/*": [
-        "artifacts/zyphix/src/*"
+        "./artifacts/zyphix/src/*"
       ],
       "@assets/*": [
-        "attached_assets/*"
+        "./attached_assets/*"
       ]
     },
     "types": [
