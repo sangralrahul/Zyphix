@@ -26,16 +26,5 @@
     "artifacts/zyphix/src/**/*.ts",
     "artifacts/zyphix/src/**/*.tsx",
     "vite.config.ts"
-  ],
-  "references": [
-    {
-      "path": "./lib/db"
-    },
-    {
-      "path": "./lib/api-client-react"
-    },
-    {
-      "path": "./lib/api-zod"
-    }
   ]
 }
