@@ -1,5 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Privacy } from "@/pages/Privacy";
+import { lazy, Suspense } from "react";
+import { ClientOnly, createFileRoute } from "@tanstack/react-router";
+
+const Privacy = lazy(() => import("@/pages/Privacy").then((module) => ({ default: module.Privacy })));
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -12,5 +14,15 @@ export const Route = createFileRoute("/privacy")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: Privacy,
+  component: PrivacyRoute,
 });
+
+function PrivacyRoute() {
+  return (
+    <ClientOnly fallback={null}>
+      <Suspense fallback={null}>
+        <Privacy />
+      </Suspense>
+    </ClientOnly>
+  );
+}

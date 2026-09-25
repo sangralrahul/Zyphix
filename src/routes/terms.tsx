@@ -1,5 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Terms } from "@/pages/Terms";
+import { lazy, Suspense } from "react";
+import { ClientOnly, createFileRoute } from "@tanstack/react-router";
+
+const Terms = lazy(() => import("@/pages/Terms").then((module) => ({ default: module.Terms })));
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -12,5 +14,15 @@ export const Route = createFileRoute("/terms")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: Terms,
+  component: TermsRoute,
 });
+
+function TermsRoute() {
+  return (
+    <ClientOnly fallback={null}>
+      <Suspense fallback={null}>
+        <Terms />
+      </Suspense>
+    </ClientOnly>
+  );
+}
