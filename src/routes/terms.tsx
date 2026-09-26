@@ -1,7 +1,7 @@
-import { lazy, Suspense } from "react";
-import { ClientOnly, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
-const Terms = lazy(() => import("@/pages/Terms").then((module) => ({ default: module.Terms })));
+import { Router } from "wouter";
+import { Terms } from "@/pages/Terms";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -19,10 +19,8 @@ export const Route = createFileRoute("/terms")({
 
 function TermsRoute() {
   return (
-    <ClientOnly fallback={null}>
-      <Suspense fallback={null}>
-        <Terms />
-      </Suspense>
-    </ClientOnly>
+    <Router ssrPath="/terms">
+      <Terms />
+    </Router>
   );
 }
