@@ -198,7 +198,6 @@ export function SplashScreen({ onComplete }: Props) {
               transition={{ duration: (TOTAL_MS - 1000) / 1000, ease: 'linear', delay: 0.2 }} />
           </div>
 
-          {/* ── Clavix credit ── */}
           <motion.p
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 3.8, duration: 0.6 }}
             style={{ position: 'absolute', bottom: 18, left: 0, right: 0, textAlign: 'center', fontFamily: "'Inter',sans-serif", fontSize: '0.68rem', color: 'rgba(255,255,255,0.18)', letterSpacing: '0.14em' }}>
