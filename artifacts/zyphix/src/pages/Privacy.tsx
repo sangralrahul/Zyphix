@@ -43,7 +43,7 @@ export function Privacy() {
         <div style={{ background: 'rgba(13,163,102,.05)', border: '1px solid rgba(13,163,102,.18)', borderRadius: 14, padding: '16px 20px', marginBottom: 36, display: 'flex', gap: 12 }}>
           <Shield size={18} color={G} style={{ flexShrink: 0, marginTop: 2 }} />
           <p style={{ fontSize: 13.5, color: '#065F46', lineHeight: 1.6 }}>
-            <strong>Your privacy matters.</strong> Zyphix Technologies Pvt. Ltd. ("Zyphix", "we", "us") is committed to protecting your personal data. This policy explains what we collect, how we use it, and your rights.
+            <strong>Your privacy matters.</strong> Zyphix ("we", "us") is committed to protecting your personal data. This policy explains what we collect, how we use it, and your rights.
           </p>
         </div>
 

@@ -46,7 +46,7 @@ export function Terms() {
 
         <div style={{ background: W, borderRadius: 20, border: `1px solid ${BD}`, padding: '36px 40px', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
           <Section title="1. Acceptance of Terms">
-            <p>These Terms of Service ("Terms") constitute a legally binding agreement between you and Zyphix Technologies Pvt. Ltd. (CIN: U74999KA2024PTC001234), a company incorporated under the Companies Act 2013 ("Zyphix", "we", "us", "our").</p>
+            <p>These Terms of Service ("Terms") constitute a legally binding agreement between you and Zyphix ("Zyphix", "we", "us", "our").</p>
             <p style={{ marginTop: 10 }}>By registering, accessing, or using the Zyphix website, mobile application, or any associated service, you ("User", "you") agree to comply with and be bound by these Terms along with our Privacy Policy.</p>
           </Section>
 
@@ -93,7 +93,7 @@ export function Terms() {
           </Section>
 
           <Section title="8. Intellectual Property">
-            <p>All content on Zyphix — including the logo, design, software, text, images, and trademarks — is the exclusive property of Zyphix Technologies Pvt. Ltd. and is protected under Indian and international intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written consent.</p>
+            <p>All content on Zyphix — including the logo, design, software, text, images, and trademarks — is the exclusive property of Zyphix and is protected under Indian and international intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written consent.</p>
           </Section>
 
           <Section title="9. Limitation of Liability">
