@@ -648,7 +648,7 @@ function TrustSection() {
             <div style={{ width: 46, height: 46, borderRadius: 13, background: G_BG, border: `1px solid ${G_BD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>👨‍💼</div>
             <div>
               <p style={{ fontWeight: 700, color: T1, fontSize: 15, lineHeight: 1 }}>Rahul</p>
-              <p style={{ fontSize: 12.5, color: T3, marginTop: 4 }}>Founder, Clavix Technologies Pvt. Ltd.</p>
+              <p style={{ fontSize: 12.5, color: T3, marginTop: 4 }}>Founder, Zyphix</p>
             </div>
           </div>
         </motion.div>
@@ -754,7 +754,7 @@ function Footer() {
           ))}
         </div>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.22)' }}>© 2025 Clavix Technologies Pvt. Ltd. All rights reserved.</p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.22)' }}>© 2025 Zyphix. All rights reserved.</p>
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.22)' }}>Made with care in India</p>
         </div>
       </div>

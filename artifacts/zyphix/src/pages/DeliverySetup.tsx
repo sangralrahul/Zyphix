@@ -589,7 +589,7 @@ function exportDeliveryPDF(personal: Record<string,string>) {
     <span class="badge">Delivery Partner Application</span>
   </div>
   <h1>Application Submitted</h1>
-  <p class="meta">Submitted on ${date} &nbsp;·&nbsp; Clavix Technologies Pvt. Ltd., India</p>
+  <p class="meta">Submitted on ${date} &nbsp;·&nbsp; Zyphix, India</p>
   <div class="ref">Reference: ${ref}</div>
 
   <div class="section">
@@ -618,7 +618,7 @@ function exportDeliveryPDF(personal: Record<string,string>) {
 
   <div class="footer">
     This is an auto-generated application confirmation. Keep it for your records.<br/>
-    Zyphix is a product of Clavix Technologies Pvt. Ltd. · India
+    Zyphix · India
   </div>
   <script>window.onload=()=>{window.print();}</script>
   </body></html>`;
