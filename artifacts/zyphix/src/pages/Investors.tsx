@@ -180,7 +180,7 @@ export function Investors() {
             <a href="mailto:support@zyphix.in" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: .97 }}
                 style={{ background: 'rgba(255,255,255,.1)', color: '#fff', fontSize: 14, fontWeight: 700, padding: '13px 30px', borderRadius: 13, border: '1px solid rgba(255,255,255,.18)', cursor: 'pointer', width: '100%' }}>
-                WhatsApp Rahul →
+                Email Us →
               </motion.button>
             </a>
           </div>
