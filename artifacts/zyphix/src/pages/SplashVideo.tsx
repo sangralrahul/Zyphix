@@ -920,7 +920,7 @@ function Scene5({ onDone }: { onDone?: () => void }) {
         initial={{ opacity: 0 }}
         animate={ph >= 4 ? { opacity: 1 } : {}}
         transition={{ duration: 0.8, delay: 0.5 }}>
-        A Clavix Technologies product
+        A Zyphix product
       </motion.p>
 
       {/* Bottom progress line */}

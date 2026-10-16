@@ -44,7 +44,7 @@ export function Investors() {
             Building India's<br /><span style={{ background: 'linear-gradient(135deg,#34D399,#0DC268)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>SuperLocal</span> Commerce Layer
           </h1>
           <p style={{ fontSize: 16.5, color: 'rgba(255,255,255,.55)', lineHeight: 1.72, maxWidth: 580, margin: '0 auto 36px' }}>
-            Zyphix by Clavix Technologies is the only hyperlocal delivery platform purpose-built for Tier-2 India and beyond — combining 30-minute grocery delivery, food delivery, and kirana digitisation in one superapp.
+            Zyphix is the only hyperlocal delivery platform purpose-built for Tier-2 India and beyond — combining 30-minute grocery delivery, food delivery, and kirana digitisation in one superapp.
           </p>
           <a href="mailto:investors@zyphix.in" style={{ textDecoration: 'none' }}>
             <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: .97 }}
@@ -145,7 +145,7 @@ export function Investors() {
           <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: '1.55rem', color: T1, letterSpacing: '-.04em', marginBottom: 28 }}>Founding Team</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20 }}>
             {[
-              { name: 'Rahul', role: 'Founder & CEO', bio: "Building Clavix Technologies with a vision to digitise India\u2019s neighbourhood economy. Previously worked in tech & logistics across Tier-2 India.", initials: 'R', color: G, bg: '#ECFDF5' },
+              { name: 'Rahul', role: 'Founder & CEO', bio: "Building Zyphix with a vision to digitise India\u2019s neighbourhood economy. Previously worked in tech & logistics across Tier-2 India.", initials: 'R', color: G, bg: '#ECFDF5' },
               { name: 'Tech Team', role: 'Engineering',   bio: "Full-stack engineers specialising in React, Node.js, and mobile-first architecture for Tier-2 connectivity environments.", initials: 'T', color: '#2563EB', bg: '#EFF6FF' },
               { name: 'Operations', role: 'Ops & Logistics', bio: "Ground operations team with deep knowledge of India\u2019s city networks, store ecosystems, and last-mile delivery infrastructure.", initials: 'O', color: '#7C3AED', bg: '#F5F3FF' },
             ].map(({ name, role, bio, initials, color, bg }) => (

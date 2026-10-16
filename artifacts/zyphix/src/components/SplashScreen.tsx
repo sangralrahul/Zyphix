@@ -202,7 +202,7 @@ export function SplashScreen({ onComplete }: Props) {
           <motion.p
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 3.8, duration: 0.6 }}
             style={{ position: 'absolute', bottom: 18, left: 0, right: 0, textAlign: 'center', fontFamily: "'Inter',sans-serif", fontSize: '0.68rem', color: 'rgba(255,255,255,0.18)', letterSpacing: '0.14em' }}>
-            A CLAVIX TECHNOLOGIES PRODUCT
+            A ZYPHIX PRODUCT
           </motion.p>
         </motion.div>
       )}

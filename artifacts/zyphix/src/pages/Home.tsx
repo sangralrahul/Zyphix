@@ -1983,7 +1983,7 @@ function Footer() {
               style={{ color: 'rgba(255,255,255,.42)', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,.18)', paddingBottom: 1, transition: 'color .15s' }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,.75)'}
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,.42)'}>
-              Clavix Technologies Pvt. Ltd.
+              Zyphix
             </a>
             {' '}· All rights reserved
           </p>

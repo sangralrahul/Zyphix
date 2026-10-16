@@ -143,7 +143,7 @@ function ShowcasePanel() {
 
         {/* Clavix credit */}
         <p style={{ fontSize: 10, color: 'rgba(255,255,255,.2)', marginTop: 14, letterSpacing: '.04em', textAlign: 'center' }}>
-          A Clavix Technologies product
+          A Zyphix product
         </p>
       </div>
     </div>
