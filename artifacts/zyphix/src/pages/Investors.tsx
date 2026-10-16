@@ -177,7 +177,7 @@ export function Investors() {
                 <Mail size={15} /> investors@zyphix.in
               </motion.button>
             </a>
-            <a href="https://wa.me/919682394363?text=Hi%20Rahul%2C%20I%27m%20interested%20in%20investing%20in%20Zyphix." target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+            <a href="mailto:support@zyphix.in" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: .97 }}
                 style={{ background: 'rgba(255,255,255,.1)', color: '#fff', fontSize: 14, fontWeight: 700, padding: '13px 30px', borderRadius: 13, border: '1px solid rgba(255,255,255,.18)', cursor: 'pointer', width: '100%' }}>
                 WhatsApp Rahul →

@@ -1905,8 +1905,8 @@ function Footer() {
       t: 'Company',
       links: [
         { l: 'About Us',   href: '/about' },
-        { l: 'Careers',    href: 'https://wa.me/919682394363?text=Hi%2C%20I%27m%20interested%20in%20career%20opportunities%20at%20Zyphix%20%2F%20Clavix%20Technologies.', ext: true },
-        { l: 'Press Kit',  href: 'https://wa.me/919682394363?text=Hi%2C%20I%27d%20like%20to%20request%20the%20Zyphix%20Press%20Kit.', ext: true },
+        { l: 'Careers',    href: 'mailto:support@zyphix.in', ext: true },
+        { l: 'Press Kit',  href: 'mailto:support@zyphix.in', ext: true },
         { l: 'Blog',       href: '/blog' },
         { l: 'Investors',  href: '/investors' },
       ],
@@ -1914,7 +1914,7 @@ function Footer() {
     {
       t: 'Support',
       links: [
-        { l: 'Help Center',       href: 'https://wa.me/919682394363?text=Hi%2C%20I%20need%20help%20with%20Zyphix.', ext: true },
+        { l: 'Help Center',       href: 'mailto:support@zyphix.in', ext: true },
         { l: 'Contact Us',        href: '/contact' },
         { l: 'Refund Policy',     href: '/terms' },
         { l: 'Privacy Policy',    href: '/privacy' },
@@ -1938,7 +1938,7 @@ function Footer() {
                 { ic: <Twitter size={14} />,   href: 'https://twitter.com/zyphixin' },
                 { ic: <Instagram size={14} />, href: 'https://instagram.com/zyphixin' },
                 { ic: <Linkedin size={14} />,  href: 'https://linkedin.com/in/rahulsangral' },
-                { ic: <Phone size={14} />,     href: 'https://wa.me/919682394363' },
+                { ic: <Phone size={14} />,     href: 'mailto:support@zyphix.in' },
               ] as { ic: React.ReactNode; href: string }[]).map(({ ic, href }, i) => (
                 <a key={i} href={href} target="_blank" rel="noopener noreferrer"
                   style={{ width: 36, height: 36, borderRadius: 9, background: 'rgba(255,255,255,.07)', border: '1px solid rgba(255,255,255,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.4)', transition: 'all .15s', textDecoration: 'none' }}
@@ -2790,7 +2790,7 @@ function WaitlistSection() {
                     )}
 
                     {/* WhatsApp CTA */}
-                    <motion.a href="https://wa.me/919682394363?text=Hi%20Zyphix%2C%20I%20just%20signed%20up%20and%20have%20a%20question."
+                    <motion.a href="mailto:support@zyphix.in"
                       target="_blank" rel="noopener noreferrer"
                       initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:.85 }}
                       style={{ marginTop:16, display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'11px', borderRadius:12, background:'rgba(13,163,102,.1)', border:`1px solid ${G}40`, textDecoration:'none', color:'#4ADE80', fontSize:13, fontWeight:700, transition:'background .15s' }}
