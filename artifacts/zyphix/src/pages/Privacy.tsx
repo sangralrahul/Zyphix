@@ -112,18 +112,6 @@ export function Privacy() {
           <Section title="9. Changes to This Policy">
             <p>We may update this Privacy Policy periodically. We will notify you of material changes via email or an in-app notification at least 7 days before the change takes effect. Continued use of Zyphix after the effective date constitutes acceptance of the updated policy.</p>
           </Section>
-
-          <Section title="10. Contact Us">
-            <p>For privacy-related questions or to exercise your rights:</p>
-            <div style={{ marginTop: 12, background: BG, borderRadius: 12, padding: '16px 18px', display: 'inline-block' }}>
-              <p><strong>Data Protection Officer</strong></p>
-              <p>Zyphix Technologies Pvt. Ltd.</p>
-              <p>12th Floor, RMZ Infinity, Old Madras Road</p>
-              <p>Bengaluru, Karnataka 560016, India</p>
-              <p style={{ marginTop: 6 }}>Email: <a href="mailto:privacy@zyphix.in" style={{ color: G, fontWeight: 600 }}>privacy@zyphix.in</a></p>
-              <p>Phone: <a href="tel:+918001234567" style={{ color: G, fontWeight: 600 }}>+91 800 123 4567</a></p>
-            </div>
-          </Section>
         </div>
       </div>
     </div>

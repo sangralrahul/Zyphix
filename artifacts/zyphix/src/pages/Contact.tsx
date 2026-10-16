@@ -70,7 +70,6 @@ export function Contact() {
             {[
               { icon: <Phone size={18} color={G} />, title: 'Call Us', lines: ['+91 800 123 4567', 'Mon–Sun, 8am–10pm IST'], link: 'tel:+918001234567' },
               { icon: <Mail size={18} color={G} />, title: 'Email Support', lines: ['support@zyphix.in', 'Response within 2 hours'], link: 'mailto:support@zyphix.in' },
-              { icon: <MapPin size={18} color={G} />, title: 'Head Office', lines: ['12th Floor, RMZ Infinity', 'Old Madras Road, Bengaluru 560016'], link: undefined },
             ].map(({ icon, title, lines, link }) => (
               <motion.div key={title} initial={{ opacity: 0, x: -12 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
                 <a href={link} style={{ display: 'block', textDecoration: 'none' }}>

@@ -618,7 +618,7 @@ function exportDeliveryPDF(personal: Record<string,string>) {
 
   <div class="footer">
     This is an auto-generated application confirmation. Keep it for your records.<br/>
-    Zyphix is a product of Clavix Technologies Pvt. Ltd. · India · wa.me/919682394363
+    Zyphix is a product of Clavix Technologies Pvt. Ltd. · India
   </div>
   <script>window.onload=()=>{window.print();}</script>
   </body></html>`;
