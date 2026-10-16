@@ -1979,12 +1979,10 @@ function Footer() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,.07)' }}>
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,.28)' }}>
             © 2026{' '}
-            <a href="https://clavix.in" target="_blank" rel="noopener noreferrer"
-              style={{ color: 'rgba(255,255,255,.42)', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,.18)', paddingBottom: 1, transition: 'color .15s' }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,.75)'}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,.42)'}>
+            <span
+              style={{ color: 'rgba(255,255,255,.42)' }}>
               Zyphix
-            </a>
+            </span>
             {' '}· All rights reserved
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
