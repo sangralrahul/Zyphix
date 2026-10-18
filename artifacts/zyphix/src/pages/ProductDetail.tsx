@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Link, useLocation, useParams } from 'wouter';
 import { motion } from 'framer-motion';
 import { ChevronLeft, Plus, Minus, Clock, Truck, ShieldCheck, Star, Heart, Share2 } from 'lucide-react';
-import { products } from '@/data/mockData';
+import { useCatalog } from '@/lib/catalog';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useReviews } from '@/context/ReviewsContext';
@@ -20,11 +20,12 @@ export function ProductDetail() {
   const { has: isWished, toggle: toggleWish } = useWishlist();
   const { summary } = useReviews();
 
-  const product = useMemo(() => products.find(p => p.id === params.id), [params.id]);
+  const { products } = useCatalog();
+  const product = useMemo(() => products.find(p => p.id === params.id), [products, params.id]);
   const related = useMemo(() => {
     if (!product) return [];
     return products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 8);
-  }, [product]);
+  }, [products, product]);
 
   if (!product) {
     return (
@@ -63,7 +64,7 @@ export function ProductDetail() {
         {/* image */}
         <div style={{ background: '#fff', borderRadius: 20, padding: 16, border: '1px solid #EAEAEA', position: 'relative' }}>
           <div style={{ aspectRatio: '1', borderRadius: 14, overflow: 'hidden', background: '#F3F4F6', position: 'relative' }}>
-            <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#fff', display: 'block' }} />
             {discount > 0 && (
               <div style={{ position: 'absolute', top: 12, left: 12, background: '#EF4444', color: '#fff', fontSize: 11, fontWeight: 800, padding: '5px 10px', borderRadius: 8 }}>
                 {discount}% OFF
@@ -177,7 +178,7 @@ export function ProductDetail() {
               <Link key={r.id} href={`/now/product/${r.id}`}>
                 <a style={{ textDecoration: 'none', color: 'inherit' }}>
                   <motion.div whileHover={{ y: -3 }} style={{ background: '#fff', borderRadius: 14, overflow: 'hidden', border: '1px solid #F0F0F0', boxShadow: '0 1px 6px rgba(0,0,0,0.05)' }}>
-                    <img src={r.image} alt={r.name} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }} />
+                    <img src={r.image} alt={r.name} style={{ width: '100%', aspectRatio: '1', objectFit: 'contain', background: '#fff' }} />
                     <div style={{ padding: 10 }}>
                       <div style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 600, textTransform: 'uppercase' }}>{r.brand}</div>
                       <div style={{ fontSize: 12.5, fontWeight: 700, color: '#1F2937', margin: '3px 0 6px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{r.name}</div>

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingCart, Plus, Minus, X, Clock, ChevronRight, Zap, Tag, Truck, SlidersHorizontal } from 'lucide-react';
-import { products, GROCERY_CATEGORIES } from '@/data/mockData';
+import { useCatalog, type Product } from '@/lib/catalog';
 import { Link, useLocation } from 'wouter';
 import { useCart } from '@/context/CartContext';
 
@@ -18,6 +18,7 @@ export function ZyphixNow() {
     try { return localStorage.getItem('zyphix_groc_cat') || 'Fruits & Veg'; } catch { return 'Fruits & Veg'; }
   };
 
+  const { products, categories: GROCERY_CATEGORIES, loading: catalogLoading } = useCatalog();
   const [activeCat, setActiveCat] = useState<string>(initCat);
   const [search, setSearch] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
@@ -56,12 +57,12 @@ export function ZyphixNow() {
     .filter(p => p.category === activeCat)
     .filter(p => !onlyDiscounted || (p.origPrice && p.price < p.origPrice))
     .filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase()))
-    .slice().sort(sortFn), [activeCat, onlyDiscounted, search, sortBy]);
+    .slice().sort(sortFn), [products, activeCat, onlyDiscounted, search, sortBy]);
 
   const allSearched = useMemo(() => search ? products
     .filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase()))
     .filter(p => !onlyDiscounted || (p.origPrice && p.price < p.origPrice))
-    .slice().sort(sortFn) : [], [search, onlyDiscounted, sortBy]);
+    .slice().sort(sortFn) : [], [products, search, onlyDiscounted, sortBy]);
 
   const displayProducts = search ? allSearched : filtered;
 
@@ -99,7 +100,7 @@ export function ZyphixNow() {
                   <Clock size={10} /> 30 min delivery
                 </span>
                 <span style={{ width: 3, height: 3, borderRadius: '50%', background: '#D1D5DB' }} />
-                <span style={{ fontSize: 11, color: '#6B7280', fontWeight: 500 }}>300+ products</span>
+                <span style={{ fontSize: 11, color: '#6B7280', fontWeight: 500 }}>{catalogLoading ? 'Loading…' : `${products.length.toLocaleString('en-IN')} products`}</span>
                 <span style={{ width: 3, height: 3, borderRadius: '50%', background: '#D1D5DB' }} />
                 <span style={{ fontSize: 11, color: '#6B7280', fontWeight: 500 }}>6 stores near you</span>
               </div>
@@ -367,7 +368,6 @@ export function ZyphixNow() {
 }
 
 /* ─── Product Card ─── */
-type Product = { id: string; name: string; brand: string; price: number; origPrice: number | null; category: string; weight: string; image: string; tag: string | null; storeName: string; distance: string };
 
 function ProductCard({ product: p, qty, onAdd, onRemove }: { product: Product; qty: number; onAdd: () => void; onRemove: () => void }) {
   const discount = p.origPrice ? Math.round((1 - p.price / p.origPrice) * 100) : 0;
@@ -381,8 +381,9 @@ function ProductCard({ product: p, qty, onAdd, onRemove }: { product: Product; q
       {/* Image */}
       <Link href={`/now/product/${p.id}`}>
         <a style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden', background: '#F8F9FA', display: 'block', textDecoration: 'none' }}>
-        <img src={p.image} alt={p.name} draggable={false}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .3s' }}
+        <img src={p.image} alt={p.name} draggable={false} loading="lazy" decoding="async"
+          onError={e => { const img = e.currentTarget as HTMLImageElement; if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = `https://placehold.co/400x400/E8F7EE/0DA366/png?text=${encodeURIComponent(p.name.split(' ').slice(0, 3).join(' '))}&font=poppins`; } }}
+          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', transition: 'transform .3s', background: '#fff', padding: 6, boxSizing: 'border-box' }}
           onMouseEnter={e => (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.05)'}
           onMouseLeave={e => (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)'}
         />
