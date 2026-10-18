@@ -154,6 +154,38 @@ async function handleAdmin(request: Request, env: Env, url: URL): Promise<Respon
     return json({ reset: r.meta.changes });
   }
 
+  // List unique pending products so a local script can resolve them off-platform.
+  if (p === '/admin/images/pending') {
+    const limit = Math.min(Number(url.searchParams.get('limit') ?? 1000), 5000);
+    const kind = url.searchParams.get('kind') ?? 'packaged';
+    const { results } = await env.DB.prepare(
+      "SELECT brand, name, category, image_kind FROM products WHERE image_status = 'pending' AND image_kind = ? GROUP BY brand, name ORDER BY rowid LIMIT ?"
+    ).bind(kind, limit).all();
+    return json(results);
+  }
+
+  // Store an image resolved elsewhere: raw bytes in the body, metadata in the query string.
+  if (p === '/admin/images/put' && request.method === 'PUT') {
+    const brand = url.searchParams.get('brand'); const name = url.searchParams.get('name');
+    const source = url.searchParams.get('source') ?? 'manual'; const barcode = url.searchParams.get('barcode');
+    if (!brand || !name) return json({ error: 'brand and name required' }, 400);
+    const ct = request.headers.get('content-type') ?? 'image/jpeg';
+    const ext = ct.includes('png') ? 'png' : ct.includes('webp') ? 'webp' : 'jpg';
+    const key = `products/${slug(brand)}/${slug(name)}${barcode ? '-' + barcode : ''}.${ext}`;
+    const imgUrl = await putImage(env, key, await request.arrayBuffer(), ct);
+    const r = await env.DB.prepare("UPDATE products SET image_url = ?, image_source = ?, barcode = COALESCE(?, barcode), image_status = 'ready', updated_at = datetime('now') WHERE brand = ? AND name = ?")
+      .bind(imgUrl, source, barcode, brand, name).run();
+    return json({ url: imgUrl, updated: r.meta.changes });
+  }
+
+  // Mark a product as not found (local resolver gave up on it).
+  if (p === '/admin/images/not-found' && request.method === 'POST') {
+    const brand = url.searchParams.get('brand'); const name = url.searchParams.get('name');
+    if (!brand || !name) return json({ error: 'brand and name required' }, 400);
+    const r = await env.DB.prepare("UPDATE products SET image_status = 'not_found', updated_at = datetime('now') WHERE brand = ? AND name = ? AND image_status = 'pending'").bind(brand, name).run();
+    return json({ updated: r.meta.changes });
+  }
+
   if (p === '/admin/images/sync' && request.method === 'POST') {
     const limit = Math.min(Number(url.searchParams.get('limit') ?? 20), 40);
     const kind = url.searchParams.get('kind'); // optional: packaged | produce
