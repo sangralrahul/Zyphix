@@ -193,9 +193,11 @@ async function syncImages(env: Env, limit: number, kind: string | null) {
         .bind(result.url, result.source, result.barcode ?? null, row.brand, row.name).run();
       report.push({ product: label, status: 'ready', source: result.source, barcode: result.barcode });
     } catch (err) {
+      const msg = (err as Error).message;
+      if (msg === 'rate limited') { report.push({ product: label, status: 'rate_limited' }); break; } // leave it pending
       await env.DB.prepare("UPDATE products SET image_status = 'failed', updated_at = datetime('now') WHERE brand = ? AND name = ? AND image_status = 'pending'")
         .bind(row.brand, row.name).run();
-      report.push({ product: label, status: 'failed', error: (err as Error).message });
+      report.push({ product: label, status: 'failed', error: msg });
     }
   }
 
@@ -252,13 +254,14 @@ async function findPackagedImage(env: Env, row: ProductRow): Promise<ImageResult
     u.searchParams.set('fields', 'code,product_name,product_name_en,brands,image_front_url,image_url,countries_tags');
 
     const res = await fetch(u.toString(), { headers: { 'user-agent': OFF_UA, accept: 'application/json' } });
-    if (!res.ok) continue;
-    const data: any = await res.json();
+    if (res.status === 429 || res.status === 503) throw new Error('rate limited');
+    if (!res.ok) throw new Error(`search ${res.status}`);
+    const data: any = await res.json().catch(() => { throw new Error('search returned non-JSON (likely blocked)'); });
     for (const hit of data.products ?? []) {
       const s = scoreHit(hit, row.brand, bareName);
       if (s > bestScore) { bestScore = s; best = { ...hit, _host: h }; }
     }
-    if (best) break;
+    if (best || (data.products ?? []).length > 0) break;
   }
   if (!best) return null;
 
