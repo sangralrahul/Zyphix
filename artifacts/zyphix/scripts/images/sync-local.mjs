@@ -5,14 +5,53 @@
 // Usage:  set ADMIN_TOKEN=...   then
 //         node scripts/images/sync-local.mjs --base https://zyphix.rahulsangral.workers.dev
 // Options: --limit N (products to attempt, default all)  --pause ms (between lookups, default 6500 = ~9/min)
+//          --maxpx 1600 (longest edge after resize when `sharp` is installed)
 const args = Object.fromEntries(process.argv.slice(2).map((a, i, arr) => a.startsWith('--') ? [a.slice(2), arr[i + 1]] : []).filter(Boolean));
 const base = (args.base ?? process.env.WORKER_URL ?? 'https://zyphix.in').replace(/\/$/, '');
-const token = process.env.ADMIN_TOKEN;
-if (!token) { console.error('ADMIN_TOKEN env var is required'); process.exit(1); }
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+let token = process.env.ADMIN_TOKEN;
+if (!token) {
+  // Fall back to artifacts/zyphix/.dev.vars (git-ignored):  ADMIN_TOKEN=...
+  try {
+    const vars = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', '.dev.vars'), 'utf8');
+    token = vars.match(/^\s*ADMIN_TOKEN\s*=\s*"?([^"\r\n]+)"?/m)?.[1];
+  } catch {}
+}
+if (!token) { console.error('ADMIN_TOKEN is required: set the env var or put ADMIN_TOKEN=... in artifacts/zyphix/.dev.vars'); process.exit(1); }
 const pause = Number(args.pause ?? 6500);
 const headers = { authorization: `Bearer ${token}` };
 const UA = 'Zyphix/1.0 (https://zyphix.in; hello@zyphix.in)';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// Optional: if `sharp` is installed we normalise images to a crisp, web-friendly size
+// (max 1600px, JPEG q88) — full-resolution OFF photos can be 3–5 MB, far too heavy for product cards.
+let sharp = null;
+try { sharp = (await import('sharp')).default; } catch { console.log('(sharp not installed – uploading original files; run `pnpm install` in the repo root to enable resizing)'); }
+const MAX_PX = Number(args.maxpx ?? 1600);
+
+/** Open Food Facts exposes 100/200/400/full variants of the same photo; ask for the full-resolution one first. */
+function imageCandidates(hit) {
+  const u = hit.image_front_url ?? hit.image_url;
+  if (!u) return [];
+  const full = u.replace(/\.(\d{3})\.jpg$/i, '.full.jpg');
+  return full !== u ? [full, u] : [u];
+}
+
+async function fetchBestImage(hit) {
+  for (const u of imageCandidates(hit)) {
+    const res = await fetch(u, { headers: { 'user-agent': UA } });
+    if (!res.ok) continue;
+    let ct = res.headers.get('content-type') ?? 'image/jpeg';
+    let buf = Buffer.from(await res.arrayBuffer());
+    if (sharp) {
+      try { buf = await sharp(buf).rotate().resize({ width: MAX_PX, height: MAX_PX, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 88, mozjpeg: true }).toBuffer(); ct = 'image/jpeg'; } catch {}
+    }
+    return { buf, ct };
+  }
+  throw new Error('image fetch failed');
+}
 
 const BEAUTY = new Set(['Personal Care', 'Beauty & Cosmetics', 'Baby Care']);
 const tokens = s => new Set(s.toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(t => t.length > 2));
@@ -62,11 +101,9 @@ for (const [i, row] of pending.entries()) {
       await fetch(`${base}/admin/images/not-found?brand=${encodeURIComponent(row.brand)}&name=${encodeURIComponent(row.name)}`, { method: 'POST', headers });
       totals.not_found++; console.log(`not_found ${label}`);
     } else {
-      const img = await fetch(best.image_front_url ?? best.image_url, { headers: { 'user-agent': UA } });
-      if (!img.ok) throw new Error(`image ${img.status}`);
-      const ct = img.headers.get('content-type') ?? 'image/jpeg';
+      const { buf, ct } = await fetchBestImage(best);
       const put = await fetch(`${base}/admin/images/put?brand=${encodeURIComponent(row.brand)}&name=${encodeURIComponent(row.name)}&source=${src}&barcode=${best.code}`,
-        { method: 'PUT', headers: { ...headers, 'content-type': ct }, body: Buffer.from(await img.arrayBuffer()) });
+        { method: 'PUT', headers: { ...headers, 'content-type': ct }, body: buf });
       if (!put.ok) throw new Error(`upload ${put.status} ${await put.text()}`);
       totals.ready++; console.log(`ready     ${label} (${src} ${best.code})`);
     }
