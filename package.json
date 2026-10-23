@@ -12,6 +12,7 @@
   },
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.28.0",
   "devDependencies": {
     "@lovable.dev/vite-tanstack-config": "2.26.5",
     "@tailwindcss/vite": "^4.1.14",
