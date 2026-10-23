@@ -8,6 +8,23 @@ import {
 } from 'lucide-react';
 import { SiteHeader, SiteFooter, SectionHead, G, G2, INK } from '@/components/layout/SiteChrome';
 import { apiFetch } from '@/lib/api';
+import { type Category } from '@/lib/catalog';
+import { GROCERY_CATEGORIES as mockCategories } from '@/data/mockData';
+
+/** Lightweight: the landing page only needs categories (not the 3k-product list). */
+function useCategories(): Category[] {
+  const [cats, setCats] = useState<Category[]>(mockCategories as Category[]);
+  React.useEffect(() => {
+    let alive = true;
+    fetch('/api/categories', { headers: { accept: 'application/json' } })
+      .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d: Category[]) => { if (alive && Array.isArray(d) && d.length) setCats(d); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+  return cats;
+}
+const PRODUCT_COUNT = '2,900+';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Zyphix — company landing page (zyphix.in)
@@ -22,94 +39,129 @@ const fade = (delay = 0) => ({
 });
 
 /* ── Hero ─────────────────────────────────────────────────────────────────── */
+const HERO_CHIPS = ['Fruits & Veg', 'Dairy & Eggs', 'Biryani', 'Pharmacy', 'Snacks', 'Pizza', 'Atta & Dal', 'Electrician', 'Chai', 'Ice cream', 'Baby care', 'Plumber', 'Thali', 'Bakery'];
+
 function Hero() {
+  const categories = useCategories();
+  const count = PRODUCT_COUNT;
   return (
-    <section className="relative overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10"
-        style={{ background: 'radial-gradient(900px 420px at 15% -10%, rgba(13,163,102,.14), transparent 60%), radial-gradient(700px 380px at 95% 10%, rgba(249,115,22,.10), transparent 60%)' }} />
-      <div className="mx-auto max-w-[1180px] px-5 pt-16 pb-14 md:pt-24 md:pb-24 grid md:grid-cols-[1.05fr_.95fr] gap-12 items-center">
+    <section className="relative overflow-hidden text-white" style={{ background: `radial-gradient(1100px 600px at 80% -10%, rgba(13,163,102,.55), transparent 60%), radial-gradient(700px 500px at 0% 100%, rgba(249,115,22,.28), transparent 55%), ${INK}` }}>
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[.07]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px)', backgroundSize: '48px 48px', maskImage: 'radial-gradient(ellipse at 60% 40%, black 30%, transparent 75%)' }} />
+      <div className="mx-auto max-w-[1180px] px-5 pt-16 pb-10 md:pt-24 md:pb-16 grid md:grid-cols-[1.05fr_.95fr] gap-12 items-center">
         <div>
-          <motion.div {...fade(0)} className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[12.5px] font-bold text-emerald-700">
-            <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>
+          <motion.div {...fade(0)} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[12.5px] font-bold text-emerald-300 backdrop-blur">
+            <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" /></span>
             India's SuperLocal App · Now onboarding across India
           </motion.div>
 
-          <motion.h1 {...fade(.05)} className="mt-5 font-black tracking-[-0.04em] leading-[1.02] text-[2.6rem] sm:text-[3.4rem] lg:text-[4rem]" style={{ fontFamily: "'Outfit', sans-serif", color: INK }}>
+          <motion.h1 {...fade(.05)} className="mt-6 font-black tracking-[-0.045em] leading-[0.98] text-[3rem] sm:text-[3.9rem] lg:text-[4.9rem]" style={{ fontFamily: "'Outfit', sans-serif" }}>
             Your neighbourhood,<br />
-            <span style={{ color: G }}>delivered in 30 minutes.</span>
+            <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #34D399, #10B981 50%, #A7F3D0)' }}>delivered in 30 minutes.</span>
           </motion.h1>
 
-          <motion.p {...fade(.1)} className="mt-6 max-w-[540px] text-[17px] leading-relaxed text-gray-600">
-            Groceries, food, pharmacy and home services from real local kirana stores, restaurants and professionals — one app, transparent pricing, no dark warehouses.
+          <motion.p {...fade(.1)} className="mt-6 max-w-[540px] text-[17px] leading-relaxed text-white/70">
+            Groceries, food, pharmacy and home services from real local kirana stores, restaurants and professionals — one app, shelf prices, no dark warehouses.
           </motion.p>
 
-          <motion.div {...fade(.15)} className="mt-8 flex flex-wrap gap-3">
-            <Link href="/now" className="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-[15px] font-bold text-white shadow-[0_8px_24px_rgba(13,163,102,.35)] transition hover:-translate-y-0.5" style={{ background: G }}>
+          <motion.div {...fade(.15)} className="mt-9 flex flex-wrap gap-3">
+            <Link href="/now" className="inline-flex items-center gap-2 rounded-2xl px-6 py-4 text-[15px] font-bold text-white shadow-[0_12px_32px_rgba(13,163,102,.45)] transition hover:-translate-y-0.5" style={{ background: G }}>
               Order groceries <ArrowRight size={17} />
             </Link>
-            <Link href="/eats" className="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-[15px] font-bold text-gray-900 border border-gray-200 bg-white transition hover:bg-gray-50">
-              <UtensilsCrossed size={17} className="text-orange-500" /> Order food
+            <Link href="/eats" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-6 py-4 text-[15px] font-bold text-white backdrop-blur transition hover:bg-white/15">
+              <UtensilsCrossed size={17} className="text-orange-400" /> Order food
             </Link>
           </motion.div>
 
-          <motion.ul {...fade(.2)} className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[13.5px] text-gray-600">
+          <motion.div {...fade(.2)} className="mt-10 grid max-w-[520px] grid-cols-3 gap-3">
             {[
-              [<Clock size={15} />, 'Under 30 min delivery'],
-              [<BadgeIndianRupee size={15} />, 'Zero surge pricing'],
-              [<Store size={15} />, 'Real local stores'],
-            ].map(([icon, t], i) => (
-              <li key={i} className="flex items-center gap-2"><span className="text-emerald-600">{icon}</span>{t}</li>
+              [count, 'products from local shelves'],
+              [`${categories.length || 26}`, 'grocery categories'],
+              ['30 min', 'doorstep delivery target'],
+            ].map(([v, l]) => (
+              <div key={l} className="rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur">
+                <p className="text-[22px] font-black leading-none tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>{v}</p>
+                <p className="mt-1.5 text-[12px] leading-snug text-white/60">{l}</p>
+              </div>
             ))}
-          </motion.ul>
+          </motion.div>
         </div>
 
-        {/* Visual */}
-        <motion.div initial={{ opacity: 0, scale: .96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .6, delay: .15 }} className="relative">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 relative overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0_20px_60px_rgba(11,18,32,.10)]">
-              <img src="/images/groceries.png" alt="Fresh groceries from local kirana stores" className="h-[220px] sm:h-[260px] w-full object-cover" loading="eager" />
+        {/* Visual stage */}
+        <motion.div initial={{ opacity: 0, y: 24, scale: .97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .7, delay: .15 }} className="relative mx-auto w-full max-w-[520px]">
+          <div aria-hidden className="absolute -inset-6 rounded-[40px] opacity-70 blur-2xl" style={{ background: 'radial-gradient(closest-side, rgba(16,185,129,.55), transparent)' }} />
+          <div className="relative overflow-hidden rounded-[32px] border border-white/15 bg-white/5 p-3 backdrop-blur">
+            <div className="relative overflow-hidden rounded-[24px]">
+              <img src="/images/groceries.png" alt="Fresh groceries from a local kirana store" className="h-[300px] sm:h-[360px] w-full object-cover" loading="eager" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-white/95 px-3 py-1.5 text-[12.5px] font-bold text-gray-900 shadow">
-                <span className="h-2 w-2 rounded-full" style={{ background: G }} /> Zyphix Now · Groceries
+                <span className="h-2 w-2 rounded-full" style={{ background: G }} /> Live · Zyphix Now
               </div>
-              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-2xl bg-white/95 p-3 shadow backdrop-blur">
+              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-2xl bg-white/95 p-3.5 text-gray-900 shadow-xl">
                 <div>
-                  <p className="text-[13px] font-bold text-gray-900">Sharma Kirana Store</p>
-                  <p className="text-[12px] text-gray-500">0.8 km away · 2,900+ items</p>
+                  <p className="text-[13.5px] font-bold">Order from Sharma Kirana Store</p>
+                  <p className="text-[12px] text-gray-500">0.8 km away · packed in 4 min · rider on the way</p>
                 </div>
-                <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[12px] font-bold text-emerald-700">18 min</span>
-              </div>
-            </div>
-            <div className="relative overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0_12px_40px_rgba(11,18,32,.08)]">
-              <img src="/images/food.png" alt="Food from neighbourhood restaurants" className="h-[150px] w-full object-cover" loading="lazy" />
-              <div className="p-3">
-                <p className="text-[13px] font-bold text-gray-900">Zyphix Eats</p>
-                <p className="text-[12px] text-gray-500">Dhabas, cloud kitchens & local favourites</p>
-              </div>
-            </div>
-            <div className="flex flex-col justify-between rounded-3xl p-4 text-white shadow-[0_12px_40px_rgba(13,163,102,.30)]" style={{ background: `linear-gradient(145deg, ${G} 0%, ${G2} 100%)` }}>
-              <Bike size={26} />
-              <div>
-                <p className="text-[28px] font-black leading-none tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>30<span className="text-[16px] font-bold"> min</span></p>
-                <p className="mt-1 text-[12.5px] text-white/85">Average doorstep delivery target</p>
+                <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[12.5px] font-black text-emerald-700">18 min</span>
               </div>
             </div>
           </div>
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: .5 }} className="absolute -right-3 top-10 hidden sm:flex items-center gap-3 rounded-2xl bg-white p-3 pr-4 text-gray-900 shadow-2xl">
+            <img src="/images/food.png" alt="" className="h-12 w-12 rounded-xl object-cover" />
+            <div>
+              <p className="text-[12.5px] font-bold">Zyphix Eats</p>
+              <p className="text-[11.5px] text-gray-500">Biryani House · 25 min</p>
+            </div>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: .65 }} className="absolute -left-3 bottom-24 hidden sm:flex items-center gap-3 rounded-2xl bg-white p-3 pr-4 text-gray-900 shadow-2xl">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl text-white" style={{ background: G }}><Bike size={20} /></span>
+            <div>
+              <p className="text-[12.5px] font-bold">Zero surge pricing</p>
+              <p className="text-[11.5px] text-gray-500">Shelf price is the app price</p>
+            </div>
+          </motion.div>
         </motion.div>
+      </div>
+
+      {/* marquee */}
+      <div className="border-t border-white/10 bg-black/20">
+        <div className="relative overflow-hidden py-3.5">
+          <div className="flex w-max gap-3 whitespace-nowrap" style={{ animation: 'marquee 40s linear infinite' }}>
+            {[...HERO_CHIPS, ...HERO_CHIPS].map((c, i) => (
+              <span key={i} className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-[13px] font-semibold text-white/80">{c}</span>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
-/* ── Category strip ───────────────────────────────────────────────────────── */
-const CATS = ['Fruits & Veg', 'Dairy & Eggs', 'Snacks', 'Pharmacy', 'Grains & Dal', 'Bakery', 'Household', 'Personal Care', 'Biryani', 'Pizza', 'Thali', 'Desserts', 'Home Services'];
-function CategoryStrip() {
+/* ── Category showcase ────────────────────────────────────────────────────── */
+function CategoryShowcase() {
+  const categories = useCategories();
+  const cats = categories.slice(0, 12);
   return (
-    <section className="border-y border-gray-200 bg-white">
-      <div className="mx-auto max-w-[1180px] px-5 py-5 flex items-center gap-4 overflow-x-auto no-scrollbar">
-        <span className="shrink-0 text-[12px] font-bold uppercase tracking-wider text-gray-400">Everyday essentials</span>
-        {CATS.map(c => (
-          <span key={c} className="shrink-0 rounded-full border border-gray-200 bg-gray-50 px-3.5 py-1.5 text-[13px] font-semibold text-gray-700">{c}</span>
-        ))}
+    <section className="bg-gray-50 border-b border-gray-200">
+      <div className="mx-auto max-w-[1180px] px-5 py-16 md:py-20">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <SectionHead align="left" eyebrow="Shop by category" title="Everything your kitchen and home needs." sub={`${categories.length || 26} categories, thousands of products — all from stores within a few kilometres of you.`} />
+          <Link href="/now" className="inline-flex items-center gap-1.5 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-[14px] font-bold text-gray-900 hover:bg-gray-100">Browse all <ArrowRight size={15} /></Link>
+        </div>
+        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {cats.map((c, i) => (
+            <Link key={c.name} href="/now" className={`group relative overflow-hidden rounded-3xl border border-gray-200 bg-white ${i === 0 ? 'col-span-2 row-span-2 min-h-[260px]' : 'min-h-[150px]'}`}>
+              <img src={c.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+              <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, rgba(11,18,32,0) 30%, rgba(11,18,32,.85) 100%)` }} />
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4 text-white">
+                <div>
+                  <span className="text-[20px]">{c.icon}</span>
+                  <p className={`font-black tracking-tight ${i === 0 ? 'text-[26px]' : 'text-[16px]'}`} style={{ fontFamily: "'Outfit', sans-serif" }}>{c.name}</p>
+                </div>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 backdrop-blur transition group-hover:bg-white group-hover:text-gray-900"><ArrowRight size={16} /></span>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -363,7 +415,7 @@ export function Landing() {
       <SiteHeader />
       <main>
         <Hero />
-        <CategoryStrip />
+        <CategoryShowcase />
         <Products />
         <HowItWorks />
         <Why />

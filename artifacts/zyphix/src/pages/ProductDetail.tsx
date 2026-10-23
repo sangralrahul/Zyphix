@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from 'wouter';
 import { motion } from 'framer-motion';
 import { ChevronLeft, Plus, Minus, Clock, Truck, ShieldCheck, Star, Heart, Share2 } from 'lucide-react';
 import { useCatalog } from '@/lib/catalog';
+import { productImageFor, categoryTint } from '@/lib/productImage';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useReviews } from '@/context/ReviewsContext';
@@ -20,8 +21,9 @@ export function ProductDetail() {
   const { has: isWished, toggle: toggleWish } = useWishlist();
   const { summary } = useReviews();
 
-  const { products } = useCatalog();
+  const { products, categories } = useCatalog();
   const product = useMemo(() => products.find(p => p.id === params.id), [products, params.id]);
+  const mainImage = useMemo(() => product ? productImageFor(product, categories) : null, [product, categories]);
   const related = useMemo(() => {
     if (!product) return [];
     return products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 8);
@@ -64,7 +66,18 @@ export function ProductDetail() {
         {/* image */}
         <div style={{ background: '#fff', borderRadius: 20, padding: 16, border: '1px solid #EAEAEA', position: 'relative' }}>
           <div style={{ aspectRatio: '1', borderRadius: 14, overflow: 'hidden', background: '#F3F4F6', position: 'relative' }}>
-            <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#fff', display: 'block' }} />
+            {mainImage?.isFallback ? (
+              <>
+                <img src={mainImage.src} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <div style={{ position: 'absolute', inset: 0, background: categoryTint(categories, product.category), opacity: 0.18, mixBlendMode: 'multiply' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,.35), transparent 50%)' }} />
+                <span style={{ position: 'absolute', left: 12, bottom: 12, background: 'rgba(255,255,255,.95)', color: '#1F2937', fontSize: 11, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase', padding: '5px 10px', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,.12)' }}>
+                  {product.brand}
+                </span>
+              </>
+            ) : (
+              <img src={mainImage?.src || product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#fff', display: 'block' }} />
+            )}
             {discount > 0 && (
               <div style={{ position: 'absolute', top: 12, left: 12, background: '#EF4444', color: '#fff', fontSize: 11, fontWeight: 800, padding: '5px 10px', borderRadius: 8 }}>
                 {discount}% OFF
@@ -174,11 +187,21 @@ export function ProductDetail() {
         <div style={{ padding: '10px 4px' }}>
           <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 18, color: '#111827', margin: '10px 0 12px' }}>You might also like</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: 10 }}>
-            {related.map(r => (
+            {related.map(r => {
+              const img = productImageFor(r, categories);
+              return (
               <Link key={r.id} href={`/now/product/${r.id}`}>
                 <a style={{ textDecoration: 'none', color: 'inherit' }}>
                   <motion.div whileHover={{ y: -3 }} style={{ background: '#fff', borderRadius: 14, overflow: 'hidden', border: '1px solid #F0F0F0', boxShadow: '0 1px 6px rgba(0,0,0,0.05)' }}>
-                    <img src={r.image} alt={r.name} style={{ width: '100%', aspectRatio: '1', objectFit: 'contain', background: '#fff' }} />
+                    <div style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden', background: '#fff' }}>
+                      <img src={img.src} alt={r.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: img.isFallback ? 'cover' : 'contain', display: 'block' }} />
+                      {img.isFallback && (
+                        <>
+                          <div style={{ position: 'absolute', inset: 0, background: categoryTint(categories, r.category), opacity: 0.18, mixBlendMode: 'multiply' }} />
+                          <span style={{ position: 'absolute', left: 8, bottom: 8, maxWidth: '80%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', background: 'rgba(255,255,255,.95)', color: '#1F2937', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', padding: '3px 7px', borderRadius: 6 }}>{r.brand}</span>
+                        </>
+                      )}
+                    </div>
                     <div style={{ padding: 10 }}>
                       <div style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 600, textTransform: 'uppercase' }}>{r.brand}</div>
                       <div style={{ fontSize: 12.5, fontWeight: 700, color: '#1F2937', margin: '3px 0 6px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{r.name}</div>
@@ -187,7 +210,8 @@ export function ProductDetail() {
                   </motion.div>
                 </a>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
