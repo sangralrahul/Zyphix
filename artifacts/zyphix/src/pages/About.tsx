@@ -1,111 +1,158 @@
 import React from 'react';
 import { Link } from 'wouter';
-import { ArrowLeft, Users, MapPin, Star, ArrowRight } from 'lucide-react';
-
 import { motion } from 'framer-motion';
-import { ZyphixLogo } from '../components/ZyphixLogo';
+import {
+  ArrowRight, Store, Warehouse, Leaf, BadgeIndianRupee, Clock, ShieldCheck,
+  Handshake, MapPin, Check, X,
+} from 'lucide-react';
+import { SitePage, PageHero, SectionHead, btnPrimary, btnSecondary, card, G, INK, HEAD_FONT } from '@/components/layout/SiteChrome';
 
-const T1 = '#111827'; const T2 = '#6B7280'; const T3 = '#9CA3AF';
-const G = '#0DA366'; const G2 = '#0A8C58'; const BD = '#E5E7EB'; const BG = '#F8F9FA'; const W = '#FFFFFF';
+/* ────────────────────────────────────────────────────────────────────────────
+   About — company story, mission, values, local-first vs dark stores.
+──────────────────────────────────────────────────────────────────────────── */
+
+const fade = (delay = 0) => ({
+  initial: { opacity: 0, y: 14 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: .5, ease: 'easeOut' as const, delay },
+});
+
+const FACTS = [
+  { icon: <MapPin size={18} />, v: 'Founded 2024', l: 'Built in India, for India' },
+  { icon: <Clock size={18} />, v: 'Under 30 minutes', l: 'Doorstep delivery target' },
+  { icon: <BadgeIndianRupee size={18} />, v: 'Zero surge', l: 'Shelf price is the app price' },
+  { icon: <Store size={18} />, v: 'Onboarding across India', l: 'Neighbourhood by neighbourhood' },
+];
+
+const VALUES = [
+  { icon: <Handshake size={20} />, t: 'Partners first', d: 'Free onboarding, fair commissions and weekly payouts. Zyphix only works when the kirana and the kitchen win too.' },
+  { icon: <BadgeIndianRupee size={20} />, t: 'Radical transparency', d: 'No surge pricing and no hidden handling fees. Every charge is shown before you pay.' },
+  { icon: <Clock size={20} />, t: 'Speed by design', d: 'Short distances and live local inventory, not giant warehouses, are what make fast delivery possible.' },
+  { icon: <ShieldCheck size={20} />, t: 'Trust and safety', d: 'Verified partners, secure payments and live tracking on every order and every service booking.' },
+];
+
+const COMPARE: Array<{ point: string; local: string; dark: string }> = [
+  { point: 'Where your order comes from', local: 'A real kirana, restaurant or professional near you', dark: 'A warehouse built to compete with them' },
+  { point: 'Who keeps the margin', local: 'The local business, with a fair platform fee', dark: 'The platform, after heavy discounting' },
+  { point: 'Pricing', local: 'Shelf price, no surge', dark: 'Dynamic pricing and handling fees' },
+  { point: 'Impact on the neighbourhood', local: 'More customers for existing shops', dark: 'Fewer independent shops over time' },
+];
 
 export function About() {
   return (
-    <div style={{ background: BG, minHeight: '100vh' }}>
-      {/* Navbar stub */}
-      <div style={{ background: W, borderBottom: `1px solid ${BD}`, position: 'sticky', top: 0, zIndex: 40 }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/">
-            <ZyphixLogo size={30} wordmarkColor={T1} wordmarkHighlight={G} />
-          </Link>
-          <Link href="/">
-            <button style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: T2, padding: '7px 14px', borderRadius: 8, border: `1px solid ${BD}`, background: W }}>
-              <ArrowLeft size={13} /> Back
-            </button>
-          </Link>
-        </div>
-      </div>
+    <SitePage title="About">
+      <PageHero
+        eyebrow="Our story"
+        title={<>Built for India's <span style={{ color: G }}>neighbourhood economy.</span></>}
+        sub="Zyphix started with a simple belief: your local kirana store, favourite dhaba and trusted plumber deserve world-class technology — without being replaced by it."
+      >
+        <Link href="/now" className={btnPrimary} style={{ background: G }}>Order now <ArrowRight size={16} /></Link>
+        <Link href="/partner" className={btnSecondary}>Partner with us</Link>
+      </PageHero>
 
-      {/* Hero */}
-      <div style={{ background: `linear-gradient(135deg, #064E3B, #065F46, #047857)`, padding: '72px 24px 80px', textAlign: 'center' }}>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .55 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: '#6EE7B7', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 16 }}>Our Story</p>
-          <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(2rem,5vw,3.4rem)', color: '#fff', letterSpacing: '-.05em', lineHeight: 1.06, marginBottom: 18, maxWidth: 700, margin: '0 auto 18px' }}>
-            Built for India's<br />neighbourhood economy.
-          </h1>
-          <p style={{ fontSize: 16, color: 'rgba(255,255,255,.6)', maxWidth: 540, margin: '0 auto 32px', lineHeight: 1.7 }}>
-            Zyphix started with a simple belief: your local kirana store, favourite dhaba, and trusted plumber deserve world-class technology.
-          </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/"><button style={{ background: W, color: G2, fontSize: 14, fontWeight: 800, padding: '12px 28px', borderRadius: 12 }}>Order Now →</button></Link>
-            <a href="mailto:partnerships@zyphix.in"><button style={{ background: 'rgba(255,255,255,.12)', color: '#fff', fontSize: 14, fontWeight: 700, padding: '12px 28px', borderRadius: 12, border: '1px solid rgba(255,255,255,.2)' }}>Partner with Us</button></a>
-          </div>
-        </motion.div>
-      </div>
-
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '56px 24px 80px' }}>
-        {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 56 }}>
-          {[
-            { v: '2024', l: 'Founded', color: G },
-            { v: '100+', l: 'Cities', color: '#7C3AED' },
-            { v: '5 Lakh+', l: 'Customers', color: '#EA580C' },
-            { v: '200+', l: 'Partner Stores', color: G },
-          ].map(({ v, l, color }, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * .07 }}>
-              <div style={{ background: W, border: `1px solid ${BD}`, borderRadius: 18, padding: '24px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
-                <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: '1.9rem', color, letterSpacing: '-.04em', lineHeight: 1 }}>{v}</p>
-                <p style={{ fontSize: 12.5, color: T3, marginTop: 6 }}>{l}</p>
+      {/* Facts (honest, no invented metrics) */}
+      <section className="mx-auto max-w-[1180px] px-5 py-14">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {FACTS.map((f, i) => (
+            <motion.div key={f.v} {...fade(i * .06)} className={`${card} flex items-start gap-4 p-5`}>
+              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">{f.icon}</span>
+              <div>
+                <p className="text-[16px] font-extrabold text-gray-900">{f.v}</p>
+                <p className="mt-0.5 text-[13px] text-gray-500">{f.l}</p>
               </div>
             </motion.div>
           ))}
         </div>
+      </section>
 
-        {/* Mission */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 56 }}>
+      {/* Mission */}
+      <section className="border-y border-gray-200 bg-gray-50">
+        <div className="mx-auto grid max-w-[1180px] items-center gap-12 px-5 py-20 md:grid-cols-[1fr_1fr] md:py-24">
           <div>
-            <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: '1.9rem', color: T1, letterSpacing: '-.04em', marginBottom: 16 }}>Our mission</h2>
-            <p style={{ fontSize: 15, color: T2, lineHeight: 1.75, marginBottom: 14 }}>India has 12 million kirana stores, 7.5 million food businesses, and millions of independent service professionals. They power our economy but lack the technology that large chains enjoy.</p>
-            <p style={{ fontSize: 15, color: T2, lineHeight: 1.75, marginBottom: 14 }}>Zyphix gives every local business a digital storefront, smart inventory management, and access to customers at hyperlocal scale — while delivering the best prices and fastest service to you.</p>
-            <p style={{ fontSize: 15, color: T2, lineHeight: 1.75 }}>We are the superapp for India's <em>SuperLocal</em> economy.</p>
+            <SectionHead align="left" eyebrow="Mission" title="Technology for the businesses that already run your neighbourhood." />
+            <div className="mt-6 space-y-4 text-[15.5px] leading-relaxed text-gray-600">
+              <p>India's neighbourhoods are powered by millions of independent kirana stores, food businesses and service professionals. They know their customers by name, but most of them have never had the tools that large chains take for granted.</p>
+              <p>Zyphix gives every local business a digital storefront, simple order and inventory management, delivery and payments — and gives customers one app for groceries, food, pharmacy and home services from the places they already trust.</p>
+              <p className="font-semibold text-gray-900">We call it SuperLocal: a superapp for the local economy, not a replacement for it.</p>
+            </div>
           </div>
-          <div>
-            <img src="https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=700&h=480&fit=crop&q=85" alt="Local store" style={{ width: '100%', borderRadius: 20, objectFit: 'cover', height: '100%', maxHeight: 340 }} />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2 overflow-hidden rounded-3xl border border-gray-200 bg-white">
+              <img src="/images/groceries.png" alt="Groceries from a local kirana store" className="h-[220px] w-full object-cover" loading="lazy" />
+            </div>
+            <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white">
+              <img src="/images/food.png" alt="Food from a neighbourhood restaurant" className="h-[150px] w-full object-cover" loading="lazy" />
+            </div>
+            <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white">
+              <img src="/images/scooter.png" alt="Zyphix delivery partner" className="h-[150px] w-full object-cover" loading="lazy" />
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Values */}
-        <div style={{ marginBottom: 56 }}>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: '1.9rem', color: T1, letterSpacing: '-.04em', marginBottom: 8 }}>What we stand for</h2>
-          <p style={{ fontSize: 14.5, color: T2, marginBottom: 32 }}>Every decision we make is guided by four principles.</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 16 }}>
-            {[
-              { em: '⚡', title: 'Speed without compromise', desc: '30-minute delivery is a promise, not a marketing line. Our operations are built around it.' },
-              { em: '🤝', title: 'Partners first', desc: 'We charge zero onboarding fee and the lowest commission in the industry — so local businesses thrive.' },
-              { em: '🛡️', title: 'Radical transparency', desc: 'No surge pricing. No hidden fees. The price you see is the price you pay, always.' },
-              { em: '🌱', title: 'Sustainable growth', desc: 'We are committed to carbon-neutral deliveries by 2027 through electric vehicle partnerships.' },
-            ].map(({ em, title, desc }) => (
-              <div key={title} style={{ background: W, border: `1px solid ${BD}`, borderRadius: 18, padding: '24px 22px', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
-                <span style={{ fontSize: 28, display: 'block', marginBottom: 12 }}>{em}</span>
-                <h3 style={{ fontWeight: 800, color: T1, fontSize: 15, marginBottom: 6 }}>{title}</h3>
-                <p style={{ fontSize: 13.5, color: T2, lineHeight: 1.65 }}>{desc}</p>
-              </div>
-            ))}
+      {/* Values */}
+      <section className="mx-auto max-w-[1180px] px-5 py-20 md:py-24">
+        <SectionHead eyebrow="What we stand for" title="Four principles behind every decision." />
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {VALUES.map(v => (
+            <div key={v.t} className={`${card} p-6`}>
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">{v.icon}</span>
+              <h3 className="mt-4 text-[16.5px] font-extrabold text-gray-900">{v.t}</h3>
+              <p className="mt-2 text-[14px] leading-relaxed text-gray-600">{v.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* How we're different */}
+      <section className="border-y border-gray-200 bg-gray-50">
+        <div className="mx-auto max-w-[1180px] px-5 py-20 md:py-24">
+          <SectionHead eyebrow="How we're different" title="Local-first, not dark stores." sub="Most quick-commerce apps build warehouses that compete with the shops around you. Zyphix puts those shops online instead." />
+          <div className="mt-12 grid gap-5 md:grid-cols-2">
+            <div className={`${card} p-7`}>
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl text-white" style={{ background: G }}><Leaf size={20} /></span>
+              <h3 className="mt-4 text-[20px] font-black tracking-tight text-gray-900" style={{ fontFamily: HEAD_FONT }}>Zyphix: local-first</h3>
+              <ul className="mt-4 space-y-3">
+                {COMPARE.map(c => (
+                  <li key={c.point} className="flex gap-3 text-[14px] leading-relaxed">
+                    <Check size={17} className="mt-0.5 shrink-0 text-emerald-600" />
+                    <span><span className="font-semibold text-gray-900">{c.point}:</span> <span className="text-gray-600">{c.local}</span></span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className={`${card} p-7`}>
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-gray-500"><Warehouse size={20} /></span>
+              <h3 className="mt-4 text-[20px] font-black tracking-tight text-gray-500" style={{ fontFamily: HEAD_FONT }}>Dark-store model</h3>
+              <ul className="mt-4 space-y-3">
+                {COMPARE.map(c => (
+                  <li key={c.point} className="flex gap-3 text-[14px] leading-relaxed">
+                    <X size={17} className="mt-0.5 shrink-0 text-gray-400" />
+                    <span><span className="font-semibold text-gray-700">{c.point}:</span> <span className="text-gray-500">{c.dark}</span></span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* CTA */}
-        <div style={{ background: `linear-gradient(135deg, #064E3B, #047857)`, borderRadius: 22, padding: '44px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
+      {/* CTA */}
+      <section className="mx-auto max-w-[1180px] px-5 py-20 md:py-24">
+        <div className="flex flex-col gap-6 rounded-[32px] p-8 text-white md:flex-row md:items-center md:justify-between md:p-12" style={{ background: INK }}>
           <div>
-            <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', fontSize: '1.6rem', letterSpacing: '-.03em', marginBottom: 6 }}>Want to partner with us?</p>
-            <p style={{ color: 'rgba(255,255,255,.55)', fontSize: 14 }}>List your store, restaurant, or services on Zyphix for free.</p>
+            <p className="text-[12px] font-bold uppercase tracking-[.12em] text-emerald-400">Join us</p>
+            <h2 className="mt-3 text-[1.8rem] font-black tracking-[-0.03em] leading-[1.1] md:text-[2.2rem]" style={{ fontFamily: HEAD_FONT }}>Be part of your neighbourhood's next chapter.</h2>
+            <p className="mt-3 max-w-[520px] text-[15px] leading-relaxed text-white/65">List your store, restaurant or services for free — or simply order from the businesses around you.</p>
           </div>
-          <a href="mailto:partnerships@zyphix.in">
-            <button style={{ background: W, color: G2, fontSize: 14, fontWeight: 800, padding: '13px 28px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
-              Get in touch <ArrowRight size={15} />
-            </button>
-          </a>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/partner" className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-[14.5px] font-bold text-gray-900 hover:bg-gray-100">Become a partner <ArrowRight size={16} /></Link>
+            <Link href="/now" className={btnPrimary} style={{ background: G }}>Order now</Link>
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </SitePage>
   );
 }
+
+export default About;

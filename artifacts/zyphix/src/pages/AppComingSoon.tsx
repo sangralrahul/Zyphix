@@ -1,17 +1,18 @@
 import { apiFetch } from '@/lib/api';
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'wouter';
+import { motion } from 'framer-motion';
 import {
-  Mail, ArrowRight, Check, Bell, ChevronLeft, Apple, Play,
-  Zap, MapPin, Tag, ShoppingBag, UtensilsCrossed, RefreshCw,
-  Sparkles, Search, Clock, Star,
+  Mail, ArrowRight, Check, Bell, Zap, MapPin, Tag, UtensilsCrossed, RefreshCw,
+  Smartphone, Globe, Share, PlusSquare, ShoppingBag, Clock,
 } from 'lucide-react';
+import { SitePage, PageHero, SectionHead, btnPrimary, btnSecondary, G, INK, HEAD_FONT } from '@/components/layout/SiteChrome';
 
-/* ── Brand tokens ── */
-const INK = '#04100B';
-const G = '#0DA366';
-const G2 = '#00E28A';
-const MINT = '#6EE7B7';
+/* ────────────────────────────────────────────────────────────────────────────
+   Zyphix mobile app — coming soon (zyphix.in/app)
+   Light page: hero + countdown + notify form, "use it in your browser" steps,
+   feature list, store badges.
+──────────────────────────────────────────────────────────────────────────── */
 
 /* Launch target — a fixed future date used for the live countdown */
 const LAUNCH_TARGET = new Date('2026-08-15T09:00:00Z').getTime();
@@ -36,107 +37,74 @@ function useCountdown(target: number) {
   ];
 }
 
-/* ── Crafted phone mockup with a mini Zyphix UI ── */
-function PhoneMock() {
+const fade = (delay = 0) => ({
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: .55, ease: 'easeOut' as const, delay },
+});
+
+const FEATURES = [
+  { Icon: Zap, t: '30-minute grocery delivery', d: 'Real kirana shelves near you, packed and moving in minutes.' },
+  { Icon: UtensilsCrossed, t: 'Food from local dhabas', d: 'Neighbourhood restaurants and cloud kitchens, fair commissions.' },
+  { Icon: MapPin, t: 'Live order tracking', d: 'Follow your delivery partner from pickup to doorstep.' },
+  { Icon: Tag, t: 'App-exclusive deals', d: 'Offers and launch-day perks only in the app.' },
+  { Icon: Bell, t: 'Instant push updates', d: 'Order confirmed, packed, on the way — without refreshing.' },
+  { Icon: RefreshCw, t: 'One-tap reorder', d: 'Your weekly essentials, re-ordered in a single tap.' },
+];
+
+const BROWSER_STEPS = [
+  { Icon: Globe, t: 'Open zyphix.in', d: 'Everything — groceries, food and services — already works in your mobile browser.' },
+  { Icon: Share, t: 'Tap Share or the browser menu', d: 'On iPhone use the Share button in Safari; on Android open the Chrome menu (⋮).' },
+  { Icon: PlusSquare, t: 'Add to Home Screen', d: 'Zyphix gets its own icon and opens full-screen, just like an installed app.' },
+];
+
+/* ── Light phone preview ──────────────────────────────────────────────────── */
+function PhonePreview() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 60, rotateX: 18 }}
-      animate={{ opacity: 1, y: 0, rotateX: 0 }}
-      transition={{ delay: 0.35, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-      style={{ position: 'relative' }}
-    >
-      {/* rotating conic halo */}
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
-        style={{
-          position: 'absolute', inset: '-16% -22%', borderRadius: '50%',
-          background: `conic-gradient(from 0deg, transparent 0%, ${G}55 15%, transparent 35%, ${G2}44 55%, transparent 75%, ${MINT}33 92%, transparent 100%)`,
-          filter: 'blur(34px)', opacity: 0.8, pointerEvents: 'none',
-        }}
-      />
-      <motion.div
-        animate={{ y: [0, -14, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-        style={{
-          position: 'relative', width: 288, height: 590, borderRadius: 46,
-          background: 'linear-gradient(160deg, #0c1a14, #060f0b)',
-          border: '1px solid rgba(255,255,255,0.10)',
-          boxShadow: '0 60px 120px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.10), 0 0 0 10px rgba(0,0,0,0.35)',
-          padding: 10, boxSizing: 'border-box',
-        }}
-      >
-        {/* screen */}
-        <div style={{ width: '100%', height: '100%', borderRadius: 38, background: '#F6F8F6', overflow: 'hidden', position: 'relative', boxSizing: 'border-box' }}>
-          {/* dynamic island */}
-          <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', width: 92, height: 26, borderRadius: 20, background: '#04100B', zIndex: 5 }} />
-          {/* app header */}
-          <div style={{ background: `linear-gradient(150deg, ${G} 0%, #0a7d4f 100%)`, padding: '46px 16px 18px', color: '#fff' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, letterSpacing: '-.04em', fontSize: 18 }}>ZYPHI<span style={{ color: MINT }}>X</span></div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, background: 'rgba(255,255,255,.16)', padding: '4px 9px', borderRadius: 20 }}>
-                <Clock size={11} /> 12 min
-              </div>
+    <motion.div initial={{ opacity: 0, scale: .96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .6, delay: .15 }} className="mx-auto w-[270px]">
+      <div className="rounded-[40px] border border-gray-200 bg-white p-2.5 shadow-[0_24px_60px_rgba(11,18,32,.12)]">
+        <div className="relative overflow-hidden rounded-[32px] bg-gray-50">
+          <div className="absolute left-1/2 top-2.5 z-10 h-5 w-20 -translate-x-1/2 rounded-full" style={{ background: INK }} />
+          <div className="px-4 pb-4 pt-10 text-white" style={{ background: G }}>
+            <div className="flex items-center justify-between">
+              <span className="text-[16px] font-black tracking-tight" style={{ fontFamily: HEAD_FONT }}>Zyphix</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold"><Clock size={10} /> 30 min</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', borderRadius: 12, padding: '9px 12px' }}>
-              <Search size={14} color={G} />
-              <span style={{ fontSize: 11.5, color: '#9CA3AF', fontWeight: 500 }}>Search groceries & food…</span>
+            <div className="mt-3 rounded-xl bg-white px-3 py-2 text-[11px] font-medium text-gray-400">Search groceries &amp; food…</div>
+          </div>
+          <div className="grid grid-cols-2 gap-2.5 p-3.5">
+            <div className="flex h-[88px] flex-col justify-between rounded-2xl bg-emerald-50 p-3 text-emerald-800">
+              <ShoppingBag size={18} />
+              <div><p className="text-[12px] font-extrabold leading-tight">Zyphix Now</p><p className="text-[10px] text-emerald-700">Groceries</p></div>
+            </div>
+            <div className="flex h-[88px] flex-col justify-between rounded-2xl bg-orange-50 p-3 text-orange-700">
+              <UtensilsCrossed size={18} />
+              <div><p className="text-[12px] font-extrabold leading-tight">Zyphix Eats</p><p className="text-[10px] text-orange-600">Food</p></div>
             </div>
           </div>
-          {/* dual hero */}
-          <div style={{ padding: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {[
-              { t: 'Zyphix Now', s: 'Grocery · 12m', bg: 'linear-gradient(160deg,#0DA366,#065f46)', Icon: ShoppingBag },
-              { t: 'Zyphix Eats', s: 'Food · Hot', bg: 'linear-gradient(160deg,#f97316,#c2410c)', Icon: UtensilsCrossed },
-            ].map(({ t, s, bg, Icon }) => (
-              <div key={t} style={{ borderRadius: 14, background: bg, padding: 12, color: '#fff', height: 96, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <Icon size={20} />
-                <div>
-                  <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 12.5, lineHeight: 1.1 }}>{t}</div>
-                  <div style={{ fontSize: 9.5, opacity: .85 }}>{s}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* category chips */}
-          <div style={{ padding: '0 14px', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="flex flex-wrap gap-1.5 px-3.5">
             {['Veg', 'Dairy', 'Snacks', 'Pharmacy'].map(c => (
-              <span key={c} style={{ fontSize: 10, fontWeight: 700, color: '#065f46', background: '#DCFCE7', padding: '5px 10px', borderRadius: 20 }}>{c}</span>
+              <span key={c} className="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-[10px] font-bold text-gray-700">{c}</span>
             ))}
           </div>
-          {/* order card */}
-          <div style={{ margin: 14, padding: 12, borderRadius: 14, background: '#fff', border: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: 10, boxShadow: '0 8px 20px rgba(0,0,0,.05)' }}>
-            <div style={{ width: 38, height: 38, borderRadius: 10, background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Zap size={17} color={G} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11.5, fontWeight: 800, color: '#111827' }}>Arriving in 12 min</div>
-              <div style={{ height: 5, borderRadius: 3, background: '#EAF6EF', marginTop: 6, overflow: 'hidden' }}>
-                <motion.div animate={{ width: ['20%', '75%', '20%'] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }} style={{ height: '100%', background: G, borderRadius: 3 }} />
-              </div>
+          <div className="m-3.5 flex items-center gap-2.5 rounded-2xl border border-gray-200 bg-white p-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700"><Zap size={16} /></span>
+            <div className="flex-1">
+              <p className="text-[11.5px] font-extrabold text-gray-900">Order on the way</p>
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-gray-100"><div className="h-full w-2/3 rounded-full" style={{ background: G }} /></div>
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
 
-function Stat({ v, l }: { v: string; l: string }) {
-  return (
-    <div style={{ textAlign: 'center', minWidth: 62 }}>
-      <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.7rem, 4vw, 2.6rem)', color: '#fff', letterSpacing: '-.04em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{v}</div>
-      <div style={{ fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.4)', letterSpacing: '.14em', textTransform: 'uppercase', marginTop: 7 }}>{l}</div>
-    </div>
-  );
-}
-
-/* ── Main page ── */
+/* ── Main page ────────────────────────────────────────────────────────────── */
 export function AppComingSoon() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
-  const [focused, setFocused] = useState(false);
   const [loading, setLoading] = useState(false);
   const countdown = useCountdown(LAUNCH_TARGET);
 
@@ -166,204 +134,140 @@ export function AppComingSoon() {
     }
   };
 
-  const features = [
-    { Icon: Zap, text: '30-minute grocery delivery' },
-    { Icon: UtensilsCrossed, text: 'Food from local dhabas' },
-    { Icon: MapPin, text: 'Live order tracking' },
-    { Icon: Tag, text: 'App-exclusive deals' },
-    { Icon: Bell, text: 'Instant push updates' },
-    { Icon: RefreshCw, text: 'One-tap reorder' },
-  ];
-
-  const marquee = ['Groceries', 'Street Food', 'Pharmacy', 'Dairy & Eggs', 'Biryani', 'Fresh Veg', 'Home Services', 'Sweets', 'Beverages', 'Snacks'];
-
   return (
-    <div data-testid="app-coming-soon" style={{ minHeight: '100vh', background: INK, position: 'relative', overflow: 'hidden', fontFamily: "'Inter',sans-serif" }}>
-      <style>{`
-        @keyframes zx-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        @keyframes zx-spin { to { transform: rotate(360deg); } }
-        .zx-input::placeholder { color: rgba(255,255,255,.32); }
-        @media (max-width: 900px){ .zx-hero { grid-template-columns: 1fr !important; } .zx-phone-wrap { justify-content: center !important; margin-top: 12px; } }
-      `}</style>
+    <SitePage title="Mobile app">
+      <div data-testid="app-coming-soon">
+        {/* Hero */}
+        <section className="relative overflow-hidden border-b border-gray-200">
+          <div aria-hidden className="pointer-events-none absolute inset-0 -z-10"
+            style={{ background: 'radial-gradient(900px 420px at 15% -10%, rgba(13,163,102,.14), transparent 60%), radial-gradient(700px 380px at 95% 10%, rgba(249,115,22,.08), transparent 60%)' }} />
+          <div className="mx-auto max-w-[1180px] px-5 pt-14 pb-14 md:pt-20 md:pb-20 grid gap-12 md:grid-cols-[1.1fr_.9fr] items-center">
+            <div>
+              <motion.p {...fade(0)} className="text-[12px] font-bold uppercase tracking-[.12em] text-emerald-700">Mobile app · Coming soon</motion.p>
+              <motion.h1 {...fade(.05)} className="mt-3 max-w-[700px] font-black tracking-[-0.04em] leading-[1.04] text-[2.3rem] sm:text-[3rem] lg:text-[3.5rem]" style={{ fontFamily: HEAD_FONT, color: INK }}>
+                The Zyphix app is coming to <span style={{ color: G }}>iOS &amp; Android.</span>
+              </motion.h1>
+              <motion.p {...fade(.1)} className="mt-5 max-w-[560px] text-[16.5px] leading-relaxed text-gray-600">
+                Groceries in 30 minutes, food from local dhabas and trusted home services — in one native app. Leave your email and we'll tell you the moment it's live.
+              </motion.p>
 
-      {/* ── Background layers ── */}
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-        <div style={{ position: 'absolute', top: '-25%', left: '-12%', width: '65vw', height: '65vw', borderRadius: '50%', background: `radial-gradient(circle, ${G}33 0%, transparent 62%)`, filter: 'blur(20px)' }} />
-        <div style={{ position: 'absolute', bottom: '-30%', right: '-15%', width: '60vw', height: '60vw', borderRadius: '50%', background: `radial-gradient(circle, ${G2}22 0%, transparent 64%)`, filter: 'blur(20px)' }} />
-        {/* fine grid */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px)', backgroundSize: '48px 48px', maskImage: 'radial-gradient(circle at 50% 30%, black, transparent 78%)', WebkitMaskImage: 'radial-gradient(circle at 50% 30%, black, transparent 78%)' }} />
-        {/* grain */}
-        <div style={{ position: 'absolute', inset: 0, opacity: 0.5, mixBlendMode: 'overlay', backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")" }} />
-      </div>
-
-      {/* ── Nav ── */}
-      <div style={{ position: 'relative', zIndex: 10, maxWidth: 1200, margin: '0 auto', padding: '22px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <a href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 11, background: `linear-gradient(135deg, ${G}, ${G2})`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 6px 18px ${G}55` }}>
-            <span style={{ color: '#fff', fontWeight: 900, fontStyle: 'italic', fontSize: 15, fontFamily: "'Outfit',sans-serif" }}>//</span>
-          </div>
-          <span style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 20, letterSpacing: '-.05em', color: '#fff' }}>ZYPHI<span style={{ color: MINT }}>X</span></span>
-        </a>
-        <a data-testid="back-home-link" href="/" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,.55)', textDecoration: 'none', transition: 'color .15s' }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#fff'}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,.55)'}>
-          <ChevronLeft size={15} /> Back to Home
-        </a>
-      </div>
-
-      {/* ── Hero ── */}
-      <div className="zx-hero" style={{ position: 'relative', zIndex: 10, maxWidth: 1200, margin: '0 auto', padding: '30px 24px 40px', display: 'grid', gridTemplateColumns: '1.05fr 0.95fr', gap: 48, alignItems: 'center' }}>
-
-        {/* Left */}
-        <div>
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .55 }}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: `${G}1f`, border: `1px solid ${G}45`, borderRadius: 99, padding: '7px 15px', marginBottom: 26 }}>
-            <span style={{ position: 'relative', display: 'flex', width: 8, height: 8 }}>
-              <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: G2, animation: 'zx-spin 1s linear infinite', boxShadow: `0 0 0 0 ${G2}` }} />
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: G2, boxShadow: `0 0 10px ${G2}` }} />
-            </span>
-            <span style={{ fontSize: 11.5, fontWeight: 800, color: MINT, letterSpacing: '.12em', textTransform: 'uppercase' }}>Launching on iOS &amp; Android</span>
-          </motion.div>
-
-          <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .08, duration: .7 }}
-            style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(2.6rem, 6vw, 4.6rem)', color: '#fff', lineHeight: 0.98, letterSpacing: '-.055em', margin: '0 0 20px' }}>
-            Your city,<br />
-            <span style={{ background: `linear-gradient(105deg, ${G2} 0%, ${MINT} 55%, #a7f3d0 100%)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>in your pocket.</span>
-          </motion.h1>
-
-          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .16, duration: .6 }}
-            style={{ fontSize: 16.5, color: 'rgba(255,255,255,.55)', lineHeight: 1.7, margin: '0 0 30px', maxWidth: 500 }}>
-            The Zyphix app is almost here — groceries in 30 minutes, food from local dhabas, and hyperlocal services, all in one place. Register now for launch-day perks.
-          </motion.p>
-
-          {/* Countdown */}
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .24, duration: .6 }}
-            style={{ display: 'flex', alignItems: 'stretch', gap: 10, marginBottom: 32 }}>
-            {countdown.map((c, i) => (
-              <React.Fragment key={c.l}>
-                <div style={{ background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.10)', borderRadius: 16, padding: '14px 4px', flex: 1, textAlign: 'center', backdropFilter: 'blur(8px)' }}>
-                  <Stat v={c.v} l={c.l} />
-                </div>
-                {i < countdown.length - 1 && <div style={{ alignSelf: 'center', color: 'rgba(255,255,255,.2)', fontWeight: 900, fontSize: 22 }}>:</div>}
-              </React.Fragment>
-            ))}
-          </motion.div>
-
-          {/* Notify form */}
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .3, duration: .6 }}
-            style={{ maxWidth: 500 }}>
-            <AnimatePresence mode="wait">
-              {!submitted ? (
-                <motion.form key="form" onSubmit={handleSubmit} exit={{ opacity: 0 }}
-                  style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1, minWidth: 210, position: 'relative' }}>
-                    <Mail size={16} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', color: focused ? G2 : 'rgba(255,255,255,.35)', transition: 'color .15s' }} />
-                    <input
-                      data-testid="notify-email-input"
-                      className="zx-input"
-                      type="email"
-                      value={email}
-                      onChange={e => { setEmail(e.target.value); setError(''); }}
-                      onFocus={() => setFocused(true)}
-                      onBlur={() => setFocused(false)}
-                      placeholder="you@email.com"
-                      style={{
-                        width: '100%', paddingLeft: 44, paddingRight: 14, height: 52,
-                        borderRadius: 14, fontSize: 14.5, color: '#fff', fontFamily: 'inherit', outline: 'none', fontWeight: 500,
-                        background: focused ? 'rgba(255,255,255,.09)' : 'rgba(255,255,255,.05)',
-                        border: `1.5px solid ${error ? '#EF4444' : focused ? `${G}90` : 'rgba(255,255,255,.12)'}`,
-                        boxSizing: 'border-box', transition: 'all .15s',
-                        boxShadow: focused ? `0 0 0 4px ${G}22` : 'none',
-                      }}
-                    />
-                  </div>
-                  <motion.button
-                    data-testid="notify-submit-button"
-                    whileHover={loading ? {} : { scale: 1.03, y: -1 }} whileTap={loading ? {} : { scale: 0.97 }}
-                    type="submit" disabled={loading}
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 26px', height: 52, borderRadius: 14, background: loading ? `${G}80` : `linear-gradient(135deg, ${G}, ${G2})`, color: '#fff', fontSize: 15, fontWeight: 800, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', boxShadow: `0 10px 30px ${G}55`, fontFamily: "'Outfit',sans-serif" }}>
-                    {loading ? 'Sending…' : <>Notify Me <ArrowRight size={16} /></>}
-                  </motion.button>
-                  {error && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ width: '100%', fontSize: 12.5, color: '#F87171', margin: '2px 0 0' }}>{error}</motion.p>}
-                </motion.form>
-              ) : (
-                <motion.div key="ok" initial={{ opacity: 0, scale: .94 }} animate={{ opacity: 1, scale: 1 }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '16px 20px', background: `${G}1c`, border: `1.5px solid ${G}55`, borderRadius: 14 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: '50%', background: G, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 0 18px ${G}77` }}>
-                    <Check size={17} color="#fff" strokeWidth={3} />
-                  </div>
-                  <div>
-                    <p style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#fff' }}>You're on the launch list!</p>
-                    <p style={{ margin: '2px 0 0', fontSize: 12.5, color: 'rgba(255,255,255,.55)' }}>We'll email your exclusive offer the day we go live.</p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* social proof */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginTop: 16 }}>
-              <div style={{ display: 'flex' }}>
-                {[0, 1, 2, 3].map(i => (
-                  <div key={i} style={{ width: 26, height: 26, borderRadius: '50%', background: `linear-gradient(135deg, ${G}, ${G2})`, border: `2px solid ${INK}`, marginLeft: i ? -9 : 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Star size={11} color="#fff" fill="#fff" />
+              {/* Countdown */}
+              <motion.div {...fade(.15)} className="mt-8 grid max-w-[460px] grid-cols-4 gap-2.5">
+                {countdown.map(c => (
+                  <div key={c.l} className="rounded-2xl border border-gray-200 bg-white px-2 py-3.5 text-center">
+                    <p className="text-[26px] sm:text-[32px] font-black leading-none tracking-tight tabular-nums text-gray-900" style={{ fontFamily: HEAD_FONT }}>{c.v}</p>
+                    <p className="mt-1.5 text-[10.5px] font-bold uppercase tracking-[.12em] text-gray-400">{c.l}</p>
                   </div>
                 ))}
-              </div>
-              <p style={{ margin: 0, fontSize: 12.5, color: 'rgba(255,255,255,.45)' }}>
-                <span style={{ color: MINT, fontWeight: 800 }}>3,200+</span> people already waiting
-              </p>
-            </div>
-          </motion.div>
-
-          {/* store badges */}
-          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .4, duration: .6 }}
-            style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 26 }}>
-            {[
-              { logo: '/images/appstore.webp', sub: 'Download on the', title: 'App Store' },
-              { logo: '/images/googleplay.webp', sub: 'Get it on', title: 'Google Play' },
-            ].map(({ logo, sub, title }) => (
-              <div key={title} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '11px 20px', borderRadius: 14, background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.12)', opacity: .85 }}>
-                <div style={{ position: 'absolute', top: 6, right: 8, fontSize: 8, fontWeight: 900, color: INK, background: MINT, padding: '1px 6px', borderRadius: 5, letterSpacing: '.06em' }}>SOON</div>
-                <img src={logo} alt={title} style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0 }} />
-                <div style={{ textAlign: 'left' }}>
-                  <p style={{ margin: 0, fontSize: 9.5, color: 'rgba(255,255,255,.5)', fontWeight: 500 }}>{sub}</p>
-                  <p style={{ margin: 0, fontSize: 16, fontWeight: 900, color: '#fff', letterSpacing: '-.02em', fontFamily: "'Outfit',sans-serif" }}>{title}</p>
-                </div>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-
-        {/* Right — phone + feature list */}
-        <div className="zx-phone-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 30 }}>
-          <PhoneMock />
-          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .6, duration: .6 }}
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, width: '100%', maxWidth: 380 }}>
-            {features.map(({ Icon, text }, i) => (
-              <motion.div key={text} initial={{ opacity: 0, scale: .9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .65 + i * 0.05 }}
-                style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.09)', borderRadius: 12, padding: '10px 12px' }}>
-                <div style={{ width: 28, height: 28, borderRadius: 8, background: `${G}22`, border: `1px solid ${G}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Icon size={14} color={MINT} />
-                </div>
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,.75)', lineHeight: 1.2 }}>{text}</span>
               </motion.div>
+
+              {/* Notify form */}
+              <motion.div {...fade(.2)} className="mt-7 max-w-[520px]">
+                {submitted ? (
+                  <div className="inline-flex items-center gap-3 rounded-2xl bg-emerald-600 px-4 py-3 text-white">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20"><Check size={15} strokeWidth={3} /></span>
+                    <div>
+                      <p className="text-[14px] font-bold">You're on the launch list!</p>
+                      <p className="text-[12.5px] text-white/85">We'll email you the day the app goes live.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row">
+                    <label className="relative flex-1">
+                      <Mail size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        data-testid="notify-email-input"
+                        type="email"
+                        value={email}
+                        onChange={e => { setEmail(e.target.value); setError(''); }}
+                        placeholder="you@email.com"
+                        className="w-full rounded-2xl border bg-white py-3.5 pl-11 pr-4 text-[14.5px] text-gray-900 outline-none transition focus:ring-4 focus:ring-emerald-100"
+                        style={{ borderColor: error ? '#EF4444' : '#E5E7EB' }}
+                      />
+                    </label>
+                    <button
+                      data-testid="notify-submit-button"
+                      type="submit" disabled={loading}
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-[14.5px] font-bold text-white transition hover:opacity-95 disabled:opacity-70"
+                      style={{ background: G }}>
+                      {loading ? 'Sending…' : <>Notify me <ArrowRight size={16} /></>}
+                    </button>
+                  </form>
+                )}
+                {error && <p className="mt-2 text-[13px] font-semibold text-red-500">{error}</p>}
+                <p className="mt-3 text-[12.5px] text-gray-500">No spam. One email when the app launches.</p>
+              </motion.div>
+
+              {/* Store badges */}
+              <motion.div {...fade(.25)} className="mt-7 flex flex-wrap gap-3">
+                {[['/images/appstore.webp', 'Coming soon on the', 'App Store'], ['/images/googleplay.webp', 'Coming soon on', 'Google Play']].map(([src, small, big]) => (
+                  <span key={big} aria-disabled className="inline-flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-white" style={{ background: INK }}>
+                    <img src={src} alt="" className="h-6 w-6 object-contain" loading="lazy" />
+                    <span className="leading-tight"><span className="block text-[10px] font-medium text-white/70">{small}</span><span className="block text-[14px] font-bold">{big}</span></span>
+                  </span>
+                ))}
+              </motion.div>
+            </div>
+
+            <PhonePreview />
+          </div>
+        </section>
+
+        {/* Until then — use the web app */}
+        <section className="bg-gray-50 border-b border-gray-200">
+          <div className="mx-auto max-w-[1180px] px-5 py-20 md:py-24 grid gap-12 md:grid-cols-[.9fr_1.1fr] items-center">
+            <div>
+              <SectionHead align="left" eyebrow="Until then" title="Use zyphix.in in your browser — today." sub="You don't need to wait for the app. The full Zyphix experience already runs in Safari and Chrome, and you can pin it to your home screen in three taps." />
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/now" className={btnPrimary} style={{ background: G }}>Order groceries <ArrowRight size={16} /></Link>
+                <Link href="/eats" className={btnSecondary}><UtensilsCrossed size={16} className="text-orange-500" /> Order food</Link>
+              </div>
+            </div>
+            <ol className="grid gap-4">
+              {BROWSER_STEPS.map((s, i) => (
+                <li key={s.t} className="flex gap-5 rounded-3xl border border-gray-200 bg-white p-6">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><s.Icon size={20} /></span>
+                  <div>
+                    <p className="text-[12px] font-bold uppercase tracking-wider text-gray-400">Step {i + 1}</p>
+                    <h3 className="mt-0.5 text-[18px] font-extrabold text-gray-900">{s.t}</h3>
+                    <p className="mt-1.5 text-[14.5px] leading-relaxed text-gray-600">{s.d}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* Features */}
+        <section className="mx-auto max-w-[1180px] px-5 py-20 md:py-24">
+          <SectionHead eyebrow="What's in the app" title="Everything local, built for your phone." sub="The same neighbourhood network as the website — plus the things only a native app can do well." />
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map(f => (
+              <div key={f.t} className="rounded-3xl border border-gray-200 bg-white p-6">
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><f.Icon size={20} /></span>
+                <h3 className="mt-4 text-[16.5px] font-extrabold text-gray-900">{f.t}</h3>
+                <p className="mt-2 text-[14px] leading-relaxed text-gray-600">{f.d}</p>
+              </div>
             ))}
-          </motion.div>
-        </div>
-      </div>
+          </div>
+        </section>
 
-      {/* ── Marquee strip ── */}
-      <div style={{ position: 'relative', zIndex: 10, borderTop: '1px solid rgba(255,255,255,.07)', borderBottom: '1px solid rgba(255,255,255,.07)', padding: '16px 0', overflow: 'hidden', maskImage: 'linear-gradient(90deg, transparent, black 8%, black 92%, transparent)', WebkitMaskImage: 'linear-gradient(90deg, transparent, black 8%, black 92%, transparent)' }}>
-        <div style={{ display: 'flex', width: 'max-content', animation: 'zx-marquee 26s linear infinite' }}>
-          {[...marquee, ...marquee].map((m, i) => (
-            <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '0 26px', fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 18, color: 'rgba(255,255,255,.28)', letterSpacing: '-.02em', whiteSpace: 'nowrap' }}>
-              {m} <Sparkles size={13} color={G} />
-            </span>
-          ))}
-        </div>
+        {/* Closing CTA */}
+        <section className="mx-auto max-w-[1180px] px-5 pb-20 md:pb-24">
+          <div className="flex flex-col items-start gap-5 rounded-[32px] border border-emerald-100 p-8 md:flex-row md:items-center md:justify-between md:p-12" style={{ background: 'linear-gradient(135deg, #F0FDF4 0%, #FFFFFF 60%)' }}>
+            <div className="flex items-start gap-4">
+              <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-gray-900 border border-gray-200"><Smartphone size={22} /></span>
+              <div>
+                <h3 className="text-[20px] font-extrabold text-gray-900" style={{ fontFamily: HEAD_FONT }}>Want to be told the day we launch?</h3>
+                <p className="mt-1 text-[14.5px] leading-relaxed text-gray-600">Scroll up and leave your email — or just start ordering on the web right now.</p>
+              </div>
+            </div>
+            <Link href="/" className={btnSecondary}>Back to zyphix.in <ArrowRight size={16} /></Link>
+          </div>
+        </section>
       </div>
-
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 220, background: `linear-gradient(to top, ${G}12, transparent)`, pointerEvents: 'none' }} />
-    </div>
+    </SitePage>
   );
 }
+
+export default AppComingSoon;

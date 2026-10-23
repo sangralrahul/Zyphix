@@ -656,10 +656,10 @@ export function Account() {
     return (
       <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 }}>
         <div style={{ fontSize: 44 }}>🔐</div>
-        <p style={{ fontSize: 20, fontWeight: 900, color: '#fff', margin: 0 }}>Sign in to view your account</p>
-        <p style={{ fontSize: 14, color: 'rgba(255,255,255,.5)', margin: 0 }}>Your orders, addresses and preferences are waiting.</p>
+        <p style={{ fontSize: 20, fontWeight: 900, color: T1, margin: 0, fontFamily: "'Outfit',sans-serif", letterSpacing: '-.03em' }}>Sign in to view your account</p>
+        <p style={{ fontSize: 14, color: T2, margin: 0 }}>Your orders, addresses and preferences are waiting.</p>
         <button onClick={openModal}
-          style={{ padding: '12px 28px', borderRadius: 14, border: 'none', background: G, color: '#fff', fontSize: 15, fontWeight: 800, cursor: 'pointer', boxShadow: `0 4px 20px ${G}50` }}>
+          style={{ padding: '12px 28px', borderRadius: 14, border: 'none', background: G, color: '#fff', fontSize: 15, fontWeight: 800, cursor: 'pointer', boxShadow: `0 4px 20px ${G}40` }}>
           Sign In to Continue
         </button>
       </div>
@@ -674,13 +674,13 @@ export function Account() {
   ];
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto' }}>
+    <div style={{ maxWidth: 960, margin: '0 auto', paddingTop: 32 }}>
       {/* Page header */}
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.4rem,3vw,2rem)', color: '#fff', letterSpacing: '-.04em', margin: 0 }}>
+        <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.4rem,3vw,2rem)', color: T1, letterSpacing: '-.04em', margin: 0 }}>
           My Account
         </h1>
-        <p style={{ fontSize: 14, color: 'rgba(255,255,255,.45)', marginTop: 4 }}>
+        <p style={{ fontSize: 14, color: T2, marginTop: 4 }}>
           Manage your profile, addresses, orders and settings
         </p>
       </div>
@@ -688,20 +688,20 @@ export function Account() {
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,220px) 1fr', gap: 20, alignItems: 'start' }}>
 
         {/* ── Sidebar ── */}
-        <div style={{ background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 18, padding: 12, display: 'flex', flexDirection: 'column', gap: 4, position: 'sticky', top: 80 }}>
+        <div style={{ background: W, border: `1px solid ${BD}`, borderRadius: 18, padding: 12, display: 'flex', flexDirection: 'column', gap: 4, position: 'sticky', top: 80, boxShadow: '0 1px 6px rgba(0,0,0,.05)' }}>
           {TABS.map(t => (
             <TabBtn key={t.id} active={tab === t.id} onClick={() => goTab(t.id)} icon={t.icon} label={t.label} />
           ))}
 
           {/* Quick stats */}
-          <div style={{ marginTop: 12, padding: '12px', borderRadius: 12, background: 'rgba(13,163,102,.08)', border: '1px solid rgba(13,163,102,.15)' }}>
-            <p style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.4)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Quick Stats</p>
+          <div style={{ marginTop: 12, padding: '12px', borderRadius: 12, background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
+            <p style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 700, color: T2, textTransform: 'uppercase', letterSpacing: '.04em' }}>Quick Stats</p>
             {[
               { v: MOCK_ORDERS.filter(o => o.status === 'delivered').length, l: 'Orders Delivered' },
               { v: getLS<Address[]>(LS_ADDR, []).length, l: 'Saved Addresses' },
             ].map(({ v, l }) => (
               <div key={l} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 0' }}>
-                <p style={{ margin: 0, fontSize: 12.5, color: 'rgba(255,255,255,.55)' }}>{l}</p>
+                <p style={{ margin: 0, fontSize: 12.5, color: T2 }}>{l}</p>
                 <p style={{ margin: 0, fontSize: 14, fontWeight: 900, color: G, fontFamily: "'Outfit',sans-serif" }}>{v}</p>
               </div>
             ))}

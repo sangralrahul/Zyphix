@@ -3,11 +3,13 @@ import { Link, useLocation } from 'wouter';
 import { Search, MapPin, ShoppingCart, User, ChevronDown, Menu, X, LogOut, Settings, Package, Users, Heart, Bell } from 'lucide-react';
 import { ZyphixLogo } from '../ZyphixLogo';
 import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useNotifications } from '@/context/NotificationsContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const G = '#0DA366';
+const HEAD_FONT = "'Outfit', sans-serif";
 
 export function Navbar() {
   const [location, nav] = useLocation();
@@ -17,7 +19,7 @@ export function Navbar() {
   const [dropdown, setDropdown]     = useState(false);
   const [query, setQuery]           = useState('');
   const dropRef = useRef<HTMLDivElement>(null);
-  const cartCount = 3;
+  const { totalItems: cartCount } = useCart();
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && query.trim()) {
@@ -50,21 +52,10 @@ export function Navbar() {
 
   const initial = user ? user.name.charAt(0).toUpperCase() : 'U';
 
-  const isLight = location === '/now' || location === '/eats';
+  const iconBtn = 'relative flex h-[38px] w-[38px] items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 transition hover:border-gray-300 hover:bg-gray-50';
 
   return (
-    <div className="sticky top-0 z-50 w-full transition-all duration-300"
-      style={{
-        background: isLight
-          ? (scrolled ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.95)')
-          : (scrolled ? 'rgba(9,9,14,0.97)' : 'rgba(16,18,24,0.95)'),
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        borderBottom: isLight
-          ? (scrolled ? '1px solid #E5E7EB' : '1px solid #F3F4F6')
-          : (scrolled ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(255,255,255,0.04)'),
-        boxShadow: scrolled ? (isLight ? '0 4px 32px rgba(0,0,0,0.08)' : '0 4px 32px rgba(0,0,0,0.5)') : 'none',
-      }}>
+    <div className={`sticky top-0 z-50 w-full border-b bg-white/90 backdrop-blur-md transition-all duration-300 ${scrolled ? 'border-gray-200 shadow-[0_4px_24px_rgba(11,18,32,.06)]' : 'border-gray-100'}`}>
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-3 h-16">
 
@@ -74,24 +65,20 @@ export function Navbar() {
           </Link>
 
           {/* ── Location ── */}
-          <button className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all shrink-0"
-            style={{ border: isLight ? '1px solid #E5E7EB' : '1px solid rgba(255,255,255,0.07)' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = isLight ? '#F3F4F6' : 'rgba(255,255,255,0.05)'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
-            <MapPin style={{ height: 14, width: 14, color: 'var(--z-green)' }} />
+          <button className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 bg-white transition hover:bg-gray-50 shrink-0">
+            <MapPin size={14} style={{ color: G }} />
             <div className="text-left">
-              <p className="text-[9px] font-semibold uppercase tracking-wide leading-none" style={{ color: isLight ? '#9CA3AF' : 'var(--z-muted)' }}>Deliver to</p>
+              <p className="text-[9px] font-semibold uppercase tracking-wide leading-none text-gray-400">Deliver to</p>
               <div className="flex items-center gap-0.5 mt-0.5">
-                <span className="font-bold text-sm leading-none" style={{ color: isLight ? '#111827' : '#ffffff' }}>Select Location</span>
-                <ChevronDown style={{ height: 12, width: 12, color: isLight ? '#9CA3AF' : 'var(--z-muted)' }} />
+                <span className="font-bold text-sm leading-none text-gray-900">Select Location</span>
+                <ChevronDown size={12} className="text-gray-400" />
               </div>
             </div>
           </button>
 
           {/* ── Search bar ── */}
           <div className="flex-1 relative" style={{ minWidth: 0, maxWidth: 480 }}>
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors z-10"
-              style={{ height: 16, width: 16, color: focused ? 'var(--z-green)' : 'var(--z-muted)' }} />
+            <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors z-10 ${focused ? 'text-emerald-600' : 'text-gray-400'}`} size={16} />
             <input
               type="text"
               value={query}
@@ -100,28 +87,15 @@ export function Navbar() {
               placeholder="Search groceries, food, services… (press Enter)"
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none transition-all duration-200"
-              style={{
-                background: isLight
-                  ? (focused ? '#FFFFFF' : '#F3F4F6')
-                  : (focused ? 'rgba(22,24,31,0.95)' : 'rgba(22,24,31,0.7)'),
-                border: focused
-                  ? '1px solid rgba(0,217,126,0.4)'
-                  : (isLight ? '1px solid #E5E7EB' : '1px solid rgba(255,255,255,0.07)'),
-                boxShadow: focused ? '0 0 0 3px rgba(0,217,126,0.06)' : 'none',
-                fontFamily: "'Inter', sans-serif",
-                color: isLight ? '#111827' : '#ffffff',
-              }}
+              className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 outline-none border transition-all duration-200 ${focused ? 'bg-white border-emerald-400 ring-[3px] ring-emerald-500/10' : 'bg-gray-100 border-gray-200'}`}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             />
           </div>
 
           {/* ── Become a Partner (desktop) ── */}
           <Link href="/partner"
-            className="hidden md:flex"
-            style={{ flexShrink: 0, alignItems: 'center', gap: 6, borderRadius: 12, padding: '7px 14px', fontSize: 13, fontWeight: 700, color: '#0DA366', border: '1px solid rgba(13,163,102,0.3)', background: 'rgba(13,163,102,0.07)', textDecoration: 'none', whiteSpace: 'nowrap' }}
-            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(13,163,102,0.15)'; el.style.borderColor = 'rgba(13,163,102,0.5)'; }}
-            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(13,163,102,0.07)'; el.style.borderColor = 'rgba(13,163,102,0.3)'; }}>
-            <Users style={{ height: 14, width: 14 }} />
+            className="hidden md:flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-[7px] text-[13px] font-bold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100">
+            <Users size={14} />
             <span className="hidden lg:inline">Become a Partner</span>
           </Link>
 
@@ -131,16 +105,16 @@ export function Navbar() {
             {/* Auth button / Avatar */}
             {user ? (
               /* ── Avatar + dropdown ── */
-              <div ref={dropRef} style={{ position: 'relative' }}>
+              <div ref={dropRef} className="relative">
                 <button onClick={() => setDropdown(d => !d)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 12, background: dropdown ? 'rgba(13,163,102,.12)' : 'rgba(255,255,255,.05)', border: `1px solid ${dropdown ? G + '40' : 'rgba(255,255,255,.08)'}`, cursor: 'pointer', transition: 'all .18s' }}>
-                  <div style={{ width: 30, height: 30, borderRadius: '50%', background: `linear-gradient(135deg, ${G}, #0A8C58)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: '#fff', fontFamily: "'Outfit',sans-serif", flexShrink: 0 }}>
+                  className={`flex items-center gap-2 rounded-xl border px-2.5 py-1.5 transition ${dropdown ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 bg-white hover:bg-gray-50'}`}>
+                  <div className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full text-[13px] font-black text-white" style={{ background: `linear-gradient(135deg, ${G}, #0A8C58)`, fontFamily: HEAD_FONT }}>
                     {initial}
                   </div>
-                  <span className="hidden lg:inline" style={{ fontSize: 13.5, fontWeight: 700, color: '#fff', maxWidth: 90, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span className="hidden lg:inline max-w-[90px] truncate text-[13.5px] font-bold text-gray-900">
                     {user.name.split(' ')[0]}
                   </span>
-                  <ChevronDown style={{ height: 13, width: 13, color: 'rgba(255,255,255,.45)', transform: dropdown ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+                  <ChevronDown size={13} className="text-gray-400 transition-transform" style={{ transform: dropdown ? 'rotate(180deg)' : 'none' }} />
                 </button>
 
                 <AnimatePresence>
@@ -150,23 +124,23 @@ export function Navbar() {
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: .95, y: -6 }}
                       transition={{ duration: .15, ease: 'easeOut' }}
-                      style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 230, borderRadius: 16, background: 'rgba(14,16,22,0.98)', border: '1px solid rgba(255,255,255,.1)', boxShadow: '0 20px 60px rgba(0,0,0,.6)', overflow: 'hidden', zIndex: 100 }}>
+                      className="absolute right-0 top-[calc(100%+8px)] z-[100] w-[230px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_20px_60px_rgba(11,18,32,.14)]">
 
                       {/* User info header */}
-                      <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,.07)', background: 'rgba(13,163,102,.06)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg, ${G}, #0A8C58)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 900, color: '#fff', fontFamily: "'Outfit',sans-serif", flexShrink: 0 }}>
+                      <div className="border-b border-gray-200 bg-emerald-50/60 px-4 py-3.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[15px] font-black text-white" style={{ background: `linear-gradient(135deg, ${G}, #0A8C58)`, fontFamily: HEAD_FONT }}>
                             {initial}
                           </div>
-                          <div style={{ minWidth: 0 }}>
-                            <p style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</p>
-                            <p style={{ margin: '1px 0 0', fontSize: 11.5, color: 'rgba(255,255,255,.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email || user.phone || 'Zyphix Member'}</p>
+                          <div className="min-w-0">
+                            <p className="m-0 truncate text-[14px] font-extrabold text-gray-900">{user.name}</p>
+                            <p className="m-0 mt-px truncate text-[11.5px] text-gray-500">{user.email || user.phone || 'Zyphix Member'}</p>
                           </div>
                         </div>
                       </div>
 
                       {/* Menu items */}
-                      <div style={{ padding: '8px' }}>
+                      <div className="p-2">
                         {[
                           { icon: <User size={14} />, label: 'My Profile',    href: '/account?tab=profile' },
                           { icon: <MapPin size={14} />, label: 'My Addresses', href: '/account?tab=addresses' },
@@ -174,19 +148,15 @@ export function Navbar() {
                           { icon: <Settings size={14} />, label: 'Settings',   href: '/account?tab=settings' },
                         ].map(({ icon, label, href }) => (
                           <Link key={label} href={href}
-                            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 10px', borderRadius: 10, color: 'rgba(255,255,255,.8)', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', textDecoration: 'none', transition: 'background .15s' }}
-                            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.06)'}
-                            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
-                            <span style={{ color: 'rgba(255,255,255,.4)' }}>{icon}</span>{label}
+                            className="flex items-center gap-2.5 rounded-[10px] px-2.5 py-2.5 text-[13.5px] font-semibold text-gray-700 transition hover:bg-gray-50 hover:text-gray-900">
+                            <span className="text-gray-400">{icon}</span>{label}
                           </Link>
                         ))}
                       </div>
 
-                      <div style={{ padding: '8px', borderTop: '1px solid rgba(255,255,255,.07)' }}>
+                      <div className="border-t border-gray-200 p-2">
                         <button onClick={() => { logout(); setDropdown(false); }}
-                          style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 10px', borderRadius: 10, color: '#F87171', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', width: '100%', border: 'none', background: 'transparent', transition: 'background .15s' }}
-                          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,.08)'}
-                          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+                          className="flex w-full items-center gap-2.5 rounded-[10px] border-0 bg-transparent px-2.5 py-2.5 text-[13.5px] font-semibold text-red-600 transition hover:bg-red-50">
                           <LogOut size={14} />Sign Out
                         </button>
                       </div>
@@ -197,48 +167,44 @@ export function Navbar() {
             ) : (
               /* ── Login button ── */
               <button onClick={openModal}
-                className="hidden sm:flex items-center gap-1.5 btn-ghost rounded-xl px-3.5 py-2 text-sm">
-                <User style={{ height: 15, width: 15 }} />
+                className="hidden sm:flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 hover:text-gray-900">
+                <User size={15} />
                 <span className="hidden lg:inline">Login</span>
               </button>
             )}
 
             {/* Wishlist */}
-            <Link href="/wishlist" aria-label="Wishlist"
-              style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, borderRadius: 12, border: isLight ? '1px solid #E5E7EB' : '1px solid rgba(255,255,255,0.08)', background: isLight ? '#F9FAFB' : 'rgba(255,255,255,0.04)', color: isLight ? '#374151' : '#fff', textDecoration: 'none' }}>
+            <Link href="/wishlist" aria-label="Wishlist" className={iconBtn}>
               <Heart size={17} />
               {wishCount > 0 && (
-                <span style={{ position: 'absolute', top: -4, right: -4, minWidth: 16, height: 16, padding: '0 4px', borderRadius: 10, background: '#EF4444', color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{wishCount}</span>
+                <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-extrabold text-white">{wishCount}</span>
               )}
             </Link>
 
             {/* Notifications */}
-            <Link href="/notifications" aria-label="Notifications"
-              style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, borderRadius: 12, border: isLight ? '1px solid #E5E7EB' : '1px solid rgba(255,255,255,0.08)', background: isLight ? '#F9FAFB' : 'rgba(255,255,255,0.04)', color: isLight ? '#374151' : '#fff', textDecoration: 'none' }}>
+            <Link href="/notifications" aria-label="Notifications" className={iconBtn}>
               <Bell size={17} />
               {notifUnread > 0 && (
-                <span style={{ position: 'absolute', top: -4, right: -4, minWidth: 16, height: 16, padding: '0 4px', borderRadius: 10, background: '#0DA366', color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{notifUnread}</span>
+                <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-extrabold text-white" style={{ background: G }}>{notifUnread}</span>
               )}
             </Link>
 
             {/* Cart */}
             <button onClick={() => nav('/now')}
-              className="relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm btn-primary">
-              <ShoppingCart style={{ height: 16, width: 16 }} />
+              className="relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-extrabold text-white transition hover:opacity-90" style={{ background: G }}>
+              <ShoppingCart size={16} />
               <span className="hidden sm:inline font-black">Cart</span>
               {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 rounded-full text-[10px] font-black flex items-center justify-center text-white"
-                  style={{ background: 'var(--z-orange)', width: 18, height: 18 }}>
+                <span className="absolute -top-1.5 -right-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-orange-500 text-[10px] font-black text-white">
                   {cartCount}
                 </span>
               )}
             </button>
 
             {/* Mobile menu toggle */}
-            <button className="md:hidden p-2 rounded-xl transition-colors"
-              style={{ color: isLight ? '#6B7280' : 'var(--z-muted)' }}
+            <button className="md:hidden p-2 rounded-xl text-gray-600 transition-colors hover:bg-gray-100"
               onClick={() => setMobileOpen(!mobileOpen)}>
-              {mobileOpen ? <X style={{ height: 20, width: 20 }} /> : <Menu style={{ height: 20, width: 20 }} />}
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
@@ -248,18 +214,18 @@ export function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-            style={{ background: isLight ? 'rgba(255,255,255,0.99)' : 'rgba(9,9,14,0.99)', borderTop: isLight ? '1px solid #E5E7EB' : '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+            className="overflow-hidden border-t border-gray-200 bg-white">
             <div className="max-w-screen-xl mx-auto px-4 py-4 space-y-1">
 
               {/* Logged-in user strip */}
               {user && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'rgba(13,163,102,.08)', borderRadius: 12, marginBottom: 8, border: '1px solid rgba(13,163,102,.15)' }}>
-                  <div style={{ width: 34, height: 34, borderRadius: '50%', background: `linear-gradient(135deg, ${G}, #0A8C58)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 900, color: '#fff', flexShrink: 0 }}>
+                <div className="mb-2 flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5">
+                  <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full text-[14px] font-black text-white" style={{ background: `linear-gradient(135deg, ${G}, #0A8C58)` }}>
                     {initial}
                   </div>
                   <div>
-                    <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#fff' }}>{user.name}</p>
-                    <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,.4)' }}>{user.email || user.phone || 'Member'}</p>
+                    <p className="m-0 text-[14px] font-bold text-gray-900">{user.name}</p>
+                    <p className="m-0 text-[12px] text-gray-500">{user.email || user.phone || 'Member'}</p>
                   </div>
                 </div>
               )}
@@ -275,8 +241,7 @@ export function Navbar() {
                 { icon: '💰', label: 'Wallet', href: '/wallet' },
               ].map(({ icon, label, href }) => (
                 <Link key={label} href={href} onClick={() => setMobileOpen(false)}
-                  style={{ color: isLight ? '#374151' : 'rgba(255,255,255,0.8)' }}
-                  className="flex items-center gap-3 py-3 px-3 rounded-xl transition-colors cursor-pointer font-medium">
+                  className="flex items-center gap-3 py-3 px-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors cursor-pointer font-medium">
                   <span>{icon}</span>{label}
                 </Link>
               ))}
@@ -284,18 +249,17 @@ export function Navbar() {
               {user ? (
                 <>
                   <Link href="/account" onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 py-3 px-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer font-medium text-white/80">
-                    <User style={{ height: 16, width: 16, color: G }} />My Account
+                    className="flex items-center gap-3 py-3 px-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors cursor-pointer font-medium">
+                    <User size={16} style={{ color: G }} />My Account
                   </Link>
                   <button onClick={() => { logout(); setMobileOpen(false); }}
-                    className="w-full flex items-center gap-3 py-3 px-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer font-medium"
-                    style={{ color: '#F87171', background: 'transparent', border: 'none' }}>
-                    <LogOut style={{ height: 16, width: 16 }} />Sign Out
+                    className="w-full flex items-center gap-3 py-3 px-3 rounded-xl border-0 bg-transparent text-red-600 hover:bg-red-50 transition-colors cursor-pointer font-medium">
+                    <LogOut size={16} />Sign Out
                   </button>
                 </>
               ) : (
                 <button onClick={() => { openModal(); setMobileOpen(false); }}
-                  className="w-full mt-3 py-3 rounded-xl font-black text-sm btn-primary">
+                  className="w-full mt-3 py-3 rounded-xl font-black text-sm text-white transition hover:opacity-90" style={{ background: G }}>
                   Sign In / Get Started
                 </button>
               )}

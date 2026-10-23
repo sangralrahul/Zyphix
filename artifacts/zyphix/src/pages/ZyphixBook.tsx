@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CalendarCheck, Clock, ArrowRight, Check, Star, MapPin, Zap } from 'lucide-react';
+import { CalendarCheck, Check } from 'lucide-react';
 import { services } from '@/data/mockData';
+
+const G = '#0DA366';
+const HEAD_FONT = "'Outfit', sans-serif";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -27,17 +30,15 @@ export function ZyphixBook() {
   return (
     <div className="pb-24 -mx-4 sm:-mx-6 lg:-mx-8">
       {/* Header */}
-      <div className="px-4 sm:px-8 lg:px-16 pt-6 pb-4"
-        style={{ background: 'linear-gradient(180deg, rgba(255,107,53,0.06) 0%, transparent 100%)' }}>
+      <div className="px-4 sm:px-8 lg:px-16 pt-8 pb-4">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-              style={{ background: 'rgba(255,107,53,0.15)', border: '1px solid rgba(255,107,53,0.3)' }}>
-              <CalendarCheck className="h-6 w-6" style={{ color: '#FF6B35' }} />
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-orange-50 border border-orange-200">
+              <CalendarCheck className="h-6 w-6 text-orange-500" />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-white">ZyphixBook</h1>
-              <p className="text-sm" style={{ color: '#5A7A9A' }}>Book local services instantly</p>
+              <h1 className="text-2xl font-black tracking-[-0.03em] text-gray-900" style={{ fontFamily: HEAD_FONT }}>ZyphixBook</h1>
+              <p className="text-sm text-gray-600">Book local services instantly</p>
             </div>
           </motion.div>
         </div>
@@ -51,8 +52,8 @@ export function ZyphixBook() {
             <div className="lg:col-span-2 space-y-6">
               <motion.div variants={stagger} initial="hidden" animate="visible">
                 <motion.div variants={fadeUp} className="mb-5">
-                  <p className="text-xs uppercase tracking-widest mb-1" style={{ color: '#5A7A9A' }}>Available Services</p>
-                  <h2 className="text-xl font-black text-white">What do you need help with?</h2>
+                  <p className="text-[12px] font-bold uppercase tracking-[.12em] text-emerald-700 mb-1">Available Services</p>
+                  <h2 className="text-xl font-black tracking-[-0.03em] text-gray-900" style={{ fontFamily: HEAD_FONT }}>What do you need help with?</h2>
                 </motion.div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {services.map((service) => {
@@ -61,27 +62,22 @@ export function ZyphixBook() {
                       <motion.div key={service.id} variants={fadeUp}>
                         <div
                           onClick={() => setSelectedService(isSelected ? null : service.id)}
-                          className="rounded-2xl p-5 cursor-pointer group relative overflow-hidden transition-all duration-200"
-                          style={{
-                            background: isSelected ? 'linear-gradient(135deg, rgba(255,107,53,0.2), rgba(30,79,194,0.1))' : '#0F1B35',
-                            border: isSelected ? '1px solid rgba(255,107,53,0.6)' : '1px solid #1E3A6E',
-                            transform: isSelected ? 'scale(1.02)' : 'scale(1)',
-                            boxShadow: isSelected ? '0 8px 32px rgba(255,107,53,0.2)' : 'none',
-                          }}>
-                          <div className="absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none"
-                            style={{ background: 'radial-gradient(circle, rgba(255,107,53,0.08), transparent)', transform: 'translate(30%, -30%)' }} />
+                          className={`rounded-3xl p-5 cursor-pointer group relative overflow-hidden border transition-all duration-200 ${
+                            isSelected
+                              ? 'bg-emerald-50 border-emerald-400 shadow-[0_8px_24px_rgba(13,163,102,.15)]'
+                              : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-[0_8px_24px_rgba(11,18,32,.06)]'
+                          }`}>
                           {isSelected && (
-                            <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center"
-                              style={{ background: '#FF6B35' }}>
+                            <div className="absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: G }}>
                               <Check className="h-3 w-3 text-white" />
                             </div>
                           )}
                           <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-200">{service.emoji}</div>
-                          <h4 className="font-black text-white text-base mb-0.5">{service.title}</h4>
-                          <p className="text-xs mb-3" style={{ color: '#5A7A9A' }}>{service.category}</p>
+                          <h4 className="font-black text-gray-900 text-base mb-0.5" style={{ fontFamily: HEAD_FONT }}>{service.title}</h4>
+                          <p className="text-xs text-gray-500 mb-3">{service.category}</p>
                           <div>
-                            <p className="text-xs font-semibold" style={{ color: '#00C9A7' }}>{service.available} pros available</p>
-                            <p className="text-[10px]" style={{ color: '#5A7A9A' }}>Next: {service.nextSlot}</p>
+                            <p className="text-xs font-semibold text-emerald-700">{service.available} pros available</p>
+                            <p className="text-[10px] text-gray-500">Next: {service.nextSlot}</p>
                           </div>
                         </div>
                       </motion.div>
@@ -93,21 +89,20 @@ export function ZyphixBook() {
               {/* Time slots */}
               {selectedService && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                  <div className="rounded-2xl p-5" style={{ background: '#0F1B35', border: '1px solid #1E3A6E' }}>
-                    <p className="text-xs uppercase tracking-widest mb-1" style={{ color: '#5A7A9A' }}>Pick a Time</p>
-                    <h3 className="text-lg font-black text-white mb-4">Available Time Slots — Today</h3>
+                  <div className="rounded-3xl p-5 bg-white border border-gray-200">
+                    <p className="text-[12px] font-bold uppercase tracking-[.12em] text-emerald-700 mb-1">Pick a Time</p>
+                    <h3 className="text-lg font-black tracking-[-0.02em] text-gray-900 mb-4" style={{ fontFamily: HEAD_FONT }}>Available Time Slots — Today</h3>
                     <div className="grid grid-cols-4 gap-2">
                       {TIME_SLOTS.map(slot => (
                         <button
                           key={slot}
                           onClick={() => setSelectedSlot(slot)}
-                          className="py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
-                          style={{
-                            background: selectedSlot === slot ? '#FF6B35' : 'rgba(30,58,110,0.5)',
-                            color: selectedSlot === slot ? 'white' : '#5A7A9A',
-                            border: `1px solid ${selectedSlot === slot ? '#FF6B35' : '#1E3A6E'}`,
-                            transform: selectedSlot === slot ? 'scale(1.05)' : 'scale(1)',
-                          }}>
+                          className={`py-2.5 rounded-xl text-sm font-semibold border transition-all duration-200 ${
+                            selectedSlot === slot
+                              ? 'text-white border-transparent scale-105'
+                              : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-gray-300 hover:bg-white'
+                          }`}
+                          style={selectedSlot === slot ? { background: G } : undefined}>
                           {slot}
                         </button>
                       ))}
@@ -115,12 +110,8 @@ export function ZyphixBook() {
                     <button
                       onClick={handleBook}
                       disabled={!selectedSlot}
-                      className="w-full mt-4 py-3.5 rounded-xl font-bold text-sm transition-all duration-200 disabled:opacity-40 hover:scale-[1.02]"
-                      style={{
-                        background: selectedSlot ? '#FF6B35' : 'rgba(255,107,53,0.3)',
-                        color: selectedSlot ? 'white' : '#5A7A9A',
-                        boxShadow: selectedSlot ? '0 8px 24px rgba(255,107,53,0.3)' : 'none',
-                      }}>
+                      className="w-full mt-4 py-3.5 rounded-2xl font-bold text-sm text-white transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-95 hover:-translate-y-0.5 disabled:hover:translate-y-0"
+                      style={{ background: G }}>
                       {booked ? '✓ Booking Confirmed!' : 'Confirm Booking'}
                     </button>
                   </div>
@@ -132,42 +123,41 @@ export function ZyphixBook() {
             <div className="space-y-4">
               {/* Trust badges */}
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-                <div className="rounded-2xl p-5" style={{ background: '#0F1B35', border: '1px solid #1E3A6E' }}>
-                  <h3 className="font-black text-white mb-4">Why book with ZYPHIX?</h3>
+                <div className="rounded-3xl p-5 bg-white border border-gray-200">
+                  <h3 className="font-black text-gray-900 mb-2" style={{ fontFamily: HEAD_FONT }}>Why book with Zyphix?</h3>
                   {[
                     { icon: '✅', title: 'Verified Professionals', desc: 'Every pro is background-checked' },
                     { icon: '💰', title: 'Zero Cancellation Fee', desc: 'Cancel up to 1hr before for free' },
-                    { icon: '⭐', title: 'Rated 4.8/5', desc: 'By early customers across India' },
+                    { icon: '💳', title: 'Transparent Pricing', desc: 'Know the price before you book' },
                     { icon: '📍', title: 'Hyperlocal', desc: 'Pros within 2km of you' },
                   ].map((item, i) => (
-                    <div key={i} className="flex items-start gap-3 py-3 border-b last:border-0" style={{ borderColor: 'rgba(30,58,110,0.5)' }}>
+                    <div key={i} className="flex items-start gap-3 py-3 border-b border-gray-100 last:border-0">
                       <span className="text-xl shrink-0">{item.icon}</span>
                       <div>
-                        <p className="font-semibold text-white text-sm">{item.title}</p>
-                        <p className="text-xs" style={{ color: '#5A7A9A' }}>{item.desc}</p>
+                        <p className="font-semibold text-gray-900 text-sm">{item.title}</p>
+                        <p className="text-xs text-gray-500">{item.desc}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </motion.div>
 
-              {/* Recent bookings */}
+              {/* How it works */}
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
-                <div className="rounded-2xl p-5" style={{ background: '#0F1B35', border: '1px solid #1E3A6E' }}>
-                  <h3 className="font-black text-white mb-4">Recent near you</h3>
+                <div className="rounded-3xl p-5 bg-white border border-gray-200">
+                  <h3 className="font-black text-gray-900 mb-2" style={{ fontFamily: HEAD_FONT }}>How it works</h3>
                   {[
-                    { name: 'Priya S.', service: 'Haircut', time: '20 min ago' },
-                    { name: 'Ravi K.', service: 'Car Service', time: '1 hr ago' },
-                    { name: 'Sneha D.', service: 'Home Cleaning', time: '2 hr ago' },
+                    { step: '1', title: 'Pick a service', desc: 'Choose what you need help with' },
+                    { step: '2', title: 'Choose a slot', desc: 'Select a time that suits you' },
+                    { step: '3', title: 'Confirm', desc: 'A verified local pro is assigned' },
                   ].map((b, i) => (
-                    <div key={i} className="flex items-center gap-3 py-2.5 border-b last:border-0" style={{ borderColor: 'rgba(30,58,110,0.5)' }}>
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black"
-                        style={{ background: 'linear-gradient(135deg, #FF6B35, #1E4FC2)', color: 'white' }}>
-                        {b.name.charAt(0)}
+                    <div key={i} className="flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0">
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white shrink-0" style={{ background: G }}>
+                        {b.step}
                       </div>
                       <div className="flex-1">
-                        <p className="text-white text-xs font-semibold">{b.name} booked <span style={{ color: '#FF6B35' }}>{b.service}</span></p>
-                        <p className="text-[10px]" style={{ color: '#5A7A9A' }}>{b.time}</p>
+                        <p className="text-gray-900 text-xs font-semibold">{b.title}</p>
+                        <p className="text-[10px] text-gray-500">{b.desc}</p>
                       </div>
                     </div>
                   ))}

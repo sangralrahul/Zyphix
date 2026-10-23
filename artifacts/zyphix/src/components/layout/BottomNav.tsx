@@ -1,46 +1,37 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { Home, Zap, Utensils, CalendarCheck, MapPin, Tag } from 'lucide-react';
+import { Home, Zap, Utensils, CalendarCheck, Tag } from 'lucide-react';
+
+const G = '#0DA366';
 
 const navItems = [
-  { label: 'Home',   path: '/',           icon: Home,          color: '#00D97E' },
-  { label: 'Now',    path: '/now',         icon: Zap,           color: '#00C9A7' },
-  { label: 'Eats',   path: '/eats',        icon: Utensils,      color: '#F97316' },
-  { label: 'Book',   path: '/book',        icon: CalendarCheck, color: '#F97316' },
-  { label: 'Offers', path: '/offers',      icon: Tag,           color: '#D4AF37' },
+  { label: 'Home',   path: '/',       icon: Home },
+  { label: 'Now',    path: '/now',    icon: Zap },
+  { label: 'Eats',   path: '/eats',   icon: Utensils },
+  { label: 'Book',   path: '/book',   icon: CalendarCheck },
+  { label: 'Offers', path: '/offers', icon: Tag },
 ];
 
 export function BottomNav() {
   const [location] = useLocation();
 
   return (
-    <div style={{
-      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
-      background: 'rgba(9,9,14,0.97)', backdropFilter: 'blur(20px)',
-      borderTop: '1px solid rgba(255,255,255,0.07)',
-      paddingBottom: 'env(safe-area-inset-bottom, 6px)',
-      paddingTop: 8,
-      paddingLeft: 8,
-      paddingRight: 8,
-      display: 'flex',
-    }}
-    className="md:hidden"
+    <div
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-gray-200 bg-white/95 backdrop-blur-md px-2 pt-2"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 6px)' }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', width: '100%', maxWidth: 480, margin: '0 auto' }}>
+      <div className="mx-auto flex w-full max-w-[480px] items-center justify-around">
         {navItems.map((item) => {
           const isActive = location === item.path || (item.path !== '/' && location.startsWith(item.path));
           const Icon = item.icon;
           return (
-            <Link key={item.path} href={item.path} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '6px 4px 8px', textDecoration: 'none', transition: 'opacity .15s', gap: 4 }}
+            <Link key={item.path} href={item.path}
+              className="flex flex-1 flex-col items-center justify-center gap-1 px-1 pt-1.5 pb-2 no-underline transition-opacity"
               onClick={() => {}}>
-              <div style={{
-                width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: isActive ? `${item.color}22` : 'transparent',
-                transition: 'background .15s',
-              }}>
-                <Icon size={22} color={isActive ? item.color : 'rgba(255,255,255,0.38)'} strokeWidth={isActive ? 2.5 : 2} />
+              <div className={`flex h-8 w-8 items-center justify-center rounded-[10px] transition-colors ${isActive ? 'bg-emerald-50' : 'bg-transparent'}`}>
+                <Icon size={22} color={isActive ? G : '#9CA3AF'} strokeWidth={isActive ? 2.5 : 2} />
               </div>
-              <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 500, color: isActive ? item.color : 'rgba(255,255,255,0.38)', letterSpacing: '.01em' }}>
+              <span className={`text-[10px] tracking-[.01em] ${isActive ? 'font-bold' : 'font-medium'}`} style={{ color: isActive ? G : '#9CA3AF' }}>
                 {item.label}
               </span>
             </Link>

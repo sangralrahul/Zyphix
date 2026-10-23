@@ -1,155 +1,157 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
-import { Utensils, Store, Bike, ArrowRight, CheckCircle2, ChevronLeft } from 'lucide-react';
+import {
+  Store, UtensilsCrossed, Bike, ArrowRight, CheckCircle2, ChevronDown,
+  FileText, BadgeCheck, Rocket, ClipboardList, Mail,
+} from 'lucide-react';
+import { SitePage, PageHero, SectionHead, btnPrimary, btnSecondary, card, G, INK, HEAD_FONT } from '@/components/layout/SiteChrome';
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Partner overview — kirana / restaurant / delivery partner types.
+──────────────────────────────────────────────────────────────────────────── */
+
+const fade = (delay = 0) => ({
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: .5, ease: 'easeOut' as const, delay },
+});
 
 const PARTNERS = [
   {
-    icon: Utensils,
-    badge: '🍽️ Restaurant Partner',
-    title: 'List your\nrestaurant.',
-    sub: 'Reach thousands of hungry customers near you. Set your own menu, hours, and prices.',
-    perks: ['Zero commission for first 3 months', 'Real-time order dashboard', 'Dedicated account manager'],
-    cta: 'Join as Restaurant',
-    href: '/restaurant-setup',
-    bg: 'linear-gradient(160deg, #1a0a00 0%, #3b1200 60%, #7c2d00 100%)',
-    accent: '#FF6435',
-    accentLight: 'rgba(255,100,53,0.18)',
-    borderColor: 'rgba(255,100,53,0.25)',
-    img: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80',
-    footerNote: 'Be first in your city',
+    icon: <Store size={22} />, tint: '#0DA366', bg: '#ECFDF5',
+    tag: 'Kirana & retail stores', title: 'Sell from your store.',
+    sub: 'Your kirana, supermarket or shop online in days. Accept orders, manage inventory and keep the customers you already have.',
+    perks: ['Free onboarding and catalogue setup', 'Hyperlocal delivery network, under-30-minute target', 'Weekly payouts, no hidden fees'],
+    cta: 'List your store', href: '/merchant-setup', img: '/images/groceries.png',
   },
   {
-    icon: Store,
-    badge: '🏪 Kirana / Merchant Partner',
-    title: 'Sell from\nyour store.',
-    sub: 'Your kirana, supermarket or shop — digitised overnight. Accept online orders, manage inventory, grow fast.',
-    perks: ['Free onboarding & setup', '30-min hyperlocal delivery network', 'Weekly payouts, zero hidden fees'],
-    cta: 'Join as Merchant',
-    href: '/merchant-setup',
-    bg: 'linear-gradient(160deg, #001a0c 0%, #002d18 60%, #004d28 100%)',
-    accent: '#0DA366',
-    accentLight: 'rgba(13,163,102,0.18)',
-    borderColor: 'rgba(13,163,102,0.25)',
-    img: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=600&q=80',
-    footerNote: '200+ categories · Live across India',
+    icon: <UtensilsCrossed size={22} />, tint: '#EA580C', bg: '#FFF7ED',
+    tag: 'Restaurants & kitchens', title: 'List your restaurant.',
+    sub: 'Reach nearby customers with fair, flat commissions. Set your own menu, hours and prices from a simple dashboard.',
+    perks: ['Fair, transparent commission', 'Real-time order dashboard', 'Help from our onboarding team'],
+    cta: 'Register restaurant', href: '/restaurant-setup', img: '/images/food.png',
   },
   {
-    icon: Bike,
-    badge: '🛵 Delivery Partner',
-    title: 'Earn on\nyour schedule.',
-    sub: 'Ride when you want, earn what you deserve. Join India\'s fastest growing hyperlocal delivery fleet.',
-    perks: ['₹800–₹1,500/day potential', 'Flexible hours, no targets', 'Fuel & accident insurance'],
-    cta: 'Join as Delivery Partner',
-    href: '/delivery-setup',
-    bg: 'linear-gradient(160deg, #00091a 0%, #001233 60%, #002966 100%)',
-    accent: '#3B82F6',
-    accentLight: 'rgba(59,130,246,0.18)',
-    borderColor: 'rgba(59,130,246,0.25)',
-    img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
-    footerNote: 'Bike · Bicycle · Auto · Car',
+    icon: <Bike size={22} />, tint: '#2563EB', bg: '#EFF6FF',
+    tag: 'Delivery partners', title: 'Earn on your schedule.',
+    sub: 'Short, local runs in your own area. Ride when you want, with transparent per-order earnings shown before you accept.',
+    perks: ['Flexible hours, no forced targets', 'Short local distances', 'Bike, bicycle, scooter or car'],
+    cta: 'Start delivering', href: '/delivery-setup', img: '/images/scooter.png',
   },
 ];
 
+const STEPS = [
+  { icon: <FileText size={20} />, t: 'Apply online', d: 'Tell us about your store, restaurant or vehicle. It takes a few minutes and costs nothing.' },
+  { icon: <BadgeCheck size={20} />, t: 'Verification', d: 'Our team checks your documents and business details so customers can trust every partner on Zyphix.' },
+  { icon: <ClipboardList size={20} />, t: 'Set up your listing', d: 'We help you upload your catalogue or menu, set prices and hours, or complete delivery training.' },
+  { icon: <Rocket size={20} />, t: 'Go live', d: 'Start receiving orders from customers near you. Track everything from your partner dashboard.' },
+];
+
+const FAQ = [
+  { q: 'Does it cost anything to join?', a: 'No. Onboarding and listing are free for stores and restaurants, and there is no joining fee for delivery partners. Platform fees are explained clearly before you go live.' },
+  { q: 'Can I set my own prices?', a: 'Yes. Partners list their own shelf or menu prices. Zyphix does not add surge pricing on top of what you charge.' },
+  { q: 'How and when do I get paid?', a: 'Earnings are settled to your bank account on a regular weekly cycle, with a full breakdown of every order in your dashboard.' },
+  { q: 'Which cities are you in?', a: 'We are onboarding partners across India, neighbourhood by neighbourhood. Apply now and we will let you know when customers in your area can order.' },
+  { q: 'What do I need to become a delivery partner?', a: 'A vehicle, a smartphone, valid ID and (for motor vehicles) a driving licence and registration. Details are on the delivery sign-up page.' },
+];
+
 export function PartnerLanding() {
+  const [open, setOpen] = useState<number | null>(0);
+
   return (
-    <div style={{ minHeight: '100vh', background: '#060A14', fontFamily: "'Inter', sans-serif" }}>
+    <SitePage title="Partner with Zyphix">
+      <PageHero
+        eyebrow="Now onboarding across India"
+        title={<>Grow your business <span style={{ color: G }}>with Zyphix.</span></>}
+        sub="Join as a kirana store, restaurant or delivery partner and reach customers in your neighbourhood — with transparent pricing and tools built for independent businesses."
+      >
+        <a href="#partner-types" className={btnPrimary} style={{ background: G }}>Choose your partner type <ArrowRight size={16} /></a>
+        <a href="mailto:partnerships@zyphix.in" className={btnSecondary}><Mail size={16} /> partnerships@zyphix.in</a>
+      </PageHero>
 
-      {/* Back nav */}
-      <div style={{ padding: '20px 24px 0', maxWidth: 1280, margin: '0 auto' }}>
-        <Link href="/"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.45)', fontSize: 13, fontWeight: 600, textDecoration: 'none', transition: 'color .15s' }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#fff'}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)'}>
-          <ChevronLeft size={15} />Back to home
-        </Link>
-      </div>
+      {/* Partner types */}
+      <section id="partner-types" className="mx-auto max-w-[1180px] px-5 py-20 md:py-24">
+        <SectionHead eyebrow="Partner types" title="Three ways to partner." sub="Pick the one that fits you — each has its own sign-up with a short, guided form." />
+        <div className="mt-12 grid gap-5 md:grid-cols-3">
+          {PARTNERS.map((p, i) => (
+            <motion.div key={p.href} {...fade(i * .08)} className={`${card} flex flex-col overflow-hidden`}>
+              <img src={p.img} alt={p.tag} className="h-[160px] w-full object-cover" loading="lazy" />
+              <div className="flex flex-1 flex-col p-6">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl" style={{ background: p.bg, color: p.tint }}>{p.icon}</span>
+                  <p className="text-[12px] font-bold uppercase tracking-wider" style={{ color: p.tint }}>{p.tag}</p>
+                </div>
+                <h3 className="mt-4 text-[22px] font-black tracking-tight text-gray-900" style={{ fontFamily: HEAD_FONT }}>{p.title}</h3>
+                <p className="mt-2 text-[14px] leading-relaxed text-gray-600">{p.sub}</p>
+                <ul className="mt-4 flex-1 space-y-2">
+                  {p.perks.map(k => (
+                    <li key={k} className="flex items-start gap-2 text-[13.5px] text-gray-700">
+                      <CheckCircle2 size={16} className="mt-0.5 shrink-0" style={{ color: p.tint }} /> {k}
+                    </li>
+                  ))}
+                </ul>
+                <Link href={p.href} className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-[14.5px] font-bold text-white transition hover:opacity-95" style={{ background: p.tint }}>
+                  {p.cta} <ArrowRight size={15} />
+                </Link>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
 
-      {/* Hero */}
-      <div style={{ textAlign: 'center', padding: '52px 24px 48px', maxWidth: 760, margin: '0 auto' }}>
-        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .5 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(13,163,102,0.12)', border: '1px solid rgba(13,163,102,0.25)', borderRadius: 999, padding: '6px 18px', marginBottom: 22 }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#0DA366', display: 'inline-block', animation: 'pulse 2s infinite' }} />
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#0DA366', letterSpacing: '.06em' }}>NOW ONBOARDING ACROSS INDIA</span>
+      {/* How onboarding works */}
+      <section className="border-y border-gray-200 bg-gray-50">
+        <div className="mx-auto max-w-[1180px] px-5 py-20 md:py-24">
+          <SectionHead eyebrow="How onboarding works" title="From application to first order." sub="A real person from our team walks you through every step." />
+          <ol className="mt-12 grid gap-4 md:grid-cols-4">
+            {STEPS.map((s, i) => (
+              <li key={s.t} className={`${card} p-6`}>
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">{s.icon}</span>
+                  <span className="text-[12px] font-bold uppercase tracking-wider text-gray-400">Step {i + 1}</span>
+                </div>
+                <h3 className="mt-4 text-[16.5px] font-extrabold text-gray-900">{s.t}</h3>
+                <p className="mt-2 text-[14px] leading-relaxed text-gray-600">{s.d}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="mx-auto max-w-[820px] px-5 py-20 md:py-24">
+        <SectionHead eyebrow="FAQ" title="Partner questions, answered." />
+        <div className="mt-10 divide-y divide-gray-200 rounded-3xl border border-gray-200 bg-white">
+          {FAQ.map((f, i) => (
+            <div key={f.q}>
+              <button onClick={() => setOpen(open === i ? null : i)} className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left" aria-expanded={open === i}>
+                <span className="text-[15.5px] font-bold text-gray-900">{f.q}</span>
+                <ChevronDown size={18} className={`shrink-0 text-gray-400 transition ${open === i ? 'rotate-180' : ''}`} />
+              </button>
+              {open === i && <p className="-mt-1 px-6 pb-6 text-[14.5px] leading-relaxed text-gray-600">{f.a}</p>}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="mx-auto max-w-[1180px] px-5 pb-20 md:pb-24">
+        <div className="flex flex-col gap-6 rounded-[32px] p-8 text-white md:flex-row md:items-center md:justify-between md:p-12" style={{ background: INK }}>
+          <div>
+            <p className="text-[12px] font-bold uppercase tracking-[.12em] text-emerald-400">Ready when you are</p>
+            <h2 className="mt-3 text-[1.8rem] font-black tracking-[-0.03em] leading-[1.1] md:text-[2.2rem]" style={{ fontFamily: HEAD_FONT }}>Put your business on the map.</h2>
+            <p className="mt-3 max-w-[520px] text-[15px] leading-relaxed text-white/65">Questions before you apply? Email <a href="mailto:partnerships@zyphix.in" className="font-semibold text-white underline-offset-2 hover:underline">partnerships@zyphix.in</a> and we'll get back to you.</p>
           </div>
-          <h1 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: 'clamp(2rem, 5vw, 3.5rem)', color: '#fff', lineHeight: 1.1, letterSpacing: '-.04em', margin: '0 0 18px' }}>
-            Grow your business<br />
-            <span style={{ color: '#0DA366' }}>with ZYPHIX.</span>
-          </h1>
-          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, maxWidth: 520, margin: '0 auto' }}>
-            India's fastest-growing hyperlocal network. Join as a restaurant, kirana store, or delivery partner and reach customers in 30 minutes.
-          </p>
-        </motion.div>
-      </div>
-
-      {/* Cards */}
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 20px 80px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
-        {PARTNERS.map(({ icon: Icon, badge, title, sub, perks, cta, href, bg, accent, accentLight, borderColor, img, footerNote }, i) => (
-          <motion.div key={badge}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 + 0.2, duration: 0.45, ease: [.22, 1, .36, 1] }}
-            whileHover={{ y: -4 }}
-            style={{ borderRadius: 24, overflow: 'hidden', border: `1px solid ${borderColor}`, boxShadow: `0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 ${borderColor}`, display: 'flex', flexDirection: 'column', cursor: 'pointer', position: 'relative' }}>
-
-            {/* Image with overlay */}
-            <div style={{ position: 'relative', height: 200, overflow: 'hidden' }}>
-              <img src={img} alt={badge} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-              <div style={{ position: 'absolute', inset: 0, background: bg, opacity: 0.82 }} />
-              {/* Badge pill */}
-              <div style={{ position: 'absolute', top: 16, left: 16, display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(12px)', border: `1px solid ${borderColor}`, borderRadius: 999, padding: '5px 14px' }}>
-                <Icon size={13} color={accent} strokeWidth={2.5} />
-                <span style={{ fontSize: 11.5, fontWeight: 700, color: '#fff', letterSpacing: '.03em' }}>{badge.split(' ').slice(1).join(' ')}</span>
-              </div>
-              {/* ZYPHIX watermark */}
-              <div style={{ position: 'absolute', top: 16, right: 16, width: 34, height: 34, borderRadius: 10, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: '#fff', letterSpacing: '-.03em', border: '1px solid rgba(255,255,255,0.12)' }}>
-                //
-              </div>
-              {/* Title overlaid on image */}
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px 20px 0' }}>
-                <h2 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: 'clamp(1.6rem, 3vw, 2.1rem)', color: '#fff', margin: 0, lineHeight: 1.15, letterSpacing: '-.03em', whiteSpace: 'pre-line' }}>
-                  {title}
-                </h2>
-              </div>
-            </div>
-
-            {/* Body */}
-            <div style={{ background: bg, padding: '16px 20px 0', flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.6)', lineHeight: 1.65, margin: '0 0 18px' }}>{sub}</p>
-
-              {/* Perks */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
-                {perks.map(p => (
-                  <div key={p} style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
-                    <CheckCircle2 size={14} color={accent} style={{ flexShrink: 0, marginTop: 1 }} />
-                    <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.72)', fontWeight: 600, lineHeight: 1.45 }}>{p}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* CTA button */}
-              <Link href={href}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px 20px', borderRadius: 14, background: accent, color: '#fff', fontWeight: 800, fontSize: 14, textDecoration: 'none', transition: 'opacity .15s, transform .15s', marginBottom: 0 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.9'; (e.currentTarget as HTMLElement).style.transform = 'scale(1.01)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; }}>
-                {cta} <ArrowRight size={15} />
-              </Link>
-
-              {/* Footer note */}
-              <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.28)', textAlign: 'center', margin: '12px 0 20px', fontWeight: 600 }}>
-                {footerNote}
-              </p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Bottom strip */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '32px 24px', textAlign: 'center' }}>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', fontWeight: 500 }}>
-          Questions? Email us at{' '}<a href="mailto:partnerships@zyphix.in" style={{ color: '#0DA366', fontWeight: 700, textDecoration: 'none' }}>partnerships@zyphix.in</a>
-        </p>
-      </div>
-    </div>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/merchant-setup" className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-[14.5px] font-bold text-gray-900 hover:bg-gray-100">List your store</Link>
+            <Link href="/restaurant-setup" className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-5 py-3 text-[14.5px] font-bold text-white hover:bg-white/10">Register restaurant</Link>
+            <Link href="/delivery-setup" className={btnPrimary} style={{ background: G }}>Start delivering <ArrowRight size={16} /></Link>
+          </div>
+        </div>
+      </section>
+    </SitePage>
   );
 }
+
+export default PartnerLanding;

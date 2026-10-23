@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'wouter';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Clock, Tag, BookOpen, TrendingUp, Users, Zap } from 'lucide-react';
-import { ZyphixLogo } from '../components/ZyphixLogo';
+import { ArrowRight, Clock, Mail, BookOpen } from 'lucide-react';
+import { SitePage, PageHero, btnSecondary, card, G, INK, HEAD_FONT } from '@/components/layout/SiteChrome';
 
-const T1 = '#111827'; const T2 = '#6B7280'; const T3 = '#9CA3AF';
-const G = '#0DA366'; const BD = '#E5E7EB'; const BG = '#F8F9FA'; const W = '#FFFFFF';
+/* ────────────────────────────────────────────────────────────────────────────
+   Blog index — article data with soft green placeholder art (no remote images).
+──────────────────────────────────────────────────────────────────────────── */
 
 interface Post {
   slug: string;
@@ -17,208 +17,154 @@ interface Post {
   author: string;
   date: string;
   readMin: number;
-  cover: string;
   featured?: boolean;
 }
 
 const POSTS: Post[] = [
   {
     slug: 'why-kirana-stores-are-indias-last-mile-advantage',
-    category: 'Insights',
-    catColor: '#065F46',
-    catBg: '#D1FAE5',
-    title: "Why Kirana Stores Are India\u2019s Last-Mile Advantage",
-    excerpt: "India has 12 million kirana stores \u2014 one of the densest retail networks on Earth. Here\u2019s why we believe empowering them, not replacing them, is the winning strategy for hyperlocal delivery.",
-    author: 'Rahul, Founder',
-    date: '8 April 2025',
-    readMin: 5,
-    cover: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=900&h=480&fit=crop&q=85',
-    featured: true,
+    category: 'Insights', catColor: '#065F46', catBg: '#D1FAE5',
+    title: "Why Kirana Stores Are India’s Last-Mile Advantage",
+    excerpt: "India has 12 million kirana stores — one of the densest retail networks on Earth. Here’s why we believe empowering them, not replacing them, is the winning strategy for hyperlocal delivery.",
+    author: 'Rahul, Founder', date: '8 April 2025', readMin: 5, featured: true,
   },
   {
     slug: 'tier2-india-the-untapped-delivery-market',
-    category: 'Market',
-    catColor: '#1E40AF',
-    catBg: '#DBEAFE',
+    category: 'Market', catColor: '#1E40AF', catBg: '#DBEAFE',
     title: 'Tier-2 India: The Untapped Delivery Market Big Tech Missed',
-    excerpt: "While Swiggy and Zomato focussed on metros, India\u2019s 400+ Tier-2 cities with millions of urban residents have been underserved. We ran the numbers \u2014 and the opportunity is enormous.",
-    author: 'Zyphix Research',
-    date: '4 April 2025',
-    readMin: 4,
-    cover: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=900&h=480&fit=crop&q=85',
+    excerpt: "While Swiggy and Zomato focussed on metros, India’s 400+ Tier-2 cities with millions of urban residents have been underserved. We ran the numbers — and the opportunity is enormous.",
+    author: 'Zyphix Research', date: '4 April 2025', readMin: 4,
   },
   {
     slug: '30-minutes-or-less-the-logistics-behind-quick-commerce',
-    category: 'Operations',
-    catColor: '#7C3AED',
-    catBg: '#EDE9FE',
+    category: 'Operations', catColor: '#7C3AED', catBg: '#EDE9FE',
     title: '30 Minutes or Less: The Logistics Behind Quick Commerce',
     excerpt: 'Delivering groceries in half an hour requires more than fast riders. It demands warehouse placement, inventory intelligence, and route optimisation working in perfect sync.',
-    author: 'Zyphix Team',
-    date: '28 March 2025',
-    readMin: 6,
-    cover: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=900&h=480&fit=crop&q=85',
+    author: 'Zyphix Team', date: '28 March 2025', readMin: 6,
   },
   {
     slug: 'zero-commission-myth-or-model',
-    category: 'Business',
-    catColor: '#EA580C',
-    catBg: '#FFEDD5',
+    category: 'Business', catColor: '#EA580C', catBg: '#FFEDD5',
     title: 'Zero Commission: Myth or Viable Business Model?',
-    excerpt: "Every delivery platform claims to be on the merchant\u2019s side. We break down how Zyphix\u2019s unit economics actually work \u2014 and why lower commissions are sustainable at scale.",
-    author: 'Rahul, Founder',
-    date: '20 March 2025',
-    readMin: 7,
-    cover: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=900&h=480&fit=crop&q=85',
+    excerpt: "Every delivery platform claims to be on the merchant’s side. We break down how Zyphix’s unit economics actually work — and why lower commissions are sustainable at scale.",
+    author: 'Rahul, Founder', date: '20 March 2025', readMin: 7,
   },
   {
     slug: 'building-in-jk-lessons-from-tier-2',
-    category: 'Story',
-    catColor: '#065F46',
-    catBg: '#D1FAE5',
+    category: 'Story', catColor: '#065F46', catBg: '#D1FAE5',
     title: 'Building in Tier-2 India: Lessons from the Ground',
     excerpt: 'Connectivity challenges, seasonal demand swings, and a fiercely loyal local customer base. Building Zyphix for Tier-2 India has taught us things no MBA course could.',
-    author: 'Zyphix Team',
-    date: '12 March 2025',
-    readMin: 5,
-    cover: 'https://images.unsplash.com/photo-1598005044410-a9e13af61bfc?w=900&h=480&fit=crop&q=85',
+    author: 'Zyphix Team', date: '12 March 2025', readMin: 5,
   },
   {
     slug: 'superlocal-vs-hyperlocal-whats-the-difference',
-    category: 'Product',
-    catColor: '#1E40AF',
-    catBg: '#DBEAFE',
-    title: "SuperLocal vs Hyperlocal: What\u2019s the Difference?",
-    excerpt: "Hyperlocal delivery is a means. SuperLocal is a philosophy \u2014 building the complete digital layer for a neighbourhood\u2019s economy. Here\u2019s how Zyphix thinks about it.",
-    author: 'Zyphix Research',
-    date: '5 March 2025',
-    readMin: 4,
-    cover: 'https://images.unsplash.com/photo-1512756290469-ec264b7fbf87?w=900&h=480&fit=crop&q=85',
+    category: 'Product', catColor: '#1E40AF', catBg: '#DBEAFE',
+    title: "SuperLocal vs Hyperlocal: What’s the Difference?",
+    excerpt: "Hyperlocal delivery is a means. SuperLocal is a philosophy — building the complete digital layer for a neighbourhood’s economy. Here’s how Zyphix thinks about it.",
+    author: 'Zyphix Research', date: '5 March 2025', readMin: 4,
   },
 ];
 
-const STATS = [
-  { Icon: BookOpen,   v: '6',    l: 'Articles published' },
-  { Icon: Users,      v: '2K+',  l: 'Monthly readers' },
-  { Icon: TrendingUp, v: 'Top 3', l: 'Topics: kirana, delivery, Tier-2 India' },
-  { Icon: Zap,        v: 'Weekly', l: 'New posts' },
-];
+const CATEGORIES = ['All', ...Array.from(new Set(POSTS.map(p => p.category)))];
 
-export function Blog() {
-  const [hovered, setHovered] = useState<string | null>(null);
-  const featured = POSTS.find(p => p.featured)!;
-  const rest = POSTS.filter(p => !p.featured);
-
-  const CategoryBadge = ({ category, catColor, catBg }: { category: string; catColor: string; catBg: string }) => (
-    <span style={{ fontSize: 11, fontWeight: 700, color: catColor, background: catBg, padding: '3px 10px', borderRadius: 99, letterSpacing: '.03em', textTransform: 'uppercase' as const }}>{category}</span>
-  );
-
+/** Soft green gradient placeholder in place of cover images. */
+function CoverArt({ post, className = '' }: { post: Post; className?: string }) {
   return (
-    <div style={{ background: BG, minHeight: '100vh' }}>
-      <div style={{ background: W, borderBottom: `1px solid ${BD}`, position: 'sticky', top: 0, zIndex: 40 }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/"><ZyphixLogo size={30} ixColor={T1} /></Link>
-          <Link href="/">
-            <button style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: T2, padding: '7px 14px', borderRadius: 8, border: `1px solid ${BD}`, background: W, cursor: 'pointer' }}>
-              <ArrowLeft size={13} /> Back to Home
-            </button>
-          </Link>
-        </div>
-      </div>
-
-      <div style={{ background: `linear-gradient(135deg, #064E3B 0%, #065F46 60%, #047857 100%)`, padding: '60px 24px 72px', textAlign: 'center' }}>
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .5 }}>
-          <p style={{ fontSize: 11.5, fontWeight: 700, color: '#6EE7B7', letterSpacing: '.1em', textTransform: 'uppercase' as const, marginBottom: 14 }}>Zyphix Blog</p>
-          <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(2rem,5vw,3.2rem)', color: '#fff', letterSpacing: '-.05em', lineHeight: 1.08, marginBottom: 14 }}>
-            Stories from India's<br />SuperLocal frontier
-          </h1>
-          <p style={{ fontSize: 15.5, color: 'rgba(255,255,255,.6)', maxWidth: 500, margin: '0 auto', lineHeight: 1.7 }}>
-            Insights on kirana commerce, hyperlocal delivery, and building for Tier-2 India.
-          </p>
-        </motion.div>
-      </div>
-
-      <div style={{ maxWidth: 1200, margin: '-28px auto 0', padding: '0 24px 20px', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
-        {STATS.map(({ Icon, v, l }, i) => (
-          <motion.div key={l} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .1 + i * .06 }}
-            style={{ background: W, borderRadius: 14, border: `1px solid ${BD}`, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Icon size={16} color={G} strokeWidth={2.2} />
-            </div>
-            <div>
-              <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 15, color: T1, letterSpacing: '-.02em', lineHeight: 1.1 }}>{v}</p>
-              <p style={{ fontSize: 11, color: T3, fontWeight: 500 }}>{l}</p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px 80px' }}>
-        <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          style={{ background: W, borderRadius: 22, border: `1px solid ${BD}`, overflow: 'hidden', marginBottom: 32, cursor: 'pointer',
-            transform: hovered === featured.slug ? 'translateY(-3px)' : 'none', transition: 'all .2s',
-            boxShadow: hovered === featured.slug ? '0 8px 32px rgba(0,0,0,.12)' : '0 2px 12px rgba(0,0,0,.07)' }}
-          onMouseEnter={() => setHovered(featured.slug)} onMouseLeave={() => setHovered(null)}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-            <img src={featured.cover} alt={featured.title} style={{ width: '100%', height: 340, objectFit: 'cover', display: 'block' }} />
-            <div style={{ padding: '40px 40px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: G, background: '#ECFDF5', padding: '3px 10px', borderRadius: 99, letterSpacing: '.06em', textTransform: 'uppercase' as const }}>✦ Featured</span>
-                <CategoryBadge {...featured} />
-              </div>
-              <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.3rem,2.2vw,1.7rem)', color: T1, letterSpacing: '-.04em', lineHeight: 1.18, marginBottom: 14 }}>{featured.title}</h2>
-              <p style={{ fontSize: 14.5, color: T2, lineHeight: 1.72, marginBottom: 24 }}>{featured.excerpt}</p>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: T1 }}>{featured.author}</p>
-                  <p style={{ fontSize: 11.5, color: T3 }}>{featured.date} · {featured.readMin} min read</p>
-                </div>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: G, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ArrowRight size={16} color="#fff" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 18, color: T1, letterSpacing: '-.03em', marginBottom: 18 }}>Latest articles</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20 }}>
-          {rest.map((post, i) => (
-            <motion.div key={post.slug} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * .07 }}
-              style={{ background: W, borderRadius: 18, border: `1px solid ${BD}`, overflow: 'hidden', cursor: 'pointer',
-                transform: hovered === post.slug ? 'translateY(-4px)' : 'none', transition: 'all .2s',
-                boxShadow: hovered === post.slug ? '0 8px 28px rgba(0,0,0,.11)' : '0 1px 6px rgba(0,0,0,.05)' }}
-              onMouseEnter={() => setHovered(post.slug)} onMouseLeave={() => setHovered(null)}>
-              <img src={post.cover} alt={post.title} style={{ width: '100%', height: 168, objectFit: 'cover', display: 'block' }} />
-              <div style={{ padding: '18px 20px 22px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <CategoryBadge {...post} />
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: T3 }}><Clock size={10} />{post.readMin} min</span>
-                </div>
-                <h3 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 15.5, color: T1, letterSpacing: '-.03em', lineHeight: 1.28, marginBottom: 8 }}>{post.title}</h3>
-                <p style={{ fontSize: 13, color: T2, lineHeight: 1.65, marginBottom: 16, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden' }}>{post.excerpt}</p>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <p style={{ fontSize: 11.5, color: T3 }}>{post.author} · {post.date}</p>
-                  <ArrowRight size={14} color={G} />
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          style={{ marginTop: 48, background: `linear-gradient(135deg, #064E3B, #047857)`, borderRadius: 22, padding: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' as const }}>
-          <div>
-            <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', fontSize: '1.5rem', letterSpacing: '-.03em', marginBottom: 6 }}>Want to write for us?</p>
-            <p style={{ color: 'rgba(255,255,255,.55)', fontSize: 14 }}>Share your perspective on kirana commerce, logistics, or India's startup ecosystem.</p>
-          </div>
-          <a href="mailto:blog@zyphix.in" style={{ textDecoration: 'none' }}>
-            <button style={{ background: W, color: '#065F46', fontSize: 14, fontWeight: 800, padding: '13px 28px', borderRadius: 12, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
-              Contribute an article <ArrowRight size={15} />
-            </button>
-          </a>
-        </motion.div>
-      </div>
+    <div aria-hidden className={`relative overflow-hidden ${className}`} style={{ background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 55%, #A7F3D0 100%)' }}>
+      <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/40" />
+      <div className="absolute -bottom-12 left-6 h-36 w-36 rounded-full bg-emerald-300/30" />
+      <span className="absolute left-5 top-5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/80 text-emerald-700"><BookOpen size={18} /></span>
+      <span className="absolute bottom-5 left-5 text-[12px] font-bold uppercase tracking-wider text-emerald-800/70">{post.category}</span>
     </div>
   );
 }
+
+function CategoryBadge({ category, catColor, catBg }: Pick<Post, 'category' | 'catColor' | 'catBg'>) {
+  return <span className="rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider" style={{ color: catColor, background: catBg }}>{category}</span>;
+}
+
+export function Blog() {
+  const [cat, setCat] = useState('All');
+  const featured = POSTS.find(p => p.featured)!;
+  const rest = POSTS.filter(p => !p.featured && (cat === 'All' || p.category === cat));
+
+  return (
+    <SitePage title="Blog">
+      <PageHero eyebrow="Zyphix blog" title="Stories from India's SuperLocal frontier." sub="Insights on kirana commerce, hyperlocal delivery and building for Tier-2 India." />
+
+      <section className="mx-auto max-w-[1180px] px-5 py-16 md:py-20">
+        {/* Featured */}
+        {(cat === 'All' || featured.category === cat) && (
+          <motion.article initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .5 }} className={`${card} grid overflow-hidden md:grid-cols-2`}>
+            <CoverArt post={featured} className="min-h-[220px] md:min-h-[340px]" />
+            <div className="flex flex-col justify-center p-8 md:p-10">
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-700">Featured</span>
+                <CategoryBadge {...featured} />
+              </div>
+              <h2 className="mt-4 text-[1.5rem] font-black tracking-[-0.03em] leading-[1.15] text-gray-900 md:text-[1.9rem]" style={{ fontFamily: HEAD_FONT }}>{featured.title}</h2>
+              <p className="mt-3 text-[14.5px] leading-relaxed text-gray-600">{featured.excerpt}</p>
+              <div className="mt-6 flex items-center justify-between">
+                <div>
+                  <p className="text-[13.5px] font-bold text-gray-900">{featured.author}</p>
+                  <p className="text-[12.5px] text-gray-500">{featured.date} · {featured.readMin} min read</p>
+                </div>
+                <span className="flex h-10 w-10 items-center justify-center rounded-full text-white" style={{ background: G }}><ArrowRight size={17} /></span>
+              </div>
+            </div>
+          </motion.article>
+        )}
+
+        {/* Filter + list */}
+        <div className="mt-12 flex flex-wrap items-center justify-between gap-4">
+          <h2 className="text-[1.4rem] font-black tracking-tight text-gray-900" style={{ fontFamily: HEAD_FONT }}>Latest articles</h2>
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map(c => (
+              <button key={c} onClick={() => setCat(c)}
+                className={`rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition ${cat === c ? 'border-transparent text-white' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'}`}
+                style={cat === c ? { background: G } : undefined}>
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {rest.map((post, i) => (
+            <motion.article key={post.slug} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * .05, duration: .4 }}
+              className={`${card} flex flex-col overflow-hidden transition hover:-translate-y-1 hover:shadow-[0_16px_48px_rgba(11,18,32,.08)]`}>
+              <CoverArt post={post} className="h-[150px]" />
+              <div className="flex flex-1 flex-col p-6">
+                <div className="flex items-center gap-2">
+                  <CategoryBadge {...post} />
+                  <span className="flex items-center gap-1 text-[12px] text-gray-400"><Clock size={12} />{post.readMin} min</span>
+                </div>
+                <h3 className="mt-3 text-[17px] font-extrabold leading-snug tracking-tight text-gray-900">{post.title}</h3>
+                <p className="mt-2 flex-1 text-[13.5px] leading-relaxed text-gray-600 line-clamp-3">{post.excerpt}</p>
+                <div className="mt-4 flex items-center justify-between">
+                  <p className="text-[12.5px] text-gray-500">{post.author} · {post.date}</p>
+                  <ArrowRight size={15} style={{ color: G }} />
+                </div>
+              </div>
+            </motion.article>
+          ))}
+        </div>
+        {rest.length === 0 && <p className="mt-6 text-[14px] text-gray-500">No more articles in this category yet.</p>}
+      </section>
+
+      {/* Contribute */}
+      <section className="mx-auto max-w-[1180px] px-5 pb-20 md:pb-24">
+        <div className="flex flex-col gap-6 rounded-[32px] p-8 text-white md:flex-row md:items-center md:justify-between md:p-12" style={{ background: INK }}>
+          <div>
+            <p className="text-[12px] font-bold uppercase tracking-[.12em] text-emerald-400">Write for us</p>
+            <h2 className="mt-3 text-[1.8rem] font-black tracking-[-0.03em] leading-[1.1] md:text-[2.2rem]" style={{ fontFamily: HEAD_FONT }}>Have a perspective on local commerce?</h2>
+            <p className="mt-3 max-w-[520px] text-[15px] leading-relaxed text-white/65">We publish pieces on kirana commerce, logistics and building for India beyond the metros. Pitch us an idea.</p>
+          </div>
+          <a href="mailto:hello@zyphix.in?subject=Blog%20contribution" className={`${btnSecondary} shrink-0`}><Mail size={16} /> Contribute an article</a>
+        </div>
+      </section>
+    </SitePage>
+  );
+}
+
+export default Blog;

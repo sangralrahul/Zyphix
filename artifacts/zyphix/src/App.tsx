@@ -51,7 +51,7 @@ const PartnerDashboard = lazy(() => import("@/pages/PartnerDashboard").then(m =>
 
 function RouteFallback() {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0A0F1A' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF' }}>
       <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(13,163,102,.2)', borderTopColor: '#0DA366', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
@@ -59,18 +59,6 @@ function RouteFallback() {
 }
 
 const queryClient = new QueryClient();
-
-function DarkLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{ minHeight: '100vh', background: '#0A0E1A', color: '#fff' }}>
-      <Navbar />
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 16px 96px', boxSizing: 'border-box' as const }}>
-        {children}
-      </div>
-      <BottomNav />
-    </div>
-  );
-}
 
 function LightLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -83,6 +71,9 @@ function LightLayout({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+// All app pages now share the same light layout.
+const DarkLayout = LightLayout;
 
 function Router() {
   return (
