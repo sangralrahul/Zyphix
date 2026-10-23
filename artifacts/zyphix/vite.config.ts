@@ -28,7 +28,7 @@ if (!basePath) {
 }
 
 const directRoutes = [
-  "light", "terms", "about", "contact", "blog", "investors",
+  "launch", "light", "terms", "about", "contact", "blog", "investors",
   "merchant-setup", "delivery-setup", "restaurant-setup", "now", "wallet",
   "wishlist", "notifications", "admin", "partner-dashboard", "eats", "book",
   "offers", "kirana-map", "partner", "app", "account",

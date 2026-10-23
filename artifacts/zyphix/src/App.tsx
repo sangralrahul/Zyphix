@@ -6,7 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 
 
-import { Home } from "@/pages/Home";
+import { Landing } from "@/pages/Landing";
+const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { PromoProvider } from "@/context/PromoContext";
@@ -86,7 +87,8 @@ function LightLayout({ children }: { children: React.ReactNode }) {
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={Landing} />
+      <Route path="/launch" component={Home} />
       <Route path="/light" component={HomeLight} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
