@@ -914,13 +914,12 @@ function Scene5({ onDone }: { onDone?: () => void }) {
         </Link>
       </motion.div>
 
-      {/* Clavix credit */}
       <motion.p
         style={{ position: 'relative', zIndex: 10, fontSize: '0.8vw', color: `${T2}70`, letterSpacing: '.1em', marginTop: '2vh', fontFamily: INT }}
         initial={{ opacity: 0 }}
         animate={ph >= 4 ? { opacity: 1 } : {}}
         transition={{ duration: 0.8, delay: 0.5 }}>
-        A Clavix Technologies product
+        A Zyphix product
       </motion.p>
 
       {/* Bottom progress line */}

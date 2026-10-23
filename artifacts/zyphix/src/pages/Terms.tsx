@@ -46,7 +46,7 @@ export function Terms() {
 
         <div style={{ background: W, borderRadius: 20, border: `1px solid ${BD}`, padding: '36px 40px', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
           <Section title="1. Acceptance of Terms">
-            <p>These Terms of Service ("Terms") constitute a legally binding agreement between you and Zyphix Technologies Pvt. Ltd. (CIN: U74999KA2024PTC001234), a company incorporated under the Companies Act 2013, having its registered office at 12th Floor, RMZ Infinity, Old Madras Road, Bengaluru 560016 ("Zyphix", "we", "us", "our").</p>
+            <p>These Terms of Service ("Terms") constitute a legally binding agreement between you and Zyphix ("Zyphix", "we", "us", "our").</p>
             <p style={{ marginTop: 10 }}>By registering, accessing, or using the Zyphix website, mobile application, or any associated service, you ("User", "you") agree to comply with and be bound by these Terms along with our Privacy Policy.</p>
           </Section>
 
@@ -93,7 +93,7 @@ export function Terms() {
           </Section>
 
           <Section title="8. Intellectual Property">
-            <p>All content on Zyphix — including the logo, design, software, text, images, and trademarks — is the exclusive property of Zyphix Technologies Pvt. Ltd. and is protected under Indian and international intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written consent.</p>
+            <p>All content on Zyphix — including the logo, design, software, text, images, and trademarks — is the exclusive property of Zyphix and is protected under Indian and international intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written consent.</p>
           </Section>
 
           <Section title="9. Limitation of Liability">
@@ -107,15 +107,6 @@ export function Terms() {
 
           <Section title="11. Changes to Terms">
             <p>We reserve the right to modify these Terms at any time. We will provide at least 7 days' notice of material changes via email or in-app notification. Your continued use after the effective date constitutes acceptance.</p>
-          </Section>
-
-          <Section title="12. Contact">
-            <p>For any questions about these Terms:</p>
-            <div style={{ marginTop: 12, background: BG, borderRadius: 12, padding: '16px 18px', display: 'inline-block' }}>
-              <p><strong>Legal Department — Zyphix Technologies Pvt. Ltd.</strong></p>
-              <p>Email: <a href="mailto:legal@zyphix.in" style={{ color: G, fontWeight: 600 }}>legal@zyphix.in</a></p>
-              <p>Address: 12th Floor, RMZ Infinity, Old Madras Road, Bengaluru 560016</p>
-            </div>
           </Section>
         </div>
       </div>

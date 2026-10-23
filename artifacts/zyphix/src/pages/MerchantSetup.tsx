@@ -880,7 +880,7 @@ function exportMerchantPDF(storeData: Record<string,string>, categories: Set<str
 
 <div class="body">
   <div class="doc-title">Store Registration</div>
-  <div class="submitted">Submitted on ${date} &nbsp;·&nbsp; Clavix Technologies Pvt. Ltd., India</div>
+  <div class="submitted">Submitted on ${date} &nbsp;·&nbsp; Zyphix, India</div>
 
   <div class="ref-box">
     <div>
@@ -910,7 +910,7 @@ function exportMerchantPDF(storeData: Record<string,string>, categories: Set<str
 <div class="footer">
   <div class="footer-left">
     This is an auto-generated registration confirmation. Keep it for your records.<br/>
-    Zyphix · Clavix Technologies Pvt. Ltd. · India · <strong>wa.me/919682394363</strong>
+    Zyphix · India
   </div>
   <div class="footer-right">ZyphixNow Merchant Program<br/>${date}</div>
 </div>

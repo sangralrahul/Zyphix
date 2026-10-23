@@ -147,11 +147,7 @@ export function PartnerLanding() {
       {/* Bottom strip */}
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '32px 24px', textAlign: 'center' }}>
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', fontWeight: 500 }}>
-          Questions? WhatsApp us at{' '}
-          <a href="https://wa.me/919682394363" target="_blank" rel="noopener noreferrer"
-            style={{ color: '#0DA366', fontWeight: 700, textDecoration: 'none' }}>
-            +91 96823 94363
-          </a>
+          Questions? Email us at{' '}<a href="mailto:partnerships@zyphix.in" style={{ color: '#0DA366', fontWeight: 700, textDecoration: 'none' }}>partnerships@zyphix.in</a>
         </p>
       </div>
     </div>

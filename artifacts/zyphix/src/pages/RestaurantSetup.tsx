@@ -611,7 +611,7 @@ function exportRestaurantPDF(restData: Record<string, string>, cuisines: Set<str
   <div class="title-row">
     <div>
       <div class="doc-title">Restaurant Registration</div>
-      <div class="submitted">Submitted on ${date} &nbsp;·&nbsp; Clavix Technologies Pvt. Ltd., India</div>
+      <div class="submitted">Submitted on ${date} &nbsp;·&nbsp; Zyphix, India</div>
     </div>
   </div>
 
@@ -642,7 +642,7 @@ function exportRestaurantPDF(restData: Record<string, string>, cuisines: Set<str
 <div class="footer">
   <div class="footer-left">
     This is an auto-generated registration confirmation. Keep it for your records.<br/>
-    Zyphix · Clavix Technologies Pvt. Ltd. · India · <strong>wa.me/919682394363</strong>
+    Zyphix · India
   </div>
   <div class="footer-right">ZyphixEats Partner Program<br/>${date}</div>
 </div>

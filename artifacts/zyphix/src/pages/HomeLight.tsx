@@ -648,7 +648,7 @@ function TrustSection() {
             <div style={{ width: 46, height: 46, borderRadius: 13, background: G_BG, border: `1px solid ${G_BD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>👨‍💼</div>
             <div>
               <p style={{ fontWeight: 700, color: T1, fontSize: 15, lineHeight: 1 }}>Rahul</p>
-              <p style={{ fontSize: 12.5, color: T3, marginTop: 4 }}>Founder, Clavix Technologies Pvt. Ltd.</p>
+              <p style={{ fontSize: 12.5, color: T3, marginTop: 4 }}>Founder, Zyphix</p>
             </div>
           </div>
         </motion.div>
@@ -691,11 +691,11 @@ function CtaBanner() {
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', color: G2, fontSize: 14, fontWeight: 700, padding: '14px 28px', borderRadius: 11, border: 'none', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}>
               Join Waitlist — Free <ArrowRight size={15} />
             </button>
-            <a href="https://wa.me/919682394363" target="_blank" rel="noopener noreferrer"
+            <a href="mailto:support@zyphix.in" target="_blank" rel="noopener noreferrer"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', fontSize: 14, fontWeight: 600, padding: '14px 24px', borderRadius: 11, textDecoration: 'none', transition: 'background 0.15s' }}
               onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.25)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}>
-              <Phone size={15} /> WhatsApp us
+              <Phone size={15} /> Contact us
             </a>
           </div>
         </div>
@@ -725,7 +725,7 @@ function Footer() {
                 { ic: <Twitter size={13} />, h: '#' },
                 { ic: <Instagram size={13} />, h: '#' },
                 { ic: <Linkedin size={13} />, h: '#' },
-                { ic: <Phone size={13} />, h: 'https://wa.me/919682394363' },
+                { ic: <Phone size={13} />, h: 'mailto:support@zyphix.in' },
               ].map(({ ic, h }, i) => (
                 <a key={i} href={h} target="_blank" rel="noopener noreferrer"
                   style={{ width: 32, height: 32, borderRadius: 8, background: '#1C1C1C', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)', transition: 'all 0.15s', textDecoration: 'none' }}
@@ -754,7 +754,7 @@ function Footer() {
           ))}
         </div>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.22)' }}>© 2025 Clavix Technologies Pvt. Ltd. All rights reserved.</p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.22)' }}>© 2025 Zyphix. All rights reserved.</p>
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.22)' }}>Made with care in India</p>
         </div>
       </div>
@@ -767,7 +767,7 @@ function Footer() {
 ───────────────────────────────────────────── */
 function WAFloat() {
   return (
-    <motion.a href="https://wa.me/919682394363" target="_blank" rel="noopener noreferrer"
+    <motion.a href="mailto:support@zyphix.in" target="_blank" rel="noopener noreferrer"
       initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 2.5, type: 'spring', stiffness: 260 }}
       whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.92 }}
       style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 999, width: 52, height: 52, borderRadius: '50%', background: '#25D366', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(37,211,102,0.38)', textDecoration: 'none' }}>
@@ -795,7 +795,6 @@ export function HomeLight() {
       <TrustSection />
       <CtaBanner />
       <Footer />
-      <WAFloat />
     </div>
   );
 }
