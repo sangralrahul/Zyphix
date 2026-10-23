@@ -1,0 +1,29 @@
+# Root config used by Cloudflare Workers Builds (root directory "/", deploy: `npx wrangler deploy`).
+# Mirrors artifacts/zyphix/wrangler.toml with paths relative to the repo root.
+# For local CLI work (db:schema, db:seed, cf:deploy) keep using artifacts/zyphix.
+name = "zyphix"
+main = "artifacts/zyphix/worker/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[assets]
+directory = "./artifacts/zyphix/dist/public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "/img/*", "/admin/*"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "zyphix-catalog"
+database_id = "8ed1c8d8-3bea-47ea-83f9-87482705c5c7"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "zyphix-images"
+
+[ai]
+binding = "AI"
+
+[observability]
+enabled = true

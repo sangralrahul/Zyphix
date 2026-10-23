@@ -5,8 +5,8 @@
   "scripts": {
     "preinstall": "node -e \"process.exit(0)\"",
     "dev": "vite dev --host 0.0.0.0 --port 8080",
-    "build": "vite build",
-    "build:dev": "vite build",
+    "build": "pnpm --filter @workspace/zyphix run build:cf",
+    "build:dev": "pnpm --filter @workspace/zyphix run build:cf",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
