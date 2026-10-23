@@ -9,11 +9,10 @@ import {
 import { SiteHeader, SiteFooter, SectionHead, G, G2, INK } from '@/components/layout/SiteChrome';
 import { apiFetch } from '@/lib/api';
 import { type Category } from '@/lib/catalog';
-import { GROCERY_CATEGORIES as mockCategories } from '@/data/mockData';
 
 /** Lightweight: the landing page only needs categories (not the 3k-product list). */
 function useCategories(): Category[] {
-  const [cats, setCats] = useState<Category[]>(mockCategories as Category[]);
+  const [cats, setCats] = useState<Category[]>([]);
   React.useEffect(() => {
     let alive = true;
     fetch('/api/categories', { headers: { accept: 'application/json' } })
@@ -140,6 +139,7 @@ function Hero() {
 function CategoryShowcase() {
   const categories = useCategories();
   const cats = categories.slice(0, 12);
+  if (!cats.length) return null;
   return (
     <section className="bg-gray-50 border-b border-gray-200">
       <div className="mx-auto max-w-[1180px] px-5 py-16 md:py-20">

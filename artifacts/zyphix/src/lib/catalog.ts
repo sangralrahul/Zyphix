@@ -5,7 +5,6 @@
  * so the page never renders empty.
  */
 import { useEffect, useState } from 'react';
-import { products as mockProducts, GROCERY_CATEGORIES as mockCategories } from '@/data/mockData';
 
 export type Product = {
   id: string; name: string; brand: string; price: number; origPrice: number | null;
@@ -40,16 +39,18 @@ export function loadCatalog(): Promise<Catalog> {
       cached = { products, categories, source: 'api' };
     } catch (err) {
       console.warn('[catalog] API unavailable, using bundled data:', (err as Error).message);
-      cached = { products: mockProducts as Product[], categories: mockCategories as Category[], source: 'mock' };
+      // The bundled fallback is ~1 MB, so it is only downloaded when the API is actually unreachable.
+      const mock = await import('@/data/mockData');
+      cached = { products: mock.products as Product[], categories: mock.GROCERY_CATEGORIES as Category[], source: 'mock' };
     }
     return cached;
   })();
   return inflight;
 }
 
-/** React hook – returns the bundled data immediately and swaps in API data once loaded. */
+/** React hook – returns an empty catalogue (loading=true) and swaps in API data once loaded. */
 export function useCatalog(): Catalog & { loading: boolean } {
-  const [state, setState] = useState<Catalog>(cached ?? { products: mockProducts as Product[], categories: mockCategories as Category[], source: 'mock' });
+  const [state, setState] = useState<Catalog>(cached ?? { products: [], categories: [], source: 'mock' });
   const [loading, setLoading] = useState(!cached);
   useEffect(() => {
     let alive = true;
