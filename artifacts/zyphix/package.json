@@ -15,7 +15,7 @@
     "db:schema": "wrangler d1 execute zyphix-catalog --remote --file=db/schema.sql",
     "db:seed": "wrangler d1 execute zyphix-catalog --remote --file=db/seed.sql",
     "images:sync": "node scripts/images/sync.mjs --base https://zyphix.in",
-    "images:local": "node scripts/images/sync-local.mjs --base https://zyphix.in",
+    "images:local": "node scripts/images/sync-local.mjs --base https://zyphix.in --reset failed",
     "images:produce": "node scripts/images/sync.mjs --base https://zyphix.in --kind produce"
   },
   "devDependencies": {

@@ -65,18 +65,50 @@ function score(hit, brand, name) {
   return s;
 }
 
-async function search(host, q) {
+class RateLimited extends Error {}
+
+/** Open Food Facts' new search service (search-a-licious) – faster and far less throttled than the legacy search.pl. */
+async function searchModern(q) {
+  const u = new URL('https://search.openfoodfacts.org/search');
+  u.searchParams.set('q', q); u.searchParams.set('page_size', '10'); u.searchParams.set('langs', 'en');
+  u.searchParams.set('fields', 'code,product_name,product_name_en,brands,image_front_url,image_url,countries_tags');
+  const res = await fetch(u, { headers: { 'user-agent': UA, accept: 'application/json' } });
+  if (res.status === 429 || res.status === 503) throw new RateLimited(`search-a-licious ${res.status}`);
+  if (!res.ok) throw new Error(`search-a-licious ${res.status}`);
+  const data = await res.json();
+  return (data.hits ?? data.products ?? []);
+}
+
+/** Legacy search endpoint – fallback only (10 req/min and shared-IP throttling are common). */
+async function searchLegacy(host, q) {
   const u = new URL(`https://${host}/cgi/search.pl`);
   u.searchParams.set('search_terms', q); u.searchParams.set('search_simple', '1'); u.searchParams.set('action', 'process');
   u.searchParams.set('json', '1'); u.searchParams.set('page_size', '10');
   u.searchParams.set('fields', 'code,product_name,product_name_en,brands,image_front_url,image_url,countries_tags');
-  for (let attempt = 0; attempt < 4; attempt++) {
-    const res = await fetch(u, { headers: { 'user-agent': UA, accept: 'application/json' } });
-    if (res.status === 429 || res.status === 503) { console.log(`   rate limited by ${host}, waiting 90s…`); await sleep(90000); continue; }
-    if (!res.ok) throw new Error(`search ${res.status}`);
-    try { return (await res.json()).products ?? []; } catch { throw new Error('non-JSON reply'); }
+  const res = await fetch(u, { headers: { 'user-agent': UA, accept: 'application/json' } });
+  if (res.status === 429 || res.status === 503) throw new RateLimited(`${host} ${res.status}`);
+  if (!res.ok) throw new Error(`search ${res.status}`);
+  try { return (await res.json()).products ?? []; } catch { throw new Error('non-JSON reply'); }
+}
+
+/** Search with backoff: modern endpoint first, legacy as fallback. Throws RateLimited only after real patience. */
+async function search(host, q) {
+  const waits = [20000, 45000, 90000, 180000];
+  for (let attempt = 0; ; attempt++) {
+    try {
+      try { return await searchModern(q); }
+      catch (e) { if (e instanceof RateLimited) throw e; /* modern endpoint down → legacy */ return await searchLegacy(host, q); }
+    } catch (e) {
+      if (!(e instanceof RateLimited) || attempt >= waits.length) throw e;
+      console.log(`   rate limited (${e.message}), waiting ${waits[attempt] / 1000}s…`);
+      await sleep(waits[attempt]);
+    }
   }
-  throw new Error('rate limited repeatedly');
+}
+
+if (args.reset) { // --reset failed   (put failed/not_found rows back to pending before this run)
+  const r = await fetch(`${base}/admin/images/reset?status=${args.reset}`, { method: 'POST', headers }).then(r => r.json());
+  console.log(`reset ${r.reset} rows from ${args.reset} -> pending`);
 }
 
 const pending = await fetch(`${base}/admin/images/pending?kind=packaged&limit=${args.limit ?? 5000}`, { headers }).then(r => r.json());
@@ -84,6 +116,7 @@ if (!Array.isArray(pending)) { console.error('could not fetch pending list:', pe
 console.log(`${pending.length} packaged products to resolve (~${Math.round(pending.length * pause / 60000)} min)`);
 
 const totals = { ready: 0, not_found: 0, failed: 0 };
+let consecutiveLimited = 0;
 for (const [i, row] of pending.entries()) {
   const label = `${row.brand} ${row.name}`;
   const bare = row.name.toLowerCase().startsWith(row.brand.toLowerCase()) ? (row.name.slice(row.brand.length).trim() || row.name) : row.name;
@@ -108,8 +141,16 @@ for (const [i, row] of pending.entries()) {
       totals.ready++; console.log(`ready     ${label} (${src} ${best.code})`);
     }
   } catch (err) {
+    if (err instanceof RateLimited) {
+      // Leave the row pending so the next run picks it up; cool off before continuing.
+      consecutiveLimited++; totals.rate_limited = (totals.rate_limited ?? 0) + 1;
+      console.log(`skipped   ${label} – still rate limited, left pending`);
+      if (consecutiveLimited >= 3) { console.log('   Open Food Facts keeps throttling this IP – pausing 10 minutes before continuing…'); await sleep(600000); consecutiveLimited = 0; }
+      continue;
+    }
     totals.failed++; console.log(`failed    ${label} – ${err.message}`);
   }
+  consecutiveLimited = 0;
   if ((i + 1) % 25 === 0) console.log(`-- ${i + 1}/${pending.length}  ready ${totals.ready} · not_found ${totals.not_found} · failed ${totals.failed}`);
   await sleep(pause);
 }
