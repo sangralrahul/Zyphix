@@ -67,36 +67,74 @@ export function SiteHeader() {
 
 /* ── Footer ───────────────────────────────────────────────────────────────── */
 const FOOT: Array<[string, Array<[string, string]>]> = [
-  ['Products', [['Zyphix Now', '/now'], ['Zyphix Eats', '/eats'], ['Zyphix Book', '/book'], ['Offers', '/offers'], ['Mobile app', '/app']]],
-  ['Partners', [['Partner portal', 'https://partner.zyphix.in'], ['Deliver with us', '/delivery-setup'], ['Register restaurant', '/restaurant-setup'], ['Join as a professional', '/service-setup'], ['List your store', '/merchant-setup']]],
-  ['Company', [['About', '/about'], ['Advertise with us', 'https://advertise.zyphix.in'], ['Investors', '/investors'], ['Blog', '/blog'], ['Contact', '/contact']]],
-  ['Legal', [['Privacy policy', '/privacy'], ['Terms of service', '/terms']]],
+  ['Products', [['Zyphix Now — groceries', '/now'], ['Zyphix Eats — food', '/eats'], ['Zyphix Book — services', '/book'], ['Offers', '/offers'], ['Kirana map', '/kirana-map'], ['Mobile app', '/app']]],
+  ['Partners', [['Partner portal', 'https://partner.zyphix.in'], ['Deliver with us', '/delivery-setup'], ['Register restaurant', '/restaurant-setup'], ['Join as a professional', '/service-setup'], ['List your store', '/merchant-setup'], ['Partner dashboard', '/partner-dashboard']]],
+  ['Advertise', [['Advertise with us', 'https://advertise.zyphix.in'], ['Ad formats', 'https://advertise.zyphix.in/#formats'], ['Pricing', 'https://advertise.zyphix.in/#pricing'], ['Talk to partnerships', 'mailto:partnerships@zyphix.in']]],
+  ['Company', [['About', '/about'], ['Investors', '/investors'], ['Blog', '/blog'], ['Contact', '/contact'], ['Press', 'mailto:press@zyphix.in']]],
+  ['Legal', [['Privacy policy', '/privacy'], ['Terms of service', '/terms'], ['Legal enquiries', 'mailto:legal@zyphix.in']]],
 ];
+const SOCIALS: Array<[React.ReactNode, string, string]> = [
+  [<Instagram size={16} />, 'https://instagram.com/zyphix.in', 'Instagram'],
+  [<Linkedin size={16} />, 'https://linkedin.com/company/zyphix', 'LinkedIn'],
+  [<Twitter size={16} />, 'https://x.com/zyphix_in', 'X'],
+];
+const CONTACTS: Array<[string, string]> = [['General', 'hello@zyphix.in'], ['Support', 'support@zyphix.in'], ['Partnerships', 'partnerships@zyphix.in']];
+
 export function SiteFooter() {
+  const ext = (href: string) => href.startsWith('http') || href.startsWith('mailto:');
   return (
     <footer className="border-t border-gray-200 bg-white">
-      <div className="mx-auto max-w-[1180px] px-5 py-14 grid gap-10 md:grid-cols-[1.4fr_repeat(4,1fr)]">
+      {/* brand + contact row */}
+      <div className="mx-auto grid max-w-[1180px] gap-8 px-5 pt-14 pb-10 md:grid-cols-[1.3fr_1fr] md:items-start">
         <div>
           <ZyphixLogo size={30} wordmarkColor={INK} wordmarkHighlight={G} />
-          <p className="mt-4 max-w-[300px] text-[14px] leading-relaxed text-gray-600">India's SuperLocal App — groceries, food, pharmacy and services from trusted neighbourhood businesses.</p>
-          <div className="mt-5 flex gap-3">
-            {[[<Instagram size={16} />, 'https://instagram.com/zyphix.in', 'Instagram'], [<Linkedin size={16} />, 'https://linkedin.com/company/zyphix', 'LinkedIn'], [<Twitter size={16} />, 'https://x.com/zyphix_in', 'X']].map(([ic, href, label]) => (
-              <a key={label as string} href={href as string} target="_blank" rel="noopener noreferrer" aria-label={label as string} className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900">{ic}</a>
+          <p className="mt-4 max-w-[420px] text-[14px] leading-relaxed text-gray-600">India's SuperLocal App — groceries, food, pharmacy and home services from the real kirana stores, restaurants and professionals in your neighbourhood. Shelf prices, zero surge, 30-minute target.</p>
+          <div className="mt-5 flex items-center gap-3">
+            {SOCIALS.map(([ic, href, label]) => (
+              <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-600 transition hover:border-gray-300 hover:text-gray-900">{ic}</a>
+            ))}
+            <span className="ml-1 hidden text-[12.5px] text-gray-400 sm:inline">@zyphix.in</span>
+          </div>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {[['/images/appstore.webp', 'App Store'], ['/images/googleplay.webp', 'Google Play']].map(([src, big]) => (
+              <Link key={big} href="/app" className="inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-white transition hover:opacity-90" style={{ background: INK }}>
+                <img src={src} alt="" className="h-5 w-5 object-contain" loading="lazy" />
+                <span className="leading-tight"><span className="block text-[9px] font-medium text-white/70">Coming soon on</span><span className="block text-[12.5px] font-bold">{big}</span></span>
+              </Link>
             ))}
           </div>
         </div>
+        <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-1 lg:grid-cols-3">
+          {CONTACTS.map(([l, e]) => (
+            <a key={e} href={`mailto:${e}`} className="rounded-2xl border border-gray-200 px-4 py-3 transition hover:border-gray-300 hover:bg-gray-50">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">{l}</p>
+              <p className="mt-1 truncate text-[13.5px] font-semibold text-gray-800">{e}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* link columns */}
+      <div className="mx-auto grid max-w-[1180px] grid-cols-2 gap-8 border-t border-gray-100 px-5 py-10 sm:grid-cols-3 lg:grid-cols-5">
         {FOOT.map(([h, links]) => (
           <div key={h}>
             <p className="text-[12.5px] font-bold uppercase tracking-wider text-gray-400">{h}</p>
             <ul className="mt-4 space-y-2.5">
-              {links.map(([l, href]) => <li key={l}>{href.startsWith('http') ? <a href={href} className="text-[14px] font-medium text-gray-700 hover:text-gray-900">{l}</a> : <Link href={href} className="text-[14px] font-medium text-gray-700 hover:text-gray-900">{l}</Link>}</li>)}
+              {links.map(([l, href]) => (
+                <li key={l}>
+                  {ext(href)
+                    ? <a href={href} className="text-[14px] font-medium text-gray-700 hover:text-gray-900">{l}</a>
+                    : <Link href={href} className="text-[14px] font-medium text-gray-700 hover:text-gray-900">{l}</Link>}
+                </li>
+              ))}
             </ul>
           </div>
         ))}
       </div>
+
       <div className="border-t border-gray-200">
-        <div className="mx-auto max-w-[1180px] px-5 py-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-[13px] text-gray-500">
-          <p>© {new Date().getFullYear()} Zyphix. All rights reserved.</p>
+        <div className="mx-auto flex max-w-[1180px] flex-col gap-2 px-5 py-5 text-[13px] text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()} Zyphix. All rights reserved. Founded 2024.</p>
           <p className="flex items-center gap-2"><span className="h-2 w-2 rounded-full" style={{ background: G }} /> Made in India · <a href="mailto:hello@zyphix.in" className="font-semibold text-gray-700">hello@zyphix.in</a></p>
         </div>
       </div>
