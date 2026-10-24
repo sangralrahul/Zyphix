@@ -1,16 +1,15 @@
 import React from 'react';
-import { Link, Route, Switch } from 'wouter';
+import { Route, Switch } from 'wouter';
 import { ArrowRight } from 'lucide-react';
-import { btnPrimary, G, HEAD_FONT } from '@/components/layout/SiteChrome';
+import { Button, Container, Display, Eyebrow, Lead } from '@/ui/kit';
 import { DeliverySetup } from '@/pages/DeliverySetup';
 import { RestaurantSetup } from '@/pages/RestaurantSetup';
 import { MerchantSetup } from '@/pages/MerchantSetup';
 import { ServiceProSetup } from '@/pages/ServiceProSetup';
 import { Shell } from './partner/Shell';
-import { Hero, TrustStrip, TrackGrid } from './partner/Hero';
-import { Tracks } from './partner/Tracks';
-import { Compare, InkBand, Support } from './partner/Compare';
-import { Timeline } from './partner/Timeline';
+import { Hero, Signals } from './partner/Hero';
+import { TrackBento, Stories } from './partner/Tracks';
+import { TermsBand, Steps } from './partner/Terms';
 import { Faq, FinalCta } from './partner/Faq';
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -24,13 +23,11 @@ function PartnerHome() {
   return (
     <>
       <Hero />
-      <TrustStrip />
-      <TrackGrid />
-      <Tracks />
-      <Compare />
-      <Timeline />
-      <InkBand />
-      <Support />
+      <Signals />
+      <TrackBento />
+      <Stories />
+      <TermsBand />
+      <Steps />
       <Faq />
       <FinalCta />
     </>
@@ -41,12 +38,12 @@ function PartnerHome() {
 function PartnerNotFound() {
   React.useEffect(() => { document.title = 'Page not found · Zyphix Partners'; }, []);
   return (
-    <section className="mx-auto max-w-[640px] px-5 py-24 text-center">
-      <p className="text-[12px] font-bold uppercase tracking-[.12em] text-emerald-700">404</p>
-      <h1 className="mt-3 text-[2rem] font-black tracking-[-0.03em] text-gray-900" style={{ fontFamily: HEAD_FONT }}>This page doesn't exist.</h1>
-      <p className="mt-3 text-[15px] text-gray-600">The link may be old or mistyped. Head back to the partner portal to pick your track.</p>
-      <Link href="/" className={`${btnPrimary} mt-7`} style={{ background: G }}>Back to partner home <ArrowRight size={16} /></Link>
-    </section>
+    <Container narrow className="py-28 text-center">
+      <Eyebrow className="justify-center">404</Eyebrow>
+      <Display as="h1" size="lg" className="mt-4 text-gray-900">This page doesn't exist.</Display>
+      <Lead className="mx-auto mt-4 max-w-[460px]">The link may be old or mistyped. Head back to the partner portal to pick your track.</Lead>
+      <Button href="/" className="mt-8">Back to partner home <ArrowRight size={15} /></Button>
+    </Container>
   );
 }
 

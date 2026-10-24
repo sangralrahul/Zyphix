@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { ArrowRight, Mail, CheckCircle2, Clock, ShieldCheck, FileText } from 'lucide-react';
-import { G, HEAD_FONT, btnPrimary } from '@/components/layout/SiteChrome';
+import { ArrowRight, Mail, CheckCircle2 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
-import { CONTAINER, Eyebrow, H2, PARTNERSHIPS_EMAIL } from './shared';
+import { Section, Container, Mesh, Eyebrow, Display, Lead, Chip } from '@/ui/kit';
+import { PARTNERSHIPS_EMAIL } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Inquiry form — light-green band. Submit contract is unchanged:
+   Inquiry form — Mesh band. Submit contract is unchanged:
    POST /api/partner-register { name, email, phone, city, role:'advertiser',
    details:{ businessName, businessType, budgetRange, goal } }
 ──────────────────────────────────────────────────────────────────────────── */
@@ -13,13 +13,12 @@ import { CONTAINER, Eyebrow, H2, PARTNERSHIPS_EMAIL } from './shared';
 const BUSINESS_TYPES = ['FMCG brand', 'Restaurant', 'Home services', 'D2C brand', 'Agency', 'Other'];
 const BUDGETS = ['Under ₹25k', '₹25k–1L', '₹1L–5L', '₹5L+', 'Not sure'];
 
-const inputCls = 'w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-[14.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-300 focus:ring-4 focus:ring-emerald-100';
-const labelCls = 'block text-[13px] font-bold text-gray-700 mb-1.5';
+const inputCls = 'w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-[14.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100';
 
 function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
   return (
     <label className="block">
-      <span className={labelCls}>{label}</span>
+      <span className="mb-1.5 block text-[13px] font-medium text-gray-700">{label}</span>
       {children}
       {hint && <span className="mt-1 block text-[12px] text-gray-500">{hint}</span>}
     </label>
@@ -70,47 +69,32 @@ export function InquiryForm() {
   const mailto = `mailto:${PARTNERSHIPS_EMAIL}?subject=${encodeURIComponent('Advertising on Zyphix')}&body=${encodeURIComponent(`Business: ${form.businessName}\nContact: ${form.contactName}\nPhone: ${form.phone}\nCity: ${form.city}\nType: ${form.businessType}\nBudget: ${form.budgetRange}\n\nGoal:\n${form.goal}`)}`;
 
   return (
-    <section id="contact" className="scroll-mt-20 border-y border-emerald-100" style={{ background: 'linear-gradient(180deg, #F0FDF4 0%, #ECFDF5 100%)' }}>
-      <div className={`${CONTAINER} grid items-start gap-12 py-20 md:py-24 lg:grid-cols-[.8fr_1.2fr]`}>
-        <div>
+    <Section id="contact" className="scroll-mt-16 overflow-hidden border-y border-gray-200">
+      <Mesh intensity={0.8} />
+      <Container className="grid items-start gap-12 lg:grid-cols-[.8fr_1.2fr]">
+        <div className="max-w-[440px]">
           <Eyebrow>Get in touch</Eyebrow>
-          <H2>Tell us what you want to achieve.</H2>
-          <p className="mt-4 text-[15.5px] leading-relaxed text-gray-600">Share a few details and the partnerships team will come back with placement ideas, the areas where Zyphix is live, and a flat-rate quote.</p>
-
-          <ul className="mt-8 space-y-3">
-            {[
-              [<Clock size={16} />, 'Reply within 2 working days', 'A real person from partnerships, not an auto-responder.'],
-              [<FileText size={16} />, 'A written plan and quote', 'Formats, areas, dates and one flat price — before you commit to anything.'],
-              [<ShieldCheck size={16} />, 'Your details stay with us', 'Used only to reply to this inquiry. No lists, no resale.'],
-            ].map(([ic, t, d]) => (
-              <li key={t as string} className="flex gap-3 rounded-2xl border border-emerald-100 bg-white p-4">
-                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">{ic}</span>
-                <div><p className="text-[14px] font-bold text-gray-900">{t as string}</p><p className="mt-0.5 text-[13px] text-gray-600">{d as string}</p></div>
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-6 rounded-3xl border border-emerald-100 bg-white p-6">
-            <p className="text-[12px] font-bold uppercase tracking-wider text-gray-400">Prefer email?</p>
-            <a href={`mailto:${PARTNERSHIPS_EMAIL}?subject=Advertising%20on%20Zyphix`} className="mt-2 inline-flex items-center gap-2 text-[15.5px] font-bold text-emerald-700 hover:text-emerald-800"><Mail size={17} /> {PARTNERSHIPS_EMAIL}</a>
-            <p className="mt-3 text-[13.5px] leading-relaxed text-gray-600">Include your business name, the cities or neighbourhoods you serve and what you'd like to run.</p>
+          <Display as="h2" size="lg" className="mt-4 text-gray-900">Tell us what you want to achieve.</Display>
+          <Lead className="mt-5">Share a few details and partnerships will reply with placement ideas, the areas where Zyphix is live, and a flat quote.</Lead>
+          <div className="mt-8 rounded-2xl border border-gray-200 bg-white/80 p-5 backdrop-blur">
+            <p className="text-[12.5px] font-medium text-gray-500">Prefer email?</p>
+            <a href={`mailto:${PARTNERSHIPS_EMAIL}?subject=Advertising%20on%20Zyphix`} className="mt-1 inline-flex items-center gap-2 text-[15px] font-semibold text-emerald-700 hover:text-emerald-800"><Mail size={16} /> {PARTNERSHIPS_EMAIL}</a>
+            <p className="mt-2 text-[13px] leading-[1.6] text-gray-600">Include your business name, the areas you serve and what you'd like to run. Your details are used only to reply to this inquiry.</p>
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-emerald-100 bg-white p-6 shadow-[0_24px_60px_rgba(13,163,102,.10)] md:p-8">
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-[0_12px_40px_rgba(11,15,25,.06)] md:p-8">
           {state === 'done' ? (
-            <div className="flex flex-col items-start gap-4 py-6">
-              <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><CheckCircle2 size={28} /></span>
-              <h3 className="text-[24px] font-black tracking-tight text-gray-900" style={{ fontFamily: HEAD_FONT }}>Thanks — partnerships will reply within 2 working days.</h3>
-              <p className="text-[14.5px] leading-relaxed text-gray-600">We've received your inquiry for <span className="font-semibold text-gray-900">{form.businessName}</span>. Expect a short email with the areas where Zyphix is live near {form.city}, suggested formats and a flat quote. If anything is urgent, write to <a href={`mailto:${PARTNERSHIPS_EMAIL}`} className="font-semibold text-emerald-700">{PARTNERSHIPS_EMAIL}</a>.</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {['Business type: ' + form.businessType, 'Budget: ' + form.budgetRange].map(x => <span key={x} className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-[12.5px] font-semibold text-gray-700">{x}</span>)}
-              </div>
+            <div className="flex flex-col items-start gap-4 py-4">
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"><CheckCircle2 size={24} /></span>
+              <h3 className="text-[22px] font-semibold tracking-[-0.02em] text-gray-900">Thanks — partnerships will be in touch.</h3>
+              <p className="text-[14.5px] leading-[1.6] text-gray-600">We've received your inquiry for <span className="font-medium text-gray-900">{form.businessName}</span>. Expect an email with the areas live near {form.city}, suggested formats and a flat quote. Anything urgent: <a href={`mailto:${PARTNERSHIPS_EMAIL}`} className="font-medium text-emerald-700">{PARTNERSHIPS_EMAIL}</a>.</p>
+              <div className="flex flex-wrap gap-2"><Chip>{form.businessType}</Chip><Chip>{form.budgetRange}</Chip></div>
             </div>
           ) : (
             <form onSubmit={submit} noValidate className="grid gap-5">
               <div className="flex items-center justify-between">
-                <p className="text-[12px] font-bold uppercase tracking-wider text-gray-400">Advertiser inquiry</p>
+                <p className="text-[13px] font-semibold text-gray-900">Advertiser inquiry</p>
                 <p className="text-[12px] text-gray-400">All fields required except goal</p>
               </div>
               <div className="grid gap-5 sm:grid-cols-2">
@@ -137,26 +121,26 @@ export function InquiryForm() {
                 </Field>
               </div>
               <Field label="What do you want to achieve?">
-                <textarea rows={4} className={`${inputCls} resize-y`} value={form.goal} onChange={set('goal')} placeholder="e.g. Launch our new oats range in South Delhi and get it into first baskets; or get more weekend dinner orders for our restaurant in Indiranagar." />
+                <textarea rows={4} className={`${inputCls} resize-y`} value={form.goal} onChange={set('goal')} placeholder="e.g. Launch our new oats range in South Delhi; or get more weekend dinner orders for our restaurant in Indiranagar." />
               </Field>
 
               {state === 'error' && error && (
-                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[13.5px] font-semibold text-red-600">
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[13.5px] font-medium text-red-600">
                   {error} {error.includes('server') && <a href={mailto} className="underline">Send by email instead.</a>}
                 </div>
               )}
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <button type="submit" disabled={state === 'loading'} className={`${btnPrimary} justify-center disabled:opacity-70`} style={{ background: G }}>
-                  {state === 'loading' ? 'Sending…' : <>Send inquiry <ArrowRight size={16} /></>}
+                <button type="submit" disabled={state === 'loading'} className="inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-[14.5px] font-semibold text-white shadow-[0_1px_2px_rgba(0,0,0,.2),inset_0_1px_0_rgba(255,255,255,.2)] transition hover:-translate-y-px hover:shadow-[0_8px_24px_rgba(13,163,102,.35)] disabled:opacity-70" style={{ background: 'linear-gradient(180deg, #13B874 0%, #0DA366 100%)' }}>
+                  {state === 'loading' ? 'Sending…' : <>Send inquiry <ArrowRight size={15} /></>}
                 </button>
-                <a href={mailto} className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-gray-600 hover:text-gray-900"><Mail size={14} /> Or send this by email</a>
+                <a href={mailto} className="inline-flex items-center gap-1.5 text-[13px] font-medium text-gray-600 hover:text-gray-900"><Mail size={14} /> Or send this by email</a>
               </div>
               <p className="text-[12.5px] text-gray-500">By sending, you agree to be contacted about advertising on Zyphix. We only use these details to reply to your inquiry.</p>
             </form>
           )}
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

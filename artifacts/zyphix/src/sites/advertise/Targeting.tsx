@@ -1,102 +1,60 @@
 import React from 'react';
-import { MapPin, Layers, Clock, Store, UtensilsCrossed, Wrench, ArrowRight } from 'lucide-react';
-import { G, HEAD_FONT } from '@/components/layout/SiteChrome';
-import { CONTAINER, Eyebrow, H2 } from './shared';
+import { motion } from 'framer-motion';
+import { MapPin, Search, Clock, Check } from 'lucide-react';
+import { Section, Container, Eyebrow, Display, Lead, ArrowLink, SampleTag, fade, G } from '@/ui/kit';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   How targeting works — CSS radius diagram with pin + three callouts.
+   Targeting feature story — text + CSS radius diagram (rings, pin, callouts).
 ──────────────────────────────────────────────────────────────────────────── */
 
-const CALLOUTS = [
-  { icon: <MapPin size={18} />, t: 'By delivery area / pin codes', d: 'Pick the pin codes or the radius around partner stores you care about. Your placement is shown only to customers whose delivery address falls inside it — nobody in the wrong city, ever.', chips: ['Pin codes', 'Radius', 'Sectors / wards'] },
-  { icon: <Layers size={18} />, t: 'By category intent', d: 'Attach the placement to a category, a search term or a product in Zyphix Now, Eats or Book. It appears when a customer is already inside that part of the app.', chips: ['Category', 'Search term', 'Product'] },
-  { icon: <Clock size={18} />, t: 'By time of day', d: 'Run breakfast placements in the morning, dinner placements from 6 pm, or a weekend-only schedule. Dayparts are set per placement, at no extra cost.', chips: ['Dayparts', 'Weekdays / weekends', 'Date range'] },
-];
-
-const SHOPS: Array<{ icon: React.ReactNode; x: string; y: string; label: string; tone: string; dim?: boolean }> = [
-  { icon: <Store size={13} />, x: '38%', y: '36%', label: 'Sharma Kirana', tone: '#0DA366' },
-  { icon: <UtensilsCrossed size={13} />, x: '60%', y: '42%', label: 'Biryani House', tone: '#EA580C' },
-  { icon: <Store size={13} />, x: '47%', y: '66%', label: 'Daily Needs', tone: '#0DA366' },
-  { icon: <Wrench size={13} />, x: '66%', y: '62%', label: 'FixIt Pros', tone: '#2563EB' },
-  { icon: <Store size={13} />, x: '18%', y: '20%', label: 'Out of area', tone: '#9CA3AF', dim: true },
-  { icon: <UtensilsCrossed size={13} />, x: '84%', y: '24%', label: 'Out of area', tone: '#9CA3AF', dim: true },
-  { icon: <Store size={13} />, x: '82%', y: '84%', label: 'Out of area', tone: '#9CA3AF', dim: true },
-];
-
 function RadiusDiagram() {
+  const rings = [100, 72, 44];
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-[520px] overflow-hidden rounded-[32px] border border-gray-200 bg-white">
-      {/* street grid */}
-      <div aria-hidden className="absolute inset-0 opacity-70" style={{ backgroundImage: 'linear-gradient(#E5E7EB 1px, transparent 1px), linear-gradient(90deg, #E5E7EB 1px, transparent 1px)', backgroundSize: '44px 44px' }} />
-      <div aria-hidden className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(#D1D5DB 2px, transparent 2px), linear-gradient(90deg, #D1D5DB 2px, transparent 2px)', backgroundSize: '176px 176px', opacity: .6 }} />
-      {/* a "road" diagonal */}
-      <div aria-hidden className="absolute left-[-10%] top-[48%] h-[10px] w-[120%] rotate-[-18deg] rounded-full bg-gray-200" />
-      {/* rings */}
-      <div aria-hidden className="absolute left-1/2 top-1/2 h-[74%] w-[74%] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-dashed border-emerald-300/80" />
-      <div aria-hidden className="absolute left-1/2 top-1/2 h-[74%] w-[74%] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(13,163,102,.16), rgba(13,163,102,.06) 70%, transparent)' }} />
-      <div aria-hidden className="absolute left-1/2 top-1/2 h-[46%] w-[46%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-400/60" />
-      <div aria-hidden className="absolute left-1/2 top-1/2 h-[46%] w-[46%] -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full bg-emerald-400/10" style={{ animationDuration: '3s' }} />
-      {/* ring labels */}
-      <span className="absolute left-1/2 top-[13%] -translate-x-1/2 rounded-full border border-emerald-200 bg-white px-2.5 py-1 text-[11px] font-bold text-emerald-700 shadow-sm">Delivery area · ~3 km</span>
-      <span className="absolute left-1/2 top-[27%] -translate-x-1/2 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">Core · 6 pin codes</span>
-
-      {/* shops */}
-      {SHOPS.map(s => (
-        <div key={s.label + s.x} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: s.x, top: s.y }}>
-          <div className={`flex items-center gap-1.5 rounded-full border bg-white py-1 pl-1 pr-2.5 shadow-sm ${s.dim ? 'border-gray-200 opacity-60' : 'border-gray-200'}`}>
-            <span className="flex h-6 w-6 items-center justify-center rounded-full text-white" style={{ background: s.tone }}>{s.icon}</span>
-            <span className={`text-[10.5px] font-bold ${s.dim ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{s.label}</span>
-          </div>
-        </div>
+    <div className="relative mx-auto aspect-square w-full max-w-[440px]">
+      <div aria-hidden className="absolute inset-0 rounded-3xl border border-gray-200 bg-[#FAFAFA]" style={{ backgroundImage: 'radial-gradient(#E5E7EB 1px, transparent 1px)', backgroundSize: '22px 22px' }} />
+      {rings.map((r, i) => (
+        <motion.div key={r} {...fade(0.1 + i * 0.1, 0)} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border"
+          style={{ width: `${r * 0.78}%`, height: `${r * 0.78}%`, borderColor: `rgba(13,163,102,${0.25 + i * 0.2})`, background: `rgba(13,163,102,${0.03 + i * 0.03})` }} />
       ))}
-
-      {/* customer pin */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-full">
-        <div className="relative flex flex-col items-center">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full border-4 border-white text-white shadow-[0_10px_24px_rgba(13,163,102,.45)]" style={{ background: G }}><MapPin size={18} /></span>
-          <span className="-mt-1 h-3 w-3 rotate-45 rounded-sm" style={{ background: G }} />
-          <span className="mt-1 whitespace-nowrap rounded-lg bg-[#0B1220] px-2 py-1 text-[10.5px] font-bold text-white">Customer · Sector 12</span>
-        </div>
-      </div>
-
-      {/* legend */}
-      <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl border border-gray-200 bg-white/95 px-3 py-2 text-[10.5px] font-semibold text-gray-600 backdrop-blur">
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full" style={{ background: G }} /> Kirana</span>
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-orange-500" /> Restaurant</span>
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-blue-600" /> Service pro</span>
-        <span className="flex items-center gap-1.5 text-gray-400"><span className="h-2.5 w-2.5 rounded-full bg-gray-300" /> Not shown your ad</span>
-      </div>
+      <motion.div {...fade(0.4, 6)} className="absolute left-1/2 top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-white shadow-[0_8px_24px_rgba(13,163,102,.4)]" style={{ background: G }}>
+        <MapPin size={18} />
+      </motion.div>
+      {[
+        { label: 'Delivery area', sub: '6 pin codes · Dwarka', icon: <MapPin size={13} />, cls: 'left-3 top-5 sm:left-5 sm:top-8' },
+        { label: 'Category intent', sub: 'Searching "atta", browsing Staples', icon: <Search size={13} />, cls: 'right-3 top-[38%] sm:right-5' },
+        { label: 'Time of day', sub: 'Evening, 6–10 pm', icon: <Clock size={13} />, cls: 'bottom-5 left-5 sm:bottom-8 sm:left-10' },
+      ].map((c, i) => (
+        <motion.div key={c.label} {...fade(0.5 + i * 0.1)} className={`absolute flex items-center gap-2.5 rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-[0_8px_30px_rgba(11,15,25,.08)] ${c.cls}`}>
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">{c.icon}</span>
+          <div><p className="text-[12.5px] font-semibold text-gray-900">{c.label}</p><p className="text-[11.5px] text-gray-500">{c.sub}</p></div>
+        </motion.div>
+      ))}
+      <SampleTag className="absolute bottom-3 right-3" />
     </div>
   );
 }
 
 export function Targeting() {
   return (
-    <section id="targeting" className={`${CONTAINER} scroll-mt-20 py-20 md:py-24`}>
-      <div className="grid items-center gap-12 lg:grid-cols-[1fr_1fr]">
-        <div>
-          <Eyebrow>How targeting works</Eyebrow>
-          <H2>You target a delivery area, not a demographic.</H2>
-          <p className="mt-4 max-w-[560px] text-[15.5px] leading-relaxed text-gray-600">
-            Every Zyphix order is fulfilled by a partner within a few kilometres of the customer. We use the same boundary for advertising: a placement is shown only to customers whose address sits inside the delivery areas you choose, at the moments you choose.
-          </p>
-          <ol className="mt-8 space-y-4">
-            {CALLOUTS.map((c, i) => (
-              <li key={c.t} className="flex gap-4 rounded-3xl border border-gray-200 bg-white p-5">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">{c.icon}</span>
-                <div>
-                  <p className="text-[11.5px] font-bold uppercase tracking-wider text-gray-400">Layer {i + 1}</p>
-                  <h3 className="mt-0.5 text-[17px] font-extrabold text-gray-900" style={{ fontFamily: HEAD_FONT }}>{c.t}</h3>
-                  <p className="mt-1.5 text-[14px] leading-relaxed text-gray-600">{c.d}</p>
-                  <div className="mt-3 flex flex-wrap gap-1.5">{c.chips.map(ch => <span key={ch} className="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11.5px] font-semibold text-gray-700">{ch}</span>)}</div>
-                </div>
-              </li>
+    <Section id="targeting" className="scroll-mt-16">
+      <Container className="grid items-center gap-14 lg:grid-cols-2">
+        <div className="max-w-[520px]">
+          <Eyebrow>Targeting</Eyebrow>
+          <Display as="h2" size="lg" className="mt-4 text-gray-900">Target by where people shop, not who they are.</Display>
+          <Lead className="mt-5">No profiles, no lookalikes. A placement runs in the delivery areas you pick, in the categories your product lives in, at the hours that matter.</Lead>
+          <ul className="mt-7 space-y-3">
+            {[
+              ['Delivery area', 'Pin codes, sectors or a radius around partner stores.'],
+              ['Category intent', 'Shown in the category or search your product belongs to.'],
+              ['Time of day', 'Optional dayparts — breakfast, evening, weekend.'],
+            ].map(([t, d]) => (
+              <li key={t} className="flex gap-3 text-[15px]"><Check size={16} className="mt-1 shrink-0 text-emerald-600" /><span className="text-gray-600"><span className="font-semibold text-gray-900">{t}.</span> {d}</span></li>
             ))}
-          </ol>
-          <a href="#contact" className="mt-8 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-[14.5px] font-bold text-white transition hover:-translate-y-0.5" style={{ background: G }}>Map my areas with partnerships <ArrowRight size={16} /></a>
+          </ul>
+          <ArrowLink href="#contact" className="mt-7">Ask which areas are live</ArrowLink>
         </div>
         <RadiusDiagram />
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }
