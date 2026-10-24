@@ -8,6 +8,10 @@ import { useCart } from '@/context/CartContext';
 import { COUPONS } from '@/data/coupons';
 import { usePartners, type PartnerListing } from '@/lib/partners';
 import { Button, IconTile, FONT, G } from '@/ui/kit';
+import {
+  discountOf, buildOffers, dealsOfTheDay, bestsellers as pickBestsellers, underPrice, topBrands, freshProduce,
+  type Offer, type OfferTheme,
+} from '@/lib/merch';
 
 type SortKey = 'featured' | 'price_asc' | 'price_desc' | 'discount';
 
@@ -19,7 +23,7 @@ const COUPON_DISMISS_KEY = 'zyphix_now_coupon_dismissed';
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 const sectionId = (name: string) => `cat-${slug(name)}`;
-const discountOf = (p: Product) => (p.origPrice && p.origPrice > p.price ? Math.round((1 - p.price / p.origPrice) * 100) : 0);
+const PRODUCE_CATEGORY = 'Fruits & Veg';
 const isDesktop = () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
 /** Offset under the sticky chrome: Navbar on desktop, Navbar + icon rail on mobile. */
 const scrollOffset = () => (isDesktop() ? NAV_H + 16 : NAV_H + MOBILE_RAIL_H + 8);
@@ -104,17 +108,43 @@ export function ZyphixNow() {
     return visible.filter(p => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
   }, [visible, q]);
 
+  /* ── Merchandised home layer (all derived from the live catalogue) ── */
+  const bestsellerRow = useMemo(() => pickBestsellers(products, categories), [products, categories]);
+  const offers = useMemo(() => buildOffers(products, categories, coupon, bestsellerRow), [products, categories, coupon, bestsellerRow]);
+  const dealsRow = useMemo(() => dealsOfTheDay(products), [products]);
+  const under49 = useMemo(() => underPrice(products, 49), [products]);
+  const under99 = useMemo(() => underPrice(products, 99), [products]);
+  const brands = useMemo(() => topBrands(products), [products]);
+  const produceRow = useMemo(() => freshProduce(products, 12, PRODUCE_CATEGORY), [products]);
+  const dealsCount = useMemo(() => products.filter(p => discountOf(p) > 0).length, [products]);
+  const under49Count = useMemo(() => products.filter(p => p.price <= 49).length, [products]);
+  const under99Count = useMemo(() => products.filter(p => p.price <= 99).length, [products]);
+  const [priceTab, setPriceTab] = useState<49 | 99>(49);
+
   /* ── Category navigation ── */
-  const jumpTo = useCallback((name: string) => {
-    setActiveCat(name);
+  const scrollToId = useCallback((id: string) => {
     const go = () => {
-      const el = document.getElementById(sectionId(name));
+      const el = document.getElementById(id);
       if (!el) return;
       const top = el.getBoundingClientRect().top + window.scrollY - scrollOffset();
       window.scrollTo({ top, behavior: 'smooth' });
     };
     if (q) { clearSearch(); setTimeout(go, 50); } else requestAnimationFrame(go);
   }, [q, clearSearch]);
+
+  const jumpTo = useCallback((name: string) => {
+    setActiveCat(name);
+    scrollToId(sectionId(name));
+  }, [scrollToId]);
+
+  const searchBrand = useCallback((brand: string) => {
+    navigate(`${path || '/'}?q=${encodeURIComponent(brand)}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [navigate, path]);
+
+  const openOffer = useCallback((o: Offer) => {
+    if (o.target.kind === 'category') jumpTo(o.target.name); else scrollToId(o.target.id);
+  }, [jumpTo, scrollToId]);
 
   const toggleExpanded = useCallback((name: string) => {
     setExpanded(prev => {
@@ -268,6 +298,75 @@ export function ZyphixNow() {
           {showStore && (
             <div className="space-y-8">
 
+              {/* ── Merchandised home layer ── */}
+              {!catalogLoading && products.length > 0 && (
+                <>
+                  {offers.length > 0 && (
+                    <OfferCarousel offers={offers} categories={categories} onShop={openOffer} />
+                  )}
+
+                  {categories.length > 0 && (
+                    <section>
+                      <SectionHead title="Shop by category" sub={`${categories.length} categories`} />
+                      <CategoryGrid categories={categories} counts={countByCategory} onPick={jumpTo} />
+                    </section>
+                  )}
+
+                  {dealsRow.length > 0 && (
+                    <section id="home-deals">
+                      <SectionHead title="Deals of the day" sub={`${dealsCount.toLocaleString('en-IN')} on offer`}
+                        action={<SeeAll onClick={() => { setSortBy('discount'); setOnlyDiscounted(true); jumpTo(dealsRow[0].category); }} />} />
+                      <ProductRow products={dealsRow} categories={categories} cart={cart} add={add} remove={remove} tagTone="red" />
+                    </section>
+                  )}
+
+                  {bestsellerRow.length > 0 && (
+                    <section id="home-bestsellers">
+                      <SectionHead title="Bestsellers" sub={`${bestsellerRow.length} staples`} />
+                      <ProductRow products={bestsellerRow} categories={categories} cart={cart} add={add} remove={remove} />
+                    </section>
+                  )}
+
+                  {(under49.length > 0 || under99.length > 0) && (
+                    <section>
+                      <SectionHead title="Budget picks" sub={`${(priceTab === 49 ? under49Count : under99Count).toLocaleString('en-IN')} products`}
+                        action={<SeeAll label="Low to high" onClick={() => { setSortBy('price_asc'); jumpTo((priceTab === 49 ? under49 : under99)[0]?.category || categories[0].name); }} />} />
+                      <div className="mb-3 flex gap-1.5">
+                        {([49, 99] as const).map(v => (
+                          <button key={v} type="button" onClick={() => setPriceTab(v)} aria-pressed={priceTab === v}
+                            className={`h-8 rounded-lg border px-3 text-[13px] font-medium transition ${priceTab === v ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'}`}>
+                            Under ₹{v}
+                          </button>
+                        ))}
+                      </div>
+                      <ProductRow products={priceTab === 49 ? under49 : under99} categories={categories} cart={cart} add={add} remove={remove} />
+                    </section>
+                  )}
+
+                  {brands.length > 0 && (
+                    <section>
+                      <SectionHead title="Popular brands" sub={`top ${brands.length}`} />
+                      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:flex-wrap md:px-0 [&::-webkit-scrollbar]:hidden">
+                        {brands.map(b => (
+                          <button key={b.brand} type="button" onClick={() => searchBrand(b.brand)}
+                            className="inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-gray-200 bg-white px-3 text-[13px] font-medium text-gray-800 transition hover:border-gray-300 hover:bg-gray-50">
+                            {b.brand}<span className="text-[11.5px] tabular-nums text-gray-400">{b.count}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {produceRow.length > 0 && (
+                    <section>
+                      <SectionHead title="Fresh from local farms" sub={`${(countByCategory.get(PRODUCE_CATEGORY) || 0).toLocaleString('en-IN')} products`}
+                        action={<SeeAll onClick={() => jumpTo(PRODUCE_CATEGORY)} />} />
+                      <ProductRow products={produceRow} categories={categories} cart={cart} add={add} remove={remove} />
+                    </section>
+                  )}
+                </>
+              )}
+
               {/* Stores near you — live partner directory, only when there are entries */}
               {stores.length > 0 && (
                 <section>
@@ -350,6 +449,140 @@ function SectionHead({ title, sub, action }: { title: string; sub?: string; acti
         {sub && <span className="shrink-0 text-[12.5px] text-gray-500">{sub}</span>}
       </div>
       {action}
+    </div>
+  );
+}
+
+function SeeAll({ onClick, label = 'See all' }: { onClick: () => void; label?: string }) {
+  return (
+    <button type="button" onClick={onClick} className="group inline-flex shrink-0 items-center gap-1 text-[13.5px] font-semibold text-emerald-700 hover:text-emerald-800">
+      {label} <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+    </button>
+  );
+}
+
+/* ─── Offer carousel: pastel cards with a 3-image product collage, every number computed ─── */
+
+const OFFER_TONE: Record<OfferTheme, { bg: string; label: string; ring: string }> = {
+  green: { bg: 'bg-emerald-50', label: 'text-emerald-700', ring: 'border-emerald-100' },
+  amber: { bg: 'bg-amber-50',   label: 'text-amber-700',   ring: 'border-amber-100' },
+  sky:   { bg: 'bg-sky-50',     label: 'text-sky-700',     ring: 'border-sky-100' },
+  rose:  { bg: 'bg-rose-50',    label: 'text-rose-700',    ring: 'border-rose-100' },
+};
+
+function OfferCarousel({ offers, categories, onShop }: { offers: Offer[]; categories: Category[]; onShop: (o: Offer) => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState(0);
+
+  // Track the snapped card for the dots.
+  useEffect(() => {
+    const el = ref.current; if (!el) return;
+    const onScroll = () => {
+      const w = el.firstElementChild ? (el.firstElementChild as HTMLElement).offsetWidth + 10 : el.clientWidth;
+      setIndex(Math.round(el.scrollLeft / w));
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const goTo = (i: number) => {
+    const el = ref.current; if (!el) return;
+    const card = el.children[i] as HTMLElement | undefined;
+    if (card) el.scrollTo({ left: card.offsetLeft - el.offsetLeft, behavior: 'smooth' });
+  };
+
+  return (
+    <section aria-label="Offers">
+      <div ref={ref} className="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden">
+        {offers.map(o => {
+          const t = OFFER_TONE[o.theme];
+          return (
+            <div key={o.key} className={`flex h-[164px] w-[86%] shrink-0 snap-start items-stretch justify-between overflow-hidden rounded-xl border ${t.ring} ${t.bg} md:h-[176px] md:w-[calc(50%-5px)] lg:w-[calc(33.333%-7px)]`}>
+              <div className="flex min-w-0 flex-col justify-between p-4">
+                <div className="min-w-0">
+                  <p className={`truncate text-[12px] font-semibold ${t.label}`}>{o.label}</p>
+                  <p className="mt-1 text-[22px] font-semibold leading-[1.1] tracking-[-0.02em] text-gray-900">{o.headline}</p>
+                  <p className="mt-1.5 line-clamp-2 text-[12.5px] leading-snug text-gray-600">{o.sub}</p>
+                </div>
+                <div>
+                  <Button size="sm" variant="secondary" onClick={() => onShop(o)}>Shop <ArrowRight size={13} /></Button>
+                </div>
+              </div>
+              <Collage products={o.images} categories={categories} />
+            </div>
+          );
+        })}
+      </div>
+      {offers.length > 1 && (
+        <div className="mt-2 flex justify-center gap-1.5 md:hidden">
+          {offers.map((o, i) => (
+            <button key={o.key} type="button" aria-label={`Offer ${i + 1}`} onClick={() => goTo(i)}
+              className={`h-1.5 rounded-full transition-all ${i === index ? 'w-4 bg-gray-800' : 'w-1.5 bg-gray-300'}`} />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+/** Three product photos: one tall tile and two stacked, white on the pastel card. */
+function Collage({ products, categories }: { products: Product[]; categories: Category[] }) {
+  const [a, b, c] = products;
+  const tile = (p: Product | undefined, cls: string) => {
+    if (!p) return <div className={`${cls} rounded-lg bg-white/60`} />;
+    const { src, isFallback } = productImageFor(p, categories);
+    return (
+      <div className={`${cls} overflow-hidden rounded-lg border border-black/[.04] bg-white`}>
+        <img src={src} alt="" loading="lazy" decoding="async" draggable={false}
+          className={isFallback ? 'h-full w-full object-cover' : 'h-full w-full object-contain p-1.5'} />
+      </div>
+    );
+  };
+  return (
+    <div className="flex w-[132px] shrink-0 gap-1.5 p-3 pl-0 md:w-[148px]">
+      {tile(a, 'h-full flex-1')}
+      <div className="flex flex-1 flex-col gap-1.5">
+        {tile(b, 'flex-1')}
+        {tile(c, 'flex-1')}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Shop by category: photo tiles. 8 across on desktop, two scrolling rows on mobile ─── */
+function CategoryGrid({ categories, counts, onPick }: { categories: Category[]; counts: Map<string, number>; onPick: (name: string) => void }) {
+  return (
+    <div className="-mx-4 grid grid-flow-col grid-rows-2 gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:grid-flow-row md:grid-cols-8 md:grid-rows-1 md:px-0 [&::-webkit-scrollbar]:hidden"
+      style={{ gridAutoColumns: '88px' }}>
+      {categories.map((c, i) => (
+        <button key={c.name} type="button" onClick={() => onPick(c.name)}
+          className={`group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-left transition hover:border-gray-300 hover:shadow-[0_4px_14px_rgba(11,15,25,.06)] ${i >= 8 ? 'md:hidden' : ''}`}>
+          <div className="aspect-[4/3] w-full overflow-hidden" style={{ background: `${c.color}1A` }}>
+            {c.image
+              ? <img src={c.image} alt="" loading="lazy" decoding="async" draggable={false} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+              : <div className="flex h-full w-full items-center justify-center"><CategoryIcon category={c} /></div>}
+          </div>
+          <div className="px-2 py-1.5">
+            <p className="line-clamp-2 text-[12px] font-medium leading-[1.2] text-gray-900">{c.name}</p>
+            <p className="mt-0.5 text-[11px] tabular-nums text-gray-400">{counts.get(c.name) || 0}</p>
+          </div>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Horizontal product row (deals, bestsellers, budget picks, produce). */
+function ProductRow({ products, categories, cart, add, remove, tagTone }: {
+  products: Product[]; categories: Category[]; cart: Record<string, number>; add: (id: string) => void; remove: (id: string) => void; tagTone?: 'green' | 'red';
+}) {
+  return (
+    <div className="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden">
+      {products.map(p => (
+        <div key={p.id} className="w-[140px] shrink-0 snap-start md:w-[164px]">
+          <ProductCard product={p} categories={categories} qty={cart[p.id] || 0} onAdd={() => add(p.id)} onRemove={() => remove(p.id)} tagTone={tagTone} />
+        </div>
+      ))}
     </div>
   );
 }
@@ -437,25 +670,32 @@ function SkeletonSection() {
 
 /* ─── Product card ─── */
 
-const ProductCard = React.memo(function ProductCard({ product: p, categories, qty, onAdd, onRemove }: {
-  product: Product; categories: Category[]; qty: number; onAdd: () => void; onRemove: () => void;
+const ProductCard = React.memo(function ProductCard({ product: p, categories, qty, onAdd, onRemove, tagTone = 'green' }: {
+  product: Product; categories: Category[]; qty: number; onAdd: () => void; onRemove: () => void; tagTone?: 'green' | 'red';
 }) {
   const discount = discountOf(p);
   const { src, isFallback } = productImageFor(p, categories);
+  const brand = (p.brand || '').trim();
+  const showBrand = !!brand && brand !== 'Local Farm';
+  const sub = p.weight || (showBrand ? '' : brand);
+  // Catalogue names usually start with the brand ("Amul Butter Salted"); drop it when the brand line is shown.
+  const stripped = showBrand && p.name.toLowerCase().startsWith(brand.toLowerCase() + ' ') ? p.name.slice(brand.length + 1) : p.name;
+  const displayName = stripped.trim() || p.name;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition hover:border-gray-300">
+    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition hover:border-gray-300 hover:shadow-[0_4px_14px_rgba(11,15,25,.06)]">
       <Link href={`/now/product/${p.id}`} className="relative block aspect-square overflow-hidden bg-[#FAFAFA] no-underline">
         <img src={src} alt={p.name} loading="lazy" decoding="async" draggable={false}
           className={isFallback ? 'h-full w-full object-cover' : 'h-full w-full bg-white object-contain p-2'} />
         {discount > 0 && (
-          <span className="absolute left-1.5 top-1.5 rounded-md bg-emerald-600 px-1.5 py-0.5 text-[10.5px] font-semibold leading-none text-white">{discount}% off</span>
+          <span className={`absolute left-1.5 top-1.5 rounded-md px-1.5 py-0.5 text-[10.5px] font-semibold leading-none text-white ${tagTone === 'red' ? 'bg-red-600' : 'bg-emerald-600'}`}>{discount}% off</span>
         )}
       </Link>
 
       <div className="flex flex-1 flex-col p-2.5">
-        <Link href={`/now/product/${p.id}`} className="line-clamp-2 min-h-[2.5em] text-[13px] font-medium leading-[1.25] text-gray-900 no-underline">{p.name}</Link>
-        <p className="mt-0.5 truncate text-[12px] text-gray-500">{p.weight || p.brand}</p>
+        {showBrand && <p className="mb-0.5 truncate text-[12px] text-gray-500">{brand}</p>}
+        <Link href={`/now/product/${p.id}`} className="line-clamp-2 min-h-[2.5em] text-[13px] font-medium leading-[1.25] text-gray-900 no-underline">{displayName}</Link>
+        {sub && <p className="mt-0.5 truncate text-[12px] text-gray-500">{sub}</p>}
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
           <div className="min-w-0 leading-none">

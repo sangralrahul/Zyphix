@@ -5,9 +5,12 @@ import type { Category, Product } from '@/lib/catalog';
  * Most catalogue rows still carry a placehold.co placeholder (image_status = pending);
  * for those we fall back to the category's photo so cards never show a grey text box.
  */
+export function hasRealImage(p: Product): boolean {
+  return !!p.image && !p.image.includes('placehold.co') && p.imageStatus !== 'pending' && p.imageStatus !== 'not_found' && p.imageStatus !== 'failed';
+}
+
 export function productImageFor(p: Product, categories: Category[]): { src: string; isFallback: boolean } {
-  const real = p.image && !p.image.includes('placehold.co') && p.imageStatus !== 'pending' && p.imageStatus !== 'not_found' && p.imageStatus !== 'failed';
-  if (real) return { src: p.image, isFallback: false };
+  if (hasRealImage(p)) return { src: p.image, isFallback: false };
   const cat = categories.find(c => c.name === p.category);
   return { src: cat?.image || '/images/groceries.png', isFallback: true };
 }
