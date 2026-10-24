@@ -18,7 +18,7 @@ export function ProductDetail() {
 
   const { products, categories } = useCatalog();
   const product = useMemo(() => products.find(p => p.id === params.id), [products, params.id]);
-  const mainImage = useMemo(() => product ? productImageFor(product, categories) : null, [product, categories]);
+  const mainImage = useMemo(() => product ? productImageFor(product, categories, 'full') : null, [product, categories]);
   const related = useMemo(() => {
     if (!product) return [];
     return products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 8);

@@ -149,7 +149,9 @@ async function handleImage(request: Request, env: Env, ctx: ExecutionContext, ke
   const hit = await cache.match(request);
   if (hit) return hit;
 
-  const obj = await env.IMAGES.get(key);
+  // Small variant for product cards: /img/<key>?w=thumb → thumbs/<key>.webp (falls back to the original).
+  const wantThumb = new URL(request.url).searchParams.get('w') === 'thumb';
+  const obj = (wantThumb ? await env.IMAGES.get(`thumbs/${key}.webp`) : null) ?? await env.IMAGES.get(key);
   if (!obj) return new Response('not found', { status: 404 });
 
   const headers = new Headers();
@@ -207,6 +209,27 @@ async function handleAdmin(request: Request, env: Env, url: URL): Promise<Respon
   }
 
   // Store an image resolved elsewhere: raw bytes in the body, metadata in the query string.
+  // Thumbnails: list originals that still need a thumb, and store one.
+  if (p === '/admin/images/thumbs/pending') {
+    const limit = Math.min(Number(url.searchParams.get('limit') ?? 2000), 5000);
+    const { results } = await env.DB.prepare("SELECT DISTINCT image_url FROM products WHERE image_status = 'ready' AND image_url LIKE '/img/%' LIMIT ?").bind(limit).all<{ image_url: string }>();
+    const keys = results.map(r => r.image_url.slice('/img/'.length));
+    const have = new Set<string>();
+    let cursor: string | undefined;
+    do {
+      const page = await env.IMAGES.list({ prefix: 'thumbs/', cursor, limit: 1000 });
+      for (const o of page.objects) have.add(o.key);
+      cursor = page.truncated ? page.cursor : undefined;
+    } while (cursor);
+    return json(keys.filter(k => !have.has(`thumbs/${k}.webp`)));
+  }
+  if (p === '/admin/images/thumb' && request.method === 'PUT') {
+    const key = url.searchParams.get('key');
+    if (!key) return json({ error: 'key required' }, 400);
+    await env.IMAGES.put(`thumbs/${key}.webp`, await request.arrayBuffer(), { httpMetadata: { contentType: 'image/webp', cacheControl: 'public, max-age=31536000, immutable' } });
+    return json({ ok: true, key: `thumbs/${key}.webp` });
+  }
+
   if (p === '/admin/images/put' && request.method === 'PUT') {
     const brand = url.searchParams.get('brand'); const name = url.searchParams.get('name');
     const source = url.searchParams.get('source') ?? 'manual'; const barcode = url.searchParams.get('barcode');
