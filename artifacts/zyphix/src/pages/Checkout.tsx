@@ -1,9 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
-import { ChevronLeft, MapPin, Wallet, CreditCard, Check } from 'lucide-react';
+import { ChevronLeft, MapPin, Wallet, CreditCard, Check, BookmarkCheck } from 'lucide-react';
 import { useCart, saveOrder, type Order } from '@/context/CartContext';
 import { usePromo, maxWalletUsable, cashbackFor } from '@/context/PromoContext';
 import { findCoupon, evaluateCoupon } from '@/data/coupons';
+import { useAuth } from '@/context/AuthContext';
+import { createOrder, listAddresses, type SavedAddress } from '@/lib/account';
 
 const G = '#0DA366';
 const G_LIGHT = 'rgba(13,163,102,0.08)';
@@ -18,9 +20,28 @@ export function Checkout() {
     hasPreviousOrders, recordOrderPlaced,
   } = usePromo();
   const [, navigate] = useLocation();
+  const { user } = useAuth();
 
   const [name, setName] = useState(() => { try { return JSON.parse(localStorage.getItem('zyphix_user') || 'null')?.name || ''; } catch { return ''; } });
   const [phone, setPhone] = useState(() => { try { return JSON.parse(localStorage.getItem('zyphix_user') || 'null')?.phone || ''; } catch { return ''; } });
+
+  // Saved addresses (signed-in users): one tap fills the form.
+  const [saved, setSaved] = useState<SavedAddress[]>([]);
+  const [savedPick, setSavedPick] = useState<string | null>(null);
+  useEffect(() => {
+    if (!user?.id) { setSaved([]); return; }
+    let alive = true;
+    listAddresses().then(l => { if (alive) setSaved(l); }).catch(() => {});
+    return () => { alive = false; };
+  }, [user?.id]);
+  const useSaved = (a: SavedAddress) => {
+    setSavedPick(a.id);
+    if (a.name) setName(a.name);
+    if (a.phone) setPhone(a.phone.replace(/\D/g, '').slice(-10));
+    setLine1([a.line1, a.line2].filter(Boolean).join(', ').replace(/ \| /g, ', '));
+    setCity(a.city); setPincode(a.pincode);
+    setErrors({});
+  };
   const [line1, setLine1] = useState('');
   const [city, setCity] = useState('');
   const [pincode, setPincode] = useState('');
@@ -85,6 +106,8 @@ export function Checkout() {
       etaMinutes: 30,
     };
     saveOrder(order);
+    // Persist to D1 (attached to the account when signed in). Best-effort: a failure never blocks the order.
+    try { await createOrder(order); } catch { /* local copy is the fallback */ }
 
     // Ledger effects
     if (walletApplied > 0) debitWallet(walletApplied, `Paid for order`, id);
@@ -114,6 +137,29 @@ export function Checkout() {
 
         <div>
           <Section title="Delivery Address" icon={<MapPin size={16} color={G} />}>
+            {saved.length > 0 && (
+              <div>
+                <div style={{ fontSize: 11.5, color: '#6B7280', fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <BookmarkCheck size={13} color={G} /> Use a saved address
+                </div>
+                <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
+                  {saved.map(a => {
+                    const active = savedPick === a.id;
+                    return (
+                      <button key={a.id} type="button" onClick={() => useSaved(a)}
+                        style={{ flex: '0 0 auto', maxWidth: 220, textAlign: 'left', padding: '9px 12px', borderRadius: 10, border: `1.5px solid ${active ? G : '#E5E7EB'}`, background: active ? G_LIGHT : '#fff', cursor: 'pointer' }}>
+                        <div style={{ fontSize: 12.5, fontWeight: 800, color: '#111827', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          {a.label || 'Address'}{a.isDefault && <span style={{ fontSize: 10, fontWeight: 700, color: G, background: G_LIGHT, borderRadius: 20, padding: '1px 7px' }}>Default</span>}
+                        </div>
+                        <div style={{ fontSize: 11.5, color: '#6B7280', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {[a.line1, a.line2, a.city].filter(Boolean).join(', ').replace(/ \| /g, ', ')} {a.pincode && `– ${a.pincode}`}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <Field label="Full Name" value={name} onChange={setName} error={errors.name} />
               <Field label="Phone" value={phone} onChange={v => setPhone(v.replace(/\D/g, '').slice(0, 10))} error={errors.phone} placeholder="10-digit mobile" />

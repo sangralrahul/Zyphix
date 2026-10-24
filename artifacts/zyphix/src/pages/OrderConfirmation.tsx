@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from 'wouter';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, MapPin, Truck, ShoppingBag, Home, MessageCircle, Share2 } from 'lucide-react';
 import { getOrder, type Order } from '@/context/CartContext';
+import { getOrderRemote, toLocalOrder } from '@/lib/account';
 import { useNotifications } from '@/context/NotificationsContext';
 
 const G = '#0DA366';
@@ -13,10 +14,19 @@ export function OrderConfirmation() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const [order, setOrder] = useState<Order | null>(null);
+  const [looking, setLooking] = useState(true);
   const { push } = useNotifications();
   const notified = useRef(false);
 
-  useEffect(() => { setOrder(getOrder(params.id)); }, [params.id]);
+  // Local copy first (instant), otherwise ask the Worker (orders on another device / after clearing storage).
+  useEffect(() => {
+    let alive = true;
+    const local = getOrder(params.id);
+    if (local) { setOrder(local); setLooking(false); return; }
+    setLooking(true);
+    getOrderRemote(params.id).then(r => { if (alive) { setOrder(r ? toLocalOrder(r) : null); setLooking(false); } });
+    return () => { alive = false; };
+  }, [params.id]);
 
   useEffect(() => {
     if (order && !notified.current) {
@@ -32,6 +42,11 @@ export function OrderConfirmation() {
 
 
   if (!order) {
+    if (looking) {
+      return (
+        <div style={{ padding: '80px 20px', textAlign: 'center', background: '#F8F9FA', minHeight: '70vh', color: '#6B7280' }}>Looking up your order…</div>
+      );
+    }
     return (
       <div style={{ padding: '80px 20px', textAlign: 'center', background: '#F8F9FA', minHeight: '70vh' }}>
         <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900 }}>Order not found</h1>

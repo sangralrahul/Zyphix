@@ -1,11 +1,13 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Search, X, Plus, Minus, Clock, ChevronRight, ChevronDown, Tag, Zap, ShoppingBag, SlidersHorizontal, ArrowRight } from 'lucide-react';
+import { Search, X, Plus, Minus, Clock, ChevronRight, ChevronDown, Tag, Zap, ShoppingBag, SlidersHorizontal, ArrowRight, Store, MapPin } from 'lucide-react';
 import { Link, useSearch } from 'wouter';
 import { useCatalog, type Product, type Category } from '@/lib/catalog';
 import { productImageFor, categoryTint } from '@/lib/productImage';
 import { useCart } from '@/context/CartContext';
 import { COUPONS } from '@/data/coupons';
+import { usePartners, tagList, type PartnerListing } from '@/lib/partners';
+import { Chip, IconTile } from '@/ui/kit';
 
 type SortKey = 'featured' | 'price_asc' | 'price_desc' | 'discount';
 
@@ -20,8 +22,24 @@ const hiRes = (url: string, size = 640) => url.replace(/w=\d+&h=\d+/, `w=${size}
 
 const discountOf = (p: Product) => (p.origPrice && p.origPrice > p.price ? Math.round((1 - p.price / p.origPrice) * 100) : 0);
 
+const PRODUCTS_SECTION_ID = 'now-products';
+
+/** "Joined today / 3 days ago / 2 months ago" from an ISO date. */
+function relativeDate(iso: string) {
+  const t = Date.parse(iso);
+  if (Number.isNaN(t)) return '';
+  const days = Math.floor((Date.now() - t) / 86_400_000);
+  if (days <= 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 7) return `${days} days ago`;
+  if (days < 30) return `${Math.floor(days / 7)} wk ago`;
+  if (days < 365) return `${Math.floor(days / 30)} mo ago`;
+  return `${Math.floor(days / 365)} yr ago`;
+}
+
 export function ZyphixNow() {
   const { products, categories: allCategories, loading: catalogLoading } = useCatalog();
+  const { partners: stores, loading: storesLoading } = usePartners('store');
   // Hide categories that have no products yet so the store never shows empty tiles/sections.
   const categories = useMemo(() => {
     const has = new Set(products.map(p => p.category));
@@ -260,6 +278,44 @@ export function ZyphixNow() {
             ))}
           </div>
 
+          {/* ── Registered stores (live partner directory) ── */}
+          <section>
+            <SectionHeading eyebrow="Local partners" title="Stores on Zyphix near you"
+              sub={storesLoading ? 'Checking the partner directory…' : stores.length ? `${stores.length} registered store${stores.length > 1 ? 's' : ''} · delivered by Zyphix riders` : 'Kiranas and marts that have joined the network'} />
+            {storesLoading ? (
+              <div className="carousel -mx-4 px-4" style={{ gap: 12 }}>
+                {[0, 1, 2, 3].map(i => (
+                  <div key={i} className="shrink-0 w-[250px] rounded-2xl border border-gray-200 bg-white p-4">
+                    <div className="h-10 w-10 rounded-xl bg-gray-200 animate-pulse" />
+                    <div className="mt-3 h-4 w-3/4 rounded bg-gray-200 animate-pulse" />
+                    <div className="mt-2 h-3 w-1/2 rounded bg-gray-200 animate-pulse" />
+                    <div className="mt-3 flex gap-1.5"><div className="h-6 w-14 rounded-full bg-gray-100 animate-pulse" /><div className="h-6 w-16 rounded-full bg-gray-100 animate-pulse" /></div>
+                    <div className="mt-4 h-9 w-full rounded-full bg-gray-100 animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            ) : stores.length === 0 ? (
+              <a href="https://partner.zyphix.in/store" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-3 rounded-2xl border border-dashed border-emerald-300 bg-emerald-50/50 px-4 py-3.5 transition hover:bg-emerald-50">
+                <IconTile><Store size={18} /></IconTile>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[14px] font-bold text-gray-900">Be the first store in your area</span>
+                  <span className="block text-[12.5px] text-gray-500">List your kirana on Zyphix — free to join, settled weekly.</span>
+                </span>
+                <span className="inline-flex items-center gap-1 text-[13px] font-bold shrink-0" style={{ color: G }}>List your kirana <ArrowRight size={14} /></span>
+              </a>
+            ) : (
+              <div className="carousel -mx-4 px-4" style={{ gap: 12 }}>
+                {stores.map((s, i) => (
+                  <motion.div key={s.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.4) }}
+                    className="snap-start shrink-0 w-[250px] sm:w-[270px]">
+                    <StoreCard store={s} />
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </section>
+
           {/* ── Shop by category ── */}
           <section>
             <SectionHeading eyebrow="Browse" title="Shop by category" sub={`${categories.length} categories · ${products.length.toLocaleString('en-IN')} products`} />
@@ -281,7 +337,7 @@ export function ZyphixNow() {
           </section>
 
           {/* ── All products, one section per category ── */}
-          <section>
+          <section id={PRODUCTS_SECTION_ID} className="scroll-mt-[124px]">
             <SectionHeading eyebrow="Everything" title="All products" sub={onlyDiscounted ? 'Showing deals only' : 'Every category, every product'} />
             {catalogLoading ? (
               <div className="space-y-10">{[0, 1, 2, 3].map(i => <SkeletonRow key={i} />)}</div>
@@ -370,6 +426,47 @@ function SectionHeading({ eyebrow, title, sub }: { eyebrow: string; title: strin
       <div className="text-[12px] font-bold uppercase tracking-[.12em] text-emerald-700">{eyebrow}</div>
       <h2 className="text-[22px] md:text-[26px] font-black tracking-[-0.03em] text-gray-900 leading-tight" style={OUTFIT}>{title}</h2>
       {sub && <p className="text-[13px] text-gray-500 font-medium mt-0.5">{sub}</p>}
+    </div>
+  );
+}
+
+/* ─── Registered store card (data from /api/partners) ─── */
+function StoreCard({ store: s }: { store: PartnerListing }) {
+  const tags = tagList(s.tags).slice(0, 3);
+  const joined = relativeDate(s.joinedAt);
+  const shop = () => {
+    const el = document.getElementById(PRODUCTS_SECTION_ID);
+    if (!el) return;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 124, behavior: 'smooth' });
+  };
+  return (
+    <div className="h-full flex flex-col rounded-2xl bg-white border border-gray-200 p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-150">
+      <div className="flex items-start gap-3">
+        <IconTile><Store size={18} /></IconTile>
+        <div className="min-w-0 flex-1">
+          <p className="text-[14.5px] font-bold text-gray-900 leading-snug truncate">{s.name}</p>
+          {s.category && <p className="text-[12px] text-gray-500 font-medium truncate">{s.category}</p>}
+        </div>
+      </div>
+      {(s.locality || s.city) && (
+        <p className="mt-2.5 inline-flex items-center gap-1 text-[12px] text-gray-600 font-medium truncate">
+          <MapPin size={12} className="shrink-0 text-gray-400" />
+          {[s.locality, s.city].filter(Boolean).join(' · ')}
+        </p>
+      )}
+      {tags.length > 0 && (
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          {tags.map(t => <Chip key={t} tone="green">{t}</Chip>)}
+        </div>
+      )}
+      <div className="mt-auto pt-3 flex items-center justify-between gap-2">
+        <span className="text-[11px] text-gray-400 font-medium">{joined ? `Joined ${joined}` : 'Registered partner'}</span>
+        <button type="button" onClick={shop}
+          className="inline-flex items-center gap-1 h-8 px-3.5 rounded-full text-[12.5px] font-bold text-white shadow-sm transition hover:-translate-y-px"
+          style={{ background: G }}>
+          Shop <ArrowRight size={13} />
+        </button>
+      </div>
     </div>
   );
 }

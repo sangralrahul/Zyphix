@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useNotifications } from '@/context/NotificationsContext';
+import { authUrl } from '@/lib/account';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const G = '#0DA366';
@@ -28,7 +29,9 @@ export function Navbar() {
     }
   };
 
-  const { user, logout, openModal } = useAuth();
+  const { user, logout } = useAuth();
+  // Sign-in lives on auth.zyphix.in (shared session for every sub-site); come back to this page after.
+  const signInHref = typeof window !== 'undefined' ? authUrl(window.location.href) : '/auth';
   const { count: wishCount } = useWishlist();
   const { unread: notifUnread } = useNotifications();
 
@@ -166,11 +169,11 @@ export function Navbar() {
               </div>
             ) : (
               /* ── Login button ── */
-              <button onClick={openModal}
+              <a href={signInHref}
                 className="hidden sm:flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 hover:text-gray-900">
                 <User size={15} />
-                <span className="hidden lg:inline">Login</span>
-              </button>
+                <span className="hidden lg:inline">Sign in</span>
+              </a>
             )}
 
             {/* Wishlist */}
@@ -258,10 +261,10 @@ export function Navbar() {
                   </button>
                 </>
               ) : (
-                <button onClick={() => { openModal(); setMobileOpen(false); }}
-                  className="w-full mt-3 py-3 rounded-xl font-black text-sm text-white transition hover:opacity-90" style={{ background: G }}>
+                <a href={signInHref} onClick={() => setMobileOpen(false)}
+                  className="block w-full mt-3 py-3 rounded-xl font-black text-sm text-white text-center transition hover:opacity-90" style={{ background: G }}>
                   Sign In / Get Started
-                </button>
+                </a>
               )}
             </div>
           </motion.div>

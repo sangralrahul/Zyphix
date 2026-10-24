@@ -112,7 +112,7 @@ export function SectionTitle({ eyebrow, title, lead, dark = false, align = 'left
 /* ── Buttons ────────────────────────────────────────────────────────────── */
 const base = 'inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-[-0.01em] transition-all duration-200 select-none';
 const sizes = { sm: 'h-9 px-4 text-[13.5px]', md: 'h-11 px-5 text-[14.5px]', lg: 'h-12 px-6 text-[15px]' };
-export function Button({ href, children, variant = 'primary', size = 'md', className = '', external = false, onClick, type }: { href?: string; children: React.ReactNode; variant?: 'primary' | 'secondary' | 'ghost' | 'white'; size?: 'sm' | 'md' | 'lg'; className?: string; external?: boolean; onClick?: () => void; type?: 'button' | 'submit' }) {
+export function Button({ href, children, variant = 'primary', size = 'md', className = '', external = false, sameTab = false, onClick, type }: { href?: string; children: React.ReactNode; variant?: 'primary' | 'secondary' | 'ghost' | 'white'; size?: 'sm' | 'md' | 'lg'; className?: string; external?: boolean; /** absolute URL that should NOT open in a new tab (e.g. auth.zyphix.in) */ sameTab?: boolean; onClick?: () => void; type?: 'button' | 'submit' }) {
   const v = variant === 'primary' ? 'text-white shadow-[0_1px_2px_rgba(0,0,0,.2),inset_0_1px_0_rgba(255,255,255,.2)] hover:-translate-y-px hover:shadow-[0_8px_24px_rgba(13,163,102,.35)]'
     : variant === 'secondary' ? 'bg-white text-gray-900 border border-gray-200 shadow-[0_1px_2px_rgba(0,0,0,.04)] hover:border-gray-300 hover:-translate-y-px'
     : variant === 'white' ? 'bg-white text-gray-900 hover:bg-gray-100'
@@ -120,7 +120,10 @@ export function Button({ href, children, variant = 'primary', size = 'md', class
   const style = variant === 'primary' ? { background: `linear-gradient(180deg, #13B874 0%, ${G} 100%)` } : undefined;
   const cls = `${base} ${sizes[size]} ${v} ${className}`;
   if (href) {
-    if (external || href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto:')) return <a href={href} className={cls} style={style} target={href.startsWith('http') ? '_blank' : undefined} rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}>{children}</a>;
+    if (external || href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto:')) {
+      const newTab = href.startsWith('http') && !sameTab;
+      return <a href={href} className={cls} style={style} target={newTab ? '_blank' : undefined} rel={newTab ? 'noopener noreferrer' : undefined}>{children}</a>;
+    }
     return <Link href={href} className={cls} style={style}>{children}</Link>;
   }
   return <button type={type ?? 'button'} onClick={onClick} className={cls} style={style}>{children}</button>;

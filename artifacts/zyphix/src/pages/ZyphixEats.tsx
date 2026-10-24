@@ -5,6 +5,7 @@ import {
   Bike, BadgeIndianRupee, Sparkles, MapPin, ArrowRight, Leaf,
 } from 'lucide-react';
 import { restaurants, menuItems, FOOD_CUISINE_TYPES } from '@/data/mockData';
+import { usePartners, tagList } from '@/lib/partners';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Zyphix Eats — food delivery from neighbourhood restaurants
@@ -12,8 +13,36 @@ import { restaurants, menuItems, FOOD_CUISINE_TYPES } from '@/data/mockData';
 ──────────────────────────────────────────────────────────────────────────── */
 
 type CartState = Record<string, number>;
-type Restaurant = typeof restaurants[0];
+type MockRestaurant = typeof restaurants[0];
+/** Mock restaurants plus live registrations (no rating / image until they go live). */
+type Restaurant = Omit<MockRestaurant, 'rating' | 'tags'> & { rating?: number; tags?: string[]; registered?: boolean };
 type MenuItem = typeof menuItems[0];
+
+/** Best cuisine chip for a registered restaurant, from its tags/category text. Falls back to 'All'. */
+function matchCuisineType(text: string): string {
+  const t = text.toLowerCase();
+  if (!t) return 'All';
+  const direct = FOOD_CUISINE_TYPES.find(c => c !== 'All' && t.includes(c.toLowerCase()));
+  if (direct) return direct;
+  const hints: [RegExp, string][] = [
+    [/biryani|mughlai|kebab/, 'Biryani'], [/pizza|pasta|italian/, 'Pizza'], [/burger|wrap|sandwich/, 'Burgers'],
+    [/momo|dimsum|tibetan/, 'Momos'], [/chinese|noodle|manchurian|hakka/, 'Chinese'], [/sweet|mithai|dessert|bakery|cake/, 'Sweets'],
+    [/chai|tea|coffee|snack|maggi|cafe|café/, 'Chai & Snacks'], [/health|salad|juice|vegan|bowl/, 'Healthy'],
+    [/dosa|idli|sambhar|udupi|south/, 'South Indian'], [/dhaba|punjabi|dal|paneer|thali|tandoor|north|chole|roti/, 'North Indian'],
+  ];
+  return hints.find(([re]) => re.test(t))?.[1] ?? 'All';
+}
+
+const initialsOf = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]!.toUpperCase()).join('') || '•';
+
+/** Gradient tile with initials, used in place of a photo for registered restaurants. */
+function InitialsTile({ name, className = '', size = 'lg' }: { name: string; className?: string; size?: 'lg' | 'xl' }) {
+  return (
+    <div className={`flex h-full w-full items-center justify-center ${className}`} style={{ background: 'linear-gradient(135deg, #0DA366 0%, #06B6D4 60%, #A7F3D0 100%)' }} aria-hidden>
+      <span className={`rounded-2xl bg-white/20 px-4 py-2 font-black tracking-[-0.02em] text-white backdrop-blur ${size === 'xl' ? 'text-[40px]' : 'text-[28px]'}`} style={HEAD}>{initialsOf(name)}</span>
+    </div>
+  );
+}
 
 const OR = '#EA580C';
 const G = '#0DA366';
@@ -28,6 +57,7 @@ const TAG_STYLE: Record<string, string> = {
   'Free Delivery': 'bg-emerald-600',
   Trending: 'bg-orange-600',
   New: 'bg-violet-600',
+  'New on Zyphix': 'bg-violet-600',
   Bestseller: 'bg-amber-500',
   '#1 Rated': 'bg-gray-900',
   Popular: 'bg-blue-600',
@@ -58,6 +88,23 @@ export function ZyphixEats() {
   const [cart, setCart] = useState<CartState>({});
   const [cartOpen, setCartOpen] = useState(false);
 
+  /* Live registrations from the partner directory, shown ahead of the mock list. */
+  const { partners } = usePartners('restaurant');
+  const registered: Restaurant[] = partners.map(p => ({
+    id: 'p-' + p.id,
+    name: p.name,
+    cuisine: p.tags || p.category || 'Neighbourhood restaurant',
+    cuisineType: matchCuisineType([...tagList(p.tags || ''), p.category || ''].join(' ')),
+    rating: undefined,
+    eta: '30–40 min',
+    deliveryFee: 0,
+    minOrder: 149,
+    image: '',
+    tags: ['New on Zyphix'],
+    registered: true,
+  }));
+  const allRestaurants: Restaurant[] = [...registered, ...restaurants];
+
   useEffect(() => {
     try { localStorage.removeItem('zyphix_food_cat'); } catch {}
   }, []);
@@ -76,7 +123,7 @@ export function ZyphixEats() {
     return sum + (m ? m.price * qty : 0);
   }, 0);
 
-  const filteredRestaurants = restaurants.filter(r => {
+  const filteredRestaurants = allRestaurants.filter(r => {
     const cuisineMatch = activeCuisine === 'All' || r.cuisineType === activeCuisine;
     const searchMatch = !search ||
       r.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -87,7 +134,7 @@ export function ZyphixEats() {
   const popular = [...restaurants].sort((a, b) => b.rating - a.rating).slice(0, 6);
   const showPopular = activeCuisine === 'All' && !search;
 
-  const activeR = activeRestaurant ? restaurants.find(r => r.id === activeRestaurant) : null;
+  const activeR = activeRestaurant ? allRestaurants.find(r => r.id === activeRestaurant) : null;
   const activeMenu = activeRestaurant ? menuItems.filter(m => m.restaurantId === activeRestaurant) : [];
 
   const heroImage = restaurants[2]?.image || restaurants[0]?.image;
@@ -100,7 +147,11 @@ export function ZyphixEats() {
           <motion.div key="detail" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.22 }}>
             {/* Photo header */}
             <div className="relative -mx-4 overflow-hidden sm:mx-0 sm:mt-5 sm:rounded-3xl">
-              <img src={activeR.image} alt={activeR.name} loading="lazy" className="h-[240px] w-full object-cover sm:h-[300px]" />
+              {activeR.image ? (
+                <img src={activeR.image} alt={activeR.name} loading="lazy" className="h-[240px] w-full object-cover sm:h-[300px]" />
+              ) : (
+                <div className="h-[240px] w-full sm:h-[300px]"><InitialsTile name={activeR.name} size="xl" /></div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
               <button onClick={() => setActiveRestaurant(null)}
                 className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3.5 py-2 text-[13px] font-bold text-gray-900 shadow transition hover:bg-white">
@@ -115,9 +166,11 @@ export function ZyphixEats() {
                 <h2 className="mt-2 text-[26px] font-black leading-tight tracking-[-0.03em] text-white sm:text-[34px]" style={HEAD}>{activeR.name}</h2>
                 <p className="mt-1 text-[13.5px] text-white/80">{activeR.cuisine}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[12px] font-bold text-gray-900">
-                    <Star size={12} className="fill-amber-400 text-amber-400" /> {activeR.rating}
-                  </span>
+                  {activeR.rating !== undefined && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[12px] font-bold text-gray-900">
+                      <Star size={12} className="fill-amber-400 text-amber-400" /> {activeR.rating}
+                    </span>
+                  )}
                   <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[12px] font-semibold text-white backdrop-blur">
                     <Clock size={12} /> {activeR.eta}
                   </span>
@@ -150,7 +203,9 @@ export function ZyphixEats() {
                 <div className="rounded-3xl border border-gray-200 bg-white px-5 py-14 text-center">
                   <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50 text-orange-600"><UtensilsCrossed size={26} /></span>
                   <p className="mt-4 text-[16px] font-black text-gray-900" style={HEAD}>Menu coming soon</p>
-                  <p className="mt-1 text-[13.5px] text-gray-500">This restaurant is still setting up their menu.</p>
+                  <p className="mt-1 text-[13.5px] text-gray-500">
+                    {activeR.registered ? 'This restaurant just joined Zyphix — their menu is being set up.' : 'This restaurant is still setting up their menu.'}
+                  </p>
                 </div>
               )}
             </motion.div>
@@ -200,6 +255,9 @@ export function ZyphixEats() {
                   <li className="flex items-center gap-1.5"><Clock size={14} className="text-orange-300" /> 25–40 min target</li>
                   <li className="flex items-center gap-1.5"><BadgeIndianRupee size={14} className="text-orange-300" /> Zero surge pricing</li>
                   <li className="flex items-center gap-1.5"><MapPin size={14} className="text-orange-300" /> {restaurants.length} neighbourhood restaurants</li>
+                  {registered.length > 0 && (
+                    <li className="flex items-center gap-1.5"><Sparkles size={14} className="text-orange-300" /> {registered.length} restaurant{registered.length > 1 ? 's' : ''} joining Zyphix</li>
+                  )}
                 </motion.ul>
               </div>
             </section>
@@ -443,9 +501,11 @@ function PopularCard({ restaurant: r, onClick }: { restaurant: Restaurant; onCli
       </div>
       <div className="flex items-center justify-between px-4 py-3">
         <DeliveryChip fee={r.deliveryFee} />
-        <span className="inline-flex items-center gap-1 text-[12.5px] font-bold text-gray-900">
-          <Star size={12} className="fill-amber-400 text-amber-400" /> {r.rating}
-        </span>
+        {r.rating !== undefined && (
+          <span className="inline-flex items-center gap-1 text-[12.5px] font-bold text-gray-900">
+            <Star size={12} className="fill-amber-400 text-amber-400" /> {r.rating}
+          </span>
+        )}
       </div>
     </button>
   );
@@ -457,7 +517,11 @@ function RestaurantCard({ restaurant: r, onClick }: { restaurant: Restaurant; on
   return (
     <button onClick={onClick} className="group block w-full overflow-hidden rounded-3xl border border-gray-200 bg-white text-left transition hover:-translate-y-1 hover:shadow-[0_16px_48px_rgba(11,18,32,.10)]">
       <div className="relative h-[170px] overflow-hidden">
-        <img src={r.image} alt={r.name} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+        {r.image ? (
+          <img src={r.image} alt={r.name} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+        ) : (
+          <InitialsTile name={r.name} className="transition duration-500 group-hover:scale-105" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
           {r.tags?.slice(0, 2).map(tag => (
@@ -471,9 +535,13 @@ function RestaurantCard({ restaurant: r, onClick }: { restaurant: Restaurant; on
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <h4 className="min-w-0 flex-1 truncate text-[16px] font-black tracking-[-0.02em] text-gray-900" style={HEAD}>{r.name}</h4>
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-emerald-600 px-2 py-0.5 text-[12px] font-extrabold text-white">
-            <Star size={10} className="fill-white text-white" /> {r.rating}
-          </span>
+          {r.rating !== undefined ? (
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-emerald-600 px-2 py-0.5 text-[12px] font-extrabold text-white">
+              <Star size={10} className="fill-white text-white" /> {r.rating}
+            </span>
+          ) : r.registered ? (
+            <span className="inline-flex shrink-0 items-center rounded-lg bg-violet-50 px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-wide text-violet-700">New</span>
+          ) : null}
         </div>
         <p className="mt-1 truncate text-[12.5px] text-gray-500">{r.cuisine}</p>
         <div className="mt-3 flex items-center gap-2 border-t border-gray-100 pt-3">

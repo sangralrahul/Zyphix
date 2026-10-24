@@ -11,6 +11,13 @@
  *   POST /admin/images/sync?limit=20           fill images for `pending` products (Bearer ADMIN_TOKEN)
  *   POST /admin/images/reset?status=failed     put failed/not_found back to pending (Bearer ADMIN_TOKEN)
  *
+ *   Accounts (cookie `zsid`, shared across *.zyphix.in; see "accounts" section at the bottom)
+ *   POST /api/auth/verify                      {email, otp, token, name?} → session cookie + {user}
+ *   POST /api/auth/logout
+ *   GET  /api/me · PATCH /api/me               {name?, phone?}
+ *   GET|POST /api/me/addresses · PATCH|DELETE /api/me/addresses/:id · POST /api/me/addresses/:id/default
+ *   POST /api/orders (guest or user) · GET /api/me/orders · GET /api/orders/:id
+ *
  * Everything else falls through to the static Vite build (SPA).
  */
 
@@ -21,6 +28,8 @@ export interface Env {
   ASSETS: Fetcher;
   ADMIN_TOKEN: string;
   PUBLIC_IMAGE_BASE?: string; // optional, e.g. https://img.zyphix.in  (defaults to same-origin /img)
+  SUPABASE_URL?: string;      // email-otp edge function host (same fallbacks as src/lib/api.ts)
+  SUPABASE_KEY?: string;
 }
 
 type ProductRow = {
@@ -54,6 +63,23 @@ export default {
     const url = new URL(request.url);
     const { pathname } = url;
 
+    // Account routes answer with credentialed CORS (cookie shared across *.zyphix.in).
+    if (isAccountPath(pathname)) {
+      const cors = accountCors(request);
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: { ...cors, 'access-control-allow-headers': 'content-type', 'access-control-allow-methods': 'GET,POST,PATCH,DELETE,OPTIONS', 'access-control-max-age': '86400' } });
+      }
+      try {
+        const res = await handleAccount(request, env, url);
+        const h = new Headers(res.headers);
+        for (const [k, v] of Object.entries(cors)) h.set(k, v);
+        return new Response(res.body, { status: res.status, headers: h });
+      } catch (err) {
+        console.error(err);
+        return json({ error: (err as Error).message }, 500, cors);
+      }
+    }
+
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: { ...JSON_HEADERS, 'access-control-allow-headers': 'authorization, content-type', 'access-control-allow-methods': 'GET,POST,OPTIONS' } });
     }
@@ -77,6 +103,10 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   const p = url.pathname;
   const origin = url.origin;
   const cache = { 'cache-control': 'public, max-age=60, s-maxage=300' };
+
+  /* ── Partner directory (stores, restaurants, service pros, riders) ── */
+  if (p === '/api/partners' && request.method === 'POST') return await createPartner(request, env);
+  if (p === '/api/partners' && request.method === 'GET') return await listPartners(env, url);
 
   if (p === '/api/categories') {
     const { results } = await env.DB.prepare('SELECT name, icon, color, image_url AS image, sort FROM categories ORDER BY sort').all();
@@ -142,6 +172,18 @@ function authorized(request: Request, env: Env) {
 async function handleAdmin(request: Request, env: Env, url: URL): Promise<Response> {
   if (!authorized(request, env)) return json({ error: 'unauthorized' }, 401);
   const p = url.pathname;
+
+  if (p === '/admin/partners' && request.method === 'GET') {
+    const { results } = await env.DB.prepare('SELECT * FROM partners ORDER BY created_at DESC LIMIT 500').all();
+    return json(results);
+  }
+  const pm = p.match(/^\/admin\/partners\/([^/]+)\/status$/);
+  if (pm && request.method === 'POST') {
+    const status = url.searchParams.get('status');
+    if (!status || !['live', 'hidden', 'pending'].includes(status)) return json({ error: 'status must be live | hidden | pending' }, 400);
+    const r = await env.DB.prepare("UPDATE partners SET status = ?, updated_at = datetime('now') WHERE id = ?").bind(status, decodeURIComponent(pm[1])).run();
+    return json({ updated: r.meta.changes });
+  }
 
   if (p === '/admin/images/status') {
     const { results } = await env.DB.prepare('SELECT image_status AS status, image_source AS source, COUNT(*) AS n FROM products GROUP BY 1,2 ORDER BY 1,2').all();
@@ -318,4 +360,323 @@ async function generateProduceImage(env: Env, row: ProductRow): Promise<ImageRes
   const key = `produce/${slug(subject)}.jpg`;
   const url = await putImage(env, key, bytes.buffer, 'image/jpeg');
   return { url, source: 'workers-ai' };
+}
+
+/* ───────────────────────── partner directory ─────────────────────────
+   Registrations from the sign-up forms (store / restaurant / service / delivery)
+   are stored here and listed on now.zyphix.in, eats.zyphix.in, book.zyphix.in and
+   partner.zyphix.in. New entries go live immediately; /admin/partners/:id/status
+   can hide one. Contact details are never returned by the public GET.          */
+
+const PARTNER_TYPES: Record<string, string> = { merchant: 'store', store: 'store', restaurant: 'restaurant', service: 'service', delivery: 'delivery' };
+const str = (v: unknown, max = 200) => (typeof v === 'string' ? v : Array.isArray(v) ? v.join(', ') : v == null ? '' : String(v)).trim().slice(0, max);
+
+async function createPartner(request: Request, env: Env): Promise<Response> {
+  let body: any;
+  try { body = await request.json(); } catch { return json({ error: 'invalid JSON' }, 400); }
+  const type = PARTNER_TYPES[str(body.role)];
+  if (!type) return json({ error: 'unknown role' }, 400);
+  const name = str(body.name, 120), email = str(body.email, 160).toLowerCase(), phone = str(body.phone, 20).replace(/\D/g, ''), city = str(body.city, 80);
+  if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || phone.length < 10) return json({ error: 'name, valid email and 10-digit phone are required' }, 400);
+  const d = (body.details ?? {}) as Record<string, unknown>;
+  const businessName = str(d.storeName ?? d.restaurantName ?? d.businessName ?? (type === 'delivery' || type === 'service' ? name : ''), 140) || name;
+  const category = str(d.primaryCategory ?? d.restaurantType ?? d.storeType ?? d.vehicleType ?? d.vehicle ?? '', 80);
+  const tags = str(d.cuisines ?? d.categories ?? d.additionalSkills ?? '', 300);
+  const locality = str(d.locality ?? d.area ?? d.address ?? '', 160);
+  const id = `${type.slice(0, 2)}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+  // one live listing per (type, email): re-registering updates instead of duplicating
+  const existing = await env.DB.prepare('SELECT id FROM partners WHERE type = ? AND email = ?').bind(type, email).first<{ id: string }>();
+  if (existing) {
+    await env.DB.prepare("UPDATE partners SET name=?, business_name=?, phone=?, city=?, locality=?, category=?, tags=?, details=?, updated_at=datetime('now') WHERE id=?")
+      .bind(name, businessName, phone, city, locality, category, tags, JSON.stringify(d).slice(0, 8000), existing.id).run();
+    return json({ success: true, id: existing.id, updated: true });
+  }
+  await env.DB.prepare('INSERT INTO partners (id, type, name, business_name, email, phone, city, locality, category, tags, details, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(id, type, name, businessName, email, phone, city, locality, category, tags, JSON.stringify(d).slice(0, 8000), 'live').run();
+  return json({ success: true, id }, 201);
+}
+
+async function listPartners(env: Env, url: URL): Promise<Response> {
+  const type = PARTNER_TYPES[url.searchParams.get('type') ?? ''] ?? url.searchParams.get('type');
+  const city = url.searchParams.get('city')?.trim();
+  const limit = Math.min(Number(url.searchParams.get('limit') ?? 200), 500);
+  const where = ["status = 'live'"]; const binds: unknown[] = [];
+  if (type) { where.push('type = ?'); binds.push(type); }
+  if (city) { where.push('LOWER(city) = LOWER(?)'); binds.push(city); }
+  const { results } = await env.DB.prepare(`SELECT id, type, name, business_name, city, locality, category, tags, created_at FROM partners WHERE ${where.join(' AND ')} ORDER BY created_at DESC LIMIT ?`).bind(...binds, limit).all();
+  const pub = results.map((r: any) => ({
+    id: r.id, type: r.type,
+    name: r.type === 'delivery' ? String(r.name).split(' ')[0] : r.business_name, // riders: first name only
+    city: r.city, locality: r.type === 'delivery' ? '' : r.locality, category: r.category, tags: r.tags, joinedAt: r.created_at,
+  }));
+  return json(pub, 200, { 'cache-control': 'public, max-age=30, s-maxage=60' });
+}
+
+/* ───────────────────────── accounts (auth.zyphix.in) ─────────────────────────
+   Email-OTP sign-in. The OTP itself is sent/checked by the Supabase `email-otp`
+   edge function; this Worker only calls it server-side on verify, then owns the
+   session: a random token in an HttpOnly cookie `zsid` (Domain=.zyphix.in so
+   now.|eats.|book.|auth.zyphix.in share it), SHA-256 hash in `sessions`.
+   Addresses and orders live in D1 and are scoped to the session user.      */
+
+const SUPABASE_URL_FALLBACK = 'https://awbccdtdszdxcxnsossy.supabase.co';
+const SUPABASE_KEY_FALLBACK = 'sb_publishable_YE-BT6c07paKhTvlCiItZw_Mm2k6z5A';
+const SESSION_COOKIE = 'zsid';
+const SESSION_TTL_S = 90 * 24 * 60 * 60; // 90 days
+const MAX_ADDRESSES = 10;
+
+type UserRow = { id: string; email: string; name: string | null; phone: string | null; created_at: string; updated_at: string };
+type AddressRow = { id: string; user_id: string; label: string | null; name: string | null; phone: string | null; line1: string; line2: string | null; city: string | null; pincode: string | null; is_default: number; created_at: string };
+type OrderRow = { id: string; user_id: string | null; email: string | null; status: string; items: string; subtotal: number; delivery_fee: number; discount: number; total: number; payment_mode: string | null; address: string | null; eta_minutes: number | null; created_at: string };
+
+const ACCOUNT_PATH = /^\/api\/(auth\/|me($|\/)|orders($|\/))/;
+const isAccountPath = (p: string) => ACCOUNT_PATH.test(p);
+
+/** Credentialed CORS for https://zyphix.in and https://*.zyphix.in (plus localhost for dev). */
+function accountCors(request: Request): Record<string, string> {
+  const origin = request.headers.get('origin');
+  if (!origin) return {};
+  let ok = false;
+  try {
+    const u = new URL(origin);
+    ok = (u.protocol === 'https:' && (u.hostname === 'zyphix.in' || u.hostname.endsWith('.zyphix.in')))
+      || (u.hostname === 'localhost' || u.hostname === '127.0.0.1');
+  } catch { ok = false; }
+  if (!ok) return {};
+  return { 'access-control-allow-origin': origin, 'access-control-allow-credentials': 'true', 'vary': 'Origin' };
+}
+
+const b64url = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const randomId = (prefix = '') => prefix + b64url(crypto.getRandomValues(new Uint8Array(12)));
+async function sha256Hex(s: string) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function readCookie(request: Request, name: string): string | null {
+  const raw = request.headers.get('cookie') ?? '';
+  for (const part of raw.split(';')) {
+    const [k, ...v] = part.trim().split('=');
+    if (k === name) return decodeURIComponent(v.join('='));
+  }
+  return null;
+}
+
+function cookieHeader(request: Request, value: string, maxAge: number) {
+  const host = new URL(request.url).hostname.toLowerCase();
+  const domain = host === 'zyphix.in' || host.endsWith('.zyphix.in') ? '; Domain=.zyphix.in' : '';
+  return `${SESSION_COOKIE}=${value}${domain}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
+}
+
+const toUser = (u: UserRow) => ({ id: u.id, email: u.email, name: u.name ?? '', phone: u.phone ?? '' });
+
+/** Session cookie → user row (null when missing, unknown or expired). */
+async function getUser(request: Request, env: Env): Promise<UserRow | null> {
+  const token = readCookie(request, SESSION_COOKIE);
+  if (!token) return null;
+  const hash = await sha256Hex(token);
+  return await env.DB.prepare(
+    "SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > datetime('now')"
+  ).bind(hash).first<UserRow>();
+}
+
+async function createSession(request: Request, env: Env, userId: string) {
+  const token = b64url(crypto.getRandomValues(new Uint8Array(32)));
+  const hash = await sha256Hex(token);
+  const ua = (request.headers.get('user-agent') ?? '').slice(0, 300);
+  await env.DB.prepare("INSERT INTO sessions (token_hash, user_id, expires_at, user_agent) VALUES (?, ?, datetime('now', ?), ?)")
+    .bind(hash, userId, `+${SESSION_TTL_S} seconds`, ua).run();
+  return cookieHeader(request, token, SESSION_TTL_S);
+}
+
+async function readJson(request: Request): Promise<Record<string, any> | null> {
+  try { const b = await request.json(); return b && typeof b === 'object' ? b as Record<string, any> : {}; } catch { return null; }
+}
+
+async function handleAccount(request: Request, env: Env, url: URL): Promise<Response> {
+  const p = url.pathname;
+  const m = request.method;
+
+  /* ── auth ── */
+  if (p === '/api/auth/verify' && m === 'POST') return await authVerify(request, env);
+  if (p === '/api/auth/logout' && m === 'POST') {
+    const token = readCookie(request, SESSION_COOKIE);
+    if (token) await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(await sha256Hex(token)).run();
+    return json({ success: true }, 200, { 'set-cookie': cookieHeader(request, '', 0) });
+  }
+
+  /* ── orders: POST works for guests too; GET /api/orders/:id allows guest lookup of guest orders ── */
+  if (p === '/api/orders' && m === 'POST') return await createOrder(request, env);
+  const om = p.match(/^\/api\/orders\/([^/]+)$/);
+  if (om && m === 'GET') {
+    const row = await env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(decodeURIComponent(om[1])).first<OrderRow>();
+    if (!row) return json({ error: 'not found' }, 404);
+    const user = await getUser(request, env);
+    const allowed = row.user_id ? (user?.id === row.user_id) : true;
+    if (!allowed) return json({ error: 'not found' }, 404);
+    return json(orderToClient(row));
+  }
+
+  /* ── everything under /api/me needs a session ── */
+  const user = await getUser(request, env);
+  if (!user) return json({ error: 'unauthorized' }, 401);
+
+  if (p === '/api/me' && m === 'GET') return json({ user: toUser(user) });
+  if (p === '/api/me' && m === 'PATCH') {
+    const body = await readJson(request); if (!body) return json({ error: 'invalid JSON' }, 400);
+    const name = body.name !== undefined ? str(body.name, 120) : user.name;
+    const phone = body.phone !== undefined ? str(body.phone, 20) : user.phone;
+    if (phone && !/^\+?[\d\s-]{10,16}$/.test(phone)) return json({ error: 'invalid phone' }, 400);
+    await env.DB.prepare("UPDATE users SET name = ?, phone = ?, updated_at = datetime('now') WHERE id = ?").bind(name || null, phone || null, user.id).run();
+    return json({ user: { ...toUser(user), name: name ?? '', phone: phone ?? '' } });
+  }
+
+  if (p === '/api/me/orders' && m === 'GET') {
+    const { results } = await env.DB.prepare('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT 50').bind(user.id).all<OrderRow>();
+    return json(results.map(orderToClient));
+  }
+
+  if (p === '/api/me/addresses' && m === 'GET') return json(await listAddresses(env, user.id));
+  if (p === '/api/me/addresses' && m === 'POST') {
+    const body = await readJson(request); if (!body) return json({ error: 'invalid JSON' }, 400);
+    const a = addressInput(body); if ('error' in a) return json({ error: a.error }, 400);
+    const count = await env.DB.prepare('SELECT COUNT(*) AS n FROM addresses WHERE user_id = ?').bind(user.id).first<{ n: number }>();
+    if ((count?.n ?? 0) >= MAX_ADDRESSES) return json({ error: `you can save up to ${MAX_ADDRESSES} addresses` }, 400);
+    const makeDefault = !!body.isDefault || (count?.n ?? 0) === 0;
+    const id = randomId('ad_');
+    if (makeDefault) await env.DB.prepare('UPDATE addresses SET is_default = 0 WHERE user_id = ?').bind(user.id).run();
+    await env.DB.prepare('INSERT INTO addresses (id, user_id, label, name, phone, line1, line2, city, pincode, is_default) VALUES (?,?,?,?,?,?,?,?,?,?)')
+      .bind(id, user.id, a.label, a.name, a.phone, a.line1, a.line2, a.city, a.pincode, makeDefault ? 1 : 0).run();
+    const row = await env.DB.prepare('SELECT * FROM addresses WHERE id = ?').bind(id).first<AddressRow>();
+    return json(addressToClient(row!), 201);
+  }
+  const am = p.match(/^\/api\/me\/addresses\/([^/]+)(\/default)?$/);
+  if (am) {
+    const id = decodeURIComponent(am[1]);
+    const row = await env.DB.prepare('SELECT * FROM addresses WHERE id = ? AND user_id = ?').bind(id, user.id).first<AddressRow>();
+    if (!row) return json({ error: 'not found' }, 404);
+    if (am[2] && m === 'POST') {
+      await env.DB.batch([
+        env.DB.prepare('UPDATE addresses SET is_default = 0 WHERE user_id = ?').bind(user.id),
+        env.DB.prepare('UPDATE addresses SET is_default = 1 WHERE id = ?').bind(id),
+      ]);
+      return json(await listAddresses(env, user.id));
+    }
+    if (!am[2] && m === 'PATCH') {
+      const body = await readJson(request); if (!body) return json({ error: 'invalid JSON' }, 400);
+      const merged = { label: row.label, name: row.name, phone: row.phone, line1: row.line1, line2: row.line2, city: row.city, pincode: row.pincode, ...body };
+      const a = addressInput(merged); if ('error' in a) return json({ error: a.error }, 400);
+      if (body.isDefault === true) await env.DB.prepare('UPDATE addresses SET is_default = 0 WHERE user_id = ?').bind(user.id).run();
+      const isDefault = body.isDefault === true ? 1 : row.is_default;
+      await env.DB.prepare('UPDATE addresses SET label=?, name=?, phone=?, line1=?, line2=?, city=?, pincode=?, is_default=? WHERE id=?')
+        .bind(a.label, a.name, a.phone, a.line1, a.line2, a.city, a.pincode, isDefault, id).run();
+      const updated = await env.DB.prepare('SELECT * FROM addresses WHERE id = ?').bind(id).first<AddressRow>();
+      return json(addressToClient(updated!));
+    }
+    if (!am[2] && m === 'DELETE') {
+      await env.DB.prepare('DELETE FROM addresses WHERE id = ?').bind(id).run();
+      if (row.is_default) {
+        // promote the oldest remaining address so there is always a default
+        await env.DB.prepare('UPDATE addresses SET is_default = 1 WHERE id = (SELECT id FROM addresses WHERE user_id = ? ORDER BY created_at LIMIT 1)').bind(user.id).run();
+      }
+      return json({ success: true });
+    }
+  }
+
+  return json({ error: 'not found' }, 404);
+}
+
+async function authVerify(request: Request, env: Env): Promise<Response> {
+  const body = await readJson(request); if (!body) return json({ error: 'invalid JSON' }, 400);
+  const email = str(body.email, 160).toLowerCase(); const otp = str(body.otp, 10); const token = str(body.token, 2000);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\d{4,8}$/.test(otp) || !token) return json({ error: 'email, otp and token are required' }, 400);
+
+  const base = (env.SUPABASE_URL ?? SUPABASE_URL_FALLBACK).replace(/\/$/, '');
+  const key = env.SUPABASE_KEY ?? SUPABASE_KEY_FALLBACK;
+  let data: any = null;
+  try {
+    const res = await fetch(`${base}/functions/v1/email-otp`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', apikey: key, authorization: `Bearer ${key}` },
+      body: JSON.stringify({ action: 'verify', email, otp, token }),
+    });
+    data = await res.json().catch(() => null);
+    if (!res.ok || !data?.success) return json({ error: str(data?.error, 300) || 'Incorrect or expired OTP' }, 400);
+  } catch {
+    return json({ error: 'Could not reach the verification service' }, 502);
+  }
+
+  const name = str(body.name, 120) || str(data?.name, 120);
+  let user = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(email).first<UserRow>();
+  if (!user) {
+    const id = randomId('u_');
+    await env.DB.prepare('INSERT INTO users (id, email, name) VALUES (?, ?, ?)').bind(id, email, name || null).run();
+    user = (await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first<UserRow>())!;
+  } else if (name && !user.name) {
+    await env.DB.prepare("UPDATE users SET name = ?, updated_at = datetime('now') WHERE id = ?").bind(name, user.id).run();
+    user = { ...user, name };
+  }
+  const cookie = await createSession(request, env, user.id);
+  return json({ user: toUser(user) }, 200, { 'set-cookie': cookie });
+}
+
+/* ---- addresses ---- */
+
+type AddressInput = { label: string | null; name: string | null; phone: string | null; line1: string; line2: string | null; city: string | null; pincode: string | null };
+function addressInput(b: Record<string, unknown>): AddressInput | { error: string } {
+  const line1 = str(b.line1, 240);
+  if (!line1) return { error: 'line1 is required' };
+  const pincode = str(b.pincode, 10);
+  if (pincode && !/^\d{6}$/.test(pincode)) return { error: 'pincode must be 6 digits' };
+  const phone = str(b.phone, 20);
+  return {
+    label: str(b.label, 40) || null, name: str(b.name, 120) || null, phone: phone || null,
+    line1, line2: str(b.line2, 240) || null, city: str(b.city, 80) || null, pincode: pincode || null,
+  };
+}
+const addressToClient = (r: AddressRow) => ({
+  id: r.id, label: r.label ?? '', name: r.name ?? '', phone: r.phone ?? '', line1: r.line1, line2: r.line2 ?? '',
+  city: r.city ?? '', pincode: r.pincode ?? '', isDefault: r.is_default === 1, createdAt: r.created_at,
+});
+async function listAddresses(env: Env, userId: string) {
+  const { results } = await env.DB.prepare('SELECT * FROM addresses WHERE user_id = ? ORDER BY is_default DESC, created_at').bind(userId).all<AddressRow>();
+  return results.map(addressToClient);
+}
+
+/* ---- orders ---- */
+
+const num = (v: unknown) => { const n = Number(v); return Number.isFinite(n) ? Math.round(n) : 0; };
+
+async function createOrder(request: Request, env: Env): Promise<Response> {
+  const body = await readJson(request); if (!body) return json({ error: 'invalid JSON' }, 400);
+  const items = Array.isArray(body.items) ? body.items : [];
+  if (items.length === 0) return json({ error: 'items are required' }, 400);
+  const id = str(body.id, 40) || `ZNW${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
+  const user = await getUser(request, env);
+  const subtotal = num(body.subtotal), deliveryFee = num(body.deliveryFee);
+  const discount = num(body.couponDiscount) + num(body.walletUsed);
+  const total = num(body.total);
+  const paymentMode = str(body.paymentMode, 20) || 'COD';
+  const address = body.address && typeof body.address === 'object' ? body.address : {};
+  const eta = num(body.etaMinutes) || 30;
+  const status = str(body.status, 20) || 'placed';
+  const email = user?.email ?? (str(body.email, 160).toLowerCase() || null);
+  const existing = await env.DB.prepare('SELECT id FROM orders WHERE id = ?').bind(id).first<{ id: string }>();
+  if (existing) return json({ error: 'order already exists' }, 409);
+  await env.DB.prepare('INSERT INTO orders (id, user_id, email, status, items, subtotal, delivery_fee, discount, total, payment_mode, address, eta_minutes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(id, user?.id ?? null, email, status, JSON.stringify(items).slice(0, 60000), subtotal, deliveryFee, discount, total, paymentMode, JSON.stringify(address).slice(0, 4000), eta).run();
+  const row = await env.DB.prepare('SELECT created_at FROM orders WHERE id = ?').bind(id).first<{ created_at: string }>();
+  return json({ id, createdAt: sqliteToIso(row?.created_at) }, 201);
+}
+
+const sqliteToIso = (s: string | undefined | null) => s ? (s.includes('T') ? s : s.replace(' ', 'T') + 'Z') : new Date().toISOString();
+const parseJson = <T,>(s: string | null, fallback: T): T => { try { return s ? JSON.parse(s) as T : fallback; } catch { return fallback; } };
+
+function orderToClient(r: OrderRow) {
+  return {
+    id: r.id, createdAt: sqliteToIso(r.created_at), status: r.status,
+    items: parseJson<unknown[]>(r.items, []), subtotal: r.subtotal, deliveryFee: r.delivery_fee, discount: r.discount, total: r.total,
+    paymentMode: r.payment_mode ?? 'COD', address: parseJson<Record<string, unknown>>(r.address, {}), etaMinutes: r.eta_minutes ?? 30,
+    email: r.email, userId: r.user_id,
+  };
 }

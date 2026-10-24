@@ -1,4 +1,5 @@
 import { apiFetch } from '@/lib/api';
+import { verifyOtp as verifyOtpRemote } from '@/lib/account';
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, User, Phone, Check, AlertCircle, Zap, ShoppingCart, CalendarCheck, ArrowRight, ChevronLeft } from 'lucide-react';
@@ -231,8 +232,8 @@ type PhoneStep = 'enter' | 'otp';
 type EmailStep = 'enter' | 'otp';
 
 export function AuthModal() {
-  const { showModal, closeModal, login, loginWithGoogle } = useAuth();
-  const [method, setMethod]         = useState<AuthMethod>('phone');
+  const { showModal, closeModal, login } = useAuth();
+  const [method, setMethod]         = useState<AuthMethod>('email');
   const [phoneStep, setPhoneStep]   = useState<PhoneStep>('enter');
   const [emailStep, setEmailStep]   = useState<EmailStep>('enter');
   const [phoneNum, setPhoneNum]     = useState('');
@@ -260,26 +261,15 @@ export function AuthModal() {
 
   const switchMethod = (m: AuthMethod) => { resetAll(); setMethod(m); };
 
-  /* ── Phone OTP (UI only for now) ── */
+  /* ── Phone OTP — coming soon. The form stays visible but is disabled; SMS delivery is not wired yet. ── */
   const sendOtp = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    const cleaned = phoneNum.replace(/\D/g, '');
-    if (cleaned.length < 10) { setErrors({ phone: 'Enter a valid 10-digit mobile number' }); return; }
-    setErrors({}); setLoading(true);
-    await new Promise(r => setTimeout(r, 1400));
-    setLoading(false); setPhoneStep('otp'); setCanResend(false); setCountdownKey(k => k + 1);
+    setErrors({ phone: 'Phone sign-in is coming soon — please use Email for now.' });
   };
 
   const verifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const code = otp.join('');
-    if (code.length < 6) { setErrors({ otp: 'Enter the complete 6-digit OTP' }); return; }
-    setErrors({}); setLoading(true);
-    await new Promise(r => setTimeout(r, 1200));
-    setLoading(false); setSuccess(true);
-    await new Promise(r => setTimeout(r, 900));
-    const num = phoneNum.replace(/\D/g, '');
-    login({ name: 'Zyphix User', email: '', phone: `+91 ${num.slice(-10)}` });
+    setErrors({ otp: 'Phone sign-in is coming soon — please use Email for now.' });
   };
 
   const handleResend = async () => {
@@ -287,11 +277,10 @@ export function AuthModal() {
     setOtp(['', '', '', '', '', '']); setCanResend(false); setCountdownKey(k => k + 1);
   };
 
-  /* ── Google (Emergent-managed OAuth) ── */
+  /* ── Google — not wired yet; nudge to email ── */
   const handleGoogle = async () => {
-    setGoogleLoading(true);
-    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-    loginWithGoogle();
+    setGoogleLoading(false);
+    switchMethod('email');
   };
 
   /* ── Email OTP (real) ── */
@@ -323,19 +312,17 @@ export function AuthModal() {
     if (code.length < 6) { setErrors({ emailOtp: 'Enter the complete 6-digit OTP' }); return; }
     setErrors({}); setApiError(''); setLoading(true);
     try {
-      const res = await apiFetch('/api/verify-email-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: form.email.trim(), otp: code, token: emailOtpToken }),
-      });
-      const data = await res.json() as { success?: boolean; name?: string | null; error?: string };
-      if (!res.ok || !data.success) { setErrors({ emailOtp: data.error ?? 'Incorrect OTP. Please try again.' }); setLoading(false); return; }
+      // The Worker checks the OTP with the email-otp function and sets the shared `zsid` session cookie.
+      const user = await verifyOtpRemote({ email: form.email.trim(), otp: code, token: emailOtpToken, name: form.name.trim() || undefined });
       setLoading(false); setSuccess(true);
       await new Promise(r => setTimeout(r, 900));
-      const displayName = data.name || form.name || form.email.split('@')[0];
-      login({ name: displayName.charAt(0).toUpperCase() + displayName.slice(1), email: form.email.trim() });
-    } catch {
-      setApiError('Network error. Please check your connection.'); setLoading(false);
+      const displayName = user.name || form.name || form.email.split('@')[0];
+      login({ id: user.id, name: displayName.charAt(0).toUpperCase() + displayName.slice(1), email: user.email, phone: user.phone || undefined });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg && !/failed to fetch|network/i.test(msg)) setErrors({ emailOtp: msg });
+      else setApiError('Network error. Please check your connection.');
+      setLoading(false);
     }
   };
 
@@ -367,8 +354,8 @@ export function AuthModal() {
     email:  emailStep === 'enter' ? 'Sign in with email' : 'Verify your email',
   };
   const subheadings: Record<string, string> = {
-    phone:  phoneStep === 'enter' ? "We'll send a one-time password to your number" : `OTP sent to +91 ${maskedPhone}`,
-    google: 'Sign in instantly using your Google account',
+    phone:  phoneStep === 'enter' ? 'Coming soon — sign in with your email for now' : `OTP sent to +91 ${maskedPhone}`,
+    google: 'Google sign-in is coming soon — use your email for now',
     email:  emailStep === 'enter'
       ? 'Get a one-time code sent to your inbox — no password needed.'
       : `OTP sent to ${maskedEmail}`,
@@ -407,7 +394,7 @@ export function AuthModal() {
                 {!success && (
                   <div style={{ display: 'flex', gap: 8, marginBottom: 22 }}>
                     {([
-                      { id: 'phone' as AuthMethod, label: 'Phone', icon: <Phone size={14} /> },
+                      { id: 'phone' as AuthMethod, label: 'Phone · soon', icon: <Phone size={14} /> },
                       { id: 'google' as AuthMethod, label: 'Google', icon: <svg width="14" height="14" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z" fill="#EA4335"/></svg> },
                       { id: 'email' as AuthMethod, label: 'Email', icon: <Mail size={14} /> },
                     ]).map(({ id, label, icon }) => (
@@ -445,15 +432,22 @@ export function AuthModal() {
                                 <span style={{ fontSize: 13, fontWeight: 800, color: T1 }}>+91</span>
                               </div>
                               <input type="tel" value={phoneNum} onChange={e => setPhoneNum(e.target.value.replace(/[^\d\s\-]/g, ''))}
-                                placeholder="98765 43210" maxLength={13}
-                                style={{ flex: 1, padding: '11px 14px', border: 'none', outline: 'none', fontSize: 15, fontWeight: 600, color: T1, fontFamily: 'inherit', background: 'transparent', letterSpacing: '.04em' }} />
+                                placeholder="98765 43210" maxLength={13} disabled
+                                style={{ flex: 1, padding: '11px 14px', border: 'none', outline: 'none', fontSize: 15, fontWeight: 600, color: T1, fontFamily: 'inherit', background: 'transparent', letterSpacing: '.04em', opacity: .6 }} />
                             </div>
                             {errors.phone && <p style={{ fontSize: 11.5, color: ERR, marginTop: 5, display: 'flex', alignItems: 'center', gap: 4 }}><AlertCircle size={11} />{errors.phone}</p>}
                           </div>
-                          <motion.button type="submit" disabled={loading} whileTap={{ scale: .98 }}
-                            style={{ width: '100%', padding: '13px', borderRadius: 12, background: loading ? G + 'BB' : `linear-gradient(135deg, ${G}, ${G2})`, color: '#fff', fontSize: 15, fontWeight: 800, cursor: loading ? 'wait' : 'pointer', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: loading ? 'none' : `0 4px 18px ${G}40` }}>
-                            {loading ? <><span style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', display: 'inline-block', animation: 'spin .7s linear infinite' }} />Sending OTP…</> : <>Send OTP <ArrowRight size={15} /></>}
+                          <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '10px 14px', fontSize: 12.5, color: '#92400E', lineHeight: 1.5 }}>
+                            <strong>Phone OTP is coming soon.</strong> Until then, sign in with your email — it takes 10 seconds.
+                          </div>
+                          <motion.button type="button" disabled
+                            style={{ width: '100%', padding: '13px', borderRadius: 12, background: '#D1D5DB', color: '#fff', fontSize: 15, fontWeight: 800, cursor: 'not-allowed', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                            Send OTP · coming soon
                           </motion.button>
+                          <button type="button" onClick={() => switchMethod('email')}
+                            style={{ width: '100%', padding: '12px', borderRadius: 12, background: W, color: G, fontSize: 14, fontWeight: 800, cursor: 'pointer', border: `1.5px solid ${G}`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                            <Mail size={15} /> Continue with Email instead
+                          </button>
                           <p style={{ fontSize: 12, color: T3, textAlign: 'center', lineHeight: 1.6 }}>
                             By continuing you agree to our <a href="/terms" onClick={closeModal} style={{ color: T2, fontWeight: 600 }}>Terms</a> & <a href="/privacy" onClick={closeModal} style={{ color: T2, fontWeight: 600 }}>Privacy Policy</a>
                           </p>
@@ -491,10 +485,10 @@ export function AuthModal() {
                         {googleLoading
                           ? <span style={{ width: 20, height: 20, border: '2.5px solid #CBD5E1', borderTopColor: G, borderRadius: '50%', display: 'inline-block', animation: 'spin .7s linear infinite' }} />
                           : <svg width="20" height="20" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>}
-                        {googleLoading ? 'Signing you in…' : 'Continue with Google'}
+                        {googleLoading ? 'Signing you in…' : 'Continue with Google · coming soon'}
                       </button>
                       <p style={{ fontSize: 12, color: T3, textAlign: 'center', marginTop: 18, lineHeight: 1.6 }}>
-                        We'll use your Google profile to create or sign in to your Zyphix account.
+                        Google sign-in is on its way. Tap the button to continue with your email instead.
                       </p>
                     </motion.div>
 

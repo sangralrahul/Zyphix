@@ -21,18 +21,24 @@ import { BottomNav } from "@/components/layout/BottomNav";
 
 const PartnerSite = lazy(() => import("@/sites/PartnerSite"));
 const AdvertiseSite = lazy(() => import("@/sites/AdvertiseSite"));
+const AuthSite = lazy(() => import("@/sites/AuthSite"));
 
 /**
  * One Worker serves zyphix.in and its sub-sites. The hostname (or ?site= for local previews)
- * decides which site renders: partner.zyphix.in → partner portal, advertise.zyphix.in → ads site.
+ * decides which site renders: partner.zyphix.in → partner portal, advertise.zyphix.in → ads site,
+ * auth.zyphix.in → the shared sign-in page.
  */
-export function detectSite(): "main" | "partner" | "advertise" {
+export function detectSite(): "main" | "partner" | "advertise" | "now" | "eats" | "book" | "auth" {
   if (typeof window === "undefined") return "main";
   const override = new URLSearchParams(window.location.search).get("site");
-  if (override === "partner" || override === "advertise") return override;
+  if (override === "partner" || override === "advertise" || override === "now" || override === "eats" || override === "book" || override === "auth") return override;
   const host = window.location.hostname.toLowerCase();
+  if (host.startsWith("auth.") || host.startsWith("account.")) return "auth";
   if (host.startsWith("partner.") || host.startsWith("partners.")) return "partner";
   if (host.startsWith("advertise.") || host.startsWith("ads.")) return "advertise";
+  if (host.startsWith("now.") || host.startsWith("shop.")) return "now";
+  if (host.startsWith("eats.") || host.startsWith("food.")) return "eats";
+  if (host.startsWith("book.") || host.startsWith("services.")) return "book";
   return "main";
 }
 
@@ -97,8 +103,18 @@ function Router() {
   const site = detectSite();
   if (site === "partner") return <PartnerSite />;
   if (site === "advertise") return <AdvertiseSite />;
+  if (site === "auth") return <AuthSite />;
+  // now.|eats.|book.zyphix.in: the app section is the root; all other paths keep working.
+  const appRoot = site === "now" ? <LightLayout><ZyphixNow /></LightLayout>
+    : site === "eats" ? <LightLayout><ZyphixEats /></LightLayout>
+    : site === "book" ? <LightLayout><ZyphixBook /></LightLayout> : null;
   return (
     <Switch>
+      {appRoot && <Route path="/">{appRoot}</Route>}
+      {site === "now" && <Route path="/product/:id">{() => <LightLayout><ProductDetail /></LightLayout>}</Route>}
+      {site === "now" && <Route path="/cart"><LightLayout><CartPage /></LightLayout></Route>}
+      {site === "now" && <Route path="/checkout"><LightLayout><CheckoutPage /></LightLayout></Route>}
+      {site === "now" && <Route path="/order/:id">{() => <LightLayout><OrderConfirmation /></LightLayout>}</Route>}
       <Route path="/" component={Landing} />
       <Route path="/launch" component={Home} />
       <Route path="/light" component={HomeLight} />
@@ -159,6 +175,7 @@ function Router() {
       <Route path="/partner" component={PartnerLanding} />
       <Route path="/service-setup" component={ServiceProSetup} />
       <Route path="/advertise" component={AdvertiseSite} />
+      <Route path="/auth" component={AuthSite} />
       <Route path="/app" component={AppComingSoon} />
       <Route path="/account">
         <DarkLayout><Account /></DarkLayout>

@@ -3,6 +3,8 @@ import { Link } from 'wouter';
 import { Menu, X, Instagram, Linkedin, Twitter, ArrowUpRight } from 'lucide-react';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
 import { Button, Container, Display, Eyebrow, Lead, Mesh, FONT, G as KIT_G, G_DEEP, INK as KIT_INK } from '@/ui/kit';
+import { authUrl } from '@/lib/account';
+import { useAuth } from '@/context/AuthContext';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Shared marketing chrome for zyphix.in — header, footer, page helpers.
@@ -43,6 +45,10 @@ export function SiteHeader() {
     return () => { document.body.style.overflow = prev; };
   }, [open]);
 
+  const { user } = useAuth();
+  // Signed-in visitors go straight to their account; everyone else to auth.zyphix.in and back here.
+  const signIn = user ? { href: '/account', label: 'My account' } : { href: typeof window !== 'undefined' ? authUrl(window.location.href) : '/auth', label: 'Sign in' };
+
   const desktop = 'text-[14px] font-medium tracking-[-0.01em] text-gray-600 transition-colors hover:text-gray-900';
   const mobile = 'flex items-center justify-between py-3.5 text-[17px] font-medium tracking-[-0.01em] text-gray-900';
 
@@ -58,7 +64,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <Button href="/account" variant="ghost" size="sm">Sign in</Button>
+          <Button href={signIn.href} sameTab variant="ghost" size="sm">{signIn.label}</Button>
           <Button href="/now" variant="primary" size="sm">Order now</Button>
         </div>
 
@@ -77,7 +83,7 @@ export function SiteHeader() {
             </div>
             <div className="mt-6 flex flex-col gap-3">
               <Button href="/now" variant="primary" size="lg" className="w-full">Order now</Button>
-              <Button href="/account" variant="secondary" size="lg" className="w-full">Sign in</Button>
+              <Button href={signIn.href} sameTab variant="secondary" size="lg" className="w-full">{signIn.label}</Button>
             </div>
           </Container>
         </div>

@@ -1,10 +1,68 @@
 import React from 'react';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check, Store, UtensilsCrossed, Wrench, Bike } from 'lucide-react';
 import { Bento, Button, Card, Chip, Container, Eyebrow, Display, Lead, IconTile, Section, SectionTitle, fade, Phone, Browser } from '@/ui/kit';
 import { SERVICES, TRACKS, type Track } from './shared';
 import { PartnerAppScreen, RestaurantDashboard, BookingScreen } from './Mockups';
+import { usePartners, type PartnerListing, type PartnerType } from '@/lib/partners';
+
+/* ── Recently joined (live partner directory) ────────────────────────────── */
+const TYPE_META: Record<PartnerType, { label: string; tone: 'green' | 'orange' | 'violet' | 'blue'; icon: typeof Store }> = {
+  store: { label: 'Store', tone: 'green', icon: Store },
+  restaurant: { label: 'Restaurant', tone: 'orange', icon: UtensilsCrossed },
+  service: { label: 'Professional', tone: 'violet', icon: Wrench },
+  delivery: { label: 'Rider', tone: 'blue', icon: Bike },
+};
+
+export function RecentlyJoined() {
+  const store = usePartners('store');
+  const restaurant = usePartners('restaurant');
+  const service = usePartners('service');
+  const delivery = usePartners('delivery');
+  const groups: { type: PartnerType; list: PartnerListing[] }[] = [
+    { type: 'store', list: store.partners }, { type: 'restaurant', list: restaurant.partners },
+    { type: 'service', list: service.partners }, { type: 'delivery', list: delivery.partners },
+  ];
+  const total = groups.reduce((n, g) => n + g.list.length, 0);
+  if (total === 0) return null;
+
+  const latest = groups.flatMap(g => g.list)
+    .sort((a, b) => (Date.parse(b.joinedAt) || 0) - (Date.parse(a.joinedAt) || 0))
+    .slice(0, 6);
+
+  return (
+    <motion.div {...fade(0.24)} className="mt-10">
+      <Card hover={false} className="p-5 md:p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0">
+            <Eyebrow>Recently joined</Eyebrow>
+            <p className="mt-2 text-[15px] text-gray-600">{total.toLocaleString('en-IN')} partner{total > 1 ? 's' : ''} registered so far.</p>
+          </div>
+          <ul className="flex flex-wrap gap-1.5">
+            {groups.filter(g => g.list.length > 0).map(g => {
+              const m = TYPE_META[g.type];
+              return <li key={g.type}><Chip tone={m.tone}><m.icon size={12} /> {g.list.length} {m.label}{g.list.length > 1 ? 's' : ''}</Chip></li>;
+            })}
+          </ul>
+        </div>
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {latest.map(p => {
+            const m = TYPE_META[p.type];
+            const place = p.locality || p.city;
+            return (
+              <li key={`${p.type}-${p.id}`} className="inline-flex max-w-full items-center gap-2 rounded-full border border-gray-200 bg-white py-1.5 pl-1.5 pr-3.5 text-[13px] text-gray-700">
+                <Chip tone={m.tone} className="!px-2"><m.icon size={11} /> {m.label}</Chip>
+                <span className="truncate font-semibold text-gray-900">{p.name}</span>
+                {place && <><span className="text-gray-300">·</span><span className="truncate text-gray-500">{place}</span></>}
+              </li>
+            );
+          })}
+        </ul>
+      </Card>
+    </motion.div>
+  );
+}
 
 /* ── Bento of tracks ─────────────────────────────────────────────────────── */
 function Tile({ tr, className = '', delay = 0, compact = false, children }: { tr: Track; className?: string; delay?: number; compact?: boolean; children?: React.ReactNode }) {
@@ -47,6 +105,7 @@ export function TrackBento() {
           </Tile>
           <Tile tr={store} className="md:col-span-4" delay={0.18} compact />
         </Bento>
+        <RecentlyJoined />
       </Container>
     </Section>
   );

@@ -8,6 +8,11 @@ import {
   Package, AlertCircle, Heart, ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { listOrders, type Order } from '@/context/CartContext';
+import {
+  listAddresses, addAddress, updateAddress, deleteAddress as deleteAddressRemote, setDefaultAddress,
+  myOrders, toLocalOrder, updateProfile, authUrl, type SavedAddress, type AddressInput,
+} from '@/lib/account';
 
 /* ─── colours ─── */
 const G   = '#0DA366';
@@ -26,15 +31,14 @@ interface Address {
   label: string; flat: string; floor: string; area: string;
   landmark: string; city: string; pincode: string; isDefault: boolean;
 }
-interface MockOrder {
-  id: string; date: string; status: 'delivered' | 'processing' | 'cancelled';
-  items: string[]; total: number; store: string; icon: string;
-}
+/** An order as shown in the list: the local `Order` shape plus the server status when known. */
+type ShownOrder = Order & { rawStatus?: string };
 
 /* ─── helpers ─── */
 const LS_ADDR  = 'zyphix_addresses';
 const LS_USER  = 'zyphix_user';
 const LS_PREFS = 'zyphix_prefs';
+const LS_ADDR_MIGRATED = 'zyphix_addresses_migrated';
 
 function getLS<T>(key: string, fallback: T): T {
   try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : fallback; } catch { return fallback; }
@@ -43,18 +47,40 @@ function setLS(key: string, val: unknown) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
 }
 
-const MOCK_ORDERS: MockOrder[] = [
-  { id: 'ZYP001', date: 'Apr 10, 2025 · 3:42 PM', status: 'delivered', items: ['Amul Butter 500g', 'Tata Salt 1kg', 'Aashirvaad Atta 5kg'], total: 348, store: 'Fresh Mart Kirana', icon: '🛒' },
-  { id: 'ZYP002', date: 'Apr 7, 2025 · 7:15 PM',  status: 'delivered', items: ['Butter Chicken', 'Garlic Naan ×2', 'Mango Lassi'],            total: 425, store: 'Haveli Restaurant', icon: '🍱' },
-  { id: 'ZYP003', date: 'Apr 3, 2025 · 11:00 AM', status: 'cancelled', items: ['Home Cleaning – 3hr session'],                                total: 799, store: 'CleanPro Services', icon: '🧹' },
-];
-
 const TYPE_META = {
   home:  { Icon: Home,      label: 'Home',   bg: '#F0FDF4', bd: '#BBF7D0', tc: '#065F46', ac: G },
   work:  { Icon: Briefcase, label: 'Work',   bg: '#EFF6FF', bd: '#BFDBFE', tc: '#1E40AF', ac: '#3B82F6' },
   hotel: { Icon: Building2, label: 'Hotel',  bg: '#FFF7ED', bd: '#FED7AA', tc: '#9A3412', ac: '#F97316' },
   other: { Icon: MapPin,    label: 'Other',  bg: '#F5F3FF', bd: '#DDD6FE', tc: '#5B21B6', ac: '#8B5CF6' },
 };
+
+/* ── local <-> server address mapping ──
+   The server stores label / line1 / line2 / city / pincode. We keep the richer local form
+   (type, flat, floor, area, landmark) by packing: label = "Home · Mom's place",
+   line1 = "flat | floor", line2 = "area | landmark". Checkout flattens " | " to ", ". */
+const SEP = ' | ';
+function encodeLabel(type: Address['type'], label: string) {
+  const t = TYPE_META[type].label;
+  return !label || label.toLowerCase() === t.toLowerCase() ? t : `${t} · ${label}`;
+}
+function decodeLabel(label: string): { type: Address['type']; label: string } {
+  const [head, ...rest] = label.split(' · ');
+  const t = (Object.keys(TYPE_META) as Address['type'][]).find(k => TYPE_META[k].label.toLowerCase() === head.trim().toLowerCase());
+  if (t) return { type: t, label: rest.join(' · ').trim() || TYPE_META[t].label };
+  return { type: 'other', label: label || 'Other' };
+}
+const split2 = (s: string): [string, string] => { const i = s.indexOf(SEP); return i < 0 ? [s, ''] : [s.slice(0, i), s.slice(i + SEP.length)]; };
+function toServer(a: Omit<Address, 'id' | 'isDefault'>, isDefault?: boolean): AddressInput {
+  return {
+    label: encodeLabel(a.type, a.label), line1: [a.flat, a.floor].filter(Boolean).join(SEP), line2: [a.area, a.landmark].filter(Boolean).join(SEP),
+    city: a.city, pincode: a.pincode, ...(isDefault !== undefined ? { isDefault } : {}),
+  };
+}
+function fromServer(s: SavedAddress): Address {
+  const { type, label } = decodeLabel(s.label);
+  const [flat, floor] = split2(s.line1); const [area, landmark] = split2(s.line2);
+  return { id: s.id, type, label, flat, floor, area, landmark, city: s.city, pincode: s.pincode, isDefault: s.isDefault };
+}
 
 /* ─── sub-components ─── */
 function TabBtn({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
@@ -219,18 +245,33 @@ function ProfileTab() {
   const [edit, setEdit] = useState(false);
   const [form, setForm] = useState({ name: user?.name ?? '', email: user?.email ?? '', phone: user?.phone ?? '' });
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string,string>>({});
+  const remote = !!user?.id; // server-backed account (session cookie) vs. legacy client-only login
 
   const f = (k: string) => (v: string) => { setForm(x => ({ ...x, [k]: v })); setErrors(x => ({ ...x, [k]: '' })); };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const e: Record<string,string> = {};
     if (!form.name.trim()) e.name = 'Name is required';
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Invalid email';
     if (form.phone && !/^(\+91\s?)?[6-9]\d{9}$/.test(form.phone.replace(/\s/g,''))) e.phone = 'Invalid phone number';
     if (Object.keys(e).length) { setErrors(e); return; }
-    login({ name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim(), avatar: user?.avatar });
-    setLS(LS_USER, { name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim(), avatar: user?.avatar });
+    let next = { id: user?.id, name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim(), avatar: user?.avatar };
+    if (remote) {
+      setSaving(true);
+      try {
+        const u = await updateProfile({ name: next.name, phone: next.phone });
+        next = { ...next, name: u.name || next.name, email: u.email, phone: u.phone };
+      } catch (err) {
+        setErrors({ name: err instanceof Error ? err.message : 'Could not save. Please try again.' });
+        setSaving(false); return;
+      }
+      setSaving(false);
+    }
+    login(next);
+    setLS(LS_USER, next);
+    setForm({ name: next.name, email: next.email, phone: next.phone });
     setEdit(false); setSaved(true); setTimeout(() => setSaved(false), 2500);
   };
 
@@ -298,9 +339,9 @@ function ProfileTab() {
           </div>
           <div>
             <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>Email Address</label>
-            {edit
+            {edit && !remote
               ? <><input value={form.email} onChange={e => f('email')(e.target.value)} placeholder="you@example.com" type="email" style={inp(errors.email)} />{errors.email && <p style={{ fontSize: 11, color: ERR, marginTop: 3, display: 'flex', alignItems: 'center', gap: 4 }}><AlertCircle size={10} />{errors.email}</p>}</>
-              : <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Mail size={15} color={T3} /><p style={{ margin: 0, fontSize: 14, color: form.email ? T1 : T3 }}>{form.email || 'Not set'}</p></div>
+              : <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Mail size={15} color={T3} /><p style={{ margin: 0, fontSize: 14, color: form.email ? T1 : T3 }}>{form.email || 'Not set'}</p>{edit && remote && <span style={{ fontSize: 11, color: T3 }}>(sign-in email can't be changed)</span>}</div>
             }
           </div>
           <div>
@@ -311,9 +352,9 @@ function ProfileTab() {
             }
           </div>
           {edit && (
-            <motion.button onClick={handleSave} whileTap={{ scale: .97 }}
-              style={{ padding: '12px', borderRadius: 12, border: 'none', background: `linear-gradient(135deg, ${G}, ${G2})`, color: '#fff', fontSize: 14, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: `0 3px 14px ${G}40` }}>
-              <Save size={15} />Save Changes
+            <motion.button onClick={handleSave} whileTap={{ scale: .97 }} disabled={saving}
+              style={{ padding: '12px', borderRadius: 12, border: 'none', background: saving ? '#9CA3AF' : `linear-gradient(135deg, ${G}, ${G2})`, color: '#fff', fontSize: 14, fontWeight: 800, cursor: saving ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: `0 3px 14px ${G}40` }}>
+              <Save size={15} />{saving ? 'Saving…' : 'Save Changes'}
             </motion.button>
           )}
         </div>
@@ -321,7 +362,7 @@ function ProfileTab() {
 
       {/* Danger zone */}
       <SectionCard title="Account">
-        <button onClick={() => { logout(); setLoc('/'); }}
+        <button onClick={async () => { await logout(); setLoc('/'); }}
           style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: `1.5px solid ${ERR}30`, background: '#FFF5F5', fontSize: 14, fontWeight: 700, color: ERR, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
           <LogOut size={15} />Sign Out
         </button>
@@ -332,37 +373,88 @@ function ProfileTab() {
 
 /* ── ADDRESSES TAB ── */
 function AddressesTab() {
+  const { user } = useAuth();
+  const remote = !!user?.id; // server-backed account → D1; otherwise localStorage
   const [addresses, setAddresses] = useState<Address[]>(() => getLS<Address[]>(LS_ADDR, []));
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleted, setDeleted] = useState<string | null>(null);
+  const [loading, setLoading] = useState(remote);
+  const [error, setError] = useState('');
 
-  const save = (updated: Address[]) => { setAddresses(updated); setLS(LS_ADDR, updated); };
+  const fail = (err: unknown) => setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
 
-  const addAddress = (a: Omit<Address, 'id' | 'isDefault'>) => {
-    const newAddr: Address = { ...a, id: Date.now().toString(), isDefault: addresses.length === 0 };
-    save([...addresses, newAddr]);
+  // Load from the server; on first sign-in, migrate any addresses saved locally (once).
+  useEffect(() => {
+    if (!remote) return;
+    let alive = true;
+    (async () => {
+      try {
+        let list = await listAddresses();
+        const local = getLS<Address[]>(LS_ADDR, []);
+        if (list.length === 0 && local.length > 0 && !getLS<boolean>(LS_ADDR_MIGRATED, false)) {
+          for (const a of local.slice(0, 10)) { try { await addAddress(toServer(a, a.isDefault)); } catch {} }
+          setLS(LS_ADDR_MIGRATED, true);
+          list = await listAddresses();
+        }
+        if (alive) setAddresses(list.map(fromServer));
+      } catch (err) { if (alive) fail(err); }
+      if (alive) setLoading(false);
+    })();
+    return () => { alive = false; };
+  }, [remote]);
+
+  const save = (updated: Address[]) => { setAddresses(updated); if (!remote) setLS(LS_ADDR, updated); };
+  const reload = async () => { try { setAddresses((await listAddresses()).map(fromServer)); } catch (err) { fail(err); } };
+
+  const addAddr = async (a: Omit<Address, 'id' | 'isDefault'>) => {
+    setError('');
+    if (remote) {
+      try { await addAddress(toServer(a)); await reload(); } catch (err) { fail(err); return; }
+    } else {
+      save([...addresses, { ...a, id: Date.now().toString(), isDefault: addresses.length === 0 }]);
+    }
     setShowForm(false);
   };
 
-  const updateAddress = (id: string, a: Omit<Address, 'id' | 'isDefault'>) => {
-    save(addresses.map(x => x.id === id ? { ...x, ...a } : x));
+  const updateAddr = async (id: string, a: Omit<Address, 'id' | 'isDefault'>) => {
+    setError('');
+    if (remote) {
+      try { await updateAddress(id, toServer(a)); await reload(); } catch (err) { fail(err); return; }
+    } else {
+      save(addresses.map(x => x.id === id ? { ...x, ...a } : x));
+    }
     setEditId(null);
   };
 
-  const deleteAddress = (id: string) => {
-    setDeleted(id);
-    setTimeout(() => {
-      const updated = addresses.filter(x => x.id !== id);
-      if (updated.length > 0 && !updated.some(x => x.isDefault)) updated[0].isDefault = true;
-      save(updated); setDeleted(null);
+  const deleteAddr = (id: string) => {
+    setError(''); setDeleted(id);
+    setTimeout(async () => {
+      if (remote) {
+        try { await deleteAddressRemote(id); await reload(); } catch (err) { fail(err); }
+      } else {
+        const updated = addresses.filter(x => x.id !== id);
+        if (updated.length > 0 && !updated.some(x => x.isDefault)) updated[0].isDefault = true;
+        save(updated);
+      }
+      setDeleted(null);
     }, 350);
   };
 
-  const setDefault = (id: string) => save(addresses.map(x => ({ ...x, isDefault: x.id === id })));
+  const setDefault = async (id: string) => {
+    setError('');
+    if (remote) { try { setAddresses((await setDefaultAddress(id)).map(fromServer)); } catch (err) { fail(err); } }
+    else save(addresses.map(x => ({ ...x, isDefault: x.id === id })));
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {error && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 10, fontSize: 13, color: '#DC2626' }}>
+          <AlertCircle size={14} />{error}
+        </div>
+      )}
+      {loading && <p style={{ margin: 0, fontSize: 13, color: T3, textAlign: 'center' }}>Loading your addresses…</p>}
       {/* Add button */}
       {!showForm && !editId && (
         <button onClick={() => setShowForm(true)}
@@ -379,13 +471,13 @@ function AddressesTab() {
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             style={{ background: W, borderRadius: 16, border: `1.5px solid ${G}40`, padding: 20, boxShadow: `0 0 0 4px ${G}08` }}>
             <p style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 800, color: T1 }}>📍 Add New Address</p>
-            <AddressForm onSave={addAddress} onCancel={() => setShowForm(false)} />
+            <AddressForm onSave={addAddr} onCancel={() => setShowForm(false)} />
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Address list */}
-      {addresses.length === 0 && !showForm ? (
+      {addresses.length === 0 && !showForm && !loading ? (
         <div style={{ textAlign: 'center', padding: '40px 20px', background: W, borderRadius: 16, border: `1px solid ${BD}` }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>📍</div>
           <p style={{ fontSize: 16, fontWeight: 800, color: T1, marginBottom: 6 }}>No saved addresses</p>
@@ -405,7 +497,7 @@ function AddressesTab() {
                   <motion.div key={addr.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     style={{ background: W, borderRadius: 16, border: `1.5px solid ${meta.ac}50`, padding: 20 }}>
                     <p style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 800, color: T1 }}>✏️ Edit Address</p>
-                    <AddressForm initial={addr} onSave={a => updateAddress(addr.id, a)} onCancel={() => setEditId(null)} />
+                    <AddressForm initial={addr} onSave={a => updateAddr(addr.id, a)} onCancel={() => setEditId(null)} />
                   </motion.div>
                 );
               }
@@ -434,7 +526,7 @@ function AddressesTab() {
                         style={{ padding: '6px 10px', borderRadius: 8, border: `1px solid ${BD}`, background: W, fontSize: 12, fontWeight: 600, color: T2, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
                         <Edit2 size={11} />Edit
                       </button>
-                      <button onClick={() => deleteAddress(addr.id)}
+                      <button onClick={() => deleteAddr(addr.id)}
                         style={{ padding: '6px 10px', borderRadius: 8, border: `1px solid ${ERR}30`, background: '#FFF5F5', fontSize: 12, fontWeight: 600, color: ERR, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
                         <Trash2 size={11} />Delete
                       </button>
@@ -457,35 +549,62 @@ function AddressesTab() {
 }
 
 /* ── ORDERS TAB ── */
+/** Server orders (signed-in) merged with orders placed on this device; deduped by id, newest first. */
+function useMergedOrders() {
+  const { user } = useAuth();
+  const [orders, setOrders] = useState<ShownOrder[]>(() => listOrders());
+  const [loading, setLoading] = useState(!!user?.id);
+  useEffect(() => {
+    if (!user?.id) { setOrders(listOrders()); setLoading(false); return; }
+    let alive = true;
+    myOrders().then(remote => {
+      if (!alive) return;
+      const seen = new Map<string, ShownOrder>();
+      for (const r of remote) seen.set(r.id, { ...toLocalOrder(r), rawStatus: r.status });
+      for (const o of listOrders()) if (!seen.has(o.id)) seen.set(o.id, o);
+      setOrders([...seen.values()].sort((a, b) => (b.createdAt > a.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0)));
+    }).catch(() => {}).finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, [user?.id]);
+  return { orders, loading };
+}
+
+const ORDER_STATUS: Record<string, { label: string; color: string; bg: string; dot: string }> = {
+  delivered:  { label: 'Delivered',  color: '#065F46', bg: '#F0FDF4', dot: G },
+  placed:     { label: 'Confirmed',  color: '#92400E', bg: '#FFFBEB', dot: '#F59E0B' },
+  confirmed:  { label: 'Confirmed',  color: '#92400E', bg: '#FFFBEB', dot: '#F59E0B' },
+  processing: { label: 'Processing', color: '#92400E', bg: '#FFFBEB', dot: '#F59E0B' },
+  cancelled:  { label: 'Cancelled',  color: '#991B1B', bg: '#FEF2F2', dot: ERR },
+};
+const fmtDate = (iso: string) => { const d = new Date(iso); return isNaN(d.getTime()) ? iso : d.toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }); };
+
 function OrdersTab() {
   const [, nav] = useLocation();
-  const statusMeta = {
-    delivered:  { label: 'Delivered',  color: '#065F46', bg: '#F0FDF4', dot: G },
-    processing: { label: 'Processing', color: '#92400E', bg: '#FFFBEB', dot: '#F59E0B' },
-    cancelled:  { label: 'Cancelled',  color: '#991B1B', bg: '#FEF2F2', dot: ERR },
-  };
+  const { orders, loading } = useMergedOrders();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {MOCK_ORDERS.length === 0 ? (
+      {loading && orders.length === 0 ? (
+        <p style={{ margin: 0, fontSize: 13, color: T3, textAlign: 'center', padding: 24 }}>Loading your orders…</p>
+      ) : orders.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px 20px', background: W, borderRadius: 16, border: `1px solid ${BD}` }}>
           <div style={{ fontSize: 44, marginBottom: 12 }}>📦</div>
           <p style={{ fontSize: 16, fontWeight: 800, color: T1, marginBottom: 6 }}>No orders yet</p>
           <p style={{ fontSize: 13.5, color: T2, lineHeight: 1.6 }}>Your order history will appear here once you place your first order.</p>
         </div>
       ) : (
-        MOCK_ORDERS.map(order => {
-          const s = statusMeta[order.status];
+        orders.map(order => {
+          const s = ORDER_STATUS[(order.rawStatus ?? order.status).toLowerCase()] ?? ORDER_STATUS.confirmed;
           return (
             <div key={order.id} style={{ background: W, borderRadius: 14, border: `1px solid ${BD}`, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.04)' }}>
               <div style={{ padding: '14px 16px', borderBottom: `1px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: BG }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 18 }}>{order.icon}</span>
+                  <span style={{ fontSize: 18 }}>🛒</span>
                   <div>
-                    <p style={{ margin: 0, fontSize: 13.5, fontWeight: 800, color: T1 }}>{order.store}</p>
+                    <p style={{ margin: 0, fontSize: 13.5, fontWeight: 800, color: T1 }}>Zyphix Now</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
                       <Clock size={11} color={T3} />
-                      <p style={{ margin: 0, fontSize: 11.5, color: T3 }}>{order.date}</p>
+                      <p style={{ margin: 0, fontSize: 11.5, color: T3 }}>{fmtDate(order.createdAt)}</p>
                     </div>
                   </div>
                 </div>
@@ -499,7 +618,7 @@ function OrdersTab() {
                 {order.items.map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
                     <Package size={12} color={T3} />
-                    <p style={{ margin: 0, fontSize: 13.5, color: T1 }}>{item}</p>
+                    <p style={{ margin: 0, fontSize: 13.5, color: T1 }}>{item.name}{item.qty > 1 ? ` ×${item.qty}` : ''}</p>
                   </div>
                 ))}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTop: `1px solid ${BD}` }}>
@@ -508,17 +627,18 @@ function OrdersTab() {
                   </div>
                   <p style={{ margin: 0, fontSize: 15, fontWeight: 900, color: T1, fontFamily: "'Outfit',sans-serif" }}>₹{order.total}</p>
                 </div>
-                {order.status === 'delivered' && (
-                  <button onClick={() => {
-                    const dest = order.icon === '🍱' ? '/eats' : order.icon === '🧹' ? '/book' : '/now';
-                    nav(dest);
-                  }}
-                    style={{ marginTop: 10, width: '100%', padding: '9px', borderRadius: 10, border: `1.5px solid ${G}40`, background: `${G}08`, fontSize: 13, fontWeight: 700, color: G, cursor: 'pointer', transition: 'background .15s' }}
+                <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                  <button onClick={() => nav(`/now/order/${order.id}`)}
+                    style={{ flex: 1, padding: '9px', borderRadius: 10, border: `1.5px solid ${BD}`, background: W, fontSize: 13, fontWeight: 700, color: T2, cursor: 'pointer' }}>
+                    View details
+                  </button>
+                  <button onClick={() => nav('/now')}
+                    style={{ flex: 1, padding: '9px', borderRadius: 10, border: `1.5px solid ${G}40`, background: `${G}08`, fontSize: 13, fontWeight: 700, color: G, cursor: 'pointer', transition: 'background .15s' }}
                     onMouseEnter={e => (e.currentTarget.style.background = `${G}18`)}
                     onMouseLeave={e => (e.currentTarget.style.background = `${G}08`)}>
                     🔁 Reorder
                   </button>
-                )}
+                </div>
               </div>
             </div>
           );
@@ -636,12 +756,15 @@ const VALID_TABS: TabId[] = ['profile', 'addresses', 'orders', 'settings'];
 
 /* ─── ROOT EXPORT ─── */
 export function Account() {
-  const { user, openModal } = useAuth();
+  const { user, ready, openModal } = useAuth();
   const [, nav] = useLocation();
   const search = useSearch();
   const paramTab = (new URLSearchParams(search)).get('tab') as TabId | null;
   const initTab: TabId = paramTab && VALID_TABS.includes(paramTab) ? paramTab : 'profile';
   const [tab, setTab] = useState<TabId>(initTab);
+  const { orders } = useMergedOrders();
+  const [addressCount, setAddressCount] = useState(() => getLS<Address[]>(LS_ADDR, []).length);
+  const orderCount = orders.length;
 
   const goTab = (t: TabId) => { setTab(t); nav(`/account?tab=${t}`, { replace: true }); };
 
@@ -650,17 +773,31 @@ export function Account() {
     if (t && VALID_TABS.includes(t)) setTab(t);
   }, [search]);
 
-  useEffect(() => { if (!user) openModal(); }, []);
+  useEffect(() => {
+    if (!user?.id) { setAddressCount(getLS<Address[]>(LS_ADDR, []).length); return; }
+    listAddresses().then(l => setAddressCount(l.length)).catch(() => {});
+  }, [user?.id, tab]);
 
   if (!user) {
+    if (!ready) {
+      return (
+        <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(13,163,102,.2)', borderTopColor: G, animation: 'spin .8s linear infinite' }} />
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      );
+    }
     return (
       <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 }}>
         <div style={{ fontSize: 44 }}>🔐</div>
         <p style={{ fontSize: 20, fontWeight: 900, color: T1, margin: 0, fontFamily: "'Outfit',sans-serif", letterSpacing: '-.03em' }}>Sign in to view your account</p>
         <p style={{ fontSize: 14, color: T2, margin: 0 }}>Your orders, addresses and preferences are waiting.</p>
-        <button onClick={openModal}
-          style={{ padding: '12px 28px', borderRadius: 14, border: 'none', background: G, color: '#fff', fontSize: 15, fontWeight: 800, cursor: 'pointer', boxShadow: `0 4px 20px ${G}40` }}>
+        <a href={authUrl(typeof window !== 'undefined' ? window.location.href : undefined)}
+          style={{ padding: '12px 28px', borderRadius: 14, border: 'none', background: G, color: '#fff', fontSize: 15, fontWeight: 800, cursor: 'pointer', boxShadow: `0 4px 20px ${G}40`, textDecoration: 'none' }}>
           Sign In to Continue
+        </a>
+        <button onClick={openModal} style={{ background: 'none', border: 'none', color: T2, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+          or sign in here
         </button>
       </div>
     );
@@ -697,8 +834,8 @@ export function Account() {
           <div style={{ marginTop: 12, padding: '12px', borderRadius: 12, background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
             <p style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 700, color: T2, textTransform: 'uppercase', letterSpacing: '.04em' }}>Quick Stats</p>
             {[
-              { v: MOCK_ORDERS.filter(o => o.status === 'delivered').length, l: 'Orders Delivered' },
-              { v: getLS<Address[]>(LS_ADDR, []).length, l: 'Saved Addresses' },
+              { v: orderCount, l: 'Orders Placed' },
+              { v: addressCount, l: 'Saved Addresses' },
             ].map(({ v, l }) => (
               <div key={l} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 0' }}>
                 <p style={{ margin: 0, fontSize: 12.5, color: T2 }}>{l}</p>

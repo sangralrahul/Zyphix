@@ -5,6 +5,8 @@ import {
   ShieldCheck, BadgeIndianRupee, MapPin, Clock, ArrowRight, type LucideIcon,
 } from 'lucide-react';
 import { services } from '@/data/mockData';
+import { usePartners, tagList, type PartnerListing } from '@/lib/partners';
+import { Chip } from '@/ui/kit';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Zyphix Book — verified local home-service professionals
@@ -33,6 +35,23 @@ const SERVICE_META: Record<string, { icon: LucideIcon; bg: string; fg: string }>
   sv10: { icon: Wrench,     bg: '#F1F5F9', fg: '#475569' },
 };
 const metaFor = (s: Service) => SERVICE_META[s.id] || { icon: Wrench, bg: '#F1F5F9', fg: '#475569' };
+
+const BOOKING_PANEL_ID = 'booking-panel';
+
+/** Match a professional's category (and skills) to a service tile; falls back to the first service. */
+function serviceForPro(p: PartnerListing): Service {
+  const terms = [p.category, ...tagList(p.tags || '')].map(t => t.trim().toLowerCase()).filter(Boolean);
+  for (const term of terms) {
+    const hit = services.find(s => {
+      const title = s.title.toLowerCase(), cat = s.category.toLowerCase();
+      return title === term || cat === term || title.includes(term) || term.includes(title) || cat.includes(term) || term.includes(cat);
+    });
+    if (hit) return hit;
+  }
+  return services[0];
+}
+
+const proInitials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]!.toUpperCase()).join('') || '•';
 
 const fade = (delay = 0) => ({
   initial: { opacity: 0, y: 14 },
@@ -72,6 +91,18 @@ export function ZyphixBook() {
   };
 
   const activeService = selectedService ? services.find(s => s.id === selectedService) || null : null;
+
+  const { partners: pros, loading: prosLoading } = usePartners('service');
+  const requestBooking = (p: PartnerListing) => {
+    const svc = serviceForPro(p);
+    setSelectedService(svc.id);
+    setSelectedSlot(null);
+    requestAnimationFrame(() => {
+      const el = document.getElementById(BOOKING_PANEL_ID);
+      if (!el) return;
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96, behavior: 'smooth' });
+    });
+  };
 
   return (
     <div className="relative">
@@ -196,6 +227,74 @@ export function ZyphixBook() {
             })}
           </motion.div>
 
+          {/* Verified professionals (live partner directory) */}
+          <motion.div {...fade(.28)} className="mt-8">
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-[12px] font-bold uppercase tracking-[.12em] text-emerald-700">Registered professionals</p>
+                <h2 className="mt-0.5 text-[22px] font-black tracking-[-0.03em] text-gray-900 sm:text-[26px]" style={HEAD}>Verified professionals near you</h2>
+              </div>
+              {!prosLoading && pros.length > 0 && <span className="text-[13px] font-semibold text-gray-500">{pros.length} pro{pros.length > 1 ? 's' : ''}</span>}
+            </div>
+
+            {prosLoading ? (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {[0, 1].map(i => (
+                  <div key={i} className="rounded-2xl border border-gray-200 bg-white p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-11 w-11 rounded-xl bg-gray-200 animate-pulse" />
+                      <div className="flex-1 space-y-2"><div className="h-4 w-1/2 rounded bg-gray-200 animate-pulse" /><div className="h-3 w-1/3 rounded bg-gray-200 animate-pulse" /></div>
+                    </div>
+                    <div className="mt-3 flex gap-1.5"><div className="h-6 w-16 rounded-full bg-gray-100 animate-pulse" /><div className="h-6 w-20 rounded-full bg-gray-100 animate-pulse" /></div>
+                    <div className="mt-4 h-9 w-full rounded-full bg-gray-100 animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            ) : pros.length === 0 ? (
+              <a href="https://partner.zyphix.in/services" target="_blank" rel="noopener noreferrer"
+                className="mt-4 flex items-center gap-3 rounded-2xl border border-dashed border-emerald-300 bg-emerald-50/50 px-4 py-3.5 transition hover:bg-emerald-50">
+                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-700 shadow-sm"><ShieldCheck size={18} /></span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[14px] font-bold text-gray-900">Professionals are being onboarded in your area</span>
+                  <span className="block text-[12.5px] text-gray-500">Electricians, plumbers, cleaners — verified before they go live.</span>
+                </span>
+                <span className="inline-flex shrink-0 items-center gap-1 text-[13px] font-bold" style={{ color: G }}>Join as a professional <ArrowRight size={14} /></span>
+              </a>
+            ) : (
+              <motion.div variants={stagger} initial="hidden" animate="visible" className="mt-4 grid gap-3 sm:grid-cols-2">
+                {pros.map(p => {
+                  const skills = tagList(p.tags || '').filter(t => t.toLowerCase() !== (p.category || '').toLowerCase()).slice(0, 4);
+                  const place = [p.locality, p.city].filter(Boolean).join(' · ');
+                  return (
+                    <motion.div key={p.id} variants={fadeUp} className="flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(11,18,32,.08)]">
+                      <div className="flex items-start gap-3">
+                        <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[14px] font-black text-white" style={{ background: `linear-gradient(135deg, ${G2}, ${G})`, ...HEAD }}>{proInitials(p.name)}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <p className="truncate text-[15px] font-bold text-gray-900">{p.name}</p>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700"><ShieldCheck size={11} /> Verified member</span>
+                          </div>
+                          {p.category && <p className="mt-0.5 text-[12.5px] font-medium text-gray-600">{p.category}</p>}
+                          {place && <p className="mt-0.5 inline-flex items-center gap-1 text-[12px] text-gray-500"><MapPin size={11} className="text-gray-400" /> {place}</p>}
+                        </div>
+                      </div>
+                      {skills.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {skills.map(s => <Chip key={s}>{s}</Chip>)}
+                        </div>
+                      )}
+                      <button type="button" onClick={() => requestBooking(p)}
+                        className="mt-4 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full text-[13px] font-bold text-white shadow-sm transition hover:-translate-y-px"
+                        style={{ background: G }}>
+                        Request booking <ArrowRight size={14} />
+                      </button>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            )}
+          </motion.div>
+
           {/* Why Zyphix */}
           <motion.div {...fade(.3)} className="mt-8 grid gap-3 sm:grid-cols-2">
             {TRUST.map(t => {
@@ -214,7 +313,7 @@ export function ZyphixBook() {
         </section>
 
         {/* Sticky booking panel */}
-        <motion.aside {...fade(.3)} className="lg:sticky lg:top-24">
+        <motion.aside {...fade(.3)} id={BOOKING_PANEL_ID} className="scroll-mt-24 lg:sticky lg:top-24">
           <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0_16px_48px_rgba(11,18,32,.08)]">
             <div className="flex items-center gap-3 border-b border-gray-200 px-5 py-4">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-white" style={{ background: G }}><CalendarCheck size={19} /></span>

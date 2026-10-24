@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { me as fetchMe, logout as apiLogout } from '@/lib/account';
 
 export interface AuthUser {
+  id?: string;
   name: string;
   email: string;
   phone?: string;
@@ -10,41 +12,32 @@ export interface AuthUser {
 
 interface AuthCtx {
   user: AuthUser | null;
+  /** True until the server session has been checked once (localStorage mirror paints meanwhile). */
+  ready: boolean;
   login: (u: AuthUser) => void;
+  /** Google sign-in is not wired yet; opens the email/OTP modal instead. */
   loginWithGoogle: () => void;
-  logout: () => void;
+  logout: () => Promise<void>;
+  /** Re-read the session from the server (e.g. after returning from auth.zyphix.in). */
+  refresh: () => Promise<AuthUser | null>;
   showModal: boolean;
   openModal: () => void;
   closeModal: () => void;
 }
 
 const Ctx = createContext<AuthCtx>({
-  user: null, login: () => {}, loginWithGoogle: () => {}, logout: () => {},
+  user: null, ready: false, login: () => {}, loginWithGoogle: () => {}, logout: async () => {}, refresh: async () => null,
   showModal: false, openModal: () => {}, closeModal: () => {},
 });
 
 const STORAGE_KEY = 'zyphix_user';
 
-function AuthCallbackScreen() {
-  return (
-    <div data-testid="auth-callback-screen" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0A0F1A', color: '#fff', gap: 18 }}>
-      <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid rgba(13,163,102,.25)', borderTopColor: '#0DA366', animation: 'spin .8s linear infinite' }} />
-      <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 700, fontSize: 15 }}>Signing you in…</p>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
-  );
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => {
     try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : null; } catch { return null; }
   });
+  const [ready, setReady] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  // true while exchanging a session_id returned from Google OAuth
-  const [processingCallback, setProcessingCallback] = useState(
-    () => typeof window !== 'undefined' && window.location.hash.includes('session_id=')
-  );
-  const processed = useRef(false);
 
   const persist = useCallback((u: AuthUser | null) => {
     setUser(u);
@@ -54,75 +47,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, []);
 
-  useEffect(() => {
-    if (processed.current) return;
-    processed.current = true;
-
-    const clearHash = () => {
-      if (window.location.hash) {
-        window.history.replaceState(null, '', window.location.pathname + window.location.search);
-      }
-    };
-
-    const bootstrap = async () => {
-      const hash = window.location.hash || '';
-      if (hash.includes('session_id=')) {
-        const sessionId = new URLSearchParams(hash.replace(/^#/, '')).get('session_id');
-        // clear the fragment immediately so it is used only once
-        clearHash();
-        if (sessionId) {
-          try {
-            const res = await fetch('/api/auth/session', {
-              method: 'POST',
-              credentials: 'include',
-              headers: { 'X-Session-ID': sessionId },
-            });
-            if (res.ok) {
-              const d = await res.json();
-              persist({ name: d.name, email: d.email, picture: d.picture, avatar: 'google' });
-            }
-          } catch {}
-        }
-        clearHash();
-        setProcessingCallback(false);
-        // defer one more clear in case the router restores the location on mount
-        setTimeout(clearHash, 0);
-        return;
-      }
-
-      // No callback in progress — verify an existing server session
-      try {
-        const res = await fetch('/api/auth/me', { credentials: 'include' });
-        if (res.ok) {
-          const d = await res.json();
-          persist({ name: d.name, email: d.email, picture: d.picture, avatar: 'google' });
-        }
-      } catch {}
-    };
-
-    bootstrap();
+  const refresh = useCallback(async () => {
+    const u = await fetchMe();
+    if (u) {
+      const next: AuthUser = { id: u.id, name: u.name || u.email.split('@')[0], email: u.email, phone: u.phone || undefined };
+      persist(next);
+      return next;
+    }
+    return null;
   }, [persist]);
+
+  // On mount: ask the Worker who the cookie belongs to. A server user wins over the
+  // localStorage mirror; a 401 with a mirrored server user (has `id`) means the session
+  // expired, so drop it. Mirrors without an id (legacy client-only logins) are kept.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const u = await fetchMe();
+        if (!alive) return;
+        if (u) persist({ id: u.id, name: u.name || u.email.split('@')[0], email: u.email, phone: u.phone || undefined });
+        else if (user?.id) persist(null);
+      } catch {}
+      if (alive) setReady(true);
+    })();
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const login = (u: AuthUser) => {
     persist(u);
     setShowModal(false);
   };
 
-  const loginWithGoogle = () => {
-    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-    const redirectUrl = window.location.origin + '/';
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
-  };
+  const loginWithGoogle = () => { setShowModal(true); };
 
   const logout = async () => {
-    try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch {}
+    await apiLogout();
     persist(null);
   };
 
-  if (processingCallback) return <AuthCallbackScreen />;
-
   return (
-    <Ctx.Provider value={{ user, login, loginWithGoogle, logout, showModal, openModal: () => setShowModal(true), closeModal: () => setShowModal(false) }}>
+    <Ctx.Provider value={{ user, ready, login, loginWithGoogle, logout, refresh, showModal, openModal: () => setShowModal(true), closeModal: () => setShowModal(false) }}>
       {children}
     </Ctx.Provider>
   );
