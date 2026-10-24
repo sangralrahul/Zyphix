@@ -1,16 +1,19 @@
 import React, { useEffect } from 'react';
 import { Link } from 'wouter';
-import { Bell, BellRing, Check, Trash2, Package, Wallet as WalletIcon, Tag, Info } from 'lucide-react';
+import { Bell, Check, X, Package, Wallet as WalletIcon, Tag, Info } from 'lucide-react';
 import { useNotifications } from '@/context/NotificationsContext';
+import { Button, FONT } from '@/ui/kit';
 
-const G = '#0DA366';
+const card = 'rounded-xl border border-[#E6E8EC] bg-white';
 
 const ICONS: Record<string, React.ReactNode> = {
-  order: <Package size={16} />,
-  promo: <Tag size={16} />,
-  wallet: <WalletIcon size={16} />,
-  system: <Info size={16} />,
+  order: <Package size={15} />,
+  promo: <Tag size={15} />,
+  wallet: <WalletIcon size={15} />,
+  system: <Info size={15} />,
 };
+
+const fmt = (iso: string) => new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 
 export function Notifications() {
   const { items, unread, markAllRead, markRead, remove, clear } = useNotifications();
@@ -23,56 +26,50 @@ export function Notifications() {
   }, []);
 
   return (
-    <div style={{ background: '#F8F9FA', minHeight: '80vh', paddingBottom: 80 }}>
-      <div style={{ padding: '20px 4px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 22, color: '#111827', margin: 0, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <BellRing size={22} color={G} /> Notifications
-          {unread > 0 && <span style={{ background: '#EF4444', color: '#fff', fontSize: 11, padding: '2px 8px', borderRadius: 20 }}>{unread}</span>}
-        </h1>
-        <div style={{ display: 'flex', gap: 6 }}>
+    <div className="mx-auto w-full max-w-[880px] pb-24 pt-4 text-gray-900 md:pb-8" style={{ fontFamily: FONT }}>
+      <div className="flex items-center gap-3">
+        <h1 className="text-[20px] font-semibold tracking-[-0.01em]">Notifications</h1>
+        {unread > 0 && <p className="text-[13px] text-gray-500">{unread} unread</p>}
+        <div className="ml-auto flex items-center gap-2">
           {unread > 0 && (
-            <button onClick={markAllRead} style={{ background: G, color: '#fff', border: 'none', borderRadius: 10, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              <Check size={13} /> Mark read
-            </button>
+            <Button size="sm" variant="secondary" className="!h-8" onClick={markAllRead}><Check size={13} /> Mark all read</Button>
           )}
           {items.length > 0 && (
-            <button onClick={clear} style={{ background: 'none', border: '1px solid #E5E7EB', borderRadius: 10, padding: '8px 12px', color: '#EF4444', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>
-              Clear
-            </button>
+            <button type="button" onClick={clear} className="text-[13px] font-semibold text-gray-600 transition hover:text-red-600">Clear</button>
           )}
         </div>
       </div>
 
       {items.length === 0 ? (
-        <div style={{ padding: '60px 20px', textAlign: 'center', background: '#fff', border: '1px solid #EAEAEA', borderRadius: 16 }}>
-          <Bell size={56} color="#E5E7EB" style={{ margin: '0 auto 10px' }} />
-          <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 18, color: '#111827' }}>You're all caught up</div>
-          <p style={{ color: '#6B7280', fontSize: 13 }}>Order updates, offers and cashback alerts will show here.</p>
+        <div className={`${card} mt-4 px-6 py-14 text-center`}>
+          <span className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E8EC] bg-[#FAFAFA] text-gray-400"><Bell size={18} /></span>
+          <p className="text-[15px] font-semibold">No notifications</p>
+          <p className="mt-1 text-[13px] text-gray-500">Order updates, offers and wallet activity will show here.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className={`${card} mt-4 divide-y divide-gray-100`}>
           {items.map(n => {
             const inner = (
-              <div style={{ display: 'flex', gap: 10, padding: 14, background: n.read ? '#fff' : 'rgba(13,163,102,0.05)', border: `1px solid ${n.read ? '#EAEAEA' : 'rgba(13,163,102,0.25)'}`, borderRadius: 14 }}>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(13,163,102,0.1)', color: G, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  {ICONS[n.kind] || <Info size={16} />}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-                    <div style={{ fontWeight: 800, color: '#111827', fontSize: 14 }}>{n.title}</div>
-                    <div style={{ fontSize: 11, color: '#9CA3AF' }}>{new Date(n.createdAt).toLocaleString()}</div>
+              <div className={`flex items-start gap-3 px-3 py-3 transition hover:bg-gray-50 ${n.read ? '' : 'bg-emerald-50/40'}`}>
+                <span className={`mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${n.read ? 'border-[#E6E8EC] bg-[#FAFAFA] text-gray-500' : 'border-emerald-100 bg-emerald-50 text-emerald-700'}`}>
+                  {ICONS[n.kind] || <Info size={15} />}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className={`truncate text-[13.5px] ${n.read ? 'font-medium' : 'font-semibold'} text-gray-900`}>{n.title}</p>
+                    <span className="shrink-0 text-[11.5px] text-gray-400">{fmt(n.createdAt)}</span>
                   </div>
-                  <div style={{ color: '#4B5563', fontSize: 13, marginTop: 3 }}>{n.body}</div>
+                  <p className="mt-0.5 text-[13px] leading-[1.45] text-gray-600">{n.body}</p>
                 </div>
-                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); remove(n.id); }}
-                  style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', color: '#9CA3AF', alignSelf: 'flex-start' }} title="Delete">
-                  <Trash2 size={14} />
+                <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); remove(n.id); }} aria-label="Delete notification"
+                  className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 transition hover:bg-white hover:text-gray-700">
+                  <X size={14} />
                 </button>
               </div>
             );
             return n.href
-              ? <Link key={n.id} href={n.href}><a onClick={() => markRead(n.id)} style={{ textDecoration: 'none' }}>{inner}</a></Link>
-              : <div key={n.id} onClick={() => markRead(n.id)} style={{ cursor: 'pointer' }}>{inner}</div>;
+              ? <Link key={n.id} href={n.href} onClick={() => markRead(n.id)} className="block no-underline">{inner}</Link>
+              : <div key={n.id} onClick={() => markRead(n.id)} className="cursor-pointer">{inner}</div>;
           })}
         </div>
       )}

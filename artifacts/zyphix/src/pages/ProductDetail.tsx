@@ -1,18 +1,13 @@
 import React, { useMemo } from 'react';
 import { Link, useLocation, useParams } from 'wouter';
-import { motion } from 'framer-motion';
 import { ChevronLeft, Plus, Minus, Clock, Truck, ShieldCheck, Star, Heart, Share2 } from 'lucide-react';
 import { useCatalog } from '@/lib/catalog';
-import { productImageFor, categoryTint } from '@/lib/productImage';
+import { productImageFor } from '@/lib/productImage';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useReviews } from '@/context/ReviewsContext';
 import { Reviews } from '@/components/Reviews';
-
-
-const G = '#0DA366';
-const G_LIGHT = 'rgba(13,163,102,0.08)';
-const G_BORDER = 'rgba(13,163,102,0.25)';
+import { Button, FONT, G } from '@/ui/kit';
 
 export function ProductDetail() {
   const params = useParams<{ id: string }>();
@@ -31,13 +26,12 @@ export function ProductDetail() {
 
   if (!product) {
     return (
-      <div style={{ padding: '80px 20px', textAlign: 'center', background: '#F8F9FA', minHeight: '70vh' }}>
-        <div style={{ fontSize: 56, marginBottom: 12 }}>🛒</div>
-        <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 22, color: '#111827' }}>Product not found</h1>
-        <p style={{ color: '#6B7280', marginBottom: 20 }}>The item you're looking for isn't available.</p>
-        <Link href="/now">
-          <a style={{ background: G, color: '#fff', padding: '12px 22px', borderRadius: 12, fontWeight: 800, textDecoration: 'none' }}>Back to store</a>
-        </Link>
+      <div className="mx-auto w-full max-w-[1180px] pt-4 text-gray-900" style={{ fontFamily: FONT }}>
+        <div className="rounded-xl border border-gray-200 bg-white px-6 py-14 text-center">
+          <h1 className="text-[17px] font-semibold tracking-[-0.01em]">Product not found</h1>
+          <p className="mt-1 text-[13px] text-gray-500">The item you're looking for isn't available.</p>
+          <div className="mt-4"><Button href="/now" size="sm" variant="secondary">Back to store</Button></div>
+        </div>
       </div>
     );
   }
@@ -45,175 +39,137 @@ export function ProductDetail() {
   const q = qty(product.id);
   const discount = product.origPrice ? Math.round((1 - product.price / product.origPrice) * 100) : 0;
   const snap = { id: product.id, name: product.name, brand: product.brand, price: product.price, origPrice: product.origPrice, image: product.image, weight: product.weight };
+  const wished = isWished(product.id);
+  const s = summary(product.id);
+  const share = () => {
+    const url = window.location.href;
+    if (navigator.share) { navigator.share({ title: product.name, url }).catch(() => {}); }
+    else { navigator.clipboard?.writeText(url); }
+  };
+
+  const iconBtn = 'inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50';
 
   return (
-    <div style={{ background: '#F8F9FA', minHeight: '80vh', paddingBottom: 120 }}>
+    <div className="mx-auto w-full max-w-[1180px] pb-24 pt-4 text-gray-900" style={{ fontFamily: FONT }}>
       {/* top bar */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #EAEAEA', padding: '12px 4px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <button onClick={() => window.history.length > 1 ? window.history.back() : navigate('/now')}
-          style={{ width: 36, height: 36, borderRadius: 10, border: '1px solid #EAEAEA', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-          <ChevronLeft size={18} />
+      <div className="flex items-center gap-2.5 text-[13px] text-gray-500">
+        <button type="button" onClick={() => window.history.length > 1 ? window.history.back() : navigate('/now')} aria-label="Back" className={iconBtn}>
+          <ChevronLeft size={16} />
         </button>
-        <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 600 }}>
-          <Link href="/now"><a style={{ color: G, textDecoration: 'none' }}>ZyphixNow</a></Link> · {product.category}
-        </div>
+        <Link href="/now" className="font-medium text-emerald-700 no-underline hover:text-emerald-800">Zyphix Now</Link>
+        <span className="text-gray-300">/</span>
+        <span className="truncate">{product.category}</span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px, 420px) 1fr', gap: 24, padding: '20px 4px', alignItems: 'start' }}
-        className="pd-grid">
-        <style>{`@media (max-width: 720px){ .pd-grid { grid-template-columns: 1fr !important; } }`}</style>
-
+      <div className="mt-4 grid items-start gap-5 md:grid-cols-[minmax(260px,420px)_1fr]">
         {/* image */}
-        <div style={{ background: '#fff', borderRadius: 20, padding: 16, border: '1px solid #EAEAEA', position: 'relative' }}>
-          <div style={{ aspectRatio: '1', borderRadius: 14, overflow: 'hidden', background: '#F3F4F6', position: 'relative' }}>
-            {mainImage?.isFallback ? (
-              <>
-                <img src={mainImage.src} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                <div style={{ position: 'absolute', inset: 0, background: categoryTint(categories, product.category), opacity: 0.18, mixBlendMode: 'multiply' }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,.35), transparent 50%)' }} />
-                <span style={{ position: 'absolute', left: 12, bottom: 12, background: 'rgba(255,255,255,.95)', color: '#1F2937', fontSize: 11, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase', padding: '5px 10px', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,.12)' }}>
-                  {product.brand}
-                </span>
-              </>
-            ) : (
-              <img src={mainImage?.src || product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#fff', display: 'block' }} />
-            )}
+        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
+          <div className="relative aspect-square bg-[#FAFAFA]">
+            <img src={mainImage?.src || product.image} alt={product.name}
+              className={mainImage?.isFallback ? 'h-full w-full object-cover' : 'h-full w-full bg-white object-contain p-4'} />
             {discount > 0 && (
-              <div style={{ position: 'absolute', top: 12, left: 12, background: '#EF4444', color: '#fff', fontSize: 11, fontWeight: 800, padding: '5px 10px', borderRadius: 8 }}>
-                {discount}% OFF
-              </div>
+              <span className="absolute left-3 top-3 rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] font-semibold text-white">{discount}% off</span>
             )}
-            <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <button onClick={() => toggleWish(snap)} title={isWished(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
-                style={{ width: 38, height: 38, borderRadius: '50%', background: '#fff', border: '1px solid #EAEAEA', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                <Heart size={18} fill={isWished(product.id) ? '#EF4444' : 'none'} stroke={isWished(product.id) ? '#EF4444' : '#374151'} />
+            <div className="absolute right-3 top-3 flex flex-col gap-2">
+              <button type="button" onClick={() => toggleWish(snap)} title={wished ? 'Remove from wishlist' : 'Add to wishlist'} className={iconBtn}>
+                <Heart size={15} fill={wished ? '#DC2626' : 'none'} stroke={wished ? '#DC2626' : 'currentColor'} />
               </button>
-              <button title="Share" onClick={() => {
-                const url = window.location.href;
-                if (navigator.share) { navigator.share({ title: product.name, url }).catch(() => {}); }
-                else { navigator.clipboard?.writeText(url); }
-              }} style={{ width: 38, height: 38, borderRadius: '50%', background: '#fff', border: '1px solid #EAEAEA', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                <Share2 size={16} color="#374151" />
-              </button>
+              <button type="button" title="Share" onClick={share} className={iconBtn}><Share2 size={14} /></button>
             </div>
           </div>
         </div>
 
-
         {/* info */}
         <div>
-          <div style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase' }}>{product.brand}</div>
-          <h1 style={{ fontFamily: "'Outfit',sans-serif", fontSize: 24, fontWeight: 900, color: '#111827', margin: '4px 0 6px', letterSpacing: '-.02em' }}>
-            {product.name}
-          </h1>
-          {(() => {
-            const s = summary(product.id);
-            const display = s.count > 0 ? s.avg.toFixed(1) : '4.4';
-            const countText = s.count > 0 ? ` (${s.count})` : '';
-            return (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#6B7280', fontSize: 13, fontWeight: 500 }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: G_LIGHT, color: G, padding: '3px 8px', borderRadius: 6, fontWeight: 700 }}>
-                  <Star size={11} fill={G} stroke={G} /> {display}{countText}
-                </span>
-                <span>· {product.weight} · {product.storeName}</span>
-              </div>
-            );
-          })()}
+          <p className="text-[12.5px] font-medium text-gray-500">{product.brand}</p>
+          <h1 className="mt-0.5 text-[20px] font-semibold leading-snug tracking-[-0.01em] md:text-[22px]">{product.name}</h1>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px] text-gray-500">
+            {s.count > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-1.5 py-0.5 text-[12px] font-semibold text-gray-900">
+                <Star size={11} fill={G} stroke={G} /> {s.avg.toFixed(1)} <span className="font-normal text-gray-500">({s.count})</span>
+              </span>
+            )}
+            {product.weight && <span>{product.weight}</span>}
+            {product.storeName && <><span className="text-gray-300">·</span><span>{product.storeName}</span></>}
+          </div>
 
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, margin: '18px 0 4px' }}>
-            <span style={{ fontFamily: "'Outfit',sans-serif", fontSize: 30, fontWeight: 900, color: '#111827' }}>₹{product.price}</span>
-            {product.origPrice && (
+          <div className="mt-4 flex items-baseline gap-2.5">
+            <span className="text-[24px] font-semibold tracking-[-0.01em]">₹{product.price}</span>
+            {product.origPrice && product.origPrice > product.price && (
               <>
-                <span style={{ fontSize: 15, color: '#9CA3AF', textDecoration: 'line-through', fontWeight: 500 }}>₹{product.origPrice}</span>
-                <span style={{ fontSize: 13, fontWeight: 800, color: G }}>Save ₹{product.origPrice - product.price}</span>
+                <span className="text-[14px] text-gray-400 line-through">₹{product.origPrice}</span>
+                <span className="text-[13px] font-semibold text-emerald-700">Save ₹{product.origPrice - product.price}</span>
               </>
             )}
           </div>
-          <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 20 }}>Inclusive of all taxes</div>
+          <p className="mt-0.5 text-[12px] text-gray-500">Inclusive of all taxes</p>
 
-          {/* Delivery card */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 22 }}>
+          {/* delivery facts */}
+          <div className="mt-4 grid grid-cols-3 gap-2">
             {[
-              { icon: <Clock size={16} color={G} />, t: '~30 min', s: 'Delivery' },
-              { icon: <Truck size={16} color={G} />, t: 'FREE', s: 'Above ₹149' },
-              { icon: <ShieldCheck size={16} color={G} />, t: '100%', s: 'Fresh' },
+              { icon: <Clock size={14} />, t: '30 min', s: 'Delivery' },
+              { icon: <Truck size={14} />, t: 'Free', s: 'Above ₹149' },
+              { icon: <ShieldCheck size={14} />, t: 'Fresh', s: 'Quality checked' },
             ].map((f, i) => (
-              <div key={i} style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 12, padding: '12px 10px', textAlign: 'center' }}>
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>{f.icon}</div>
-                <div style={{ fontSize: 13, fontWeight: 800, color: '#111827' }}>{f.t}</div>
-                <div style={{ fontSize: 11, color: '#6B7280' }}>{f.s}</div>
+              <div key={i} className="rounded-xl border border-gray-200 bg-white px-3 py-2.5">
+                <div className="flex items-center gap-1.5 text-[13px] font-semibold"><span className="text-emerald-700">{f.icon}</span>{f.t}</div>
+                <div className="mt-0.5 text-[12px] text-gray-500">{f.s}</div>
               </div>
             ))}
           </div>
 
-          {/* Add to cart */}
-          {q === 0 ? (
-            <button onClick={() => add(snap)}
-              style={{ width: '100%', padding: '14px', background: `linear-gradient(135deg, ${G}, #0A8C58)`, color: '#fff', fontWeight: 800, fontSize: 15, border: 'none', borderRadius: 14, cursor: 'pointer', boxShadow: '0 6px 20px rgba(13,163,102,.35)', fontFamily: "'Outfit',sans-serif" }}>
-              Add to Cart
-            </button>
-          ) : (
-            <div style={{ display: 'flex', gap: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: G_LIGHT, border: `1.5px solid ${G_BORDER}`, borderRadius: 12, overflow: 'hidden', flex: 1 }}>
-                <button onClick={() => remove(product.id)} style={{ width: 44, height: 46, background: 'none', border: 'none', color: G, cursor: 'pointer' }}><Minus size={16} /></button>
-                <span style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: G, fontSize: 16 }}>{q} in cart</span>
-                <button onClick={() => add(snap)} style={{ width: 44, height: 46, background: 'none', border: 'none', color: G, cursor: 'pointer' }}><Plus size={16} /></button>
+          {/* add to cart */}
+          <div className="mt-4">
+            {q === 0 ? (
+              <Button onClick={() => add(snap)} className="w-full sm:w-auto sm:min-w-[200px]">Add to cart</Button>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2.5">
+                <div className="inline-flex h-11 items-center overflow-hidden rounded-full text-white" style={{ background: G }}>
+                  <button type="button" onClick={() => remove(product.id)} aria-label="Remove one" className="flex h-full w-11 items-center justify-center transition hover:bg-black/10"><Minus size={15} /></button>
+                  <span className="min-w-[72px] text-center text-[14px] font-semibold tabular-nums">{q} in cart</span>
+                  <button type="button" onClick={() => add(snap)} aria-label="Add one" className="flex h-full w-11 items-center justify-center transition hover:bg-black/10"><Plus size={15} /></button>
+                </div>
+                <Button variant="secondary" onClick={() => navigate('/now/cart')}>Go to cart</Button>
               </div>
-              <button onClick={() => navigate('/now/cart')}
-                style={{ flex: 1, padding: '14px', background: `linear-gradient(135deg, ${G}, #0A8C58)`, color: '#fff', fontWeight: 800, fontSize: 14, border: 'none', borderRadius: 12, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
-                Go to Cart
-              </button>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* description */}
-          <div style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 14, padding: 16, marginTop: 22 }}>
-            <div style={{ fontWeight: 800, fontFamily: "'Outfit',sans-serif", marginBottom: 6, color: '#111827' }}>About this product</div>
-            <p style={{ margin: 0, color: '#4B5563', fontSize: 13, lineHeight: 1.55 }}>
-              Handpicked {product.name.toLowerCase()} from trusted local suppliers. Sourced daily to bring you
-              the freshest quality at the best price. Quantity: <strong>{product.weight}</strong>.
-              Delivered in ~30 minutes to your doorstep.
+          <div className="mt-5 rounded-xl border border-gray-200 bg-white p-4">
+            <p className="text-[14px] font-semibold">About this product</p>
+            <p className="mt-1.5 text-[13px] leading-[1.6] text-gray-600">
+              {product.name} by {product.brand}{product.weight ? `, ${product.weight}` : ''}. Sourced daily from trusted local suppliers and delivered in about 30 minutes.
             </p>
           </div>
 
-          {/* reviews */}
           <Reviews productId={product.id} />
         </div>
       </div>
 
-
       {/* related */}
       {related.length > 0 && (
-        <div style={{ padding: '10px 4px' }}>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 18, color: '#111827', margin: '10px 0 12px' }}>You might also like</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: 10 }}>
+        <section className="mt-8">
+          <h2 className="mb-3 text-[17px] font-semibold tracking-[-0.01em] md:text-[18px]">You might also like</h2>
+          <div className="grid grid-cols-3 gap-2.5 md:grid-cols-4 lg:grid-cols-6 lg:gap-3">
             {related.map(r => {
               const img = productImageFor(r, categories);
+              const d = r.origPrice && r.origPrice > r.price ? Math.round((1 - r.price / r.origPrice) * 100) : 0;
               return (
-              <Link key={r.id} href={`/now/product/${r.id}`}>
-                <a style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <motion.div whileHover={{ y: -3 }} style={{ background: '#fff', borderRadius: 14, overflow: 'hidden', border: '1px solid #F0F0F0', boxShadow: '0 1px 6px rgba(0,0,0,0.05)' }}>
-                    <div style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden', background: '#fff' }}>
-                      <img src={img.src} alt={r.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: img.isFallback ? 'cover' : 'contain', display: 'block' }} />
-                      {img.isFallback && (
-                        <>
-                          <div style={{ position: 'absolute', inset: 0, background: categoryTint(categories, r.category), opacity: 0.18, mixBlendMode: 'multiply' }} />
-                          <span style={{ position: 'absolute', left: 8, bottom: 8, maxWidth: '80%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', background: 'rgba(255,255,255,.95)', color: '#1F2937', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', padding: '3px 7px', borderRadius: 6 }}>{r.brand}</span>
-                        </>
-                      )}
-                    </div>
-                    <div style={{ padding: 10 }}>
-                      <div style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 600, textTransform: 'uppercase' }}>{r.brand}</div>
-                      <div style={{ fontSize: 12.5, fontWeight: 700, color: '#1F2937', margin: '3px 0 6px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{r.name}</div>
-                      <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#111827' }}>₹{r.price}</div>
-                    </div>
-                  </motion.div>
-                </a>
-              </Link>
+                <Link key={r.id} href={`/now/product/${r.id}`} className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-inherit no-underline transition hover:border-gray-300">
+                  <div className="relative aspect-square bg-[#FAFAFA]">
+                    <img src={img.src} alt={r.name} loading="lazy" className={img.isFallback ? 'h-full w-full object-cover' : 'h-full w-full bg-white object-contain p-2'} />
+                    {d > 0 && <span className="absolute left-1.5 top-1.5 rounded-md bg-emerald-600 px-1.5 py-0.5 text-[10.5px] font-semibold leading-none text-white">{d}% off</span>}
+                  </div>
+                  <div className="p-2.5">
+                    <p className="line-clamp-2 min-h-[2.5em] text-[13px] font-medium leading-[1.25]">{r.name}</p>
+                    <p className="mt-0.5 truncate text-[12px] text-gray-500">{r.weight || r.brand}</p>
+                    <p className="mt-1.5 text-[14px] font-semibold">₹{r.price}{r.origPrice && r.origPrice > r.price && <span className="ml-1 text-[12px] font-normal text-gray-400 line-through">₹{r.origPrice}</span>}</p>
+                  </div>
+                </Link>
               );
             })}
           </div>
-        </div>
+        </section>
       )}
     </div>
   );

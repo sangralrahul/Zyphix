@@ -1,15 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
-import { ChevronLeft, MapPin, Wallet, CreditCard, Check, BookmarkCheck } from 'lucide-react';
+import { ChevronLeft, MapPin, Wallet, CreditCard, Check } from 'lucide-react';
 import { useCart, saveOrder, type Order } from '@/context/CartContext';
 import { usePromo, maxWalletUsable, cashbackFor } from '@/context/PromoContext';
 import { findCoupon, evaluateCoupon } from '@/data/coupons';
 import { useAuth } from '@/context/AuthContext';
 import { createOrder, listAddresses, type SavedAddress } from '@/lib/account';
+import { Button, FONT } from '@/ui/kit';
 
-const G = '#0DA366';
-const G_LIGHT = 'rgba(13,163,102,0.08)';
-const G_BORDER = 'rgba(13,163,102,0.25)';
+const card = 'rounded-xl border border-[#E6E8EC] bg-white';
 
 export function Checkout() {
   const { items, subtotal, clear } = useCart();
@@ -66,9 +65,12 @@ export function Checkout() {
 
   if (items.length === 0) {
     return (
-      <div style={{ padding: '80px 20px', textAlign: 'center', background: '#F8F9FA', minHeight: '70vh' }}>
-        <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900 }}>Your cart is empty</h1>
-        <button onClick={() => navigate('/now')} style={{ background: G, color: '#fff', padding: '12px 22px', borderRadius: 12, fontWeight: 800, border: 'none', marginTop: 10, cursor: 'pointer' }}>Shop now</button>
+      <div className="mx-auto w-full max-w-[1180px] pt-4 text-gray-900" style={{ fontFamily: FONT }}>
+        <div className={`${card} px-6 py-14 text-center`}>
+          <h1 className="text-[17px] font-semibold tracking-[-0.01em]">Your cart is empty</h1>
+          <p className="mt-1 text-[13px] text-gray-500">Add a few products before checking out.</p>
+          <div className="mt-4"><Button size="sm" onClick={() => navigate('/now')}>Go to store</Button></div>
+        </div>
       </div>
     );
   }
@@ -124,109 +126,99 @@ export function Checkout() {
   };
 
   return (
-    <div style={{ background: '#F8F9FA', minHeight: '80vh', paddingBottom: 140 }}>
-      <div style={{ background: '#fff', borderBottom: '1px solid #EAEAEA', padding: '12px 4px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <button onClick={() => navigate('/now/cart')} style={{ width: 36, height: 36, borderRadius: 10, border: '1px solid #EAEAEA', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <ChevronLeft size={18} />
+    <div className="mx-auto w-full max-w-[1180px] pb-24 pt-4 text-gray-900 md:pb-8" style={{ fontFamily: FONT }}>
+      <div className="flex items-center gap-2">
+        <button type="button" onClick={() => navigate('/now/cart')} aria-label="Back to cart"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#E6E8EC] bg-white text-gray-600 transition hover:bg-gray-50">
+          <ChevronLeft size={16} />
         </button>
-        <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 18, color: '#111827', margin: 0 }}>Checkout</h1>
+        <h1 className="text-[20px] font-semibold tracking-[-0.01em]">Checkout</h1>
+        <p className="text-[13px] text-gray-500">{items.length} item{items.length > 1 ? 's' : ''}</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 16, padding: '16px 4px' }} className="co-grid">
-        <style>{`@media (max-width: 820px){ .co-grid { grid-template-columns: 1fr !important; } .co-sum { position: static !important; } }`}</style>
-
-        <div>
-          <Section title="Delivery Address" icon={<MapPin size={16} color={G} />}>
+      <div className="mt-4 grid items-start gap-4 md:grid-cols-[1fr_320px]">
+        <div className="space-y-3">
+          <Section title="Delivery address" icon={<MapPin size={14} className="text-emerald-700" />}>
             {saved.length > 0 && (
               <div>
-                <div style={{ fontSize: 11.5, color: '#6B7280', fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <BookmarkCheck size={13} color={G} /> Use a saved address
-                </div>
-                <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
+                <p className="mb-2 text-[12px] font-medium text-gray-500">Saved addresses</p>
+                <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {saved.map(a => {
                     const active = savedPick === a.id;
                     return (
                       <button key={a.id} type="button" onClick={() => useSaved(a)}
-                        style={{ flex: '0 0 auto', maxWidth: 220, textAlign: 'left', padding: '9px 12px', borderRadius: 10, border: `1.5px solid ${active ? G : '#E5E7EB'}`, background: active ? G_LIGHT : '#fff', cursor: 'pointer' }}>
-                        <div style={{ fontSize: 12.5, fontWeight: 800, color: '#111827', display: 'flex', alignItems: 'center', gap: 6 }}>
-                          {a.label || 'Address'}{a.isDefault && <span style={{ fontSize: 10, fontWeight: 700, color: G, background: G_LIGHT, borderRadius: 20, padding: '1px 7px' }}>Default</span>}
+                        className={`w-[200px] shrink-0 rounded-lg border px-3 py-2 text-left transition ${active ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500' : 'border-[#E6E8EC] bg-white hover:border-gray-300'}`}>
+                        <div className="flex items-center gap-1.5 text-[12.5px] font-semibold text-gray-900">
+                          <span className="truncate">{a.label || 'Address'}</span>
+                          {a.isDefault && <span className="shrink-0 rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10.5px] font-semibold text-emerald-700">Default</span>}
                         </div>
-                        <div style={{ fontSize: 11.5, color: '#6B7280', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {[a.line1, a.line2, a.city].filter(Boolean).join(', ').replace(/ \| /g, ', ')} {a.pincode && `– ${a.pincode}`}
-                        </div>
+                        <p className="mt-0.5 truncate text-[12px] text-gray-500">
+                          {[a.line1, a.line2, a.city].filter(Boolean).join(', ').replace(/ \| /g, ', ')}{a.pincode ? ` – ${a.pincode}` : ''}
+                        </p>
                       </button>
                     );
                   })}
                 </div>
               </div>
             )}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <Field label="Full Name" value={name} onChange={setName} error={errors.name} />
-              <Field label="Phone" value={phone} onChange={v => setPhone(v.replace(/\D/g, '').slice(0, 10))} error={errors.phone} placeholder="10-digit mobile" />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label="Full name" value={name} onChange={setName} error={errors.name} autoComplete="name" />
+              <Field label="Phone" value={phone} onChange={v => setPhone(v.replace(/\D/g, '').slice(0, 10))} error={errors.phone} placeholder="10-digit mobile" inputMode="numeric" autoComplete="tel" />
             </div>
-            <Field label="Address (House, Street, Landmark)" value={line1} onChange={setLine1} error={errors.line1} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <Field label="City" value={city} onChange={setCity} error={errors.city} />
-              <Field label="Pincode" value={pincode} onChange={v => setPincode(v.replace(/\D/g, '').slice(0, 6))} error={errors.pincode} />
+            <Field label="Address (house, street, landmark)" value={line1} onChange={setLine1} error={errors.line1} autoComplete="street-address" />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label="City" value={city} onChange={setCity} error={errors.city} autoComplete="address-level2" />
+              <Field label="Pincode" value={pincode} onChange={v => setPincode(v.replace(/\D/g, '').slice(0, 6))} error={errors.pincode} inputMode="numeric" autoComplete="postal-code" />
             </div>
-            <Field label="Delivery notes (optional)" value={notes} onChange={setNotes} placeholder="e.g., Ring the bell twice" />
+            <Field label="Delivery notes (optional)" value={notes} onChange={setNotes} placeholder="e.g. Ring the bell twice" />
           </Section>
 
-          <Section title="Payment Method">
+          <Section title="Payment">
             <PayOption
               active={payment === 'COD'} onClick={() => setPayment('COD')}
-              icon={<Wallet size={18} color={payment === 'COD' ? G : '#6B7280'} />}
-              title="Cash on Delivery" sub="Pay when your order arrives"
+              icon={<Wallet size={16} />}
+              title="Cash on delivery" sub="Pay when your order arrives"
             />
             <PayOption
               active={payment === 'ONLINE'} onClick={() => setPayment('ONLINE')}
-              icon={<CreditCard size={18} color={payment === 'ONLINE' ? G : '#6B7280'} />}
-              title="Online Payment" sub="UPI / Cards / Netbanking (coming soon)"
+              icon={<CreditCard size={16} />}
+              title="Online payment" sub="UPI, cards, netbanking (coming soon)"
             />
           </Section>
         </div>
 
-        <div className="co-sum" style={{ position: 'sticky', top: 76, alignSelf: 'start' }}>
-          <div style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 16, padding: 16 }}>
-            <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 15, color: '#111827', marginBottom: 10 }}>Order Summary</div>
-            <div style={{ maxHeight: 200, overflowY: 'auto', marginBottom: 8 }}>
-              {items.map(i => (
-                <div key={i.id} style={{ display: 'flex', gap: 10, padding: '6px 0', borderBottom: '1px dashed #F3F4F6' }}>
-                  <img src={i.image} alt={i.name} style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 700, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i.name}</div>
-                    <div style={{ fontSize: 11, color: '#6B7280' }}>{i.weight} · Qty {i.qty}</div>
-                  </div>
-                  <div style={{ fontWeight: 800, color: '#111827', fontSize: 13 }}>₹{i.price * i.qty}</div>
+        {/* Summary */}
+        <div className={`${card} p-4 md:sticky md:top-[80px]`}>
+          <p className="text-[14px] font-semibold">Order summary</p>
+          <div className="mt-2 max-h-[220px] divide-y divide-gray-100 overflow-y-auto [scrollbar-width:thin]">
+            {items.map(i => (
+              <div key={i.id} className="flex items-center gap-2.5 py-2">
+                <img src={i.image} alt={i.name} className="h-10 w-10 shrink-0 rounded-lg border border-[#E6E8EC] bg-white object-contain p-0.5" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13px] font-medium text-gray-900">{i.name}</p>
+                  <p className="text-[12px] text-gray-500">{[i.weight, `Qty ${i.qty}`].filter(Boolean).join(' · ')}</p>
                 </div>
-              ))}
-            </div>
-            <SumRow label="Subtotal" value={`₹${subtotal}`} />
-            {itemDiscount > 0 && <SumRow label={`Coupon (${activeCoupon?.code})`} value={`− ₹${itemDiscount}`} valueColor={G} />}
-            <SumRow label="Delivery" value={deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`} valueColor={deliveryFee === 0 ? G : undefined} />
-            {walletApplied > 0 && <SumRow label="Wallet" value={`− ₹${walletApplied}`} valueColor={G} />}
-            <div style={{ borderTop: '1px dashed #E5E7EB', margin: '8px 0' }} />
-            <SumRow label="Total" value={`₹${grand}`} bold />
-
-            {totalSavings > 0 && (
-              <div style={{ marginTop: 10, background: G_LIGHT, color: G, border: `1px dashed ${G_BORDER}`, borderRadius: 8, padding: '7px 10px', fontSize: 11.5, fontWeight: 800, textAlign: 'center' }}>
-                🎉 You save ₹{totalSavings} on this order
+                <span className="text-[13px] font-semibold tabular-nums">₹{i.price * i.qty}</span>
               </div>
-            )}
-            {cashbackFor(grand) > 0 && (
-              <div style={{ marginTop: 6, fontSize: 11.5, color: '#6B7280', textAlign: 'center' }}>
-                You'll earn <strong style={{ color: G }}>₹{cashbackFor(grand)} cashback</strong> to your wallet
-              </div>
-            )}
-
-            <button onClick={placeOrder} disabled={placing}
-              style={{ width: '100%', marginTop: 14, padding: '14px', background: placing ? '#9CA3AF' : `linear-gradient(135deg, ${G}, #0A8C58)`, color: '#fff', fontWeight: 800, fontSize: 15, border: 'none', borderRadius: 12, cursor: placing ? 'not-allowed' : 'pointer', boxShadow: '0 6px 20px rgba(13,163,102,.35)', fontFamily: "'Outfit',sans-serif" }}>
-              {placing ? 'Placing order…' : `Place Order · ₹${grand}`}
-            </button>
-            <p style={{ fontSize: 11, color: '#6B7280', margin: '8px 0 0', textAlign: 'center' }}>
-              By placing this order you agree to our Terms.
-            </p>
+            ))}
           </div>
+          <div className="mt-2 border-t border-[#E6E8EC] pt-2">
+            <Row label="Item total" value={`₹${subtotal}`} />
+            {itemDiscount > 0 && <Row label={`Coupon (${activeCoupon?.code})`} value={`− ₹${itemDiscount}`} green />}
+            <Row label="Delivery fee" value={deliveryFee === 0 ? 'Free' : `₹${deliveryFee}`} green={deliveryFee === 0} />
+            {walletApplied > 0 && <Row label="Wallet" value={`− ₹${walletApplied}`} green />}
+          </div>
+          <div className="my-3 border-t border-[#E6E8EC]" />
+          <div className="flex items-center justify-between text-[15px] font-semibold">
+            <span>To pay</span><span>₹{grand}</span>
+          </div>
+          {totalSavings > 0 && <p className="mt-1 text-[12.5px] font-medium text-emerald-700">You save ₹{totalSavings} on this order</p>}
+          {cashbackFor(grand) > 0 && <p className="mt-1 text-[12px] text-gray-500">₹{cashbackFor(grand)} cashback will be added to your wallet</p>}
+
+          <Button onClick={placeOrder} className={`mt-3 w-full justify-between ${placing ? 'pointer-events-none opacity-60' : ''}`}>
+            <span>{placing ? 'Placing order' : 'Place order'}</span><span>₹{grand}</span>
+          </Button>
+          <p className="mt-2 text-center text-[11.5px] text-gray-400">By placing this order you agree to our Terms.</p>
         </div>
       </div>
     </div>
@@ -235,50 +227,50 @@ export function Checkout() {
 
 function Section({ title, icon, children }: { title: string; icon?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 16, padding: 16, marginBottom: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        {icon}<div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#111827', fontSize: 15 }}>{title}</div>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>{children}</div>
+    <div className={`${card} p-4`}>
+      <div className="flex items-center gap-2 text-[14px] font-semibold">{icon}{title}</div>
+      <div className="mt-3 flex flex-col gap-3">{children}</div>
     </div>
   );
 }
 
-function Field({ label, value, onChange, error, placeholder }: { label: string; value: string; onChange: (v: string) => void; error?: string; placeholder?: string }) {
+function Field({ label, value, onChange, error, placeholder, inputMode, autoComplete }: {
+  label: string; value: string; onChange: (v: string) => void; error?: string; placeholder?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']; autoComplete?: string;
+}) {
   return (
-    <label style={{ display: 'block' }}>
-      <div style={{ fontSize: 11.5, color: '#6B7280', fontWeight: 700, marginBottom: 4 }}>{label}</div>
+    <label className="block">
+      <span className="mb-1 block text-[12px] font-medium text-gray-600">{label}</span>
       <input
-        value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        style={{ width: '100%', boxSizing: 'border-box', padding: '11px 12px', background: '#F9FAFB', border: `1.5px solid ${error ? '#FCA5A5' : '#E5E7EB'}`, borderRadius: 10, fontSize: 13.5, color: '#111827', outline: 'none' }}
-        onFocus={e => (e.currentTarget.style.borderColor = G_BORDER)}
-        onBlur={e => (e.currentTarget.style.borderColor = error ? '#FCA5A5' : '#E5E7EB')}
+        value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} inputMode={inputMode} autoComplete={autoComplete}
+        className={`h-9 w-full rounded-lg border bg-white px-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 ${error ? 'border-red-300' : 'border-[#E6E8EC]'}`}
       />
-      {error && <div style={{ color: '#EF4444', fontSize: 11, marginTop: 3 }}>{error}</div>}
+      {error && <span className="mt-1 block text-[12px] text-red-600">{error}</span>}
     </label>
   );
 }
 
 function PayOption({ active, onClick, icon, title, sub }: { active: boolean; onClick: () => void; icon: React.ReactNode; title: string; sub: string }) {
   return (
-    <button onClick={onClick}
-      style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: 12, border: `1.5px solid ${active ? G_BORDER : '#E5E7EB'}`, background: active ? G_LIGHT : '#fff', borderRadius: 12, cursor: 'pointer', textAlign: 'left' }}>
-      <div style={{ width: 36, height: 36, borderRadius: 10, background: '#fff', border: '1px solid #EAEAEA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{icon}</div>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: 800, color: '#111827', fontSize: 13.5 }}>{title}</div>
-        <div style={{ fontSize: 11.5, color: '#6B7280' }}>{sub}</div>
-      </div>
-      <div style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${active ? G : '#D1D5DB'}`, background: active ? G : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {active && <Check size={12} color="#fff" strokeWidth={3} />}
-      </div>
+    <button type="button" onClick={onClick} aria-pressed={active}
+      className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition ${active ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500' : 'border-[#E6E8EC] bg-white hover:border-gray-300'}`}>
+      <span className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${active ? 'border-emerald-200 bg-white text-emerald-700' : 'border-[#E6E8EC] bg-[#FAFAFA] text-gray-500'}`}>{icon}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[13.5px] font-semibold text-gray-900">{title}</span>
+        <span className="block text-[12px] text-gray-500">{sub}</span>
+      </span>
+      <span className={`inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border ${active ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-gray-300 bg-white'}`}>
+        {active && <Check size={11} strokeWidth={3} />}
+      </span>
     </button>
   );
 }
 
-function SumRow({ label, value, valueColor, bold }: { label: string; value: string; valueColor?: string; bold?: boolean }) {
+function Row({ label, value, green }: { label: string; value: string; green?: boolean }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: bold ? 15 : 13, color: bold ? '#111827' : '#6B7280', fontWeight: bold ? 900 : 500, fontFamily: bold ? "'Outfit',sans-serif" : undefined }}>
-      <span>{label}</span><span style={{ color: valueColor || '#111827', fontWeight: bold ? 900 : 700 }}>{value}</span>
+    <div className="flex justify-between py-1 text-[13px]">
+      <span className="text-gray-500">{label}</span>
+      <span className={`font-medium tabular-nums ${green ? 'text-emerald-700' : 'text-gray-900'}`}>{value}</span>
     </div>
   );
 }

@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useSearch } from 'wouter';
 import {
   User, MapPin, ShoppingBag, Settings, Plus, Edit2, Trash2,
-  Home, Briefcase, Building2, Check, ChevronRight, Bell, Moon,
-  Lock, LogOut, Phone, Mail, Camera, Save, X, Star, Clock,
+  Home, Briefcase, Building2, Check, ChevronRight, Bell,
+  Lock, LogOut, Phone, Mail, Camera, X, Clock,
   Package, AlertCircle, Heart, ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -13,17 +13,13 @@ import {
   listAddresses, addAddress, updateAddress, deleteAddress as deleteAddressRemote, setDefaultAddress,
   myOrders, toLocalOrder, updateProfile, authUrl, type SavedAddress, type AddressInput,
 } from '@/lib/account';
+import { Button, FONT } from '@/ui/kit';
 
-/* ─── colours ─── */
-const G   = '#0DA366';
-const G2  = '#0A8C58';
-const T1  = '#111827';
-const T2  = '#6B7280';
-const T3  = '#9CA3AF';
-const BD  = '#E5E7EB';
-const BG  = '#F8FAFB';
-const W   = '#FFFFFF';
-const ERR = '#EF4444';
+/* ─── shared classes ─── */
+const card = 'rounded-xl border border-[#E6E8EC] bg-white';
+const label = 'mb-1 block text-[12px] font-medium text-gray-600';
+const inputCls = (err?: string) => `h-9 w-full rounded-lg border bg-white px-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 ${err ? 'border-red-300' : 'border-[#E6E8EC]'}`;
+const errCls = 'mt-1 flex items-center gap-1 text-[12px] text-red-600';
 
 /* ─── types ─── */
 interface Address {
@@ -48,10 +44,10 @@ function setLS(key: string, val: unknown) {
 }
 
 const TYPE_META = {
-  home:  { Icon: Home,      label: 'Home',   bg: '#F0FDF4', bd: '#BBF7D0', tc: '#065F46', ac: G },
-  work:  { Icon: Briefcase, label: 'Work',   bg: '#EFF6FF', bd: '#BFDBFE', tc: '#1E40AF', ac: '#3B82F6' },
-  hotel: { Icon: Building2, label: 'Hotel',  bg: '#FFF7ED', bd: '#FED7AA', tc: '#9A3412', ac: '#F97316' },
-  other: { Icon: MapPin,    label: 'Other',  bg: '#F5F3FF', bd: '#DDD6FE', tc: '#5B21B6', ac: '#8B5CF6' },
+  home:  { Icon: Home,      label: 'Home'  },
+  work:  { Icon: Briefcase, label: 'Work'  },
+  hotel: { Icon: Building2, label: 'Hotel' },
+  other: { Icon: MapPin,    label: 'Other' },
 };
 
 /* ── local <-> server address mapping ──
@@ -83,32 +79,27 @@ function fromServer(s: SavedAddress): Address {
 }
 
 /* ─── sub-components ─── */
-function TabBtn({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+function TabBtn({ active, onClick, icon, label, count }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string; count?: number }) {
   return (
-    <button onClick={onClick}
-      style={{
-        display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '12px 16px',
-        borderRadius: 12, background: active ? `${G}0F` : 'transparent',
-        border: `1.5px solid ${active ? G + '40' : 'transparent'}`,
-        color: active ? G : T2, fontWeight: active ? 700 : 500, fontSize: 14,
-        cursor: 'pointer', transition: 'all .18s', textAlign: 'left',
-      }}>
-      {icon}<span>{label}</span>
-      {active && <ChevronRight size={14} style={{ marginLeft: 'auto', opacity: .6 }} />}
+    <button type="button" onClick={onClick} aria-current={active ? 'page' : undefined}
+      className={`flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-lg px-2.5 py-2 text-left text-[13px] transition md:w-full ${active ? 'bg-emerald-50 font-semibold text-gray-900' : 'font-medium text-gray-700 hover:bg-gray-50'}`}>
+      <span className={active ? 'text-emerald-700' : 'text-gray-400'}>{icon}</span>
+      <span className="min-w-0 flex-1">{label}</span>
+      {count !== undefined && <span className={`text-[11.5px] tabular-nums ${active ? 'text-emerald-700' : 'text-gray-400'}`}>{count}</span>}
     </button>
   );
 }
 
 function SectionCard({ title, children, action }: { title?: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div style={{ background: W, borderRadius: 16, border: `1px solid ${BD}`, overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,.05)' }}>
+    <div className={card}>
       {title && (
-        <div style={{ padding: '16px 20px', borderBottom: `1px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: T1 }}>{title}</p>
+        <div className="flex items-center justify-between border-b border-[#E6E8EC] px-4 py-3">
+          <p className="text-[14px] font-semibold text-gray-900">{title}</p>
           {action}
         </div>
       )}
-      <div style={{ padding: 20 }}>{children}</div>
+      <div className="p-4">{children}</div>
     </div>
   );
 }
@@ -149,27 +140,20 @@ function AddressForm({ initial, onSave, onCancel }: {
     onSave({ ...form, label, type: form.type as Address['type'] });
   };
 
-  const inp = (err?: string): React.CSSProperties => ({
-    width: '100%', padding: '10px 12px', borderRadius: 10, fontSize: 13.5,
-    border: `1.5px solid ${err ? ERR + '88' : BD}`, background: err ? '#FFF5F5' : W,
-    color: T1, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
-    transition: 'border-color .15s',
-  });
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div className="flex flex-col gap-3">
       {/* Type picker */}
       <div>
-        <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.04em' }}>Address Type</label>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
+        <span className={label}>Address type</span>
+        <div className="grid grid-cols-4 gap-2">
           {(Object.keys(TYPE_META) as Array<keyof typeof TYPE_META>).map(t => {
             const m = TYPE_META[t];
             const active = form.type === t;
             return (
-              <button key={t} onClick={() => f('type')(t)}
-                style={{ padding: '10px 6px', borderRadius: 12, border: `1.5px solid ${active ? m.ac : BD}`, background: active ? m.bg : W, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, transition: 'all .15s' }}>
-                <m.Icon size={16} color={active ? m.ac : T3} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: active ? m.tc : T3 }}>{m.label}</span>
+              <button key={t} type="button" onClick={() => f('type')(t)} aria-pressed={active}
+                className={`flex flex-col items-center gap-1 rounded-lg border px-1 py-2 transition ${active ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500' : 'border-[#E6E8EC] bg-white text-gray-500 hover:border-gray-300'}`}>
+                <m.Icon size={15} />
+                <span className={`text-[11.5px] ${active ? 'font-semibold' : 'font-medium'}`}>{m.label}</span>
               </button>
             );
           })}
@@ -177,62 +161,56 @@ function AddressForm({ initial, onSave, onCancel }: {
       </div>
 
       {/* Label */}
-      <div>
-        <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>Save As (optional)</label>
-        <input value={form.label} onChange={e => f('label')(e.target.value)} placeholder={`e.g. ${TYPE_META[form.type as keyof typeof TYPE_META].label}, Mom's Place`} style={inp()} />
-      </div>
+      <label className="block">
+        <span className={label}>Save as (optional)</span>
+        <input value={form.label} onChange={e => f('label')(e.target.value)} placeholder={`e.g. ${TYPE_META[form.type as keyof typeof TYPE_META].label}, Mom's place`} className={inputCls()} />
+      </label>
 
       {/* Flat & Floor */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        <div>
-          <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>Flat / House No. *</label>
-          <input value={form.flat} onChange={e => f('flat')(e.target.value)} placeholder="F-12, Block B" style={inp(errors.flat)} />
-          {errors.flat && <p style={{ fontSize: 11, color: ERR, marginTop: 3 }}>{errors.flat}</p>}
-        </div>
-        <div>
-          <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>Floor (optional)</label>
-          <input value={form.floor} onChange={e => f('floor')(e.target.value)} placeholder="2nd Floor" style={inp()} />
-        </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <label className="block">
+          <span className={label}>Flat / house no.</span>
+          <input value={form.flat} onChange={e => f('flat')(e.target.value)} placeholder="F-12, Block B" className={inputCls(errors.flat)} />
+          {errors.flat && <span className={errCls}>{errors.flat}</span>}
+        </label>
+        <label className="block">
+          <span className={label}>Floor (optional)</span>
+          <input value={form.floor} onChange={e => f('floor')(e.target.value)} placeholder="2nd floor" className={inputCls()} />
+        </label>
       </div>
 
       {/* Area */}
-      <div>
-        <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>Area / Locality *</label>
-        <input value={form.area} onChange={e => f('area')(e.target.value)} placeholder="Gandhi Nagar, Trikuta Nagar…" style={inp(errors.area)} />
-        {errors.area && <p style={{ fontSize: 11, color: ERR, marginTop: 3 }}>{errors.area}</p>}
-      </div>
+      <label className="block">
+        <span className={label}>Area / locality</span>
+        <input value={form.area} onChange={e => f('area')(e.target.value)} placeholder="Gandhi Nagar, Trikuta Nagar" className={inputCls(errors.area)} />
+        {errors.area && <span className={errCls}>{errors.area}</span>}
+      </label>
 
       {/* Landmark */}
-      <div>
-        <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>Landmark (optional)</label>
-        <input value={form.landmark} onChange={e => f('landmark')(e.target.value)} placeholder="Near petrol pump, opp. hospital…" style={inp()} />
-      </div>
+      <label className="block">
+        <span className={label}>Landmark (optional)</span>
+        <input value={form.landmark} onChange={e => f('landmark')(e.target.value)} placeholder="Near petrol pump, opp. hospital" className={inputCls()} />
+      </label>
 
       {/* City & Pincode */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        <div>
-          <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>City *</label>
-          <select value={form.city} onChange={e => f('city')(e.target.value)} style={{ ...inp(errors.city), appearance: 'none', cursor: 'pointer' }}>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <label className="block">
+          <span className={label}>City</span>
+          <select value={form.city} onChange={e => f('city')(e.target.value)} className={`${inputCls(errors.city)} cursor-pointer appearance-none`}>
             {['Delhi', 'Mumbai', 'Bengaluru', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow', 'Chandigarh', 'Surat', 'Nagpur', 'Indore', 'Bhopal', 'Patna', 'Kochi', 'Other'].map(c => <option key={c}>{c}</option>)}
           </select>
-        </div>
-        <div>
-          <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>Pincode *</label>
-          <input value={form.pincode} onChange={e => f('pincode')(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="180001" inputMode="numeric" style={inp(errors.pincode)} />
-          {errors.pincode && <p style={{ fontSize: 11, color: ERR, marginTop: 3 }}>{errors.pincode}</p>}
-        </div>
+        </label>
+        <label className="block">
+          <span className={label}>Pincode</span>
+          <input value={form.pincode} onChange={e => f('pincode')(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="180001" inputMode="numeric" className={inputCls(errors.pincode)} />
+          {errors.pincode && <span className={errCls}>{errors.pincode}</span>}
+        </label>
       </div>
 
       {/* Buttons */}
-      <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-        <button onClick={onCancel}
-          style={{ flex: 1, padding: '11px', borderRadius: 12, border: `1.5px solid ${BD}`, background: W, fontSize: 14, fontWeight: 700, color: T2, cursor: 'pointer' }}>
-          Cancel
-        </button>
-        <button onClick={handleSave}
-          style={{ flex: 2, padding: '11px', borderRadius: 12, border: 'none', background: `linear-gradient(135deg, ${G}, ${G2})`, fontSize: 14, fontWeight: 800, color: '#fff', cursor: 'pointer', boxShadow: `0 3px 14px ${G}40` }}>
-          Save Address
-        </button>
+      <div className="mt-1 flex gap-2">
+        <Button size="sm" variant="secondary" onClick={onCancel} className="flex-1">Cancel</Button>
+        <Button size="sm" onClick={handleSave} className="flex-[2]">Save address</Button>
       </div>
     </div>
   );
@@ -276,10 +254,6 @@ function ProfileTab() {
   };
 
   const initial = (user?.name ?? 'U').charAt(0).toUpperCase();
-  const inp = (err?: string): React.CSSProperties => ({
-    width: '100%', padding: '11px 14px', borderRadius: 10, fontSize: 14, border: `1.5px solid ${err ? ERR + '88' : BD}`,
-    background: err ? '#FFF5F5' : W, color: T1, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', transition: 'border-color .15s',
-  });
 
   const fileRef = useRef<HTMLInputElement>(null);
   const [avatar, setAvatar] = useState<string | null>(() => localStorage.getItem('zyphix_avatar'));
@@ -291,80 +265,81 @@ function ProfileTab() {
     reader.readAsDataURL(file);
   };
 
+  const ReadRow = ({ icon, value }: { icon: React.ReactNode; value: string }) => (
+    <div className="flex items-center gap-2.5">
+      <span className="text-gray-400">{icon}</span>
+      <p className={`text-[13.5px] ${value ? 'text-gray-900' : 'text-gray-400'}`}>{value || 'Not set'}</p>
+    </div>
+  );
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="flex flex-col gap-3">
       {/* Avatar card */}
       <SectionCard>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ position: 'relative', flexShrink: 0 }}>
-            <div style={{ width: 72, height: 72, borderRadius: '50%', background: avatar ? 'transparent' : `linear-gradient(135deg, ${G}, ${G2})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 900, color: '#fff', fontFamily: "'Outfit',sans-serif", overflow: 'hidden' }}>
-              {avatar ? <img src={avatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initial}
+        <div className="flex items-center gap-3">
+          <div className="relative shrink-0">
+            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-gray-900 text-[20px] font-semibold text-white">
+              {avatar ? <img src={avatar} alt="avatar" className="h-full w-full object-cover" /> : initial}
             </div>
-            <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
-            <div onClick={() => fileRef.current?.click()}
-              style={{ position: 'absolute', bottom: 0, right: 0, width: 24, height: 24, borderRadius: '50%', background: W, border: `2px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-              <Camera size={11} color={T2} />
-            </div>
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+            <button type="button" onClick={() => fileRef.current?.click()} aria-label="Change photo"
+              className="absolute -bottom-0.5 -right-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full border border-[#E6E8EC] bg-white text-gray-600 transition hover:bg-gray-50">
+              <Camera size={11} />
+            </button>
           </div>
-          <div>
-            <p style={{ margin: 0, fontSize: 18, fontWeight: 900, color: T1, fontFamily: "'Outfit',sans-serif" }}>{user?.name}</p>
-            <p style={{ margin: '2px 0 0', fontSize: 13, color: T2 }}>{user?.email || user?.phone || 'Zyphix Member'}</p>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 6, background: `${G}12`, borderRadius: 20, padding: '3px 10px' }}>
-              <Star size={10} fill={G} color={G} />
-              <span style={{ fontSize: 11.5, fontWeight: 700, color: G }}>Early Member</span>
-            </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[15px] font-semibold text-gray-900">{user?.name}</p>
+            <p className="truncate text-[13px] text-gray-500">{user?.email || user?.phone || 'Member'}</p>
           </div>
-          <button onClick={() => { setEdit(!edit); if (edit) setErrors({}); }}
-            style={{ marginLeft: 'auto', padding: '8px 16px', borderRadius: 10, border: `1.5px solid ${edit ? ERR + '60' : BD}`, background: edit ? '#FFF5F5' : W, fontSize: 13, fontWeight: 700, color: edit ? ERR : T2, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-            {edit ? <><X size={13} />Cancel</> : <><Edit2 size={13} />Edit</>}
-          </button>
+          <Button size="sm" variant="secondary" className="!h-8" onClick={() => { setEdit(!edit); if (edit) setErrors({}); }}>
+            {edit ? <><X size={13} /> Cancel</> : <><Edit2 size={13} /> Edit</>}
+          </Button>
         </div>
       </SectionCard>
 
       {/* Details */}
-      <SectionCard title="Personal Information">
+      <SectionCard title="Personal information">
         {saved && (
-          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, marginBottom: 16, fontSize: 13, fontWeight: 600, color: '#065F46' }}>
-            <Check size={14} color={G} />Profile saved successfully!
+          <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
+            className="mb-3 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] font-medium text-emerald-700">
+            <Check size={14} /> Profile saved
           </motion.div>
         )}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div className="flex flex-col gap-3">
           <div>
-            <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>Full Name</label>
+            <span className={label}>Full name</span>
             {edit
-              ? <><input value={form.name} onChange={e => f('name')(e.target.value)} placeholder="Your name" style={inp(errors.name)} />{errors.name && <p style={{ fontSize: 11, color: ERR, marginTop: 3, display: 'flex', alignItems: 'center', gap: 4 }}><AlertCircle size={10} />{errors.name}</p>}</>
-              : <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><User size={15} color={T3} /><p style={{ margin: 0, fontSize: 14, color: form.name ? T1 : T3 }}>{form.name || 'Not set'}</p></div>
+              ? <><input value={form.name} onChange={e => f('name')(e.target.value)} placeholder="Your name" className={inputCls(errors.name)} />{errors.name && <p className={errCls}><AlertCircle size={11} />{errors.name}</p>}</>
+              : <ReadRow icon={<User size={14} />} value={form.name} />
             }
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>Email Address</label>
+            <span className={label}>Email</span>
             {edit && !remote
-              ? <><input value={form.email} onChange={e => f('email')(e.target.value)} placeholder="you@example.com" type="email" style={inp(errors.email)} />{errors.email && <p style={{ fontSize: 11, color: ERR, marginTop: 3, display: 'flex', alignItems: 'center', gap: 4 }}><AlertCircle size={10} />{errors.email}</p>}</>
-              : <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Mail size={15} color={T3} /><p style={{ margin: 0, fontSize: 14, color: form.email ? T1 : T3 }}>{form.email || 'Not set'}</p>{edit && remote && <span style={{ fontSize: 11, color: T3 }}>(sign-in email can't be changed)</span>}</div>
+              ? <><input value={form.email} onChange={e => f('email')(e.target.value)} placeholder="you@example.com" type="email" className={inputCls(errors.email)} />{errors.email && <p className={errCls}><AlertCircle size={11} />{errors.email}</p>}</>
+              : <div className="flex flex-wrap items-center gap-x-2"><ReadRow icon={<Mail size={14} />} value={form.email} />{edit && remote && <span className="text-[12px] text-gray-400">Sign-in email can't be changed</span>}</div>
             }
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>Phone Number</label>
+            <span className={label}>Phone</span>
             {edit
-              ? <><input value={form.phone} onChange={e => f('phone')(e.target.value)} placeholder="+91 98765 43210" type="tel" style={inp(errors.phone)} />{errors.phone && <p style={{ fontSize: 11, color: ERR, marginTop: 3, display: 'flex', alignItems: 'center', gap: 4 }}><AlertCircle size={10} />{errors.phone}</p>}</>
-              : <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Phone size={15} color={T3} /><p style={{ margin: 0, fontSize: 14, color: form.phone ? T1 : T3 }}>{form.phone || 'Not set'}</p></div>
+              ? <><input value={form.phone} onChange={e => f('phone')(e.target.value)} placeholder="+91 98765 43210" type="tel" className={inputCls(errors.phone)} />{errors.phone && <p className={errCls}><AlertCircle size={11} />{errors.phone}</p>}</>
+              : <ReadRow icon={<Phone size={14} />} value={form.phone} />
             }
           </div>
           {edit && (
-            <motion.button onClick={handleSave} whileTap={{ scale: .97 }} disabled={saving}
-              style={{ padding: '12px', borderRadius: 12, border: 'none', background: saving ? '#9CA3AF' : `linear-gradient(135deg, ${G}, ${G2})`, color: '#fff', fontSize: 14, fontWeight: 800, cursor: saving ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: `0 3px 14px ${G}40` }}>
-              <Save size={15} />{saving ? 'Saving…' : 'Save Changes'}
-            </motion.button>
+            <div>
+              <Button size="sm" onClick={handleSave} className={saving ? 'pointer-events-none opacity-60' : ''}>{saving ? 'Saving' : 'Save changes'}</Button>
+            </div>
           )}
         </div>
       </SectionCard>
 
-      {/* Danger zone */}
+      {/* Account */}
       <SectionCard title="Account">
-        <button onClick={async () => { await logout(); setLoc('/'); }}
-          style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: `1.5px solid ${ERR}30`, background: '#FFF5F5', fontSize: 14, fontWeight: 700, color: ERR, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <LogOut size={15} />Sign Out
+        <button type="button" onClick={async () => { await logout(); setLoc('/'); }}
+          className="inline-flex h-9 items-center gap-2 rounded-full border border-[#E6E8EC] bg-white px-4 text-[13.5px] font-semibold text-red-600 transition hover:border-red-200 hover:bg-red-50">
+          <LogOut size={14} /> Sign out
         </button>
       </SectionCard>
     </div>
@@ -448,29 +423,32 @@ function AddressesTab() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div className="flex flex-col gap-3">
       {error && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 10, fontSize: 13, color: '#DC2626' }}>
+        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700">
           <AlertCircle size={14} />{error}
         </div>
       )}
-      {loading && <p style={{ margin: 0, fontSize: 13, color: T3, textAlign: 'center' }}>Loading your addresses…</p>}
+      {loading && (
+        <div className={`${card} space-y-2 p-4`}>
+          <div className="h-3.5 w-32 animate-pulse rounded bg-gray-100" />
+          <div className="h-3 w-56 animate-pulse rounded bg-gray-100" />
+        </div>
+      )}
+
       {/* Add button */}
-      {!showForm && !editId && (
-        <button onClick={() => setShowForm(true)}
-          style={{ width: '100%', padding: '13px', borderRadius: 14, border: `1.5px dashed ${G}60`, background: `${G}06`, fontSize: 14, fontWeight: 700, color: G, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all .15s' }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = `${G}10`; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = `${G}06`; }}>
-          <Plus size={16} />Add New Address
-        </button>
+      {!showForm && !editId && !loading && (
+        <div className="flex items-center justify-between">
+          <p className="text-[13px] text-gray-500">{addresses.length} saved</p>
+          <Button size="sm" variant="secondary" className="!h-8" onClick={() => setShowForm(true)}><Plus size={14} /> Add address</Button>
+        </div>
       )}
 
       {/* Add form */}
       <AnimatePresence>
         {showForm && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-            style={{ background: W, borderRadius: 16, border: `1.5px solid ${G}40`, padding: 20, boxShadow: `0 0 0 4px ${G}08` }}>
-            <p style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 800, color: T1 }}>📍 Add New Address</p>
+          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className={`${card} p-4`}>
+            <p className="mb-3 text-[14px] font-semibold text-gray-900">New address</p>
             <AddressForm onSave={addAddr} onCancel={() => setShowForm(false)} />
           </motion.div>
         )}
@@ -478,66 +456,60 @@ function AddressesTab() {
 
       {/* Address list */}
       {addresses.length === 0 && !showForm && !loading ? (
-        <div style={{ textAlign: 'center', padding: '40px 20px', background: W, borderRadius: 16, border: `1px solid ${BD}` }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📍</div>
-          <p style={{ fontSize: 16, fontWeight: 800, color: T1, marginBottom: 6 }}>No saved addresses</p>
-          <p style={{ fontSize: 13.5, color: T2, marginBottom: 18, lineHeight: 1.6 }}>Add your home, work, or any address so we can deliver right to your door.</p>
-          <button onClick={() => setShowForm(true)}
-            style={{ padding: '10px 24px', borderRadius: 12, border: 'none', background: G, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
-            Add First Address
-          </button>
+        <div className={`${card} px-6 py-12 text-center`}>
+          <span className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E8EC] bg-[#FAFAFA] text-gray-400"><MapPin size={18} /></span>
+          <p className="text-[15px] font-semibold">No saved addresses</p>
+          <p className="mt-1 text-[13px] text-gray-500">Save an address to check out faster.</p>
+          <div className="mt-4"><Button size="sm" onClick={() => setShowForm(true)}>Add address</Button></div>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="flex flex-col gap-2.5">
           <AnimatePresence>
             {addresses.map(addr => {
               const meta = TYPE_META[addr.type];
               if (editId === addr.id) {
                 return (
-                  <motion.div key={addr.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    style={{ background: W, borderRadius: 16, border: `1.5px solid ${meta.ac}50`, padding: 20 }}>
-                    <p style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 800, color: T1 }}>✏️ Edit Address</p>
+                  <motion.div key={addr.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`${card} p-4`}>
+                    <p className="mb-3 text-[14px] font-semibold text-gray-900">Edit address</p>
                     <AddressForm initial={addr} onSave={a => updateAddr(addr.id, a)} onCancel={() => setEditId(null)} />
                   </motion.div>
                 );
               }
               return (
                 <motion.div key={addr.id}
-                  animate={{ opacity: deleted === addr.id ? 0 : 1, x: deleted === addr.id ? 40 : 0 }}
-                  style={{ background: W, borderRadius: 14, border: `1.5px solid ${addr.isDefault ? meta.ac + '50' : BD}`, padding: '14px 16px', boxShadow: addr.isDefault ? `0 0 0 3px ${meta.ac}10` : 'none' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                    <div style={{ width: 38, height: 38, borderRadius: 11, background: meta.bg, border: `1px solid ${meta.bd}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
-                      <meta.Icon size={16} color={meta.ac} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                        <p style={{ margin: 0, fontSize: 14, fontWeight: 800, color: T1 }}>{addr.label || meta.label}</p>
-                        {addr.isDefault && (
-                          <span style={{ fontSize: 10.5, fontWeight: 700, color: meta.ac, background: meta.bg, border: `1px solid ${meta.bd}`, borderRadius: 20, padding: '1px 8px' }}>Default</span>
-                        )}
+                  animate={{ opacity: deleted === addr.id ? 0 : 1, x: deleted === addr.id ? 24 : 0 }}
+                  className={`${card} p-3 ${addr.isDefault ? 'border-emerald-200' : ''}`}>
+                  <div className="flex items-start gap-3">
+                    <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${addr.isDefault ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-[#E6E8EC] bg-[#FAFAFA] text-gray-500'}`}>
+                      <meta.Icon size={15} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate text-[13.5px] font-semibold text-gray-900">{addr.label || meta.label}</p>
+                        {addr.isDefault && <span className="shrink-0 rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10.5px] font-semibold text-emerald-700">Default</span>}
                       </div>
-                      <p style={{ margin: 0, fontSize: 13, color: T2, lineHeight: 1.5 }}>
+                      <p className="mt-0.5 text-[13px] leading-[1.45] text-gray-600">
                         {[addr.flat, addr.floor, addr.area, addr.landmark].filter(Boolean).join(', ')}
                       </p>
-                      <p style={{ margin: '2px 0 0', fontSize: 12.5, color: T3 }}>{addr.city} – {addr.pincode}</p>
+                      <p className="text-[12px] text-gray-500">{addr.city} – {addr.pincode}</p>
+                      {!addr.isDefault && (
+                        <button type="button" onClick={() => setDefault(addr.id)}
+                          className="mt-1.5 inline-flex items-center gap-1 text-[12.5px] font-semibold text-emerald-700 transition hover:text-emerald-800">
+                          <Check size={12} /> Set as default
+                        </button>
+                      )}
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-                      <button onClick={() => setEditId(addr.id)}
-                        style={{ padding: '6px 10px', borderRadius: 8, border: `1px solid ${BD}`, background: W, fontSize: 12, fontWeight: 600, color: T2, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
-                        <Edit2 size={11} />Edit
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button type="button" onClick={() => setEditId(addr.id)} aria-label="Edit address"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-400 transition hover:bg-gray-100 hover:text-gray-900">
+                        <Edit2 size={13} />
                       </button>
-                      <button onClick={() => deleteAddr(addr.id)}
-                        style={{ padding: '6px 10px', borderRadius: 8, border: `1px solid ${ERR}30`, background: '#FFF5F5', fontSize: 12, fontWeight: 600, color: ERR, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
-                        <Trash2 size={11} />Delete
+                      <button type="button" onClick={() => deleteAddr(addr.id)} aria-label="Delete address"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-400 transition hover:bg-red-50 hover:text-red-600">
+                        <Trash2 size={13} />
                       </button>
                     </div>
                   </div>
-                  {!addr.isDefault && (
-                    <button onClick={() => setDefault(addr.id)}
-                      style={{ marginTop: 10, marginLeft: 50, fontSize: 12.5, fontWeight: 600, color: G, border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
-                      <Check size={12} />Set as default
-                    </button>
-                  )}
                 </motion.div>
               );
             })}
@@ -569,12 +541,12 @@ function useMergedOrders() {
   return { orders, loading };
 }
 
-const ORDER_STATUS: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  delivered:  { label: 'Delivered',  color: '#065F46', bg: '#F0FDF4', dot: G },
-  placed:     { label: 'Confirmed',  color: '#92400E', bg: '#FFFBEB', dot: '#F59E0B' },
-  confirmed:  { label: 'Confirmed',  color: '#92400E', bg: '#FFFBEB', dot: '#F59E0B' },
-  processing: { label: 'Processing', color: '#92400E', bg: '#FFFBEB', dot: '#F59E0B' },
-  cancelled:  { label: 'Cancelled',  color: '#991B1B', bg: '#FEF2F2', dot: ERR },
+const ORDER_STATUS: Record<string, { label: string; cls: string }> = {
+  delivered:  { label: 'Delivered',  cls: 'bg-emerald-50 text-emerald-700' },
+  placed:     { label: 'Confirmed',  cls: 'bg-amber-50 text-amber-700' },
+  confirmed:  { label: 'Confirmed',  cls: 'bg-amber-50 text-amber-700' },
+  processing: { label: 'Processing', cls: 'bg-amber-50 text-amber-700' },
+  cancelled:  { label: 'Cancelled',  cls: 'bg-red-50 text-red-700' },
 };
 const fmtDate = (iso: string) => { const d = new Date(iso); return isNaN(d.getTime()) ? iso : d.toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }); };
 
@@ -583,61 +555,51 @@ function OrdersTab() {
   const { orders, loading } = useMergedOrders();
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div className="flex flex-col gap-2.5">
       {loading && orders.length === 0 ? (
-        <p style={{ margin: 0, fontSize: 13, color: T3, textAlign: 'center', padding: 24 }}>Loading your orders…</p>
+        [0, 1].map(i => (
+          <div key={i} className={`${card} space-y-2 p-4`}>
+            <div className="h-3.5 w-40 animate-pulse rounded bg-gray-100" />
+            <div className="h-3 w-64 animate-pulse rounded bg-gray-100" />
+            <div className="h-3 w-24 animate-pulse rounded bg-gray-100" />
+          </div>
+        ))
       ) : orders.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px 20px', background: W, borderRadius: 16, border: `1px solid ${BD}` }}>
-          <div style={{ fontSize: 44, marginBottom: 12 }}>📦</div>
-          <p style={{ fontSize: 16, fontWeight: 800, color: T1, marginBottom: 6 }}>No orders yet</p>
-          <p style={{ fontSize: 13.5, color: T2, lineHeight: 1.6 }}>Your order history will appear here once you place your first order.</p>
+        <div className={`${card} px-6 py-12 text-center`}>
+          <span className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E8EC] bg-[#FAFAFA] text-gray-400"><Package size={18} /></span>
+          <p className="text-[15px] font-semibold">No orders yet</p>
+          <p className="mt-1 text-[13px] text-gray-500">Orders you place will show up here.</p>
+          <div className="mt-4"><Button size="sm" href="/now">Start shopping</Button></div>
         </div>
       ) : (
         orders.map(order => {
           const s = ORDER_STATUS[(order.rawStatus ?? order.status).toLowerCase()] ?? ORDER_STATUS.confirmed;
+          const count = order.items.reduce((n, i) => n + i.qty, 0);
           return (
-            <div key={order.id} style={{ background: W, borderRadius: 14, border: `1px solid ${BD}`, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.04)' }}>
-              <div style={{ padding: '14px 16px', borderBottom: `1px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: BG }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 18 }}>🛒</span>
-                  <div>
-                    <p style={{ margin: 0, fontSize: 13.5, fontWeight: 800, color: T1 }}>Zyphix Now</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                      <Clock size={11} color={T3} />
-                      <p style={{ margin: 0, fontSize: 11.5, color: T3 }}>{fmtDate(order.createdAt)}</p>
-                    </div>
-                  </div>
+            <div key={order.id} className={card}>
+              <div className="flex items-center justify-between gap-3 border-b border-[#E6E8EC] px-4 py-2.5">
+                <div className="min-w-0">
+                  <p className="truncate text-[13.5px] font-semibold text-gray-900">Zyphix Now · {order.id}</p>
+                  <p className="mt-0.5 inline-flex items-center gap-1 text-[12px] text-gray-500"><Clock size={11} /> {fmtDate(order.createdAt)}</p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 20, background: s.bg }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: s.dot }} />
-                  <span style={{ fontSize: 11.5, fontWeight: 700, color: s.color }}>{s.label}</span>
-                </div>
+                <span className={`shrink-0 rounded-full px-2.5 py-1 text-[12px] font-semibold ${s.cls}`}>{s.label}</span>
               </div>
-              <div style={{ padding: '12px 16px' }}>
-                <p style={{ margin: '0 0 6px', fontSize: 12, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '.04em' }}>Items</p>
-                {order.items.map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
-                    <Package size={12} color={T3} />
-                    <p style={{ margin: 0, fontSize: 13.5, color: T1 }}>{item.name}{item.qty > 1 ? ` ×${item.qty}` : ''}</p>
-                  </div>
-                ))}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTop: `1px solid ${BD}` }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <p style={{ margin: 0, fontSize: 12, color: T3 }}>Order ID: <span style={{ fontWeight: 700, color: T2 }}>{order.id}</span></p>
-                  </div>
-                  <p style={{ margin: 0, fontSize: 15, fontWeight: 900, color: T1, fontFamily: "'Outfit',sans-serif" }}>₹{order.total}</p>
+              <div className="px-4 py-3">
+                <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {order.items.slice(0, 6).map((item, i) => (
+                    <img key={i} src={item.image} alt={item.name} className="h-10 w-10 shrink-0 rounded-lg border border-[#E6E8EC] bg-white object-contain p-0.5" />
+                  ))}
+                  {order.items.length > 6 && <span className="shrink-0 text-[12px] text-gray-500">+{order.items.length - 6}</span>}
                 </div>
-                <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                  <button onClick={() => nav(`/now/order/${order.id}`)}
-                    style={{ flex: 1, padding: '9px', borderRadius: 10, border: `1.5px solid ${BD}`, background: W, fontSize: 13, fontWeight: 700, color: T2, cursor: 'pointer' }}>
-                    View details
-                  </button>
-                  <button onClick={() => nav('/now')}
-                    style={{ flex: 1, padding: '9px', borderRadius: 10, border: `1.5px solid ${G}40`, background: `${G}08`, fontSize: 13, fontWeight: 700, color: G, cursor: 'pointer', transition: 'background .15s' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = `${G}18`)}
-                    onMouseLeave={e => (e.currentTarget.style.background = `${G}08`)}>
-                    🔁 Reorder
-                  </button>
+                <p className="mt-2 truncate text-[13px] text-gray-600">
+                  {order.items.map(i => `${i.name}${i.qty > 1 ? ` ×${i.qty}` : ''}`).join(', ')}
+                </p>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <p className="text-[13px] text-gray-500">{count} item{count > 1 ? 's' : ''} · <span className="font-semibold text-gray-900">₹{order.total}</span></p>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="secondary" className="!h-8" onClick={() => nav(`/now/order/${order.id}`)}>Details</Button>
+                    <Button size="sm" className="!h-8" onClick={() => nav('/now')}>Reorder</Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -662,87 +624,76 @@ function SettingsTab() {
   };
 
   const Toggle = ({ k, label, sub }: { k: string; label: string; sub: string }) => (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: `1px solid ${BD}` }}>
-      <div>
-        <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: T1 }}>{label}</p>
-        <p style={{ margin: '2px 0 0', fontSize: 12.5, color: T3 }}>{sub}</p>
+    <div className="flex items-center justify-between gap-3 py-2.5">
+      <div className="min-w-0">
+        <p className="text-[13.5px] font-medium text-gray-900">{label}</p>
+        <p className="text-[12px] text-gray-500">{sub}</p>
       </div>
-      <button onClick={() => toggle(k)}
-        style={{ width: 44, height: 24, borderRadius: 12, border: 'none', background: prefs[k] ? G : '#D1D5DB', cursor: 'pointer', position: 'relative', transition: 'background .2s', flexShrink: 0 }}>
-        <div style={{ width: 18, height: 18, borderRadius: '50%', background: W, position: 'absolute', top: 3, left: prefs[k] ? 23 : 3, transition: 'left .2s', boxShadow: '0 1px 3px rgba(0,0,0,.25)' }} />
+      <button type="button" role="switch" aria-checked={!!prefs[k]} onClick={() => toggle(k)}
+        className={`relative h-6 w-11 shrink-0 rounded-full transition ${prefs[k] ? 'bg-emerald-600' : 'bg-gray-300'}`}>
+        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${prefs[k] ? 'left-[22px]' : 'left-0.5'}`} />
       </button>
     </div>
   );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="flex flex-col gap-3">
       <SectionCard title="Notifications">
-        <div>
-          <Toggle k="orderUpdates" label="Order Updates" sub="Get notified about your order status" />
-          <Toggle k="promos" label="Offers & Promotions" sub="Discount codes, flash sales and deals" />
-          <Toggle k="newArrivals" label="New Arrivals" sub="New stores and products near you" />
-          <div style={{ padding: '12px 0' }}>
-            <Toggle k="soundAlerts" label="Sound Alerts" sub="Play sound when an order is confirmed" />
-          </div>
+        <div className="-my-1 divide-y divide-gray-100">
+          <Toggle k="orderUpdates" label="Order updates" sub="Status changes for your orders" />
+          <Toggle k="promos" label="Offers and promotions" sub="Coupon codes and deals" />
+          <Toggle k="newArrivals" label="New arrivals" sub="New stores and products near you" />
+          <Toggle k="soundAlerts" label="Sound alerts" sub="Play a sound when an order is confirmed" />
         </div>
       </SectionCard>
 
       {otpMsg && (
-        <div style={{ padding: '12px 16px', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 12, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-          <Lock size={15} color="#3B82F6" style={{ flexShrink: 0, marginTop: 2 }} />
-          <div>
-            <p style={{ margin: 0, fontSize: 13.5, fontWeight: 700, color: '#1E40AF' }}>Passwordless Account</p>
-            <p style={{ margin: '2px 0 0', fontSize: 12.5, color: '#3B82F6', lineHeight: 1.5 }}>
-              ZYPHIX uses email OTP for secure sign-in — no password needed. Your account is already protected by one-time codes.
-            </p>
+        <div className="flex items-start gap-2.5 rounded-xl border border-[#E6E8EC] bg-white px-3 py-3">
+          <Lock size={14} className="mt-0.5 shrink-0 text-gray-500" />
+          <div className="min-w-0 flex-1">
+            <p className="text-[13.5px] font-semibold text-gray-900">Passwordless account</p>
+            <p className="mt-0.5 text-[12.5px] leading-[1.5] text-gray-600">Zyphix uses email OTP for sign-in, so there is no password to change.</p>
           </div>
-          <button onClick={() => setOtpMsg(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#93C5FD', flexShrink: 0, padding: 0 }}>
-            <X size={14} />
+          <button type="button" onClick={() => setOtpMsg(false)} aria-label="Dismiss" className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700">
+            <X size={13} />
           </button>
         </div>
       )}
 
-      <SectionCard title="Privacy & Security">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <SectionCard title="Privacy and security">
+        <div className="-my-1 divide-y divide-gray-100">
           {([
-            { icon: <Lock size={15} />, label: 'Change Password', sub: 'Passwordless OTP — learn more', action: () => setOtpMsg(true) },
-            { icon: <Heart size={15} />, label: 'Saved Items', sub: 'Products you\'ve favourited', action: () => nav('/now') },
-            { icon: <Bell size={15} />, label: 'Notification Preferences', sub: 'Manage how we contact you', action: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
+            { icon: <Lock size={14} />, label: 'Password', sub: 'Passwordless OTP sign-in', action: () => setOtpMsg(true) },
+            { icon: <Heart size={14} />, label: 'Saved items', sub: 'Products you have saved', action: () => nav('/wishlist') },
+            { icon: <Bell size={14} />, label: 'Notification preferences', sub: 'Manage how we contact you', action: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
           ] as { icon: React.ReactNode; label: string; sub: string; action: () => void }[]).map(({ icon, label, sub, action }) => (
-            <button key={label} onClick={action}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '11px 0', border: 'none', background: 'transparent', cursor: 'pointer', borderBottom: `1px solid ${BD}`, transition: 'opacity .15s' }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '.7')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: BG, border: `1px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T2, flexShrink: 0 }}>
-                {icon}
-              </div>
-              <div style={{ flex: 1, textAlign: 'left' }}>
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: T1 }}>{label}</p>
-                <p style={{ margin: '1px 0 0', fontSize: 12, color: T3 }}>{sub}</p>
-              </div>
-              <ChevronRight size={14} color={T3} />
+            <button key={label} type="button" onClick={action} className="flex w-full items-center gap-3 py-2.5 text-left transition hover:opacity-80">
+              <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E6E8EC] bg-[#FAFAFA] text-gray-500">{icon}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[13.5px] font-medium text-gray-900">{label}</span>
+                <span className="block text-[12px] text-gray-500">{sub}</span>
+              </span>
+              <ChevronRight size={14} className="shrink-0 text-gray-400" />
             </button>
           ))}
         </div>
       </SectionCard>
 
       <SectionCard title="About">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: `1px solid ${BD}` }}>
-            <p style={{ margin: 0, fontSize: 13.5, color: T1 }}>App Version</p>
-            <p style={{ margin: 0, fontSize: 13.5, color: T3 }}>1.0.0 (Beta)</p>
+        <div className="-my-1 divide-y divide-gray-100">
+          <div className="flex items-center justify-between py-2.5 text-[13.5px]">
+            <p className="text-gray-900">App version</p>
+            <p className="text-gray-500">1.0.0 (Beta)</p>
           </div>
           {([
-            { label: 'Terms of Service', href: '/terms' },
-            { label: 'Privacy Policy',   href: '/privacy' },
-            { label: 'Contact Support',  href: 'mailto:support@zyphix.in' },
+            { label: 'Terms of service', href: '/terms' },
+            { label: 'Privacy policy',   href: '/privacy' },
+            { label: 'Contact support',  href: 'mailto:support@zyphix.in' },
           ] as { label: string; href: string }[]).map(({ label, href }) => (
             <a key={label} href={href} target={href.startsWith('mailto') ? '_self' : '_blank'} rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: `1px solid ${BD}`, textDecoration: 'none', cursor: 'pointer', transition: 'opacity .15s' }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '.7')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-              <p style={{ margin: 0, fontSize: 13.5, color: T1 }}>{label}</p>
-              <ExternalLink size={13} color={T3} />
+              className="flex items-center justify-between py-2.5 text-[13.5px] text-gray-900 no-underline transition hover:opacity-80">
+              <span>{label}</span>
+              <ExternalLink size={13} className="text-gray-400" />
             </a>
           ))}
         </div>
@@ -781,74 +732,55 @@ export function Account() {
   if (!user) {
     if (!ready) {
       return (
-        <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(13,163,102,.2)', borderTopColor: G, animation: 'spin .8s linear infinite' }} />
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <div className="mx-auto w-full max-w-[960px] pt-4" style={{ fontFamily: FONT }}>
+          <div className={`${card} space-y-2 p-4`}>
+            <div className="h-4 w-40 animate-pulse rounded bg-gray-100" />
+            <div className="h-3 w-64 animate-pulse rounded bg-gray-100" />
+          </div>
         </div>
       );
     }
     return (
-      <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 }}>
-        <div style={{ fontSize: 44 }}>🔐</div>
-        <p style={{ fontSize: 20, fontWeight: 900, color: T1, margin: 0, fontFamily: "'Outfit',sans-serif", letterSpacing: '-.03em' }}>Sign in to view your account</p>
-        <p style={{ fontSize: 14, color: T2, margin: 0 }}>Your orders, addresses and preferences are waiting.</p>
-        <a href={authUrl(typeof window !== 'undefined' ? window.location.href : undefined)}
-          style={{ padding: '12px 28px', borderRadius: 14, border: 'none', background: G, color: '#fff', fontSize: 15, fontWeight: 800, cursor: 'pointer', boxShadow: `0 4px 20px ${G}40`, textDecoration: 'none' }}>
-          Sign In to Continue
-        </a>
-        <button onClick={openModal} style={{ background: 'none', border: 'none', color: T2, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-          or sign in here
-        </button>
+      <div className="mx-auto w-full max-w-[960px] pt-4 text-gray-900" style={{ fontFamily: FONT }}>
+        <div className={`${card} px-6 py-14 text-center`}>
+          <span className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E8EC] bg-[#FAFAFA] text-gray-400"><User size={18} /></span>
+          <h1 className="text-[17px] font-semibold tracking-[-0.01em]">Sign in to view your account</h1>
+          <p className="mt-1 text-[13px] text-gray-500">Orders, addresses and preferences are saved to your account.</p>
+          <div className="mt-4 flex flex-col items-center gap-2">
+            <Button size="sm" sameTab href={authUrl(typeof window !== 'undefined' ? window.location.href : undefined)}>Sign in</Button>
+            <button type="button" onClick={openModal} className="text-[13px] font-medium text-gray-500 hover:text-gray-900">or sign in here</button>
+          </div>
+        </div>
       </div>
     );
   }
 
   const TABS = [
-    { id: 'profile'   as const, label: 'My Profile',  icon: <User size={16} /> },
-    { id: 'addresses' as const, label: 'Addresses',   icon: <MapPin size={16} /> },
-    { id: 'orders'    as const, label: 'My Orders',   icon: <ShoppingBag size={16} /> },
-    { id: 'settings'  as const, label: 'Settings',    icon: <Settings size={16} /> },
+    { id: 'profile'   as const, label: 'Profile',   icon: <User size={15} /> },
+    { id: 'addresses' as const, label: 'Addresses', icon: <MapPin size={15} />, count: addressCount },
+    { id: 'orders'    as const, label: 'Orders',    icon: <ShoppingBag size={15} />, count: orderCount },
+    { id: 'settings'  as const, label: 'Settings',  icon: <Settings size={15} /> },
   ];
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', paddingTop: 32 }}>
-      {/* Page header */}
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.4rem,3vw,2rem)', color: T1, letterSpacing: '-.04em', margin: 0 }}>
-          My Account
-        </h1>
-        <p style={{ fontSize: 14, color: T2, marginTop: 4 }}>
-          Manage your profile, addresses, orders and settings
-        </p>
+    <div className="mx-auto w-full max-w-[960px] pb-24 pt-4 text-gray-900 md:pb-8" style={{ fontFamily: FONT }}>
+      <div className="flex items-baseline gap-3">
+        <h1 className="text-[20px] font-semibold tracking-[-0.01em]">Account</h1>
+        <p className="truncate text-[13px] text-gray-500">{user.email || user.phone || user.name}</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,220px) 1fr', gap: 20, alignItems: 'start' }}>
-
-        {/* ── Sidebar ── */}
-        <div style={{ background: W, border: `1px solid ${BD}`, borderRadius: 18, padding: 12, display: 'flex', flexDirection: 'column', gap: 4, position: 'sticky', top: 80, boxShadow: '0 1px 6px rgba(0,0,0,.05)' }}>
+      <div className="mt-4 grid items-start gap-4 md:grid-cols-[208px_1fr]">
+        {/* Sidebar (desktop) / tab row (mobile) */}
+        <div className={`${card} flex gap-1 overflow-x-auto p-1.5 [scrollbar-width:none] md:sticky md:top-[80px] md:flex-col md:overflow-visible [&::-webkit-scrollbar]:hidden`}>
           {TABS.map(t => (
-            <TabBtn key={t.id} active={tab === t.id} onClick={() => goTab(t.id)} icon={t.icon} label={t.label} />
+            <TabBtn key={t.id} active={tab === t.id} onClick={() => goTab(t.id)} icon={t.icon} label={t.label} count={t.count} />
           ))}
-
-          {/* Quick stats */}
-          <div style={{ marginTop: 12, padding: '12px', borderRadius: 12, background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
-            <p style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 700, color: T2, textTransform: 'uppercase', letterSpacing: '.04em' }}>Quick Stats</p>
-            {[
-              { v: orderCount, l: 'Orders Placed' },
-              { v: addressCount, l: 'Saved Addresses' },
-            ].map(({ v, l }) => (
-              <div key={l} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 0' }}>
-                <p style={{ margin: 0, fontSize: 12.5, color: T2 }}>{l}</p>
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 900, color: G, fontFamily: "'Outfit',sans-serif" }}>{v}</p>
-              </div>
-            ))}
-          </div>
         </div>
 
-        {/* ── Content ── */}
-        <div style={{ minWidth: 0 }}>
+        {/* Content */}
+        <div className="min-w-0">
           <AnimatePresence mode="wait">
-            <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: .18 }}>
+            <motion.div key={tab} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: .15 }}>
               {tab === 'profile'   && <ProfileTab />}
               {tab === 'addresses' && <AddressesTab />}
               {tab === 'orders'    && <OrdersTab />}

@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'wouter';
-import { Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, Copy, Check, Gift, Sparkles } from 'lucide-react';
+import { Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, Copy, Check, Gift } from 'lucide-react';
 import { usePromo } from '@/context/PromoContext';
 import { COUPONS } from '@/data/coupons';
+import { Button, FONT, IconTile } from '@/ui/kit';
 
-const G = '#0DA366';
-const G_LIGHT = 'rgba(13,163,102,0.08)';
-const G_BORDER = 'rgba(13,163,102,0.25)';
+const card = 'rounded-xl border border-[#E6E8EC] bg-white';
 
 export function Wallet() {
   const { walletBalance, walletTxns, referralCode } = usePromo();
@@ -17,84 +15,78 @@ export function Wallet() {
   };
 
   return (
-    <div style={{ background: '#F8F9FA', minHeight: '80vh', paddingBottom: 60 }}>
-      <div style={{ maxWidth: 820, margin: '0 auto', padding: '20px 4px' }}>
+    <div className="mx-auto w-full max-w-[880px] pb-24 pt-4 text-gray-900 md:pb-8" style={{ fontFamily: FONT }}>
+      <h1 className="text-[20px] font-semibold tracking-[-0.01em]">Wallet</h1>
 
-        {/* Balance card */}
-        <div style={{
-          background: `linear-gradient(135deg, ${G} 0%, #0A8C58 100%)`,
-          borderRadius: 20, padding: 24, color: '#fff', boxShadow: '0 10px 30px rgba(13,163,102,.35)',
-          position: 'relative', overflow: 'hidden',
-        }}>
-          <div style={{ position: 'absolute', right: -30, top: -30, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,.08)' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, opacity: 0.9, fontSize: 12.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
-            <WalletIcon size={14} /> Zyphix Wallet
-          </div>
-          <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 40, marginTop: 6 }}>₹{walletBalance}</div>
-          <div style={{ fontSize: 12.5, opacity: 0.9 }}>Use up to 20% of any order · Earn 2% cashback</div>
+      {/* Balance */}
+      <div className={`${card} mt-4 flex items-center gap-3 p-4`}>
+        <IconTile><WalletIcon size={18} /></IconTile>
+        <div className="min-w-0 flex-1">
+          <p className="text-[12px] text-gray-500">Balance</p>
+          <p className="text-[24px] font-semibold leading-tight tracking-[-0.01em] tabular-nums">₹{walletBalance.toLocaleString('en-IN')}</p>
+          <p className="mt-0.5 text-[12px] text-gray-500">Use up to 20% of any order · 2% cashback on every order</p>
         </div>
+        <Button href="/now" size="sm" variant="secondary" className="hidden sm:inline-flex">Shop</Button>
+      </div>
 
-        {/* Referral */}
-        <div style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 16, padding: 16, marginTop: 14, display: 'flex', gap: 12, alignItems: 'center' }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: G_LIGHT, color: G, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Gift size={22} />
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#111827', fontSize: 14.5 }}>Refer &amp; Earn</div>
-            <div style={{ fontSize: 12, color: '#6B7280' }}>Share your code · You both get ₹50 on their first order</div>
-          </div>
-          <button onClick={copyRef}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 12px', background: '#fff', border: `1.5px dashed ${G_BORDER}`, borderRadius: 10, color: G, fontWeight: 800, cursor: 'pointer', fontSize: 12.5 }}>
-            {copied ? <><Check size={14} /> Copied</> : <><Copy size={14} /> {referralCode}</>}
-          </button>
+      {/* Referral */}
+      <div className={`${card} mt-3 flex items-center gap-3 p-4`}>
+        <IconTile className="h-9 w-9 rounded-lg"><Gift size={16} /></IconTile>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13.5px] font-semibold">Referral code</p>
+          <p className="text-[12px] text-gray-500">Share this code with friends</p>
         </div>
+        <button type="button" onClick={copyRef}
+          className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[12.5px] font-semibold tracking-wide transition ${copied ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-[#E6E8EC] bg-white text-gray-900 hover:border-gray-300'}`}>
+          {copied ? <><Check size={13} /> Copied</> : <><Copy size={13} /> {referralCode}</>}
+        </button>
+      </div>
 
-        {/* Available coupons */}
-        <div style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 16, padding: 16, marginTop: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <Sparkles size={16} color={G} />
-            <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#111827', fontSize: 15 }}>Available Coupons</div>
-          </div>
-          <div style={{ display: 'grid', gap: 10 }}>
-            {COUPONS.map(c => (
-              <div key={c.code} style={{ display: 'flex', alignItems: 'center', gap: 12, border: `1.5px dashed ${G_BORDER}`, borderRadius: 12, padding: 12, background: G_LIGHT }}>
-                <div style={{ background: G, color: '#fff', fontWeight: 900, padding: '6px 10px', borderRadius: 8, fontSize: 12, letterSpacing: 0.5 }}>{c.code}</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 800, color: '#111827', fontSize: 13.5 }}>{c.title}</div>
-                  <div style={{ fontSize: 11.5, color: '#4B5563' }}>{c.desc}</div>
-                </div>
+      {/* Coupons */}
+      <div className={`${card} mt-3 p-4`}>
+        <div className="flex items-center justify-between">
+          <p className="text-[14px] font-semibold">Coupons</p>
+          <Button href="/now" size="sm" variant="secondary" className="!h-8">Apply in cart</Button>
+        </div>
+        <div className="mt-3 divide-y divide-gray-100 rounded-lg border border-[#E6E8EC]">
+          {COUPONS.map(c => (
+            <div key={c.code} className="flex items-center gap-3 px-3 py-2.5">
+              <span className="shrink-0 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11.5px] font-semibold tracking-wide text-emerald-700">{c.code}</span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-medium">{c.title}</p>
+                <p className="truncate text-[12px] text-gray-500">{c.desc}</p>
               </div>
-            ))}
-          </div>
-          <Link href="/now">
-            <a style={{ display: 'block', textAlign: 'center', marginTop: 12, padding: '11px', background: G, color: '#fff', borderRadius: 12, fontWeight: 800, textDecoration: 'none' }}>
-              Shop &amp; Apply Coupons
-            </a>
-          </Link>
+            </div>
+          ))}
         </div>
+      </div>
 
-        {/* Transactions */}
-        <div style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 16, padding: 16, marginTop: 14 }}>
-          <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#111827', fontSize: 15, marginBottom: 10 }}>Recent Activity</div>
-          {walletTxns.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '20px 0', color: '#9CA3AF', fontSize: 13 }}>No wallet activity yet.</div>
-          ) : (
-            walletTxns.map(t => (
-              <div key={t.id} style={{ display: 'flex', gap: 12, padding: '10px 0', borderBottom: '1px dashed #F3F4F6', alignItems: 'center' }}>
-                <div style={{ width: 34, height: 34, borderRadius: '50%', background: t.type === 'CREDIT' ? G_LIGHT : '#FEF2F2', color: t.type === 'CREDIT' ? G : '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {t.type === 'CREDIT' ? <ArrowDownLeft size={16} /> : <ArrowUpRight size={16} />}
+      {/* Transactions */}
+      <div className={`${card} mt-3 p-4`}>
+        <p className="text-[14px] font-semibold">Activity</p>
+        {walletTxns.length === 0 ? (
+          <p className="mt-3 rounded-lg bg-[#FAFAFA] px-3 py-6 text-center text-[13px] text-gray-500">No wallet activity yet.</p>
+        ) : (
+          <div className="mt-2 divide-y divide-gray-100">
+            {walletTxns.map(t => {
+              const credit = t.type === 'CREDIT';
+              return (
+                <div key={t.id} className="flex items-center gap-3 py-2.5">
+                  <span className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${credit ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-red-100 bg-red-50 text-red-600'}`}>
+                    {credit ? <ArrowDownLeft size={15} /> : <ArrowUpRight size={15} />}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-medium">{t.reason}</p>
+                    <p className="truncate text-[12px] text-gray-500">{new Date(t.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}{t.orderId ? ` · ${t.orderId}` : ''}</p>
+                  </div>
+                  <span className={`text-[13.5px] font-semibold tabular-nums ${credit ? 'text-emerald-700' : 'text-gray-900'}`}>
+                    {credit ? '+' : '−'}₹{t.amount}
+                  </span>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, color: '#111827', fontSize: 13.5 }}>{t.reason}</div>
-                  <div style={{ fontSize: 11.5, color: '#6B7280' }}>{new Date(t.createdAt).toLocaleString()}{t.orderId ? ` · ${t.orderId}` : ''}</div>
-                </div>
-                <div style={{ fontWeight: 900, color: t.type === 'CREDIT' ? G : '#EF4444', fontFamily: "'Outfit',sans-serif" }}>
-                  {t.type === 'CREDIT' ? '+' : '−'}₹{t.amount}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

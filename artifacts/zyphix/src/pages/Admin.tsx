@@ -3,6 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { ShieldCheck, Package, Users, TrendingUp, IndianRupee, ShoppingBag, LogOut, Search } from 'lucide-react';
 import { listOrders, type Order } from '@/context/CartContext';
 import { products } from '@/data/mockData';
+import { FONT } from '@/ui/kit';
 
 const G = '#0DA366';
 const ADMIN_KEY = 'zyphix_admin_pass_v1';
@@ -42,18 +43,18 @@ export function Admin() {
 
   if (!authed) {
     return (
-      <div style={{ padding: '60px 20px', maxWidth: 420, margin: '0 auto' }}>
-        <div style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 16, padding: 24, textAlign: 'center' }}>
+      <div style={{ padding: '60px 20px', maxWidth: 420, margin: '0 auto', fontFamily: FONT }}>
+        <div style={{ background: '#fff', border: '1px solid #E6E8EC', borderRadius: 12, padding: 24, textAlign: 'center' }}>
           <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(13,163,102,0.1)', color: G, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
             <ShieldCheck size={30} />
           </div>
-          <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 22, color: '#111827', margin: 0 }}>Admin Access</h1>
+          <h1 style={{ fontWeight: 600, fontSize: 18, color: '#111827', margin: 0, letterSpacing: '-0.01em' }}>Admin access</h1>
           <p style={{ color: '#6B7280', fontSize: 13, marginTop: 6 }}>Sign in to manage orders, products and customers.</p>
           <form onSubmit={(e) => { e.preventDefault(); if (pw === DEFAULT_PASS) { localStorage.setItem(ADMIN_KEY, '1'); setAuthed(true); } else setErr('Wrong password'); }}>
             <input type="password" value={pw} onChange={e => { setPw(e.target.value); setErr(''); }} placeholder="Admin password"
-              style={{ width: '100%', padding: '12px 14px', border: '1px solid #E5E7EB', borderRadius: 12, fontSize: 14, outline: 'none', margin: '16px 0 8px', boxSizing: 'border-box' }} />
+              style={{ width: '100%', padding: '12px 14px', border: '1px solid #E6E8EC', borderRadius: 12, fontSize: 14, outline: 'none', margin: '16px 0 8px', boxSizing: 'border-box' }} />
             {err && <div style={{ color: '#EF4444', fontSize: 12, marginBottom: 8 }}>{err}</div>}
-            <button type="submit" style={{ width: '100%', padding: '12px', background: G, color: '#fff', border: 'none', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>
+            <button type="submit" style={{ width: '100%', padding: '12px', background: G, color: '#fff', border: 'none', borderRadius: 12, fontWeight: 600, cursor: 'pointer' }}>
               Sign in
             </button>
           </form>
@@ -64,14 +65,14 @@ export function Admin() {
   }
 
   return (
-    <div style={{ background: '#F8F9FA', minHeight: '80vh', paddingBottom: 80 }}>
+    <div style={{ minHeight: '80vh', paddingBottom: 80, fontFamily: FONT }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 4px' }}>
         <div>
-          <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 24, color: '#111827', margin: 0 }}>Admin Dashboard</h1>
+          <h1 style={{ fontWeight: 600, fontSize: 20, color: '#111827', margin: 0, letterSpacing: '-0.01em' }}>Admin dashboard</h1>
           <div style={{ fontSize: 12, color: '#6B7280' }}>ZyphixNOW · Operations</div>
         </div>
         <button onClick={() => { localStorage.removeItem(ADMIN_KEY); setAuthed(false); }}
-          style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 10, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, color: '#111827' }}>
+          style={{ background: '#fff', border: '1px solid #E6E8EC', borderRadius: 10, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, color: '#111827' }}>
           <LogOut size={13} /> Sign out
         </button>
       </div>
@@ -80,7 +81,7 @@ export function Admin() {
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto' }}>
         {(['overview', 'orders', 'products', 'customers'] as Tab[]).map(t => (
           <button key={t} onClick={() => setTab(t)}
-            style={{ padding: '9px 16px', background: tab === t ? G : '#fff', color: tab === t ? '#fff' : '#111827', border: `1px solid ${tab === t ? G : '#E5E7EB'}`, borderRadius: 10, fontWeight: 700, fontSize: 13, cursor: 'pointer', textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
+            style={{ padding: '9px 16px', background: tab === t ? G : '#fff', color: tab === t ? '#fff' : '#111827', border: `1px solid ${tab === t ? G : '#E6E8EC'}`, borderRadius: 10, fontWeight: 700, fontSize: 13, cursor: 'pointer', textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
             {t}
           </button>
         ))}
@@ -95,15 +96,15 @@ export function Admin() {
             <Kpi icon={<TrendingUp size={18} />} label="AOV" value={`₹${stats.aov}`} />
             <Kpi icon={<Package size={18} />} label="Catalog" value={String(stats.products)} />
           </div>
-          <div style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 14, padding: 16 }}>
-            <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#111827', marginBottom: 10 }}>Recent orders</div>
+          <div style={{ background: '#fff', border: '1px solid #E6E8EC', borderRadius: 12, padding: 16 }}>
+            <div style={{ fontWeight: 600, color: '#111827', marginBottom: 10 }}>Recent orders</div>
             {orders.slice(0, 5).map(o => (
-              <div key={o.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px dashed #F3F4F6' }}>
+              <div key={o.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #F3F4F6' }}>
                 <div>
                   <div style={{ fontWeight: 700, color: '#111827', fontSize: 13 }}>{o.address.name}</div>
                   <div style={{ fontSize: 11, color: '#6B7280' }}>{o.id} · {new Date(o.createdAt).toLocaleString()}</div>
                 </div>
-                <div style={{ fontWeight: 800, color: '#111827' }}>₹{o.total}</div>
+                <div style={{ fontWeight: 600, color: '#111827' }}>₹{o.total}</div>
               </div>
             ))}
             {orders.length === 0 && <div style={{ color: '#6B7280', fontSize: 13, padding: '20px 0', textAlign: 'center' }}>No orders yet.</div>}
@@ -112,8 +113,8 @@ export function Admin() {
       )}
 
       {tab === 'orders' && (
-        <div style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 14, padding: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 10, padding: '8px 12px' }}>
+        <div style={{ background: '#fff', border: '1px solid #E6E8EC', borderRadius: 12, padding: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, background: '#F9FAFB', border: '1px solid #E6E8EC', borderRadius: 10, padding: '8px 12px' }}>
             <Search size={16} color="#9CA3AF" />
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by ID, name or phone" style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13 }} />
           </div>
@@ -122,7 +123,7 @@ export function Admin() {
               <thead>
                 <tr style={{ background: '#F9FAFB', textAlign: 'left' }}>
                   {['Order', 'Customer', 'Items', 'Payment', 'Total', 'When'].map(h => (
-                    <th key={h} style={{ padding: '10px', fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase' }}>{h}</th>
+                    <th key={h} style={{ padding: '10px', fontSize: 12, fontWeight: 500, color: '#6B7280' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -133,7 +134,7 @@ export function Admin() {
                     <td style={{ padding: '10px' }}>{o.address.name}<div style={{ fontSize: 11, color: '#6B7280' }}>{o.address.phone}</div></td>
                     <td style={{ padding: '10px' }}>{o.items.reduce((s, i) => s + i.qty, 0)}</td>
                     <td style={{ padding: '10px' }}><span style={{ padding: '3px 8px', background: o.paymentMode === 'COD' ? '#FEF3C7' : '#DBEAFE', color: o.paymentMode === 'COD' ? '#92400E' : '#1E40AF', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>{o.paymentMode}</span></td>
-                    <td style={{ padding: '10px', fontWeight: 800 }}>₹{o.total}</td>
+                    <td style={{ padding: '10px', fontWeight: 600 }}>₹{o.total}</td>
                     <td style={{ padding: '10px', color: '#6B7280', fontSize: 12 }}>{new Date(o.createdAt).toLocaleString()}</td>
                   </tr>
                 ))}
@@ -147,8 +148,8 @@ export function Admin() {
       )}
 
       {tab === 'products' && (
-        <div style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 14, padding: 16 }}>
-          <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#111827', marginBottom: 12 }}>Catalog ({products.length} products)</div>
+        <div style={{ background: '#fff', border: '1px solid #E6E8EC', borderRadius: 12, padding: 16 }}>
+          <div style={{ fontWeight: 600, color: '#111827', marginBottom: 12 }}>Catalog ({products.length} products)</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, maxHeight: 600, overflowY: 'auto' }}>
             {products.slice(0, 60).map(p => (
               <div key={p.id} style={{ border: '1px solid #F0F0F0', borderRadius: 10, padding: 8 }}>
@@ -156,7 +157,7 @@ export function Admin() {
                 <div style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 600, marginTop: 6 }}>{p.brand}</div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: '#1F2937', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.name}</div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-                  <div style={{ fontWeight: 900, color: '#111827', fontSize: 13 }}>₹{p.price}</div>
+                  <div style={{ fontWeight: 600, color: '#111827', fontSize: 13 }}>₹{p.price}</div>
                   <div style={{ fontSize: 10, color: '#6B7280' }}>{p.category}</div>
                 </div>
               </div>
@@ -167,8 +168,8 @@ export function Admin() {
       )}
 
       {tab === 'customers' && (
-        <div style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 14, padding: 16 }}>
-          <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#111827', marginBottom: 12 }}>Customers</div>
+        <div style={{ background: '#fff', border: '1px solid #E6E8EC', borderRadius: 12, padding: 16 }}>
+          <div style={{ fontWeight: 600, color: '#111827', marginBottom: 12 }}>Customers</div>
           {(() => {
             const byPhone = new Map<string, { name: string; phone: string; orders: number; spend: number }>();
             orders.forEach(o => {
@@ -182,13 +183,13 @@ export function Admin() {
             return (
               <div>
                 {list.map(c => (
-                  <div key={c.phone} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px dashed #F3F4F6' }}>
+                  <div key={c.phone} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #F3F4F6' }}>
                     <div>
-                      <div style={{ fontWeight: 800, color: '#111827', fontSize: 13 }}>{c.name}</div>
+                      <div style={{ fontWeight: 600, color: '#111827', fontSize: 13 }}>{c.name}</div>
                       <div style={{ fontSize: 11, color: '#6B7280' }}>{c.phone}</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 800, color: '#111827' }}>₹{c.spend.toLocaleString('en-IN')}</div>
+                      <div style={{ fontWeight: 600, color: '#111827' }}>₹{c.spend.toLocaleString('en-IN')}</div>
                       <div style={{ fontSize: 11, color: G }}>{c.orders} order{c.orders > 1 ? 's' : ''}</div>
                     </div>
                   </div>
@@ -204,11 +205,11 @@ export function Admin() {
 
 function Kpi({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 14, padding: 14 }}>
+    <div style={{ background: '#fff', border: '1px solid #E6E8EC', borderRadius: 12, padding: 14 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: G, marginBottom: 6 }}>
-        {icon}<span style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.05em' }}>{label}</span>
+        {icon}<span style={{ fontSize: 12, fontWeight: 500, color: '#6B7280' }}>{label}</span>
       </div>
-      <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 22, color: '#111827' }}>{value}</div>
+      <div style={{ fontWeight: 600, fontSize: 20, color: '#111827', letterSpacing: '-0.01em' }}>{value}</div>
     </div>
   );
 }

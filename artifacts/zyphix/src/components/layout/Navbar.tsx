@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Search, MapPin, ShoppingCart, User, ChevronDown, Menu, X, LogOut, Settings, Package, Users, Heart, Bell } from 'lucide-react';
+import { Search, MapPin, ShoppingCart, User, ChevronDown, Menu, X, LogOut, Settings, Package, Heart, Bell, Zap, Utensils, CalendarCheck, Store, Tag, Wallet } from 'lucide-react';
 import { ZyphixLogo } from '../ZyphixLogo';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
@@ -8,9 +8,7 @@ import { useWishlist } from '@/context/WishlistContext';
 import { useNotifications } from '@/context/NotificationsContext';
 import { authUrl } from '@/lib/account';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const G = '#0DA366';
-const HEAD_FONT = "'Outfit', sans-serif";
+import { Button, FONT, G } from '@/ui/kit';
 
 export function Navbar() {
   const [location, nav] = useLocation();
@@ -55,112 +53,120 @@ export function Navbar() {
 
   const initial = user ? user.name.charAt(0).toUpperCase() : 'U';
 
-  const iconBtn = 'relative flex h-[38px] w-[38px] items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 transition hover:border-gray-300 hover:bg-gray-50';
+  const iconBtn = 'relative flex h-9 w-9 items-center justify-center rounded-xl text-gray-600 transition hover:bg-gray-100 hover:text-gray-900';
+  const badge = 'absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold text-white';
+  const avatar = 'flex shrink-0 items-center justify-center rounded-full bg-gray-900 font-semibold text-white';
 
   return (
-    <div className={`sticky top-0 z-50 w-full border-b bg-white/90 backdrop-blur-md transition-all duration-300 ${scrolled ? 'border-gray-200 shadow-[0_4px_24px_rgba(11,18,32,.06)]' : 'border-gray-100'}`}>
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3 h-16">
+    <div className={`sticky top-0 z-50 w-full border-b border-[#E6E8EC] bg-white/90 backdrop-blur-md transition-shadow ${scrolled ? 'shadow-[0_1px_2px_rgba(11,15,25,.04)]' : ''}`} style={{ fontFamily: FONT }}>
+      <div className="mx-auto max-w-[1180px] px-4">
+        <div className="flex h-[60px] items-center gap-2 sm:gap-3">
 
           {/* ── Logo ── */}
           <Link href="/" className="shrink-0 transition-opacity hover:opacity-90">
-            <ZyphixLogo key={location} size={34} ixColor="#000000" />
+            <ZyphixLogo key={location} size={30} ixColor="#000000" />
           </Link>
 
           {/* ── Location ── */}
-          <button className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 bg-white transition hover:bg-gray-50 shrink-0">
-            <MapPin size={14} style={{ color: G }} />
-            <div className="text-left">
-              <p className="text-[9px] font-semibold uppercase tracking-wide leading-none text-gray-400">Deliver to</p>
-              <div className="flex items-center gap-0.5 mt-0.5">
-                <span className="font-bold text-sm leading-none text-gray-900">Select Location</span>
-                <ChevronDown size={12} className="text-gray-400" />
-              </div>
-            </div>
+          <button type="button" className="hidden md:flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-2.5 text-[13px] font-medium text-gray-900 transition hover:bg-gray-100">
+            <MapPin size={16} style={{ color: G }} />
+            <span>Select location</span>
+            <ChevronDown size={14} className="text-gray-400" />
           </button>
 
           {/* ── Search bar ── */}
-          <div className="flex-1 relative" style={{ minWidth: 0, maxWidth: 480 }}>
-            <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors z-10 ${focused ? 'text-emerald-600' : 'text-gray-400'}`} size={16} />
+          <div className="relative min-w-0 flex-1" style={{ maxWidth: 520 }}>
+            <Search className={`pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 ${focused ? 'text-gray-600' : 'text-gray-400'}`} size={16} />
             <input
               type="text"
               value={query}
               onChange={e => setQuery(e.target.value)}
               onKeyDown={handleSearch}
-              placeholder="Search groceries, food, services… (press Enter)"
+              placeholder="Search groceries, food, services"
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
-              className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 outline-none border transition-all duration-200 ${focused ? 'bg-white border-emerald-400 ring-[3px] ring-emerald-500/10' : 'bg-gray-100 border-gray-200'}`}
-              style={{ fontFamily: "'Inter', sans-serif" }}
+              className={`h-10 w-full rounded-xl border pl-9 pr-3 text-[14px] text-gray-900 outline-none transition placeholder:text-gray-400 ${focused ? 'border-gray-300 bg-white ring-[3px] ring-gray-900/5' : 'border-transparent bg-gray-100'}`}
+              style={{ fontFamily: FONT }}
             />
           </div>
 
-          {/* ── Become a Partner (desktop) ── */}
-          <Link href="/partner"
-            className="hidden md:flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-[7px] text-[13px] font-bold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100">
-            <Users size={14} />
-            <span className="hidden lg:inline">Become a Partner</span>
-          </Link>
+          {/* ── Become a partner (desktop) ── */}
+          <a href="https://partner.zyphix.in" target="_blank" rel="noopener noreferrer"
+            className="hidden lg:inline-flex h-9 shrink-0 items-center whitespace-nowrap px-2 text-[13px] font-medium text-gray-600 transition hover:text-gray-900">
+            Become a partner
+          </a>
 
           {/* ── Actions ── */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="ml-auto flex shrink-0 items-center gap-1">
+
+            {/* Wishlist */}
+            <Link href="/wishlist" aria-label="Wishlist" className={iconBtn}>
+              <Heart size={20} strokeWidth={1.75} />
+              {wishCount > 0 && <span className={`${badge} bg-red-600`}>{wishCount}</span>}
+            </Link>
+
+            {/* Notifications */}
+            <Link href="/notifications" aria-label="Notifications" className={iconBtn}>
+              <Bell size={20} strokeWidth={1.75} />
+              {notifUnread > 0 && <span className={badge} style={{ background: G }}>{notifUnread}</span>}
+            </Link>
+
+            {/* Cart */}
+            <button type="button" onClick={() => nav('/now')} aria-label="Cart" className={iconBtn}>
+              <ShoppingCart size={20} strokeWidth={1.75} />
+              {cartCount > 0 && <span className={badge} style={{ background: G }}>{cartCount}</span>}
+            </button>
 
             {/* Auth button / Avatar */}
             {user ? (
               /* ── Avatar + dropdown ── */
-              <div ref={dropRef} className="relative">
-                <button onClick={() => setDropdown(d => !d)}
-                  className={`flex items-center gap-2 rounded-xl border px-2.5 py-1.5 transition ${dropdown ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 bg-white hover:bg-gray-50'}`}>
-                  <div className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full text-[13px] font-black text-white" style={{ background: `linear-gradient(135deg, ${G}, #0A8C58)`, fontFamily: HEAD_FONT }}>
-                    {initial}
-                  </div>
-                  <span className="hidden lg:inline max-w-[90px] truncate text-[13.5px] font-bold text-gray-900">
+              <div ref={dropRef} className="relative ml-1">
+                <button type="button" onClick={() => setDropdown(d => !d)}
+                  className={`flex h-9 items-center gap-1.5 rounded-xl pl-1 pr-2 transition ${dropdown ? 'bg-gray-100' : 'hover:bg-gray-100'}`}>
+                  <span className={`${avatar} h-7 w-7 text-[12px]`}>{initial}</span>
+                  <span className="hidden max-w-[90px] truncate text-[13px] font-medium text-gray-900 lg:inline">
                     {user.name.split(' ')[0]}
                   </span>
-                  <ChevronDown size={13} className="text-gray-400 transition-transform" style={{ transform: dropdown ? 'rotate(180deg)' : 'none' }} />
+                  <ChevronDown size={14} className="text-gray-400 transition-transform" style={{ transform: dropdown ? 'rotate(180deg)' : 'none' }} />
                 </button>
 
                 <AnimatePresence>
                   {dropdown && (
                     <motion.div
-                      initial={{ opacity: 0, scale: .95, y: -6 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: .95, y: -6 }}
-                      transition={{ duration: .15, ease: 'easeOut' }}
-                      className="absolute right-0 top-[calc(100%+8px)] z-[100] w-[230px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_20px_60px_rgba(11,18,32,.14)]">
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: .12, ease: 'easeOut' }}
+                      className="absolute right-0 top-[calc(100%+6px)] z-[100] w-[232px] overflow-hidden rounded-xl border border-[#E6E8EC] bg-white shadow-[0_8px_24px_rgba(11,15,25,.08)]">
 
                       {/* User info header */}
-                      <div className="border-b border-gray-200 bg-emerald-50/60 px-4 py-3.5">
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[15px] font-black text-white" style={{ background: `linear-gradient(135deg, ${G}, #0A8C58)`, fontFamily: HEAD_FONT }}>
-                            {initial}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="m-0 truncate text-[14px] font-extrabold text-gray-900">{user.name}</p>
-                            <p className="m-0 mt-px truncate text-[11.5px] text-gray-500">{user.email || user.phone || 'Zyphix Member'}</p>
-                          </div>
+                      <div className="flex items-center gap-2.5 border-b border-[#E6E8EC] px-3 py-3">
+                        <span className={`${avatar} h-8 w-8 text-[13px]`}>{initial}</span>
+                        <div className="min-w-0">
+                          <p className="m-0 truncate text-[13px] font-semibold text-gray-900">{user.name}</p>
+                          <p className="m-0 truncate text-[12px] text-gray-600">{user.email || user.phone || 'Member'}</p>
                         </div>
                       </div>
 
                       {/* Menu items */}
-                      <div className="p-2">
+                      <div className="p-1.5">
                         {[
-                          { icon: <User size={14} />, label: 'My Profile',    href: '/account?tab=profile' },
-                          { icon: <MapPin size={14} />, label: 'My Addresses', href: '/account?tab=addresses' },
-                          { icon: <Package size={14} />, label: 'My Orders',   href: '/account?tab=orders' },
-                          { icon: <Settings size={14} />, label: 'Settings',   href: '/account?tab=settings' },
+                          { icon: <User size={16} />, label: 'Profile',    href: '/account?tab=profile' },
+                          { icon: <MapPin size={16} />, label: 'Addresses', href: '/account?tab=addresses' },
+                          { icon: <Package size={16} />, label: 'Orders',   href: '/account?tab=orders' },
+                          { icon: <Settings size={16} />, label: 'Settings', href: '/account?tab=settings' },
                         ].map(({ icon, label, href }) => (
                           <Link key={label} href={href}
-                            className="flex items-center gap-2.5 rounded-[10px] px-2.5 py-2.5 text-[13.5px] font-semibold text-gray-700 transition hover:bg-gray-50 hover:text-gray-900">
+                            className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium text-gray-700 transition hover:bg-gray-100 hover:text-gray-900">
                             <span className="text-gray-400">{icon}</span>{label}
                           </Link>
                         ))}
                       </div>
 
-                      <div className="border-t border-gray-200 p-2">
-                        <button onClick={() => { logout(); setDropdown(false); }}
-                          className="flex w-full items-center gap-2.5 rounded-[10px] border-0 bg-transparent px-2.5 py-2.5 text-[13.5px] font-semibold text-red-600 transition hover:bg-red-50">
-                          <LogOut size={14} />Sign Out
+                      <div className="border-t border-[#E6E8EC] p-1.5">
+                        <button type="button" onClick={() => { logout(); setDropdown(false); }}
+                          className="flex w-full items-center gap-2.5 rounded-lg border-0 bg-transparent px-2.5 py-2 text-[13px] font-medium text-red-600 transition hover:bg-red-50">
+                          <LogOut size={16} />Sign out
                         </button>
                       </div>
                     </motion.div>
@@ -168,45 +174,15 @@ export function Navbar() {
                 </AnimatePresence>
               </div>
             ) : (
-              /* ── Login button ── */
-              <a href={signInHref}
-                className="hidden sm:flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 hover:text-gray-900">
-                <User size={15} />
-                <span className="hidden lg:inline">Sign in</span>
-              </a>
+              /* ── Sign in ── */
+              <div className="hidden sm:block ml-1">
+                <Button href={signInHref} sameTab variant="secondary" size="sm" className="!h-9 !rounded-xl !px-3.5">Sign in</Button>
+              </div>
             )}
 
-            {/* Wishlist */}
-            <Link href="/wishlist" aria-label="Wishlist" className={iconBtn}>
-              <Heart size={17} />
-              {wishCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-extrabold text-white">{wishCount}</span>
-              )}
-            </Link>
-
-            {/* Notifications */}
-            <Link href="/notifications" aria-label="Notifications" className={iconBtn}>
-              <Bell size={17} />
-              {notifUnread > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-extrabold text-white" style={{ background: G }}>{notifUnread}</span>
-              )}
-            </Link>
-
-            {/* Cart */}
-            <button onClick={() => nav('/now')}
-              className="relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-extrabold text-white transition hover:opacity-90" style={{ background: G }}>
-              <ShoppingCart size={16} />
-              <span className="hidden sm:inline font-black">Cart</span>
-              {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-orange-500 text-[10px] font-black text-white">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-
             {/* Mobile menu toggle */}
-            <button className="md:hidden p-2 rounded-xl text-gray-600 transition-colors hover:bg-gray-100"
-              onClick={() => setMobileOpen(!mobileOpen)}>
+            <button type="button" className="md:hidden flex h-9 w-9 items-center justify-center rounded-xl text-gray-600 transition hover:bg-gray-100"
+              aria-label="Menu" onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
@@ -217,53 +193,56 @@ export function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden border-t border-gray-200 bg-white">
-            <div className="max-w-screen-xl mx-auto px-4 py-4 space-y-1">
+            className="overflow-hidden border-t border-[#E6E8EC] bg-white">
+            <div className="mx-auto max-w-[1180px] space-y-0.5 px-3 py-3">
 
               {/* Logged-in user strip */}
               {user && (
-                <div className="mb-2 flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5">
-                  <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full text-[14px] font-black text-white" style={{ background: `linear-gradient(135deg, ${G}, #0A8C58)` }}>
-                    {initial}
-                  </div>
-                  <div>
-                    <p className="m-0 text-[14px] font-bold text-gray-900">{user.name}</p>
-                    <p className="m-0 text-[12px] text-gray-500">{user.email || user.phone || 'Member'}</p>
+                <div className="mb-2 flex items-center gap-2.5 rounded-xl border border-[#E6E8EC] bg-[#FAFAFA] px-3 py-2.5">
+                  <span className={`${avatar} h-8 w-8 text-[13px]`}>{initial}</span>
+                  <div className="min-w-0">
+                    <p className="m-0 truncate text-[13px] font-semibold text-gray-900">{user.name}</p>
+                    <p className="m-0 truncate text-[12px] text-gray-600">{user.email || user.phone || 'Member'}</p>
                   </div>
                 </div>
               )}
 
               {[
-                { icon: '⚡', label: 'Zyphix Now',    href: '/now' },
-                { icon: '🍱', label: 'Zyphix Eats',   href: '/eats' },
-                { icon: '📅', label: 'Zyphix Book',   href: '/book' },
-                { icon: '🗺️', label: 'Kirana Near Me', href: '/kirana-map' },
-                { icon: '🏷️', label: 'Offers',        href: '/offers' },
-                { icon: '❤️', label: `Wishlist${wishCount ? ` (${wishCount})` : ''}`, href: '/wishlist' },
-                { icon: '🔔', label: `Notifications${notifUnread ? ` (${notifUnread})` : ''}`, href: '/notifications' },
-                { icon: '💰', label: 'Wallet', href: '/wallet' },
+                { icon: <Zap size={18} />, label: 'Zyphix Now',    href: '/now' },
+                { icon: <Utensils size={18} />, label: 'Zyphix Eats',   href: '/eats' },
+                { icon: <CalendarCheck size={18} />, label: 'Zyphix Book',   href: '/book' },
+                { icon: <Store size={18} />, label: 'Kirana near me', href: '/kirana-map' },
+                { icon: <Tag size={18} />, label: 'Offers',        href: '/offers' },
+                { icon: <Heart size={18} />, label: `Wishlist${wishCount ? ` (${wishCount})` : ''}`, href: '/wishlist' },
+                { icon: <Bell size={18} />, label: `Notifications${notifUnread ? ` (${notifUnread})` : ''}`, href: '/notifications' },
+                { icon: <Wallet size={18} />, label: 'Wallet', href: '/wallet' },
               ].map(({ icon, label, href }) => (
                 <Link key={label} href={href} onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 py-3 px-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors cursor-pointer font-medium">
-                  <span>{icon}</span>{label}
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900">
+                  <span className="text-gray-400">{icon}</span>{label}
                 </Link>
               ))}
+
+              <a href="https://partner.zyphix.in" target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900">
+                <span className="text-gray-400"><User size={18} /></span>Become a partner
+              </a>
 
               {user ? (
                 <>
                   <Link href="/account" onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 py-3 px-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors cursor-pointer font-medium">
-                    <User size={16} style={{ color: G }} />My Account
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900">
+                    <span className="text-gray-400"><User size={18} /></span>My account
                   </Link>
-                  <button onClick={() => { logout(); setMobileOpen(false); }}
-                    className="w-full flex items-center gap-3 py-3 px-3 rounded-xl border-0 bg-transparent text-red-600 hover:bg-red-50 transition-colors cursor-pointer font-medium">
-                    <LogOut size={16} />Sign Out
+                  <button type="button" onClick={() => { logout(); setMobileOpen(false); }}
+                    className="flex w-full items-center gap-3 rounded-xl border-0 bg-transparent px-3 py-2.5 text-[14px] font-medium text-red-600 transition-colors hover:bg-red-50">
+                    <LogOut size={18} />Sign out
                   </button>
                 </>
               ) : (
                 <a href={signInHref} onClick={() => setMobileOpen(false)}
-                  className="block w-full mt-3 py-3 rounded-xl font-black text-sm text-white text-center transition hover:opacity-90" style={{ background: G }}>
-                  Sign In / Get Started
+                  className="mt-2 block w-full rounded-xl border border-[#E6E8EC] bg-white py-2.5 text-center text-[14px] font-semibold text-gray-900 transition hover:bg-gray-50">
+                  Sign in
                 </a>
               )}
             </div>
