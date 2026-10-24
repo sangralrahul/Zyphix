@@ -14,6 +14,7 @@
   "type": "module",
   "packageManager": "pnpm@10.28.0",
   "devDependencies": {
+    "@cf-wasm/photon": "0.1.31",
     "@lovable.dev/vite-tanstack-config": "2.26.5",
     "@tailwindcss/vite": "^4.1.14",
     "@tanstack/router-plugin": "^1.168.40",

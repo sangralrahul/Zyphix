@@ -1,4 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
+import { PhotonImage, resize, SamplingFilter } from '@cf-wasm/photon';
 /**
  * Zyphix Now – Cloudflare Worker
  *
@@ -94,6 +95,22 @@ export default {
     }
 
     return env.ASSETS.fetch(request);
+  },
+
+  /**
+   * Cron (see wrangler.toml [triggers]): fills product images on its own.
+   * Each run resolves a small batch of packaged goods from Open Food Facts, generates
+   * produce photos with Workers AI, and creates 480px WebP thumbnails — no laptop needed.
+   */
+  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil((async () => {
+      try {
+        const packaged = await syncImages(env, 5, 'packaged');
+        const produce = await syncImages(env, 10, 'produce');
+        const thumbs = await makeMissingThumbs(env, 40);
+        console.log(JSON.stringify({ cron: 'images', packaged: packaged.processed, produce: produce.processed, remaining: produce.remaining, thumbs }));
+      } catch (err) { console.error('cron images failed', (err as Error).message); }
+    })());
   },
 } satisfies ExportedHandler<Env>;
 
@@ -308,7 +325,37 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(
 
 async function putImage(env: Env, key: string, body: ArrayBuffer, contentType: string) {
   await env.IMAGES.put(key, body, { httpMetadata: { contentType, cacheControl: 'public, max-age=31536000, immutable' } });
+  try { await putThumb(env, key, body); } catch (err) { console.warn('thumb failed', key, (err as Error).message); }
   return `/img/${key}`;
+}
+
+/* ---- Thumbnails (480px WebP) made in the Worker with photon (WASM) ---- */
+const THUMB_PX = 480;
+async function putThumb(env: Env, key: string, body: ArrayBuffer) {
+  const img = PhotonImage.new_from_byteslice(new Uint8Array(body));
+  try {
+    const w = img.get_width(), h = img.get_height();
+    const scale = Math.min(1, THUMB_PX / Math.max(w, h));
+    const out = scale < 1 ? resize(img, Math.max(1, Math.round(w * scale)), Math.max(1, Math.round(h * scale)), SamplingFilter.Lanczos3) : img;
+    const webp = out.get_bytes_webp();
+    await env.IMAGES.put(`thumbs/${key}.webp`, webp, { httpMetadata: { contentType: 'image/webp', cacheControl: 'public, max-age=31536000, immutable' } });
+    if (out !== img) out.free();
+  } finally { img.free(); }
+}
+
+/** Creates thumbnails for ready images that don't have one yet (bounded per run). */
+async function makeMissingThumbs(env: Env, limit: number): Promise<number> {
+  const { results } = await env.DB.prepare("SELECT DISTINCT image_url FROM products WHERE image_status = 'ready' AND image_url LIKE '/img/%' LIMIT 1500").all<{ image_url: string }>();
+  let made = 0;
+  for (const r of results) {
+    if (made >= limit) break;
+    const key = r.image_url.slice('/img/'.length);
+    if (await env.IMAGES.head(`thumbs/${key}.webp`)) continue;
+    const obj = await env.IMAGES.get(key);
+    if (!obj) continue;
+    try { await putThumb(env, key, await obj.arrayBuffer()); made++; } catch (err) { console.warn('thumb failed', key, (err as Error).message); }
+  }
+  return made;
 }
 
 /* ---- Open Food Facts / Open Beauty Facts ---- */
@@ -341,29 +388,47 @@ async function findPackagedImage(env: Env, row: ProductRow): Promise<ImageResult
     : row.name;
 
   let best: any = null; let bestScore = 2; // require at least a brand hit or 3 token hits
-  for (const h of hosts) {
-    const u = new URL(`https://${h}/cgi/search.pl`);
-    u.searchParams.set('search_terms', `${row.brand} ${bareName}`);
-    u.searchParams.set('search_simple', '1');
-    u.searchParams.set('action', 'process');
-    u.searchParams.set('json', '1');
-    u.searchParams.set('page_size', '10');
-    u.searchParams.set('fields', 'code,product_name,product_name_en,brands,image_front_url,image_url,countries_tags');
-
-    const res = await fetch(u.toString(), { headers: { 'user-agent': OFF_UA, accept: 'application/json' } });
-    if (res.status === 429 || res.status === 503) throw new Error('rate limited');
-    if (!res.ok) throw new Error(`search ${res.status}`);
-    const data: any = await res.json().catch(() => { throw new Error('search returned non-JSON (likely blocked)'); });
-    for (const hit of data.products ?? []) {
-      const s = scoreHit(hit, row.brand, bareName);
-      if (s > bestScore) { bestScore = s; best = { ...hit, _host: h }; }
+  // Prefer the modern search service (search-a-licious): far less throttled than the legacy search.pl,
+  // which blocks most cloud IPs. Fall back to search.pl on the two legacy hosts.
+  const queries: Array<() => Promise<any[]>> = [
+    async () => {
+      const u = new URL('https://search.openfoodfacts.org/search');
+      u.searchParams.set('q', `${row.brand} ${bareName}`); u.searchParams.set('page_size', '10'); u.searchParams.set('langs', 'en');
+      u.searchParams.set('fields', 'code,product_name,product_name_en,brands,image_front_url,image_url,countries_tags');
+      const res = await fetch(u.toString(), { headers: { 'user-agent': OFF_UA, accept: 'application/json' } });
+      if (res.status === 429 || res.status === 503) throw new Error('rate limited');
+      if (!res.ok) throw new Error(`search-a-licious ${res.status}`);
+      const data: any = await res.json(); return data.hits ?? data.products ?? [];
+    },
+    ...hosts.map(h => async () => {
+      const u = new URL(`https://${h}/cgi/search.pl`);
+      u.searchParams.set('search_terms', `${row.brand} ${bareName}`); u.searchParams.set('search_simple', '1'); u.searchParams.set('action', 'process');
+      u.searchParams.set('json', '1'); u.searchParams.set('page_size', '10');
+      u.searchParams.set('fields', 'code,product_name,product_name_en,brands,image_front_url,image_url,countries_tags');
+      const res = await fetch(u.toString(), { headers: { 'user-agent': OFF_UA, accept: 'application/json' } });
+      if (res.status === 429 || res.status === 503) throw new Error('rate limited');
+      if (!res.ok) throw new Error(`search ${res.status}`);
+      const data: any = await res.json().catch(() => { throw new Error('search returned non-JSON (likely blocked)'); });
+      return data.products ?? [];
+    }),
+  ];
+  let lastErr: Error | null = null;
+  for (const q of queries) {
+    let hits: any[] = [];
+    try { hits = await q(); } catch (err) { lastErr = err as Error; if ((err as Error).message === 'rate limited') throw err; continue; }
+    for (const hit of hits) {
+      const sc = scoreHit(hit, row.brand, bareName);
+      if (sc > bestScore) { bestScore = sc; best = { ...hit, _host: String(hit.code ?? '').length && BEAUTY_CATEGORIES.has(row.category) ? 'beauty' : 'food' }; }
     }
-    if (best || (data.products ?? []).length > 0) break;
+    if (best || hits.length) break;
   }
+  if (!best && lastErr) throw lastErr;
   if (!best) return null;
 
-  const imgUrl: string = best.image_front_url ?? best.image_url;
-  const imgRes = await fetch(imgUrl, { headers: { 'user-agent': OFF_UA } });
+  const imgUrl0: string = best.image_front_url ?? best.image_url;
+  const full = imgUrl0.replace(/\.(\d{3})\.jpg$/i, '.full.jpg');
+  let imgRes = await fetch(full, { headers: { 'user-agent': OFF_UA } });
+  if (!imgRes.ok && full !== imgUrl0) imgRes = await fetch(imgUrl0, { headers: { 'user-agent': OFF_UA } });
   if (!imgRes.ok) throw new Error(`image fetch ${imgRes.status}`);
   const ct = imgRes.headers.get('content-type') ?? 'image/jpeg';
   const ext = ct.includes('png') ? 'png' : ct.includes('webp') ? 'webp' : 'jpg';

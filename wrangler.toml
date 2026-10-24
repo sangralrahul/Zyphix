@@ -27,3 +27,7 @@ binding = "AI"
 
 [observability]
 enabled = true
+
+# Image pipeline runs itself: every 2 minutes resolve a few product photos, generate produce shots, build thumbnails
+[triggers]
+crons = ["*/2 * * * *"]
