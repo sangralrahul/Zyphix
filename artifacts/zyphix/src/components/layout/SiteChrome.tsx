@@ -68,8 +68,8 @@ export function SiteHeader() {
 /* ── Footer ───────────────────────────────────────────────────────────────── */
 const FOOT: Array<[string, Array<[string, string]>]> = [
   ['Products', [['Zyphix Now', '/now'], ['Zyphix Eats', '/eats'], ['Zyphix Book', '/book'], ['Offers', '/offers'], ['Mobile app', '/app']]],
-  ['Partners', [['Partner overview', '/partner'], ['List your store', '/merchant-setup'], ['Register restaurant', '/restaurant-setup'], ['Deliver with us', '/delivery-setup']]],
-  ['Company', [['About', '/about'], ['Blog', '/blog'], ['Investors', '/investors'], ['Contact', '/contact']]],
+  ['Partners', [['Partner portal', 'https://partner.zyphix.in'], ['Deliver with us', '/delivery-setup'], ['Register restaurant', '/restaurant-setup'], ['Join as a professional', '/service-setup'], ['List your store', '/merchant-setup']]],
+  ['Company', [['About', '/about'], ['Advertise with us', 'https://advertise.zyphix.in'], ['Investors', '/investors'], ['Blog', '/blog'], ['Contact', '/contact']]],
   ['Legal', [['Privacy policy', '/privacy'], ['Terms of service', '/terms']]],
 ];
 export function SiteFooter() {
@@ -89,7 +89,7 @@ export function SiteFooter() {
           <div key={h}>
             <p className="text-[12.5px] font-bold uppercase tracking-wider text-gray-400">{h}</p>
             <ul className="mt-4 space-y-2.5">
-              {links.map(([l, href]) => <li key={l}><Link href={href} className="text-[14px] font-medium text-gray-700 hover:text-gray-900">{l}</Link></li>)}
+              {links.map(([l, href]) => <li key={l}>{href.startsWith('http') ? <a href={href} className="text-[14px] font-medium text-gray-700 hover:text-gray-900">{l}</a> : <Link href={href} className="text-[14px] font-medium text-gray-700 hover:text-gray-900">{l}</Link>}</li>)}
             </ul>
           </div>
         ))}

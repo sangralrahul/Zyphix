@@ -19,6 +19,23 @@ import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
 
 
+const PartnerSite = lazy(() => import("@/sites/PartnerSite"));
+const AdvertiseSite = lazy(() => import("@/sites/AdvertiseSite"));
+
+/**
+ * One Worker serves zyphix.in and its sub-sites. The hostname (or ?site= for local previews)
+ * decides which site renders: partner.zyphix.in → partner portal, advertise.zyphix.in → ads site.
+ */
+export function detectSite(): "main" | "partner" | "advertise" {
+  if (typeof window === "undefined") return "main";
+  const override = new URLSearchParams(window.location.search).get("site");
+  if (override === "partner" || override === "advertise") return override;
+  const host = window.location.hostname.toLowerCase();
+  if (host.startsWith("partner.") || host.startsWith("partners.")) return "partner";
+  if (host.startsWith("advertise.") || host.startsWith("ads.")) return "advertise";
+  return "main";
+}
+
 const HomeLight = lazy(() => import("@/pages/HomeLight").then(m => ({ default: m.HomeLight })));
 const Privacy = lazy(() => import("@/pages/Privacy").then(m => ({ default: m.Privacy })));
 const Terms = lazy(() => import("@/pages/Terms").then(m => ({ default: m.Terms })));
@@ -37,6 +54,7 @@ const KiranaMap = lazy(() => import("@/pages/KiranaMap").then(m => ({ default: m
 const Offers = lazy(() => import("@/pages/Offers").then(m => ({ default: m.Offers })));
 const AppComingSoon = lazy(() => import("@/pages/AppComingSoon").then(m => ({ default: m.AppComingSoon })));
 const Account = lazy(() => import("@/pages/Account").then(m => ({ default: m.Account })));
+const ServiceProSetup = lazy(() => import("@/pages/ServiceProSetup").then(m => ({ default: m.ServiceProSetup })));
 const PartnerLanding = lazy(() => import("@/pages/PartnerLanding").then(m => ({ default: m.PartnerLanding })));
 const ProductDetail = lazy(() => import("@/pages/ProductDetail").then(m => ({ default: m.ProductDetail })));
 const CartPage = lazy(() => import("@/pages/Cart").then(m => ({ default: m.Cart })));
@@ -76,6 +94,9 @@ function LightLayout({ children }: { children: React.ReactNode }) {
 const DarkLayout = LightLayout;
 
 function Router() {
+  const site = detectSite();
+  if (site === "partner") return <PartnerSite />;
+  if (site === "advertise") return <AdvertiseSite />;
   return (
     <Switch>
       <Route path="/" component={Landing} />
@@ -136,6 +157,8 @@ function Router() {
         <DarkLayout><KiranaMap /></DarkLayout>
       </Route>
       <Route path="/partner" component={PartnerLanding} />
+      <Route path="/service-setup" component={ServiceProSetup} />
+      <Route path="/advertise" component={AdvertiseSite} />
       <Route path="/app" component={AppComingSoon} />
       <Route path="/account">
         <DarkLayout><Account /></DarkLayout>

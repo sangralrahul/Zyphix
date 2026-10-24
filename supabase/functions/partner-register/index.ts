@@ -4,6 +4,8 @@ const ROLE_LABELS: Record<string, string> = {
   restaurant: "Restaurant / Dhaba Owner",
   merchant: "Merchant / Kirana Store",
   delivery: "Delivery Partner",
+  service: "Service Professional (Zyphix Book)",
+  advertiser: "Advertiser / Brand (advertise.zyphix.in)",
 };
 
 Deno.serve(async (req) => {
