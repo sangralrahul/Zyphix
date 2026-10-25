@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { LayoutPanelTop, Rows3, Sparkles, Search, Star, TicketPercent, Plus, Clock, Check } from 'lucide-react';
-import { Section, Container, SectionTitle, Phone, SampleTag, Chip, ArrowLink, G, G_DEEP } from '@/ui/kit';
-import { AppHeader, AppSearch, AppBanner, AppDots, AppRow, AppTile, AppGhost, SponsoredTag } from './shared';
+import React from 'react';
+import { LayoutPanelTop, Rows3, Sparkles, Search, Star, TicketPercent, Plus, Clock, Check, ArrowRight, MapPin, ChevronDown } from 'lucide-react';
+import { Container, Phone, Browser, G, G_DEEP } from '@/ui/kit';
+import { Light, Kicker, Headline, Sub, Reveal, Tilt } from '@/ui/cinema';
+import { AppHeader, AppSearch, AppBanner, AppDots, AppRow, AppTile, AppGhost, SponsoredTag, IllustrativeTag } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Ad formats — six tabs. Left: in-app preview inside a Phone. Right: what /
-   where / best for / specs / billing. Copy kept to 2–3 short lines each.
+   Ad formats — bento of six cards. Each card shows the placement as an
+   illustrative in-app mock (Phone / Browser), then what / where / best for,
+   with specs and billing behind a disclosure.
 ──────────────────────────────────────────────────────────────────────────── */
 
 type Format = {
@@ -22,19 +23,16 @@ const BannerPreview = () => (
     <AppBanner highlight /><AppDots />
     <AppRow title="Fruits & vegetables"><AppTile name="Bananas" price="₹45" tone="amber" /><AppTile name="Tomatoes" price="₹32" tone="rose" /><AppTile name="Spinach" price="₹18" tone="green" /></AppRow>
     <AppGhost className="h-16" />
-    <SampleTag className="absolute bottom-3 right-3" />
   </Phone>
 );
 
 const RowPreview = () => (
   <Phone>
     <AppHeader /><AppSearch />
-    <AppGhost className="h-16" />
     <AppRow title="Breakfast by YourBrand" sponsored highlight>
       <AppTile name="Rolled oats 1kg" price="₹189" tone="green" /><AppTile name="Muesli 500g" price="₹249" tone="green" /><AppTile name="Instant oats" price="₹99" tone="green" />
     </AppRow>
     <AppRow title="Dairy & eggs"><AppTile name="Toned milk" price="₹28" tone="blue" /><AppTile name="Curd 400g" price="₹35" tone="blue" /><AppTile name="Eggs ×6" price="₹48" tone="amber" /></AppRow>
-    <SampleTag className="absolute bottom-3 right-3" />
   </Phone>
 );
 
@@ -48,7 +46,6 @@ const SpotlightPreview = () => (
       <AppTile name="Chai masala" price="₹65" tone="amber" spotlight /><AppTile name="Assam tea" price="₹120" /><AppTile name="Filter coffee" price="₹180" />
       <AppTile name="Green tea ×25" price="₹140" /><AppTile name="Ginger tea" price="₹95" /><AppTile name="Jaggery 500g" price="₹60" />
     </AppRow>
-    <SampleTag className="absolute bottom-3 right-3" />
   </Phone>
 );
 
@@ -59,7 +56,7 @@ const SearchPreview = () => (
     <div className="relative mx-4 mt-1.5 flex items-center gap-2.5 rounded-xl border border-emerald-300 bg-white p-2 ring-2 ring-emerald-100">
       <SponsoredTag className="absolute right-2 top-2" />
       <div className="h-10 w-10 shrink-0 rounded-lg" style={{ background: 'linear-gradient(135deg,#FEF3C7,#FDE68A)' }} />
-      <div className="min-w-0 flex-1"><p className="truncate text-[10.5px] font-semibold text-gray-900">YourBrand Chakki Atta 5kg</p><p className="text-[9.5px] text-gray-500">Sharma Kirana · 0.8 km</p><p className="text-[10px] font-semibold">₹265</p></div>
+      <div className="min-w-0 flex-1"><p className="truncate text-[10.5px] font-semibold text-gray-900">YourBrand Chakki Atta 5kg</p><p className="text-[9.5px] text-gray-500">Local kirana · 0.8 km</p><p className="text-[10px] font-semibold">₹265</p></div>
       <span className="flex h-6 w-6 items-center justify-center rounded-md border border-emerald-300 text-emerald-700"><Plus size={11} /></span>
     </div>
     {[['Whole wheat atta 5kg', '₹240'], ['Multigrain atta 1kg', '₹85'], ['Besan 500g', '₹58']].map(([n, p]) => (
@@ -69,29 +66,41 @@ const SearchPreview = () => (
         <span className="flex h-6 w-6 items-center justify-center rounded-md border border-gray-200 text-gray-500"><Plus size={11} /></span>
       </div>
     ))}
-    <SampleTag className="absolute bottom-3 right-3" />
   </Phone>
 );
 
+/** Eats on the web — featured restaurant card inside a Browser frame. */
 const FeaturedPreview = () => (
-  <Phone>
-    <AppHeader product="Zyphix Eats" accent="#EA580C" /><AppSearch />
-    <p className="mx-4 mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-gray-900">Featured near you <SponsoredTag /></p>
-    <div className="relative mx-4 mt-1.5 overflow-hidden rounded-xl border border-orange-200 bg-white ring-2 ring-orange-100">
-      <div className="h-16" style={{ background: 'linear-gradient(135deg,#FFEDD5,#FED7AA)' }} />
-      <div className="p-2">
-        <div className="flex items-center justify-between"><p className="text-[11px] font-semibold text-gray-900">Biryani House</p><span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-medium text-gray-600"><Clock size={9} /> 25 min</span></div>
-        <p className="text-[9.5px] text-gray-500">Hyderabadi · 1.4 km</p>
-        <div className="mt-1.5 flex gap-1">{['Chicken biryani', 'Veg biryani', 'Kebabs'].map(d => <span key={d} className="rounded-full border border-gray-200 px-1.5 py-0.5 text-[8.5px] text-gray-600">{d}</span>)}</div>
+  <Browser url="eats.zyphix.in" className="w-full">
+    <div className="bg-white p-4 sm:p-5">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400">Zyphix Eats</p>
+          <p className="flex items-center gap-1 text-[12.5px] font-semibold text-gray-900"><MapPin size={12} className="text-orange-600" /> Gandhi Nagar, Jammu <ChevronDown size={12} className="text-gray-400" /></p>
+        </div>
+        <div className="hidden flex-1 items-center gap-2 rounded-lg border border-gray-200 bg-[#FAFAFA] px-3 py-1.5 text-[11px] text-gray-400 sm:flex sm:max-w-[220px]"><Search size={12} /> Search dishes or restaurants</div>
+      </div>
+      <p className="mt-4 flex items-center gap-1.5 text-[12.5px] font-semibold text-gray-900">Featured near you <SponsoredTag /></p>
+      <div className="mt-2 grid gap-2.5 sm:grid-cols-[1.5fr_1fr]">
+        <div className="overflow-hidden rounded-xl border border-orange-200 bg-white ring-2 ring-orange-100">
+          <div className="h-20 sm:h-24" style={{ background: 'linear-gradient(135deg,#FFEDD5,#FED7AA)' }} />
+          <div className="p-2.5">
+            <div className="flex items-center justify-between"><p className="text-[12.5px] font-semibold text-gray-900">Biryani House</p><span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600"><Clock size={10} /> 25 min</span></div>
+            <p className="text-[10.5px] text-gray-500">Hyderabadi · 1.4 km</p>
+            <div className="mt-1.5 flex flex-wrap gap-1">{['Chicken biryani', 'Veg biryani', 'Kebabs'].map(d => <span key={d} className="rounded-full border border-gray-200 px-1.5 py-0.5 text-[9.5px] text-gray-600">{d}</span>)}</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-1">
+          {[['Dosa Corner', '18 min'], ['Punjabi Dhaba', '30 min']].map(([n, t]) => (
+            <div key={n} className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-2">
+              <div className="h-10 w-10 shrink-0 rounded-lg bg-gray-100" />
+              <div className="min-w-0"><p className="truncate text-[11px] font-semibold text-gray-900">{n}</p><p className="text-[10px] text-gray-500">{t}</p></div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
-    <div className="mx-4 mt-2 grid grid-cols-2 gap-1.5">
-      {[['Dosa Corner', '18 min'], ['Punjabi Dhaba', '30 min']].map(([n, t]) => (
-        <div key={n} className="rounded-xl border border-gray-200 bg-white p-1.5"><div className="h-10 rounded-lg bg-gray-100" /><p className="mt-1 text-[10px] font-semibold text-gray-900">{n}</p><p className="text-[9px] text-gray-500">{t}</p></div>
-      ))}
-    </div>
-    <SampleTag className="absolute bottom-3 right-3" />
-  </Phone>
+  </Browser>
 );
 
 const OffersPreview = () => (
@@ -105,10 +114,10 @@ const OffersPreview = () => (
       <div className="min-w-0 flex-1 p-2">
         <div className="flex items-center justify-between"><p className="truncate text-[10.5px] font-semibold text-gray-900">YourBrand oats range</p><SponsoredTag /></div>
         <p className="mt-0.5 text-[9px] text-gray-500">Min. order ₹199 · 6 pin codes</p>
-        <div className="mt-1.5 flex items-center justify-between rounded-md border border-dashed border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[9.5px] font-semibold text-emerald-800"><span className="tracking-wider">OATS50</span><span>Copy</span></div>
+        <div className="mt-1.5 flex items-center justify-between rounded-md bg-emerald-50 px-2 py-0.5 text-[9.5px] font-semibold text-emerald-800 ring-1 ring-emerald-200"><span className="tracking-wider">OATS50</span><span>Copy</span></div>
       </div>
     </div>
-    {[['Free delivery on Eats', 'Till Sunday'], ['10% off at Sharma Kirana', '2 days left']].map(([n, t]) => (
+    {[['Free delivery on Eats', 'Till Sunday'], ['10% off at your local kirana', '2 days left']].map(([n, t]) => (
       <div key={n} className="mx-4 mt-1.5 flex items-center gap-2.5 rounded-xl border border-gray-200 bg-white p-2">
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500"><TicketPercent size={13} /></span>
         <div className="min-w-0 flex-1"><p className="truncate text-[10.5px] font-semibold text-gray-800">{n}</p><p className="text-[9px] text-gray-500">{t}</p></div>
@@ -118,7 +127,6 @@ const OffersPreview = () => (
       <p className="text-[9px] font-medium uppercase tracking-wider text-gray-400">At checkout</p>
       <div className="mt-0.5 flex items-center justify-between text-[10px]"><span className="flex items-center gap-1 font-medium text-emerald-700"><Check size={11} /> OATS50 applied</span><span className="font-semibold">−₹50</span></div>
     </div>
-    <SampleTag className="absolute bottom-3 right-3" />
   </Phone>
 );
 
@@ -174,69 +182,114 @@ const FORMATS: Format[] = [
   },
 ];
 
+/* ── Card pieces ─────────────────────────────────────────────────────────── */
+/** Soft stage that crops the top of a Phone mock and fades it into the card. */
+function Stage({ children, phone = true, fill = false, className = '' }: { children: React.ReactNode; phone?: boolean; fill?: boolean; className?: string }) {
+  return (
+    <div className={`relative overflow-hidden bg-[#F3F5F4] ${phone ? 'h-[340px] sm:h-[380px]' : ''} ${className}`}>
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(60% 55% at 50% 30%, rgba(13,163,102,.14), transparent 70%)' }} />
+      <div className={`${fill ? 'relative lg:absolute lg:inset-x-0 lg:top-0' : 'relative'} ${phone ? 'flex justify-center pt-8' : 'px-4 py-8 sm:px-8 sm:py-10'}`}>
+        <div className="transition-transform duration-700 ease-[cubic-bezier(.22,1,.36,1)] group-hover:-translate-y-2">{children}</div>
+      </div>
+      {phone && <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-24" style={{ background: 'linear-gradient(180deg, rgba(243,245,244,0), #F3F5F4 85%)' }} />}
+      <IllustrativeTag className="absolute right-3 top-3" />
+    </div>
+  );
+}
+
+function Details({ f }: { f: Format }) {
+  return (
+    <div className="flex flex-1 flex-col p-6 sm:p-7">
+      <div className="flex items-center gap-3">
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">{f.icon}</span>
+        <div className="min-w-0">
+          <p className="text-[11.5px] font-semibold uppercase tracking-[0.12em] text-gray-400">{f.product}</p>
+          <h3 className="text-[20px] font-semibold leading-tight tracking-[-0.02em] text-gray-900">{f.label}</h3>
+        </div>
+      </div>
+      <p className="mt-4 text-[15px] leading-[1.6] text-gray-700">{f.what}</p>
+      <p className="mt-3 text-[13.5px] leading-[1.6] text-gray-500"><span className="font-semibold text-gray-700">Where it appears. </span>{f.where}</p>
+      <ul className="mt-4 flex flex-wrap gap-1.5">
+        {f.bestFor.map(b => <li key={b} className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-[12px] font-medium text-gray-700"><Check size={12} className="text-emerald-600" />{b}</li>)}
+      </ul>
+      <details className="group/d mt-5 rounded-xl border border-gray-200 bg-[#FAFAFA] open:bg-white">
+        <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between px-4 text-[13.5px] font-semibold text-gray-900 [&::-webkit-details-marker]:hidden">
+          Specs &amp; billing <ChevronDown size={16} className="text-gray-400 transition-transform group-open/d:rotate-180" />
+        </summary>
+        <div className="border-t border-gray-200 px-4 pb-4 pt-3">
+          <dl className="grid gap-y-1.5">
+            {f.specs.map(([k, v]) => (
+              <div key={k} className="flex gap-3 text-[13.5px]"><dt className="w-[84px] shrink-0 font-medium text-gray-900">{k}</dt><dd className="text-gray-600">{v}</dd></div>
+            ))}
+          </dl>
+          <p className="mt-3 border-t border-gray-200 pt-3 text-[13.5px] text-gray-600"><span className="font-medium text-gray-900">Billing</span> · {f.billing}</p>
+        </div>
+      </details>
+      <a href="#contact" className="mt-auto inline-flex items-center gap-1.5 pt-6 text-[14px] font-semibold text-emerald-700 transition hover:gap-2.5 hover:text-emerald-800">
+        Get a quote for {f.label.toLowerCase()} <ArrowRight size={15} />
+      </a>
+    </div>
+  );
+}
+
+const cardCls = 'group flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(11,15,25,.04)] transition-shadow duration-500 hover:shadow-[0_30px_70px_rgba(11,15,25,.10)]';
+
+function FormatCard({ f, delay = 0, className = '' }: { f: Format; delay?: number; className?: string }) {
+  return (
+    <Reveal delay={delay} y={28} className={className}>
+      <Tilt max={3} className="h-full">
+        <article className={cardCls}>
+          <Stage>{f.preview}</Stage>
+          <Details f={f} />
+        </article>
+      </Tilt>
+    </Reveal>
+  );
+}
+
 /* ── Section ─────────────────────────────────────────────────────────────── */
 export function Formats() {
-  const [active, setActive] = useState(0);
-  const f = FORMATS[active];
-
+  const [banner, row, spotlight, search, featured, offers] = FORMATS;
   return (
-    <Section id="formats" className="scroll-mt-16">
+    <Light id="formats" className="scroll-mt-16 py-24 md:py-36">
       <Container>
-        <SectionTitle eyebrow="Formats" title="Six placements, built into the shopping journey." lead="Each one sits where a decision is being made. All are labelled Sponsored, priced flat and reported individually." />
-
-        <div className="-mx-5 mt-10 overflow-x-auto px-5 sm:mx-0 sm:px-0" role="tablist" aria-label="Ad formats">
-          <div className="flex w-max gap-1.5 rounded-full border border-gray-200 bg-[#FAFAFA] p-1 sm:w-auto sm:flex-wrap">
-            {FORMATS.map((t, i) => (
-              <button key={t.id} role="tab" aria-selected={active === i} onClick={() => setActive(i)}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-[13.5px] font-semibold transition ${active === i ? 'bg-white text-gray-900 shadow-[0_1px_3px_rgba(11,15,25,.08)] ring-1 ring-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>
-                <span className={active === i ? 'text-emerald-700' : 'text-gray-400'}>{t.icon}</span>{t.label}
-              </button>
-            ))}
+        <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-7">
+            <Reveal><Kicker>Formats</Kicker></Reveal>
+            <Reveal delay={0.05}><Headline size="lg">Six placements, built into the shopping journey.</Headline></Reveal>
           </div>
+          <Reveal delay={0.1} className="lg:col-span-5">
+            <Sub>Each one sits where a decision is being made. All are labelled Sponsored, priced flat and reported individually.</Sub>
+          </Reveal>
         </div>
 
-        <motion.div key={f.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .35, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-6 grid overflow-hidden rounded-2xl border border-gray-200 bg-white lg:grid-cols-[.9fr_1.1fr]" role="tabpanel">
-          <div className="relative flex items-center justify-center overflow-hidden border-b border-gray-200 bg-[#FAFAFA] px-6 pb-0 pt-10 lg:border-b-0 lg:border-r">
-            <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60" style={{ backgroundImage: 'radial-gradient(#D1D5DB 1px, transparent 1px)', backgroundSize: '18px 18px' }} />
-            <div className="relative max-h-[460px] overflow-hidden scale-[.92] origin-top">{f.preview}</div>
-            <span className="absolute left-4 top-4"><Chip>Preview · {f.product}</Chip></span>
-          </div>
+        <div className="mt-12 grid gap-4 md:mt-16 md:grid-cols-2 lg:grid-cols-3">
+          <FormatCard f={banner} />
+          <FormatCard f={row} delay={0.06} />
+          <FormatCard f={spotlight} delay={0.12} className="md:col-span-2 lg:col-span-1" />
+          <FormatCard f={search} />
 
-          <div className="p-7 md:p-9">
-            <div className="flex items-center gap-3">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">{f.icon}</span>
-              <h3 className="text-[22px] font-semibold tracking-[-0.02em] text-gray-900">{f.label}</h3>
-            </div>
-            <p className="mt-4 text-[15px] leading-[1.6] text-gray-600">{f.what}</p>
+          {/* Eats on the web, in a browser frame */}
+          <Reveal delay={0.06} y={28} className="md:col-span-1 lg:col-span-2">
+            <Tilt max={2} className="h-full">
+              <article className={cardCls}>
+                <Stage phone={false}><FeaturedPreview /></Stage>
+                <Details f={featured} />
+              </article>
+            </Tilt>
+          </Reveal>
 
-            <div className="mt-6 grid gap-6 sm:grid-cols-2">
-              <div>
-                <p className="text-[12.5px] font-semibold text-gray-900">Where it appears</p>
-                <p className="mt-1.5 text-[14px] leading-[1.6] text-gray-600">{f.where}</p>
-              </div>
-              <div>
-                <p className="text-[12.5px] font-semibold text-gray-900">Best for</p>
-                <ul className="mt-1.5 space-y-1.5">
-                  {f.bestFor.map(b => <li key={b} className="flex items-start gap-2 text-[14px] leading-snug text-gray-600"><Check size={14} className="mt-[3px] shrink-0 text-emerald-600" />{b}</li>)}
-                </ul>
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-xl border border-gray-200 bg-[#FAFAFA] p-4">
-              <p className="text-[12.5px] font-semibold text-gray-900">Specs</p>
-              <dl className="mt-2 grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
-                {f.specs.map(([k, v]) => (
-                  <div key={k} className="flex gap-2 text-[13.5px]"><dt className="w-[78px] shrink-0 font-medium text-gray-900">{k}</dt><dd className="text-gray-600">{v}</dd></div>
-                ))}
-              </dl>
-              <p className="mt-3 border-t border-gray-200 pt-3 text-[13.5px] text-gray-600"><span className="font-medium text-gray-900">Billing</span> · {f.billing}</p>
-            </div>
-
-            <ArrowLink href="#contact" className="mt-6">Get a quote for {f.label.toLowerCase()}</ArrowLink>
-          </div>
-        </motion.div>
+          {/* Offers: wide horizontal card */}
+          <Reveal y={28} className="md:col-span-2 lg:col-span-3">
+            <Tilt max={1.5} className="h-full">
+              <article className={`${cardCls} lg:flex-row`}>
+                <Stage fill className="lg:h-auto lg:min-h-[420px] lg:w-[44%] lg:shrink-0">{offers.preview}</Stage>
+                <Details f={offers} />
+              </article>
+            </Tilt>
+          </Reveal>
+        </div>
       </Container>
-    </Section>
+    </Light>
   );
 }

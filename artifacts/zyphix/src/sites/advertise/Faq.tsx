@@ -1,10 +1,12 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import { Section, Container, SectionTitle, Accordion, Mesh, Display, Lead, Button, Eyebrow } from '@/ui/kit';
+import { Container, Accordion } from '@/ui/kit';
+import { BgVideo, GhostButton, GlowButton, Grain, Headline, Kicker, Light, Reveal, Sub } from '@/ui/cinema';
+import { VIDEOS } from '@/data/media';
 import { PARTNERSHIPS_EMAIL, PARTNER_SITE } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   FAQ accordion (7 Qs) in a narrow Container + final CTA band on Mesh.
+   FAQ accordion (7 Qs) on a soft band + full-bleed video final CTA.
 ──────────────────────────────────────────────────────────────────────────── */
 
 const FAQ = [
@@ -19,27 +21,34 @@ const FAQ = [
 
 export function Faq() {
   return (
-    <Section id="faq" className="scroll-mt-16">
+    <Light id="faq" tone="soft" className="scroll-mt-16 py-24 md:py-32">
       <Container narrow>
-        <SectionTitle align="center" eyebrow="FAQ" title="Questions advertisers ask first." lead={<>Not answered here? Write to <a href={`mailto:${PARTNERSHIPS_EMAIL}`} className="font-medium text-emerald-700">{PARTNERSHIPS_EMAIL}</a>.</>} />
-        <div className="mt-12"><Accordion items={FAQ} /></div>
+        <Reveal className="mb-12 text-center">
+          <Kicker>FAQ</Kicker>
+          <Headline size="md">Questions advertisers ask first.</Headline>
+        </Reveal>
+        <Reveal delay={0.05}><Accordion items={FAQ} /></Reveal>
+        <p className="mt-10 text-center text-[14.5px] text-gray-600">Not answered here? Write to <a href={`mailto:${PARTNERSHIPS_EMAIL}`} className="font-semibold text-emerald-700 hover:underline">{PARTNERSHIPS_EMAIL}</a>.</p>
       </Container>
-    </Section>
+    </Light>
   );
 }
 
+/* ── Final CTA (full-bleed video) ────────────────────────────────────────── */
 export function FinalCta() {
   return (
-    <section className="relative overflow-hidden border-t border-gray-200 py-20 md:py-28">
-      <Mesh />
-      <Container className="text-center">
-        <Eyebrow className="justify-center">Early advertiser programme</Eyebrow>
-        <Display as="h2" size="lg" className="mx-auto mt-4 max-w-[640px] text-gray-900">Be in the app when your neighbourhood opens.</Display>
-        <Lead className="mx-auto mt-5 max-w-[520px]">Send a brief and get a written plan, the live areas near you and a flat quote.</Lead>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Button href="#contact" size="lg">Talk to partnerships <ArrowRight size={16} /></Button>
-          <Button href={PARTNER_SITE} variant="secondary" size="lg">Become a partner instead</Button>
-        </div>
+    <section className="relative isolate overflow-hidden bg-[#05080E] py-28 text-white md:py-40">
+      <BgVideo clip={VIDEOS.heroCity} dim={0.6} />
+      <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.85) 0%, rgba(5,8,14,.35) 50%, rgba(5,8,14,.9) 100%)' }} />
+      <Grain />
+      <Container className="relative text-center">
+        <Reveal><Kicker light className="justify-center">Early advertiser programme</Kicker></Reveal>
+        <Reveal delay={0.05}><Headline size="lg" light className="mx-auto max-w-[760px]">Be in the app when your neighbourhood opens.</Headline></Reveal>
+        <Reveal delay={0.1}><Sub light className="mx-auto mt-5 max-w-[520px]">Send a brief and get a written plan, the live areas near you and a flat quote.</Sub></Reveal>
+        <Reveal delay={0.15} className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+          <GlowButton href="#contact">Talk to partnerships <ArrowRight size={17} /></GlowButton>
+          <GhostButton href={PARTNER_SITE}>Become a partner instead</GhostButton>
+        </Reveal>
       </Container>
     </section>
   );

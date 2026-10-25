@@ -4,11 +4,14 @@ import { Search, Star, X, Plus, Minus, ShoppingBag, ChevronLeft, ChevronRight } 
 import { restaurants, menuItems, FOOD_CUISINE_TYPES } from '@/data/mockData';
 import { usePartners, tagList } from '@/lib/partners';
 import { Chip, Card, Button, G, FONT } from '@/ui/kit';
+import { VideoHero, Words, Reveal, Kicker } from '@/ui/cinema';
+import { VIDEOS } from '@/data/media';
+import { TonightsPicks, CuisineTiles, PartnerStrip, RestaurantCta, fallbackPhoto } from './eats/picks';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Zyphix Eats — restaurants near you.
-   Stripe-neutral app page: Inter, 13–15px UI type, 1px borders, the
-   restaurants and dishes are the visual. No hero, no promo copy.
+   Cinematic top (video hero + search + cuisine chips, "Tonight's picks" bento,
+   cuisine photo tiles), then the 13–15px UI shop: restaurant grid, menus, cart.
 ──────────────────────────────────────────────────────────────────────────── */
 
 type CartState = Record<string, number>;
@@ -108,10 +111,10 @@ export function ZyphixEats() {
   const activeMenu = activeRestaurant ? menuItems.filter(m => m.restaurantId === activeRestaurant) : [];
 
   return (
-    <div className="relative mx-auto min-h-[70vh] w-full max-w-[1180px] pt-4 text-gray-900" style={{ fontFamily: FONT }}>
+    <div className="relative mx-auto min-h-[70vh] w-full max-w-[1180px] pt-0 text-gray-900 md:pt-4" style={{ fontFamily: FONT }}>
       {activeR ? (
         /* ── Restaurant detail / menu ── */
-        <motion.div key={activeR.id} {...enter}>
+        <motion.div key={activeR.id} {...enter} className="pt-4 md:pt-0">
           <button onClick={() => setActiveRestaurant(null)}
             className="inline-flex items-center gap-1 text-[13px] font-medium text-gray-600 transition hover:text-gray-900">
             <ChevronLeft size={15} /> All restaurants
@@ -163,64 +166,72 @@ export function ZyphixEats() {
       ) : (
         /* ── Restaurant list ── */
         <motion.div key="list" {...enter}>
-          {/* Header row */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <div className="flex min-w-0 items-baseline gap-2.5">
-              <h1 className="text-[20px] font-semibold tracking-[-0.01em] text-gray-900">Zyphix Eats</h1>
-              <span className="text-[13px] text-gray-500">Restaurants near you · {allRestaurants.length} open</span>
-            </div>
-            <label className="ml-auto flex h-9 w-full items-center gap-2 rounded-lg border border-gray-200 bg-white px-2.5 sm:w-[240px]">
-              <Search size={14} className="shrink-0 text-gray-400" />
-              <input
-                value={search}
-                onChange={e => { setSearch(e.target.value); setActiveRestaurant(null); }}
-                placeholder="Search restaurants"
-                className="min-w-0 flex-1 bg-transparent text-[13px] text-gray-900 outline-none placeholder:text-gray-400"
-              />
-              {search && (
-                <button onClick={() => setSearch('')} aria-label="Clear search" className="text-gray-400 transition hover:text-gray-700"><X size={14} /></button>
-              )}
-            </label>
-          </div>
-
-          {/* Cuisine chips */}
-          <div className="-mx-4 mt-3 flex items-center gap-1.5 overflow-x-auto px-4 pb-1 no-scrollbar sm:mx-0 sm:px-0">
-            {FOOD_CUISINE_TYPES.map(c => {
-              const active = activeCuisine === c;
-              return (
-                <button key={c}
-                  onClick={() => { setActiveCuisine(c); setActiveRestaurant(null); }}
-                  className={`shrink-0 rounded-full border px-3 py-1.5 text-[13px] font-medium transition ${
-                    active ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                  }`}>
-                  {c}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Popular */}
-          {showPopular && (
-            <section className="mt-6">
-              <h2 className="text-[17px] font-semibold tracking-[-0.01em] text-gray-900">Popular</h2>
-              <div className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-1 no-scrollbar sm:mx-0 sm:px-0">
-                {popular.map(r => (
-                  <div key={r.id} className="w-[220px] shrink-0">
-                    <RestaurantCard restaurant={r} onClick={() => setActiveRestaurant(r.id)} />
-                  </div>
-                ))}
+          {/* Hero: video, headline, search, cuisine chips */}
+          <div className="-mx-4 md:mx-0">
+            <VideoHero clip={VIDEOS.food} height="min-h-[46svh] md:min-h-[56svh]" dim={0.4} className="md:rounded-3xl">
+              <div className="px-4 pb-7 pt-14 md:px-10 md:pb-10 md:pt-16">
+                <Kicker light>Zyphix Eats · Jammu</Kicker>
+                <Words as="h1" text="Hungry? Jammu's kitchens, at your door." className="max-w-[720px] text-[30px] font-semibold leading-[1.05] tracking-[-0.03em] text-white sm:text-[38px] md:text-[48px]" />
+                <p className="mt-3 max-w-[520px] text-[15px] leading-[1.55] text-white/75 md:text-[17px]">
+                  Dhabas, biryani houses, momo stalls and cafés near you, cooked to order and tracked to your gate.
+                </p>
+                <form role="search" onSubmit={e => e.preventDefault()}
+                  className="mt-5 flex h-12 max-w-[640px] items-center gap-2 rounded-2xl bg-white pl-4 pr-1.5 text-gray-900 shadow-[0_20px_60px_-15px_rgba(0,0,0,.6)] md:mt-6 md:h-14">
+                  <Search size={18} className="shrink-0 text-gray-400" />
+                  <input
+                    value={search}
+                    onChange={e => { setSearch(e.target.value); setActiveRestaurant(null); }}
+                    placeholder="Search restaurants or dishes"
+                    aria-label="Search restaurants"
+                    className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-gray-400 md:text-[16px]"
+                  />
+                  {search && (
+                    <button type="button" onClick={() => setSearch('')} aria-label="Clear search" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700"><X size={15} /></button>
+                  )}
+                  <span className="hidden h-9 items-center rounded-xl px-4 text-[13.5px] font-semibold text-white md:inline-flex md:h-11 md:px-5" style={{ background: `linear-gradient(180deg, #13B874 0%, ${G} 100%)` }}>
+                    {allRestaurants.length} open
+                  </span>
+                </form>
+                <div className="mt-4 flex gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
+                  {FOOD_CUISINE_TYPES.map(c => {
+                    const active = activeCuisine === c;
+                    return (
+                      <button key={c} type="button" aria-pressed={active}
+                        onClick={() => { setActiveCuisine(c); setActiveRestaurant(null); }}
+                        className={`h-9 shrink-0 rounded-full border px-3.5 text-[13px] font-medium backdrop-blur-md transition ${
+                          active ? 'border-white bg-white text-gray-900' : 'border-white/20 bg-white/10 text-white/90 hover:bg-white/20'
+                        }`}>
+                        {c}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </section>
+            </VideoHero>
+          </div>
+
+          {/* Tonight's picks + cuisine tiles (home state only) */}
+          {showPopular && (
+            <>
+              <TonightsPicks picks={popular.slice(0, 3)} onOpen={setActiveRestaurant} />
+              <CuisineTiles cuisines={FOOD_CUISINE_TYPES.filter(c => c !== 'All')} active={activeCuisine}
+                onPick={c => { setActiveCuisine(c); setActiveRestaurant(null); document.getElementById('eats-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} />
+            </>
           )}
 
           {/* Grid */}
-          <section className="mt-6">
-            <div className="flex items-baseline justify-between">
-              <h2 className="text-[17px] font-semibold tracking-[-0.01em] text-gray-900">
+          <section id="eats-grid" className="mt-8 scroll-mt-20 md:mt-10">
+            <Reveal y={12} amount={0.4} className="flex items-baseline justify-between gap-3">
+              <h2 className="text-[17px] font-semibold tracking-[-0.01em] text-gray-900 md:text-[18px]">
                 {search ? `Results for “${search}”` : activeCuisine === 'All' ? 'All restaurants' : activeCuisine}
               </h2>
-              <span className="text-[13px] text-gray-500">{filteredRestaurants.length} place{filteredRestaurants.length === 1 ? '' : 's'}</span>
-            </div>
+              <span className="flex items-center gap-3 text-[13px] text-gray-500">
+                {filteredRestaurants.length} place{filteredRestaurants.length === 1 ? '' : 's'}
+                {(search || activeCuisine !== 'All') && (
+                  <button type="button" onClick={() => { setSearch(''); setActiveCuisine('All'); }} className="font-semibold text-emerald-700 hover:text-emerald-800">Clear</button>
+                )}
+              </span>
+            </Reveal>
 
             {filteredRestaurants.length === 0 ? (
               <div className="mt-3 py-10 text-[13px] text-gray-500">
@@ -229,12 +240,21 @@ export function ZyphixEats() {
               </div>
             ) : (
               <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                {filteredRestaurants.map(r => (
-                  <RestaurantCard key={r.id} restaurant={r} onClick={() => setActiveRestaurant(r.id)} />
+                {filteredRestaurants.map((r, i) => (
+                  <Reveal key={r.id} delay={Math.min((i % 8) * 0.05, 0.4)} y={14} amount={0.1}>
+                    <RestaurantCard restaurant={r} index={i} onClick={() => setActiveRestaurant(r.id)} />
+                  </Reveal>
                 ))}
               </div>
             )}
           </section>
+
+          {showPopular && (
+            <>
+              <PartnerStrip registeredCount={registered.length} />
+              <RestaurantCta />
+            </>
+          )}
         </motion.div>
       )}
 
@@ -321,14 +341,16 @@ function QtyStepper({ qty, onAdd, onRemove }: { qty: number; onAdd: () => void; 
 }
 
 /* ─── Restaurant card ─── */
-function RestaurantCard({ restaurant: r, onClick }: { restaurant: Restaurant; onClick: () => void }) {
+function RestaurantCard({ restaurant: r, index = 0, onClick }: { restaurant: Restaurant; index?: number; onClick: () => void }) {
+  const photo = r.image || fallbackPhoto(index).src;
   return (
-    <button onClick={onClick} className="group block w-full overflow-hidden rounded-xl border border-gray-200 bg-white text-left shadow-[0_1px_2px_rgba(0,0,0,.03)] transition hover:border-gray-300">
+    <button onClick={onClick} className="group block h-full w-full overflow-hidden rounded-xl border border-gray-200 bg-white text-left shadow-[0_1px_2px_rgba(0,0,0,.03)] transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-1 hover:border-gray-300 hover:shadow-[0_14px_30px_-8px_rgba(11,15,25,.16)]">
       <div className="relative w-full overflow-hidden bg-gray-100" style={{ aspectRatio: '16 / 10' }}>
-        {r.image
-          ? <img src={r.image} alt={r.name} loading="lazy" className="h-full w-full object-cover" />
-          : <InitialsTile name={r.name} />}
+        <img src={photo} alt={r.image ? r.name : ''} loading="lazy" className="h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.05]" />
         {r.registered && <Chip tone="green" className="absolute left-2 top-2">New</Chip>}
+        {r.registered && (
+          <span className="absolute bottom-2 left-2 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-white/90 text-[11px] font-semibold text-emerald-700 backdrop-blur">{initialsOf(r.name)}</span>
+        )}
       </div>
       <div className="p-3">
         <div className="flex items-start justify-between gap-2">

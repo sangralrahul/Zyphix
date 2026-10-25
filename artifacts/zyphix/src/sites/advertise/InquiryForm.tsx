@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { ArrowRight, Mail, CheckCircle2 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
-import { Section, Container, Mesh, Eyebrow, Display, Lead, Chip } from '@/ui/kit';
+import { Container, Chip } from '@/ui/kit';
+import { Dark, Glow, Grain, Kicker, Headline, Sub, Reveal } from '@/ui/cinema';
 import { PARTNERSHIPS_EMAIL } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Inquiry form — Mesh band. Submit contract is unchanged:
+   Inquiry form — white card on a dark Glow band. Submit contract is unchanged:
    POST /api/partner-register { name, email, phone, city, role:'advertiser',
    details:{ businessName, businessType, budgetRange, goal } }
 ──────────────────────────────────────────────────────────────────────────── */
@@ -69,21 +70,25 @@ export function InquiryForm() {
   const mailto = `mailto:${PARTNERSHIPS_EMAIL}?subject=${encodeURIComponent('Advertising on Zyphix')}&body=${encodeURIComponent(`Business: ${form.businessName}\nContact: ${form.contactName}\nPhone: ${form.phone}\nCity: ${form.city}\nType: ${form.businessType}\nBudget: ${form.budgetRange}\n\nGoal:\n${form.goal}`)}`;
 
   return (
-    <Section id="contact" className="scroll-mt-16 overflow-hidden border-y border-gray-200">
-      <Mesh intensity={0.8} />
-      <Container className="grid items-start gap-12 lg:grid-cols-[.8fr_1.2fr]">
-        <div className="max-w-[440px]">
-          <Eyebrow>Get in touch</Eyebrow>
-          <Display as="h2" size="lg" className="mt-4 text-gray-900">Tell us what you want to achieve.</Display>
-          <Lead className="mt-5">Share a few details and partnerships will reply with placement ideas, the areas where Zyphix is live, and a flat quote.</Lead>
-          <div className="mt-8 rounded-2xl border border-gray-200 bg-white/80 p-5 backdrop-blur">
-            <p className="text-[12.5px] font-medium text-gray-500">Prefer email?</p>
-            <a href={`mailto:${PARTNERSHIPS_EMAIL}?subject=Advertising%20on%20Zyphix`} className="mt-1 inline-flex items-center gap-2 text-[15px] font-semibold text-emerald-700 hover:text-emerald-800"><Mail size={16} /> {PARTNERSHIPS_EMAIL}</a>
-            <p className="mt-2 text-[13px] leading-[1.6] text-gray-600">Include your business name, the areas you serve and what you'd like to run. Your details are used only to reply to this inquiry.</p>
-          </div>
+    <Dark id="contact" className="scroll-mt-16 py-24 md:py-36">
+      <Glow x="20%" y="20%" size={900} alpha={0.3} />
+      <Glow x="90%" y="95%" size={700} alpha={0.18} />
+      <Grain />
+      <Container className="relative grid items-start gap-12 lg:grid-cols-12 lg:gap-16">
+        <div className="lg:col-span-5">
+          <Reveal><Kicker light>Get in touch</Kicker></Reveal>
+          <Reveal delay={0.05}><Headline size="lg" light>Tell us what you want to achieve.</Headline></Reveal>
+          <Reveal delay={0.1}><Sub light className="mt-5 max-w-[460px]">Share a few details and partnerships will reply with placement ideas, the areas where Zyphix is live, and a flat quote.</Sub></Reveal>
+          <Reveal delay={0.15}>
+            <div className="mt-10 rounded-3xl border border-white/10 bg-white/[.05] p-6 backdrop-blur">
+              <p className="text-[12.5px] font-semibold uppercase tracking-[0.12em] text-white/45">Prefer email?</p>
+              <a href={`mailto:${PARTNERSHIPS_EMAIL}?subject=Advertising%20on%20Zyphix`} className="mt-2 inline-flex items-center gap-2 break-all text-[16px] font-semibold text-emerald-300 hover:text-emerald-200"><Mail size={16} className="shrink-0" /> {PARTNERSHIPS_EMAIL}</a>
+              <p className="mt-3 text-[14px] leading-[1.6] text-white/60">Include your business name, the areas you serve and what you'd like to run. Your details are used only to reply to this inquiry.</p>
+            </div>
+          </Reveal>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-[0_12px_40px_rgba(11,15,25,.06)] md:p-8">
+        <Reveal y={32} delay={0.1} className="lg:col-span-7"><div className="rounded-3xl bg-white p-6 text-gray-900 shadow-[0_40px_120px_rgba(0,0,0,.45),0_0_0_1px_rgba(255,255,255,.06)] sm:p-8 md:p-10">
           {state === 'done' ? (
             <div className="flex flex-col items-start gap-4 py-4">
               <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"><CheckCircle2 size={24} /></span>
@@ -106,7 +111,7 @@ export function InquiryForm() {
                 <Field label="Phone (10 digits)" hint="Indian mobile number, no country code"><input type="tel" inputMode="numeric" maxLength={10} className={inputCls} value={form.phone} onChange={set('phone')} placeholder="98765 43210" autoComplete="tel-national" required /></Field>
               </div>
               <div className="grid gap-5 sm:grid-cols-3">
-                <Field label="City"><input className={inputCls} value={form.city} onChange={set('city')} placeholder="Delhi" autoComplete="address-level2" required /></Field>
+                <Field label="City"><input className={inputCls} value={form.city} onChange={set('city')} placeholder="Jammu" autoComplete="address-level2" required /></Field>
                 <Field label="Business type">
                   <select className={inputCls} value={form.businessType} onChange={set('businessType')} required>
                     <option value="">Select…</option>
@@ -121,7 +126,7 @@ export function InquiryForm() {
                 </Field>
               </div>
               <Field label="What do you want to achieve?">
-                <textarea rows={4} className={`${inputCls} resize-y`} value={form.goal} onChange={set('goal')} placeholder="e.g. Launch our new oats range in South Delhi; or get more weekend dinner orders for our restaurant in Indiranagar." />
+                <textarea rows={4} className={`${inputCls} resize-y`} value={form.goal} onChange={set('goal')} placeholder="e.g. Launch our new oats range in Gandhi Nagar; or get more weekend dinner orders for our restaurant." />
               </Field>
 
               {state === 'error' && error && (
@@ -139,8 +144,8 @@ export function InquiryForm() {
               <p className="text-[12.5px] text-gray-500">By sending, you agree to be contacted about advertising on Zyphix. We only use these details to reply to your inquiry.</p>
             </form>
           )}
-        </div>
+        </div></Reveal>
       </Container>
-    </Section>
+    </Dark>
   );
 }

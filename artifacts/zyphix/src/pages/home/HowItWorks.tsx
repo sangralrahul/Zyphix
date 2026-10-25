@@ -1,100 +1,122 @@
-import React from 'react';
-import { Link } from 'wouter';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Store, Bike, Wrench, MapPin, ShoppingBag, PackageCheck, Home } from 'lucide-react';
-import { type Category } from '@/lib/catalog';
-import { Section, Container, SectionTitle, Grid, Display, Lead, Eyebrow, ArrowLink, fade, G } from '@/ui/kit';
-import { CATEGORY_NAMES } from './shared';
+import { MapPin, Store, CreditCard, Navigation, UtensilsCrossed, Wrench } from 'lucide-react';
+import { Dark, Light, Glow, Grain, Kicker, Headline, Sub, Reveal, Counter, Ticker, isStatic, EASE } from '@/ui/cinema';
+import { Container } from '@/ui/kit';
+import { usePartners, type PartnerListing } from '@/lib/partners';
+import { NUM, PARTNER_SITE } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   INK statement with grid lines, the 4-step "how it works" row, and the
-   compact "shop by category" tile row (icon + name, no photos).
+   "How it works" (id="how") — four horizontal steps with an animated connector,
+   then the live-proof band fed by the real partner directory.
 ──────────────────────────────────────────────────────────────────────────── */
 
-export function Statement() {
-  const cols: Array<[React.ReactNode, string, string]> = [
-    [<Store size={18} />, 'Kirana stores', 'List the shelf as it is. No warehouse competes with them, no marketplace fee eats the margin.'],
-    [<Bike size={18} />, 'Local riders', 'Short trips inside one area. Predictable hours, predictable payouts.'],
-    [<Wrench size={18} />, 'Professionals', 'Verified once, booked directly. The price they quote is the price you pay.'],
-  ];
+const STEPS = [
+  { icon: <MapPin size={20} />, title: 'Set your location', body: 'Drop a pin or type your colony. We only show stores, kitchens and pros that actually serve your street.' },
+  { icon: <Store size={20} />, title: 'Pick from local partners', body: 'Real shelves, real menus, real slots. Prices are the partner’s own, with no markup from us.' },
+  { icon: <CreditCard size={20} />, title: 'Pay how you like', body: 'UPI, cards, net banking, wallets or cash on delivery. The total you see is the total you pay.' },
+  { icon: <Navigation size={20} />, title: 'Track it live', body: 'Watch your rider or pro on the map. Groceries in 30 minutes, food while it is hot, pros on the slot you chose.' },
+];
+
+function Connector() {
+  const stat = isStatic();
   return (
-    <Section tone="ink" className="overflow-hidden">
-      <Grid dark />
-      <Container>
-        <motion.div {...fade(0)} className="max-w-[760px]">
-          <Eyebrow dark className="mb-5">Why local</Eyebrow>
-          <Display as="h2" size="lg" className="text-white">Built for the people who already run your neighbourhood.</Display>
-          <Lead dark className="mt-6 max-w-[560px]">Zyphix does not open dark stores. It gives the businesses that are already there the software to deliver in 30 minutes.</Lead>
-        </motion.div>
-        <div className="mt-16 grid gap-10 border-t border-white/10 pt-10 md:grid-cols-3 md:gap-8">
-          {cols.map(([ic, t, d], i) => (
-            <motion.div key={t} {...fade(0.1 + i * 0.06)}>
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/[.06] text-emerald-300 ring-1 ring-white/10">{ic}</span>
-              <h3 className="mt-4 text-[17px] font-semibold tracking-[-0.02em] text-white">{t}</h3>
-              <p className="mt-2 text-[14.5px] leading-[1.6] text-white/60">{d}</p>
-            </motion.div>
-          ))}
-        </div>
-        <motion.div {...fade(0.3)} className="mt-12"><ArrowLink dark href="/about">Read how we work</ArrowLink></motion.div>
-      </Container>
-    </Section>
+    <div aria-hidden className="pointer-events-none absolute left-0 top-6 hidden h-px w-full md:block">
+      <div className="absolute inset-0 bg-white/10" />
+      <motion.div
+        className="absolute inset-0 origin-left"
+        style={{ background: 'linear-gradient(90deg, #0DA366, #19C27C 60%, rgba(25,194,124,.3))' }}
+        initial={stat ? false : { scaleX: 0 }}
+        whileInView={stat ? undefined : { scaleX: 1 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ duration: 1.6, ease: EASE, delay: 0.2 }}
+      />
+    </div>
   );
 }
 
-/* ── How it works ─────────────────────────────────────────────────────────── */
-const STEPS: Array<[React.ReactNode, string, string]> = [
-  [<MapPin size={18} />, 'Set your location', 'We show only the stores, restaurants and pros that actually serve your area.'],
-  [<ShoppingBag size={18} />, 'Pick what you need', 'Groceries, a meal or a service. Prices are the partner\'s own.'],
-  [<PackageCheck size={18} />, 'Partner packs it', 'The store confirms stock and packs; a nearby rider picks it up.'],
-  [<Home size={18} />, 'Delivered in ~30 min', 'Track the rider live. Pay online or cash on eligible orders.'],
-];
-
 export function HowItWorks() {
   return (
-    <Section id="how" className="scroll-mt-16">
+    <Dark id="how" className="scroll-mt-16 border-t border-white/[.06] py-24 md:py-36">
+      <Glow x="50%" y="0%" size={1100} alpha={0.3} />
+      <Grain />
       <Container>
-        <SectionTitle eyebrow="How it works" title="Four steps, about thirty minutes." align="center" className="text-center" />
-        <div className="relative mt-14">
-          <div aria-hidden className="absolute left-0 right-0 top-5 hidden h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent lg:block" />
-          <ol className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-            {STEPS.map(([ic, t, d], i) => (
-              <motion.li key={t} {...fade(i * 0.07)} className="relative">
-                <div className="flex items-center gap-3">
-                  <span className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white text-emerald-700 ring-1 ring-gray-200 shadow-[0_1px_2px_rgba(0,0,0,.04)]">{ic}</span>
-                  <span className="text-[12px] font-semibold text-gray-400" style={{ fontVariantNumeric: 'tabular-nums' }}>0{i + 1}</span>
+        <div className="max-w-[720px]">
+          <Reveal><Kicker light>How it works</Kicker></Reveal>
+          <Reveal delay={0.05}><Headline light size="lg">Four taps between you and your door.</Headline></Reveal>
+          <Reveal delay={0.1}><Sub light className="mt-6">The same flow for groceries, food and services. One login, one wallet, one order history.</Sub></Reveal>
+        </div>
+
+        <div className="relative mt-16 md:mt-20">
+          <Connector />
+          <ol className="relative grid gap-10 md:grid-cols-4 md:gap-8">
+            {STEPS.map((s, i) => (
+              <Reveal as="li" key={s.title} delay={0.12 + i * 0.12} y={28} className="relative flex gap-5 md:block">
+                {/* vertical connector on mobile */}
+                {i < STEPS.length - 1 && <span aria-hidden className="absolute left-6 top-12 h-[calc(100%+40px)] w-px bg-white/10 md:hidden" />}
+                <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-emerald-300/30 bg-[#05080E] text-emerald-300 shadow-[0_0_0_6px_#05080E,0_0_40px_rgba(13,163,102,.35)]">
+                  {s.icon}
                 </div>
-                <h3 className="mt-4 text-[16px] font-semibold tracking-[-0.02em] text-gray-900">{t}</h3>
-                <p className="mt-1.5 text-[14px] leading-[1.6] text-gray-600">{d}</p>
-              </motion.li>
+                <div className="md:mt-7">
+                  <p className="text-[13px] font-semibold tracking-[0.12em] text-emerald-300/80" style={NUM}>
+                    <Counter to={i + 1} duration={0.9} format={n => String(Math.round(n)).padStart(2, '0')} />
+                  </p>
+                  <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-white">{s.title}</h3>
+                  <p className="mt-2 text-[15px] leading-[1.6] text-white/60">{s.body}</p>
+                </div>
+              </Reveal>
             ))}
           </ol>
         </div>
       </Container>
-    </Section>
+    </Dark>
   );
 }
 
-/* ── Shop by category ─────────────────────────────────────────────────────── */
-export function Categories({ categories }: { categories: Category[] }) {
-  const list: Array<{ name: string; icon?: string }> = categories.length ? categories : CATEGORY_NAMES.map(name => ({ name }));
+/* ── Live proof: real partner directory ──────────────────────────────────── */
+const TYPE_LABEL: Record<PartnerListing['type'], { label: string; icon: React.ReactNode }> = {
+  store: { label: 'Store', icon: <Store size={13} /> },
+  restaurant: { label: 'Restaurant', icon: <UtensilsCrossed size={13} /> },
+  service: { label: 'Pro', icon: <Wrench size={13} /> },
+  delivery: { label: 'Rider', icon: <Navigation size={13} /> },
+};
+
+export function LiveProof() {
+  const stores = usePartners('store');
+  const restaurants = usePartners('restaurant');
+  const pros = usePartners('service');
+  const all = useMemo(() => {
+    const seen = new Set<string>();
+    return [...stores.partners, ...restaurants.partners, ...pros.partners].filter(p => p.name && !seen.has(p.id) && seen.add(p.id));
+  }, [stores.partners, restaurants.partners, pros.partners]);
+  if (!all.length) return null;
+
+  const items = all.slice(0, 40).map(p => {
+    const t = TYPE_LABEL[p.type] ?? TYPE_LABEL.store;
+    return (
+      <span key={p.id} className="inline-flex h-11 items-center gap-2.5 rounded-full border border-gray-200 bg-white px-4 text-[14px] font-medium text-gray-800 shadow-[0_1px_2px_rgba(0,0,0,.04)]">
+        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">{t.icon}</span>
+        {p.name}
+        <span className="text-[12px] text-gray-400">{[t.label, p.locality || p.city].filter(Boolean).join(' · ')}</span>
+      </span>
+    );
+  });
   return (
-    <Section tone="soft" className="!py-16 md:!py-20">
+    <Light tone="soft" className="py-16 md:py-20">
       <Container>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <SectionTitle eyebrow="Shop by category" title="Live categories near you." />
-          <ArrowLink href="/now">Browse all</ArrowLink>
-        </div>
-        <div className="mt-10 flex flex-wrap gap-2.5">
-          {list.map((c, i) => (
-            <motion.div key={c.name} {...fade(Math.min(i, 12) * 0.02, 8)}>
-              <Link href="/now" className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white py-2 pl-2.5 pr-3.5 text-[13.5px] font-medium tracking-[-0.01em] text-gray-800 shadow-[0_1px_2px_rgba(0,0,0,.03)] transition hover:-translate-y-px hover:border-gray-300 hover:shadow-[0_6px_20px_rgba(11,15,25,.06)]">
-                {c.icon ? <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-50 text-[13px]">{c.icon}</span> : <span className="h-1.5 w-1.5 rounded-full" style={{ background: G }} />}
-                {c.name}
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+        <Reveal className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <Kicker>Live partner directory</Kicker>
+            <h2 className="text-[26px] font-semibold tracking-[-0.025em] text-gray-900 sm:text-[32px]">
+              <span style={NUM}><Counter to={all.length} /></span> {all.length === 1 ? 'partner' : 'partners'} registered on Zyphix
+            </h2>
+          </div>
+          <a href={PARTNER_SITE} target="_blank" rel="noopener noreferrer" className="text-[14.5px] font-semibold text-emerald-700">Add your business</a>
+        </Reveal>
       </Container>
-    </Section>
+      <Reveal delay={0.1} y={0} className="mt-8">
+        <Ticker items={items} speed={Math.max(30, items.length * 3)} size="text-[14px]" />
+      </Reveal>
+    </Light>
   );
 }

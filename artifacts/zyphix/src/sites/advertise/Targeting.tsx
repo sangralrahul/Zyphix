@@ -1,60 +1,72 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { MapPin, Search, Clock, Check } from 'lucide-react';
-import { Section, Container, Eyebrow, Display, Lead, ArrowLink, SampleTag, fade, G } from '@/ui/kit';
+import { MapPin, Search, Clock, Check, ArrowRight } from 'lucide-react';
+import { Kicker, Headline, Sub, Reveal, ParallaxImage, Stagger } from '@/ui/cinema';
+import { PHOTOS } from '@/data/media';
+import { IllustrativeTag } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Targeting feature story — text + CSS radius diagram (rings, pin, callouts).
+   Targeting — second half of the dark Audience band: copy + a parallax city
+   photo with radius rings and three targeting callouts layered on top.
 ──────────────────────────────────────────────────────────────────────────── */
 
-function RadiusDiagram() {
-  const rings = [100, 72, 44];
+const LEVERS: Array<[string, string]> = [
+  ['Delivery area', 'Pin codes, sectors or a radius around partner stores.'],
+  ['Category intent', 'Shown in the category or search your product belongs to.'],
+  ['Time of day', 'Optional dayparts — breakfast, evening, weekend.'],
+];
+
+const CALLOUTS = [
+  { label: 'Delivery area', sub: '6 pin codes · your choice', icon: <MapPin size={13} />, cls: 'left-3 top-3 sm:left-5 sm:top-5' },
+  { label: 'Category intent', sub: 'Searching "atta", browsing Staples', icon: <Search size={13} />, cls: 'right-3 top-[68%] sm:right-5' },
+  { label: 'Time of day', sub: 'Evening, 6–10 pm', icon: <Clock size={13} />, cls: 'bottom-3 left-3 sm:bottom-5 sm:left-5' },
+];
+
+function RadiusPhoto() {
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-[440px]">
-      <div aria-hidden className="absolute inset-0 rounded-3xl border border-gray-200 bg-[#FAFAFA]" style={{ backgroundImage: 'radial-gradient(#E5E7EB 1px, transparent 1px)', backgroundSize: '22px 22px' }} />
-      {rings.map((r, i) => (
-        <motion.div key={r} {...fade(0.1 + i * 0.1, 0)} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border"
-          style={{ width: `${r * 0.78}%`, height: `${r * 0.78}%`, borderColor: `rgba(13,163,102,${0.25 + i * 0.2})`, background: `rgba(13,163,102,${0.03 + i * 0.03})` }} />
+    <ParallaxImage photo={PHOTOS.city[0]} ratio="4/5" className="bg-gray-800 ring-1 ring-white/10" strength={10}>
+      <div aria-hidden className="absolute inset-0 bg-[#05080E]/45" />
+      {[92, 64, 36].map((r, i) => (
+        <div key={r} aria-hidden className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border"
+          style={{ width: `${r}%`, aspectRatio: '1 / 1', borderColor: `rgba(110,231,183,${0.25 + i * 0.2})`, background: `rgba(13,163,102,${0.06 + i * 0.05})` }} />
       ))}
-      <motion.div {...fade(0.4, 6)} className="absolute left-1/2 top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-white shadow-[0_8px_24px_rgba(13,163,102,.4)]" style={{ background: G }}>
-        <MapPin size={18} />
-      </motion.div>
-      {[
-        { label: 'Delivery area', sub: '6 pin codes · Dwarka', icon: <MapPin size={13} />, cls: 'left-3 top-5 sm:left-5 sm:top-8' },
-        { label: 'Category intent', sub: 'Searching "atta", browsing Staples', icon: <Search size={13} />, cls: 'right-3 top-[38%] sm:right-5' },
-        { label: 'Time of day', sub: 'Evening, 6–10 pm', icon: <Clock size={13} />, cls: 'bottom-5 left-5 sm:bottom-8 sm:left-10' },
-      ].map((c, i) => (
-        <motion.div key={c.label} {...fade(0.5 + i * 0.1)} className={`absolute flex items-center gap-2.5 rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-[0_8px_30px_rgba(11,15,25,.08)] ${c.cls}`}>
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">{c.icon}</span>
-          <div><p className="text-[12.5px] font-semibold text-gray-900">{c.label}</p><p className="text-[11.5px] text-gray-500">{c.sub}</p></div>
-        </motion.div>
+      <div className="absolute left-1/2 top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-white shadow-[0_0_0_8px_rgba(13,163,102,.25),0_12px_40px_rgba(13,163,102,.6)]" style={{ background: '#0DA366' }}>
+        <MapPin size={19} />
+      </div>
+      {CALLOUTS.map((c, i) => (
+        <Reveal key={c.label} delay={0.2 + i * 0.1} className={`absolute ${c.cls}`}>
+          <div className="flex items-center gap-2.5 rounded-xl border border-white/15 bg-[#05080E]/60 px-3 py-2 backdrop-blur-md">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-400/20 text-emerald-200">{c.icon}</span>
+            <div className="min-w-0"><p className="text-[12.5px] font-semibold text-white">{c.label}</p><p className="text-[11.5px] text-white/60">{c.sub}</p></div>
+          </div>
+        </Reveal>
       ))}
-      <SampleTag className="absolute bottom-3 right-3" />
-    </div>
+      <IllustrativeTag dark className="absolute right-3 top-4 sm:right-5 sm:top-6" />
+    </ParallaxImage>
   );
 }
 
 export function Targeting() {
   return (
-    <Section id="targeting" className="scroll-mt-16">
-      <Container className="grid items-center gap-14 lg:grid-cols-2">
-        <div className="max-w-[520px]">
-          <Eyebrow>Targeting</Eyebrow>
-          <Display as="h2" size="lg" className="mt-4 text-gray-900">Target by where people shop, not who they are.</Display>
-          <Lead className="mt-5">No profiles, no lookalikes. A placement runs in the delivery areas you pick, in the categories your product lives in, at the hours that matter.</Lead>
-          <ul className="mt-7 space-y-3">
-            {[
-              ['Delivery area', 'Pin codes, sectors or a radius around partner stores.'],
-              ['Category intent', 'Shown in the category or search your product belongs to.'],
-              ['Time of day', 'Optional dayparts — breakfast, evening, weekend.'],
-            ].map(([t, d]) => (
-              <li key={t} className="flex gap-3 text-[15px]"><Check size={16} className="mt-1 shrink-0 text-emerald-600" /><span className="text-gray-600"><span className="font-semibold text-gray-900">{t}.</span> {d}</span></li>
-            ))}
-          </ul>
-          <ArrowLink href="#contact" className="mt-7">Ask which areas are live</ArrowLink>
-        </div>
-        <RadiusDiagram />
-      </Container>
-    </Section>
+    <div id="targeting" className="scroll-mt-16 grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
+      <div className="lg:col-span-6 lg:order-2">
+        <Reveal><Kicker light>Targeting</Kicker></Reveal>
+        <Reveal delay={0.05}><Headline size="lg" light>Target by where people shop, not who they are.</Headline></Reveal>
+        <Reveal delay={0.1}><Sub light className="mt-5 max-w-[520px]">No profiles, no lookalikes. A placement runs in the delivery areas you pick, in the categories your product lives in, at the hours that matter.</Sub></Reveal>
+        <Stagger className="mt-8 space-y-0 divide-y divide-white/10 border-y border-white/10" step={0.07}>
+          {LEVERS.map(([t, d]) => (
+            <div key={t} className="flex gap-3 py-4 text-[15px]">
+              <Check size={16} className="mt-1 shrink-0 text-emerald-300" />
+              <span className="text-white/65"><span className="font-semibold text-white">{t}.</span> {d}</span>
+            </div>
+          ))}
+        </Stagger>
+        <Reveal delay={0.1}>
+          <a href="#contact" className="mt-7 inline-flex items-center gap-1.5 text-[15px] font-semibold text-emerald-300 transition hover:gap-2.5 hover:text-emerald-200">Ask which areas are live <ArrowRight size={15} /></a>
+        </Reveal>
+      </div>
+      <Reveal y={32} className="mx-auto w-full max-w-[520px] lg:order-1 lg:col-span-6 lg:max-w-none">
+        <RadiusPhoto />
+      </Reveal>
+    </div>
   );
 }

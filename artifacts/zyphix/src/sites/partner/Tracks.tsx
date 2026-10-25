@@ -1,181 +1,240 @@
-import React from 'react';
-import { Link } from 'wouter';
-import { motion } from 'framer-motion';
-import { ArrowRight, Check, Store, UtensilsCrossed, Wrench, Bike } from 'lucide-react';
-import { Bento, Button, Card, Chip, Container, Eyebrow, Display, Lead, IconTile, Section, SectionTitle, fade, Phone, Browser } from '@/ui/kit';
-import { SERVICES, TRACKS, type Track } from './shared';
-import { PartnerAppScreen, RestaurantDashboard, BookingScreen } from './Mockups';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowRight, Check, Store, UtensilsCrossed, Wrench, Bike, ClipboardCheck } from 'lucide-react';
+import { Light, Dark, Glow, Grain, Kicker, Headline, Sub, Reveal, Stagger, GlowButton, Counter, Ticker, PhotoTile, VideoCard, isStatic } from '@/ui/cinema';
+import { Container, Chip } from '@/ui/kit';
+import { VIDEOS, PHOTOS, landscape, type Clip } from '@/data/media';
+import { SERVICES, TRACKS, NUM, NOW_SITE, EATS_SITE, BOOK_SITE, type Track } from './shared';
 import { usePartners, type PartnerListing, type PartnerType } from '@/lib/partners';
 
-/* ── Recently joined (live partner directory) ────────────────────────────── */
-const TYPE_META: Record<PartnerType, { label: string; tone: 'green' | 'orange' | 'violet' | 'blue'; icon: typeof Store }> = {
-  store: { label: 'Store', tone: 'green', icon: Store },
-  restaurant: { label: 'Restaurant', tone: 'orange', icon: UtensilsCrossed },
-  service: { label: 'Professional', tone: 'violet', icon: Wrench },
-  delivery: { label: 'Rider', tone: 'blue', icon: Bike },
-};
+/* ────────────────────────────────────────────────────────────────────────────
+   Track bento (photo cards with hover video) · "Listed automatically" band ·
+   live partner directory (renders nothing until the API has partners).
+──────────────────────────────────────────────────────────────────────────── */
 
-export function RecentlyJoined() {
-  const store = usePartners('store');
-  const restaurant = usePartners('restaurant');
-  const service = usePartners('service');
-  const delivery = usePartners('delivery');
-  const groups: { type: PartnerType; list: PartnerListing[] }[] = [
-    { type: 'store', list: store.partners }, { type: 'restaurant', list: restaurant.partners },
-    { type: 'service', list: service.partners }, { type: 'delivery', list: delivery.partners },
-  ];
-  const total = groups.reduce((n, g) => n + g.list.length, 0);
-  if (total === 0) return null;
-
-  const latest = groups.flatMap(g => g.list)
-    .sort((a, b) => (Date.parse(b.joinedAt) || 0) - (Date.parse(a.joinedAt) || 0))
-    .slice(0, 6);
-
+/* ── Hover clip: poster is already painted by the card; video fades in on hover */
+function HoverClip({ clip, active }: { clip: Clip; active: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [failed, setFailed] = useState(false);
+  const [wanted, setWanted] = useState(false);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    if (active) { setWanted(true); v.play().catch(() => {}); }
+    else v.pause();
+  }, [active]);
+  if (failed || isStatic()) return null;
   return (
-    <motion.div {...fade(0.24)} className="mt-10">
-      <Card hover={false} className="p-5 md:p-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div className="min-w-0">
-            <Eyebrow>Recently joined</Eyebrow>
-            <p className="mt-2 text-[15px] text-gray-600">{total.toLocaleString('en-IN')} partner{total > 1 ? 's' : ''} registered so far.</p>
-          </div>
-          <ul className="flex flex-wrap gap-1.5">
-            {groups.filter(g => g.list.length > 0).map(g => {
-              const m = TYPE_META[g.type];
-              return <li key={g.type}><Chip tone={m.tone}><m.icon size={12} /> {g.list.length} {m.label}{g.list.length > 1 ? 's' : ''}</Chip></li>;
-            })}
-          </ul>
-        </div>
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {latest.map(p => {
-            const m = TYPE_META[p.type];
-            const place = p.locality || p.city;
-            return (
-              <li key={`${p.type}-${p.id}`} className="inline-flex max-w-full items-center gap-2 rounded-full border border-gray-200 bg-white py-1.5 pl-1.5 pr-3.5 text-[13px] text-gray-700">
-                <Chip tone={m.tone} className="!px-2"><m.icon size={11} /> {m.label}</Chip>
-                <span className="truncate font-semibold text-gray-900">{p.name}</span>
-                {place && <><span className="text-gray-300">·</span><span className="truncate text-gray-500">{place}</span></>}
-              </li>
-            );
-          })}
-        </ul>
-      </Card>
-    </motion.div>
+    <video
+      ref={ref}
+      aria-hidden
+      src={wanted ? clip.src720 || clip.src : undefined}
+      muted loop playsInline preload="none"
+      onError={() => setFailed(true)}
+      className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${active ? 'opacity-100' : 'opacity-0'}`}
+    />
   );
 }
 
-/* ── Bento of tracks ─────────────────────────────────────────────────────── */
-function Tile({ tr, className = '', delay = 0, compact = false, children }: { tr: Track; className?: string; delay?: number; compact?: boolean; children?: React.ReactNode }) {
+function TrackCard({ tr, className = '', delay = 0, chips = false }: { tr: Track; className?: string; delay?: number; chips?: boolean }) {
+  const [hover, setHover] = useState(false);
   return (
-    <motion.div {...fade(delay)} className={className}>
-      <Link href={tr.href} className="group block h-full">
-        <Card className={`flex h-full flex-col ${compact ? 'p-6' : 'p-7 md:p-8'}`}>
-          <div className="flex items-center justify-between">
-            <IconTile tone={tr.tone}><tr.icon size={18} /></IconTile>
-            <span className="text-[12px] font-medium text-gray-400">{tr.product}</span>
-          </div>
-          <h3 className={`mt-5 font-semibold tracking-[-0.02em] text-gray-900 ${compact ? 'text-[20px]' : 'text-[22px] md:text-[24px]'}`}>{tr.title}</h3>
-          <p className="mt-2 text-[15px] leading-relaxed text-gray-600">{tr.line}</p>
-          {children}
-          <ul className="mt-5 space-y-2">
+    <Reveal delay={delay} y={32} className={className}>
+      <article
+        onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+        className="group relative flex h-full min-h-[460px] flex-col justify-end overflow-hidden rounded-3xl bg-[#05080E] text-white shadow-[0_24px_60px_rgba(11,15,25,.12)] md:min-h-[500px]"
+      >
+        <a href={tr.href} aria-label={tr.cta} className="absolute inset-0 z-0">
+          <img src={tr.photo.src} alt={tr.photo.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.05]" />
+          {tr.clip && <HoverClip clip={tr.clip} active={hover} />}
+          <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.35) 0%, rgba(5,8,14,.05) 30%, rgba(5,8,14,.55) 60%, rgba(5,8,14,.94) 100%)' }} />
+        </a>
+
+        <div className="pointer-events-none absolute left-5 top-5 z-10 flex items-center gap-2 sm:left-6 sm:top-6">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-md"><tr.icon size={15} /></span>
+          <span className="rounded-full bg-white/15 px-3 py-1.5 text-[12px] font-semibold text-white/90 ring-1 ring-white/25 backdrop-blur-md">{tr.product}</span>
+        </div>
+
+        <div className="relative z-10 p-5 pt-20 sm:p-7 sm:pt-24">
+          <h3 className="text-[26px] font-semibold leading-[1.1] tracking-[-0.025em] sm:text-[30px]">{tr.title}</h3>
+          <p className="mt-2 max-w-[420px] text-[15px] leading-[1.55] text-white/75">{tr.line}</p>
+          {chips && (
+            <ul className="mt-4 flex flex-wrap gap-1.5">
+              {SERVICES.slice(0, 6).map(s => <li key={s} className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[12px] font-medium text-white/85 backdrop-blur-sm">{s}</li>)}
+              <li className="rounded-full border border-white/15 bg-white/[.04] px-2.5 py-1 text-[12px] font-medium text-white/60">+{SERVICES.length - 6} more</li>
+            </ul>
+          )}
+          <ul className="mt-4 space-y-1.5">
             {tr.bullets.map(b => (
-              <li key={b} className="flex items-start gap-2 text-[14px] text-gray-700"><Check size={15} className="mt-0.5 shrink-0 text-emerald-600" /> {b}</li>
+              <li key={b} className="flex items-start gap-2 text-[14px] text-white/85"><Check size={15} className="mt-0.5 shrink-0 text-emerald-300" /> {b}</li>
             ))}
           </ul>
-          <span className="mt-auto inline-flex items-center gap-1.5 pt-6 text-[14.5px] font-semibold text-emerald-700">{tr.cta} <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" /></span>
-        </Card>
-      </Link>
-    </motion.div>
+          <div className="mt-6">
+            <GlowButton href={tr.href} size="md">{tr.cta} <ArrowRight size={15} /></GlowButton>
+          </div>
+        </div>
+      </article>
+    </Reveal>
   );
 }
 
 export function TrackBento() {
   const [delivery, restaurant, services, store] = TRACKS;
   return (
-    <Section id="tracks" tone="soft" className="scroll-mt-16">
+    <Light id="tracks" className="scroll-mt-16 py-24 md:py-36">
       <Container>
-        <SectionTitle eyebrow="Choose your track" title="Three ways to partner. One neighbourhood network." lead="Pick the track that matches how you work. Each has a short guided application and its own onboarding manager." />
-        <Bento className="mt-12">
-          <Tile tr={delivery} className="md:col-span-7" delay={0} />
-          <Tile tr={restaurant} className="md:col-span-5" delay={0.06} />
-          <Tile tr={services} className="md:col-span-8" delay={0.12}>
-            <ul className="mt-4 flex flex-wrap gap-1.5">
-              {SERVICES.map(s => <li key={s}><Chip tone="violet">{s}</Chip></li>)}
-            </ul>
-          </Tile>
-          <Tile tr={store} className="md:col-span-4" delay={0.18} compact />
-        </Bento>
-        <RecentlyJoined />
+        <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-8">
+            <Reveal><Kicker>Choose your track</Kicker></Reveal>
+            <Reveal delay={0.05}><Headline size="lg">Four ways to partner. One neighbourhood network.</Headline></Reveal>
+          </div>
+          <Reveal delay={0.1} className="lg:col-span-4">
+            <Sub>Pick the track that matches how you work. Each has a short guided application and its own onboarding manager.</Sub>
+          </Reveal>
+        </div>
+
+        <div className="mt-12 grid gap-4 md:mt-16 md:grid-cols-12">
+          <TrackCard tr={delivery} className="md:col-span-7" delay={0} />
+          <TrackCard tr={restaurant} className="md:col-span-5" delay={0.08} />
+          <TrackCard tr={store} className="md:col-span-5" delay={0.16} />
+          <TrackCard tr={services} className="md:col-span-7" delay={0.24} chips />
+        </div>
       </Container>
-    </Section>
+    </Light>
   );
 }
 
-/* ── Feature stories ─────────────────────────────────────────────────────── */
-interface Story { tr: Track; eyebrow: string; title: string; lead: string; bullets: string[]; visual: React.ReactNode; flip?: boolean }
+/* ── Listed automatically ───────────────────────────────────────────────── */
+const DESTINATIONS = [
+  { host: 'now.zyphix.in', href: NOW_SITE, who: 'Kirana & store owners', what: 'Your shelves, at shelf prices, 30-minute delivery.' },
+  { host: 'eats.zyphix.in', href: EATS_SITE, who: 'Restaurants & kitchens', what: 'Your menu, your prices, riders timed to prep.' },
+  { host: 'book.zyphix.in', href: BOOK_SITE, who: 'Zyphix Book professionals', what: 'Your slots and rate card, with a verified badge.' },
+];
 
-function StoryRow({ s, index }: { s: Story; index: number }) {
-  const text = (
-    <motion.div {...fade(0)} className="max-w-[480px]">
-      <Eyebrow>{s.eyebrow}</Eyebrow>
-      <Display as="h3" size="md" className="mt-4 text-gray-900">{s.title}</Display>
-      <Lead className="mt-4">{s.lead}</Lead>
-      <ul className="mt-6 space-y-2.5">
-        {s.bullets.map(b => <li key={b} className="flex items-start gap-2.5 text-[15px] text-gray-700"><Check size={16} className="mt-0.5 shrink-0 text-emerald-600" /> {b}</li>)}
-      </ul>
-      <Button href={s.tr.href} variant="secondary" className="mt-8">{s.tr.cta} <ArrowRight size={15} /></Button>
-    </motion.div>
-  );
-  const visual = <motion.div {...fade(0.1, 20)} className="relative">{s.visual}</motion.div>;
+function DestLabel({ host, who, what }: { host: string; who: string; what: string }) {
   return (
-    <div className={`grid items-center gap-12 md:grid-cols-2 md:gap-16 ${index > 0 ? 'mt-24 md:mt-32' : ''}`}>
-      {s.flip ? <>{visual}{text}</> : <>{text}{visual}</>}
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-4 sm:p-5" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,0) 0%, rgba(5,8,14,.82) 100%)' }}>
+      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-emerald-300">{host}</p>
+      <p className="mt-1 text-[16px] font-semibold tracking-[-0.01em] text-white">{who}</p>
+      <p className="mt-0.5 text-[12.5px] text-white/65">{what}</p>
     </div>
   );
 }
 
-export function Stories() {
-  const [delivery, restaurant, services] = TRACKS;
-  const stories: Story[] = [
-    {
-      tr: delivery, eyebrow: 'Delivery partner',
-      title: 'Every order shows its payout before you accept.',
-      lead: 'Short hyperlocal runs in the streets you already know. Your week is summarised in the app and settled to your bank every Monday.',
-      bullets: ['Per-order payout visible up front', 'No forced login hours or penalty targets', 'Dedicated onboarding manager and training'],
-      visual: (
-        <div className="relative mx-auto w-fit">
-          <Phone><PartnerAppScreen /></Phone>
-        </div>
-      ),
-    },
-    {
-      tr: restaurant, eyebrow: 'Restaurant & kitchen partner', flip: true,
-      title: 'Your menu, your prices, your counter.',
-      lead: 'A live dashboard built for the kitchen counter. Toggle items, set prep time and accept orders in a tap — riders are timed to arrive when food is ready.',
-      bullets: ['Commission explained before you go live', 'Menu, prices and hours stay in your control', 'Customer names and order history shared with you'],
-      visual: (
-        <div className="relative">
-          <Browser url="partner.zyphix.in/eats"><RestaurantDashboard /></Browser>
-        </div>
-      ),
-    },
-    {
-      tr: services, eyebrow: 'Zyphix Book professional',
-      title: 'Verified badge. Local bookings. Your rate card.',
-      lead: 'Booking requests only from your chosen area and radius. Once ID and background checks are complete, customers see your verified badge.',
-      bullets: ['You set your days, slots and rates', 'Job checklist and customer confirmation on every booking', 'Solo professionals and small teams both welcome'],
-      visual: (
-        <div className="relative mx-auto w-fit">
-          <Phone><BookingScreen /></Phone>
-        </div>
-      ),
-    },
-  ];
+export function ListedAutomatically() {
   return (
-    <Section>
+    <Dark className="py-24 md:py-36">
+      <Glow x="15%" y="20%" size={900} alpha={0.22} />
+      <Grain />
       <Container>
-        {stories.map((s, i) => <StoryRow key={s.tr.id} s={s} index={i} />)}
+        <div className="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
+          <div className="lg:col-span-5">
+            <Reveal><Kicker light>Listed automatically</Kicker></Reveal>
+            <Reveal delay={0.05}><Headline light size="lg">Register once. Appear where your customers already shop.</Headline></Reveal>
+            <Reveal delay={0.1}><Sub light className="mt-6 max-w-[480px]">Your listing is built from your registration and goes live on the Zyphix product for your track. People in your area see you in the app and on the web, with no separate storefront to maintain.</Sub></Reveal>
+            <Stagger className="mt-8 grid gap-3" step={0.08}>
+              {[
+                ['Register', 'A ten-minute form on this portal.'],
+                ['Verify', 'A call within two working days; documents checked.'],
+                ['Go live', 'Your listing appears on now., eats. or book.zyphix.in, and in the rider app for delivery partners.'],
+              ].map(([t, d], i) => (
+                <div key={t} className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[.04] p-4">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-emerald-300/30 text-[12.5px] font-semibold text-emerald-300" style={NUM}>0{i + 1}</span>
+                  <div>
+                    <p className="text-[15px] font-semibold text-white">{t}</p>
+                    <p className="mt-0.5 text-[14px] leading-[1.55] text-white/60">{d}</p>
+                  </div>
+                </div>
+              ))}
+            </Stagger>
+          </div>
+
+          <div className="lg:col-span-7">
+            <div className="grid grid-cols-2 gap-4">
+              <Reveal y={32} className="col-span-2">
+                <VideoCard clip={VIDEOS.groceryShelf} ratio="16/8" rounded="rounded-3xl" className="!bg-[#111827] ring-1 ring-white/10">
+                  <DestLabel {...DESTINATIONS[0]} />
+                </VideoCard>
+              </Reveal>
+              <Reveal y={32} delay={0.1}>
+                <PhotoTile photo={landscape('indianFood', 0)} ratio="4/5" rounded="rounded-3xl" className="!bg-[#111827] ring-1 ring-white/10">
+                  <DestLabel {...DESTINATIONS[1]} />
+                </PhotoTile>
+              </Reveal>
+              <Reveal y={32} delay={0.18}>
+                <PhotoTile photo={PHOTOS.electrician[1]} ratio="4/5" rounded="rounded-3xl" className="!bg-[#111827] ring-1 ring-white/10">
+                  <DestLabel {...DESTINATIONS[2]} />
+                </PhotoTile>
+              </Reveal>
+            </div>
+            <Reveal delay={0.25} className="mt-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 text-[13.5px] text-white/70">
+              <ClipboardCheck size={16} className="shrink-0 text-emerald-300" />
+              Delivery partners are not listed publicly; they receive orders from Zyphix Now and Eats in the partner app.
+            </Reveal>
+          </div>
+        </div>
       </Container>
-    </Section>
+    </Dark>
+  );
+}
+
+/* ── Live directory (real registrations) ───────────────────────────────── */
+const TYPE_META: Record<PartnerType, { label: string; plural: string; tone: 'green' | 'orange' | 'violet' | 'blue'; icon: typeof Store }> = {
+  store: { label: 'Store', plural: 'Stores', tone: 'green', icon: Store },
+  restaurant: { label: 'Restaurant', plural: 'Restaurants', tone: 'orange', icon: UtensilsCrossed },
+  service: { label: 'Professional', plural: 'Professionals', tone: 'violet', icon: Wrench },
+  delivery: { label: 'Rider', plural: 'Riders', tone: 'blue', icon: Bike },
+};
+
+export function LiveDirectory() {
+  const store = usePartners('store');
+  const restaurant = usePartners('restaurant');
+  const service = usePartners('service');
+  const delivery = usePartners('delivery');
+  const groups = useMemo<{ type: PartnerType; list: PartnerListing[] }[]>(() => [
+    { type: 'store', list: store.partners }, { type: 'restaurant', list: restaurant.partners },
+    { type: 'service', list: service.partners }, { type: 'delivery', list: delivery.partners },
+  ], [store.partners, restaurant.partners, service.partners, delivery.partners]);
+  const total = groups.reduce((n, g) => n + g.list.length, 0);
+  if (total === 0) return null;
+
+  const latest = groups.flatMap(g => g.list)
+    .filter(p => p.name)
+    .sort((a, b) => (Date.parse(b.joinedAt) || 0) - (Date.parse(a.joinedAt) || 0))
+    .slice(0, 40);
+
+  const items = latest.map(p => {
+    const m = TYPE_META[p.type] ?? TYPE_META.store;
+    const place = p.locality || p.city;
+    return (
+      <span key={`${p.type}-${p.id}`} className="inline-flex h-11 items-center gap-2.5 rounded-full border border-gray-200 bg-white px-4 text-[14px] font-medium text-gray-800 shadow-[0_1px_2px_rgba(0,0,0,.04)]">
+        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-700"><m.icon size={13} /></span>
+        {p.name}
+        <span className="text-[12px] text-gray-400">{[m.label, place].filter(Boolean).join(' · ')}</span>
+      </span>
+    );
+  });
+
+  return (
+    <Light tone="soft" className="py-16 md:py-20">
+      <Container>
+        <Reveal className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <Kicker>Live partner directory</Kicker>
+            <h2 className="text-[26px] font-semibold tracking-[-0.025em] text-gray-900 sm:text-[32px]">
+              <span style={NUM}><Counter to={total} /></span> {total === 1 ? 'partner' : 'partners'} registered so far
+            </h2>
+          </div>
+          <ul className="flex flex-wrap gap-1.5">
+            {groups.filter(g => g.list.length > 0).map(g => {
+              const m = TYPE_META[g.type];
+              return <li key={g.type}><Chip tone={m.tone}><m.icon size={12} /> {g.list.length} {g.list.length === 1 ? m.label : m.plural}</Chip></li>;
+            })}
+          </ul>
+        </Reveal>
+      </Container>
+      <Reveal delay={0.1} y={0} className="mt-8">
+        <Ticker items={items} speed={Math.max(30, items.length * 3)} size="text-[14px]" />
+      </Reveal>
+    </Light>
   );
 }

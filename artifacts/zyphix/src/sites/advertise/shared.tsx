@@ -4,7 +4,7 @@ import { G, G_DEEP } from '@/ui/kit';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Shared bits for advertise.zyphix.in — constants and the tiny in-app UI
-   fragments used inside Phone / Browser mocks. All mock data is sample data.
+   fragments used inside Phone / Browser mocks. All mock data is illustrative.
 ──────────────────────────────────────────────────────────────────────────── */
 
 export const MAIN_SITE = 'https://zyphix.in';
@@ -21,7 +21,7 @@ export function SponsoredTag({ dark = false, className = '' }: { dark?: boolean;
 }
 
 /* ── App mock fragments (small, monochrome, no photos) ─────────────────── */
-export function AppHeader({ area = 'Sector 12, Dwarka', product = 'Zyphix Now', accent = G }: { area?: string; product?: string; accent?: string }) {
+export function AppHeader({ area = 'Gandhi Nagar, Jammu', product = 'Zyphix Now', accent = G }: { area?: string; product?: string; accent?: string }) {
   return (
     <div className="flex items-center justify-between px-4 pb-2 pt-1">
       <div>
@@ -92,5 +92,23 @@ export function AppDots() {
 }
 
 export function AppGhost({ className = 'h-9' }: { className?: string }) {
-  return <div className={`mx-4 mt-3 rounded-xl border border-dashed border-gray-200 bg-[#FAFAFA] ${className}`} />;
+  return <div className={`mx-4 mt-3 rounded-xl bg-[#F3F4F6] ${className}`} />;
 }
+
+/** "Illustrative" label for every mock placement / report (no real data shown). */
+export function IllustrativeTag({ className = '', dark = false }: { className?: string; dark?: boolean }) {
+  return (
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[.1em] ${dark ? 'bg-white/10 text-white/70 ring-1 ring-white/15' : 'bg-white/90 text-gray-500 ring-1 ring-gray-200'} backdrop-blur ${className}`}>
+      Illustrative
+    </span>
+  );
+}
+
+/** Ad surfaces shown in the hero strip. */
+export const SURFACES = [
+  { name: 'Zyphix Now', where: 'Home banner, rows, spotlight' },
+  { name: 'Zyphix Eats', where: 'Featured near you' },
+  { name: 'Zyphix Book', where: 'Featured pros' },
+  { name: 'In-app search', where: 'First result, your terms' },
+  { name: 'Offers & checkout', where: 'Coupons at the basket' },
+];

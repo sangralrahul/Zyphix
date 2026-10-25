@@ -1,7 +1,7 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Check, ArrowRight } from 'lucide-react';
-import { Section, Container, SectionTitle, Card, Button, Chip, fade } from '@/ui/kit';
+import { Container, Button } from '@/ui/kit';
+import { Light, Kicker, Headline, Sub, Reveal } from '@/ui/cinema';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Pricing — three tiers described by inclusions only. No prices.
@@ -27,34 +27,47 @@ const TIERS = [
 
 export function Pricing() {
   return (
-    <Section id="pricing" className="scroll-mt-16">
+    <Light id="pricing" className="scroll-mt-16 py-24 md:py-36">
       <Container>
-        <SectionTitle align="center" eyebrow="Pricing" title="Flat rates. Written quotes." lead="Every placement is priced flat per period and quoted before anything goes live. Pick the shape that fits and we'll send a custom quote." />
-        <div className="mt-12 grid gap-4 lg:grid-cols-3">
+        <div className="mx-auto max-w-[760px] text-center">
+          <Reveal><Kicker>Pricing</Kicker></Reveal>
+          <Reveal delay={0.05}><Headline size="lg">Flat rates. Written quotes.</Headline></Reveal>
+          <Reveal delay={0.1}><Sub className="mx-auto mt-5 max-w-[620px]">Every placement is priced flat per period and quoted before anything goes live. Pick the shape that fits and we'll send a custom quote.</Sub></Reveal>
+        </div>
+
+        <div className="mt-14 grid gap-4 md:mt-20 lg:grid-cols-3 lg:items-stretch">
           {TIERS.map((t, i) => (
-            <motion.div key={t.name} {...fade(i * 0.08)}>
-              <Card className={`flex h-full flex-col p-7 ${t.featured ? 'ring-1 ring-emerald-200 shadow-[0_12px_40px_rgba(13,163,102,.10)]' : ''}`}>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-[22px] font-semibold tracking-[-0.02em] text-gray-900">{t.name}</h3>
-                  {t.featured && <Chip tone="green">Most chosen</Chip>}
+            <Reveal key={t.name} delay={i * 0.08} y={28}>
+              <article className={`relative flex h-full flex-col overflow-hidden rounded-3xl p-7 sm:p-8 ${t.featured
+                ? 'bg-[#05080E] text-white shadow-[0_40px_90px_rgba(5,8,14,.28)]'
+                : 'border border-gray-200 bg-white text-gray-900'}`}>
+                {t.featured && <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(13,163,102,.45), transparent 70%)' }} />}
+                <div className="relative flex items-center justify-between gap-3">
+                  <h3 className="text-[26px] font-semibold tracking-[-0.025em]">{t.name}</h3>
+                  {t.featured && <span className="rounded-full bg-emerald-400/15 px-2.5 py-1 text-[12px] font-semibold text-emerald-200 ring-1 ring-emerald-300/30">Most chosen</span>}
                 </div>
-                <p className="mt-1 text-[13px] font-medium text-emerald-700">{t.tag}</p>
-                <p className="mt-3 text-[14.5px] leading-[1.6] text-gray-600">{t.d}</p>
-                <dl className="mt-6 flex-1 space-y-3 border-t border-gray-200 pt-6">
+                <p className={`relative mt-1 text-[13.5px] font-semibold ${t.featured ? 'text-emerald-300' : 'text-emerald-700'}`}>{t.tag}</p>
+                <p className={`relative mt-4 text-[15px] leading-[1.6] ${t.featured ? 'text-white/65' : 'text-gray-600'}`}>{t.d}</p>
+                <dl className={`relative mt-7 flex-1 divide-y border-t ${t.featured ? 'divide-white/10 border-white/10' : 'divide-gray-100 border-gray-200'}`}>
                   {t.rows.map(([k, v]) => (
-                    <div key={k} className="flex gap-3">
-                      <Check size={15} className="mt-[3px] shrink-0 text-emerald-600" />
-                      <div className="text-[14px]"><dt className="inline font-medium text-gray-900">{k}: </dt><dd className="inline text-gray-600">{v}</dd></div>
+                    <div key={k} className="flex items-start gap-3 py-3.5">
+                      <Check size={15} className={`mt-[3px] shrink-0 ${t.featured ? 'text-emerald-300' : 'text-emerald-600'}`} />
+                      <div className="text-[14.5px]">
+                        <dt className={`inline font-semibold ${t.featured ? 'text-white' : 'text-gray-900'}`}>{k}: </dt>
+                        <dd className={`inline ${t.featured ? 'text-white/70' : 'text-gray-600'}`}>{v}</dd>
+                      </div>
                     </div>
                   ))}
                 </dl>
-                <Button href="#contact" variant={t.featured ? 'primary' : 'secondary'} className="mt-7 w-full">Custom quote <ArrowRight size={15} /></Button>
-              </Card>
-            </motion.div>
+                <Button href="#contact" variant={t.featured ? 'primary' : 'secondary'} size="lg" className="relative mt-7 w-full">Custom quote <ArrowRight size={15} /></Button>
+              </article>
+            </Reveal>
           ))}
         </div>
-        <p className="mt-8 text-center text-[13.5px] text-gray-500">No auctions or bidding · Change areas between periods · GST invoice for every period</p>
+        <Reveal delay={0.1}>
+          <p className="mt-10 text-center text-[14px] text-gray-500">No auctions or bidding · Change areas between periods · GST invoice for every period</p>
+        </Reveal>
       </Container>
-    </Section>
+    </Light>
   );
 }

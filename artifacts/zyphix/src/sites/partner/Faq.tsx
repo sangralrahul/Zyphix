@@ -1,7 +1,8 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import { Accordion, Button, Container, Display, Lead, Mesh, Section, SectionTitle, fade } from '@/ui/kit';
+import { Accordion, Container } from '@/ui/kit';
+import { BgVideo, GhostButton, GlowButton, Grain, Headline, Kicker, Light, Reveal, Sub } from '@/ui/cinema';
+import { VIDEOS } from '@/data/media';
 import { PARTNERSHIPS_EMAIL, TRACKS } from './shared';
 
 /* ── FAQ ─────────────────────────────────────────────────────────────────── */
@@ -17,33 +18,34 @@ const FAQ = [
 
 export function Faq() {
   return (
-    <Section id="faq" tone="soft" className="scroll-mt-16">
+    <Light id="faq" tone="soft" className="scroll-mt-16 py-24 md:py-32">
       <Container narrow>
-        <SectionTitle eyebrow="FAQ" title="Questions partners ask first." align="center" className="mb-12" />
-        <motion.div {...fade(0.05)}><Accordion items={FAQ} /></motion.div>
+        <Reveal className="mb-12 text-center">
+          <Kicker>FAQ</Kicker>
+          <Headline size="md">Questions partners ask first.</Headline>
+        </Reveal>
+        <Reveal delay={0.05}><Accordion items={FAQ} /></Reveal>
         <p className="mt-10 text-center text-[14.5px] text-gray-600">Something else? Write to <a href={`mailto:${PARTNERSHIPS_EMAIL}`} className="font-semibold text-emerald-700 hover:underline">{PARTNERSHIPS_EMAIL}</a>.</p>
       </Container>
-    </Section>
+    </Light>
   );
 }
 
-/* ── Final CTA band ──────────────────────────────────────────────────────── */
+/* ── Final CTA (full-bleed video) ────────────────────────────────────────── */
 export function FinalCta() {
   return (
-    <section className="relative isolate overflow-hidden border-t border-gray-200 bg-white py-20 md:py-28">
-      <Mesh intensity={1.1} />
-      <Container className="text-center">
-        <motion.div {...fade(0)}>
-          <Display as="h2" size="lg" className="mx-auto max-w-[680px] text-gray-900">Pick a track and apply in ten minutes.</Display>
-        </motion.div>
-        <motion.div {...fade(0.05)}>
-          <Lead className="mx-auto mt-5 max-w-[520px]">Free to apply. A real person calls you within two working days.</Lead>
-        </motion.div>
-        <motion.div {...fade(0.1)} className="mx-auto mt-9 flex max-w-[720px] flex-wrap justify-center gap-3">
-          {TRACKS.map((t, i) => (
-            <Button key={t.id} href={t.href} variant={i === 0 ? 'primary' : 'secondary'}>{t.name} <ArrowRight size={15} /></Button>
-          ))}
-        </motion.div>
+    <section className="relative isolate overflow-hidden bg-[#05080E] py-28 text-white md:py-40">
+      <BgVideo clip={VIDEOS.foodDelivery} dim={0.6} />
+      <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.85) 0%, rgba(5,8,14,.35) 50%, rgba(5,8,14,.9) 100%)' }} />
+      <Grain />
+      <Container className="relative text-center">
+        <Reveal><Headline size="lg" light className="mx-auto max-w-[760px]">Pick a track and apply in ten minutes.</Headline></Reveal>
+        <Reveal delay={0.05}><Sub light className="mx-auto mt-5 max-w-[520px]">Free to apply. A real person calls you within two working days.</Sub></Reveal>
+        <Reveal delay={0.1} className="mx-auto mt-10 flex max-w-[760px] flex-wrap justify-center gap-3">
+          {TRACKS.map((t, i) => i === 0
+            ? <GlowButton key={t.id} href={t.href} size="md">{t.name} <ArrowRight size={15} /></GlowButton>
+            : <GhostButton key={t.id} href={t.href} size="md">{t.name} <ArrowRight size={15} /></GhostButton>)}
+        </Reveal>
       </Container>
     </section>
   );

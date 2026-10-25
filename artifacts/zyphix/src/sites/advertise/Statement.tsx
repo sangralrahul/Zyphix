@@ -1,10 +1,12 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { ShoppingCart, Store, Tag } from 'lucide-react';
-import { Section, Container, Grid, Eyebrow, Display, Lead, fade } from '@/ui/kit';
+import { Container } from '@/ui/kit';
+import { BgVideo, Grain, Kicker, Reveal, Stagger } from '@/ui/cinema';
+import { VIDEOS } from '@/data/media';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   INK statement — large claim + three columns over Grid lines.
+   Statement — full-bleed video band with one large white statement (a claim
+   about the product, not a testimonial) and the three reasons beneath it.
 ──────────────────────────────────────────────────────────────────────────── */
 
 const COLS = [
@@ -15,24 +17,27 @@ const COLS = [
 
 export function Statement() {
   return (
-    <Section tone="ink" className="overflow-hidden">
-      <Grid dark />
-      <Container>
-        <div className="max-w-[720px]">
-          <Eyebrow dark>Why it works</Eyebrow>
-          <Display as="h2" size="lg" className="mt-4 text-white">Intent at the point of purchase.</Display>
-          <Lead dark className="mt-5">The closer a message sits to the basket, the less it has to shout.</Lead>
-        </div>
-        <div className="mt-14 grid gap-10 md:grid-cols-3">
-          {COLS.map((c, i) => (
-            <motion.div key={c.title} {...fade(0.1 + i * 0.08)} className="border-t border-white/10 pt-6">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/[.06] text-emerald-300 ring-1 ring-white/10">{c.icon}</span>
-              <h3 className="mt-5 text-[17px] font-semibold tracking-[-0.01em] text-white">{c.title}</h3>
-              <p className="mt-2 text-[14.5px] leading-[1.65] text-white/60">{c.text}</p>
-            </motion.div>
+    <section className="relative isolate overflow-hidden bg-[#05080E] text-white">
+      <BgVideo clip={VIDEOS.unboxing} dim={0.55} />
+      <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.75) 0%, rgba(5,8,14,.25) 40%, rgba(5,8,14,.92) 100%)' }} />
+      <Grain />
+      <Container className="relative flex min-h-[92svh] flex-col justify-end pb-16 pt-32 md:pb-24 md:pt-44">
+        <Reveal><Kicker light>Why it works</Kicker></Reveal>
+        <Reveal delay={0.05} y={32} blur>
+          <h2 className="max-w-[1080px] text-[34px] font-semibold leading-[1.08] tracking-[-0.03em] text-white sm:text-[52px] md:text-[64px]">
+            Intent at the point of purchase. <span className="text-white/55">The closer a message sits to the basket, the less it has to shout.</span>
+          </h2>
+        </Reveal>
+        <Stagger className="mt-14 grid gap-8 border-t border-white/15 pt-10 md:mt-20 md:grid-cols-3 md:gap-10" step={0.08}>
+          {COLS.map(c => (
+            <div key={c.title}>
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-emerald-300 ring-1 ring-white/15 backdrop-blur-md">{c.icon}</span>
+              <h3 className="mt-5 text-[18px] font-semibold tracking-[-0.01em] text-white">{c.title}</h3>
+              <p className="mt-2 max-w-[380px] text-[15px] leading-[1.65] text-white/65">{c.text}</p>
+            </div>
           ))}
-        </div>
+        </Stagger>
       </Container>
-    </Section>
+    </section>
   );
 }

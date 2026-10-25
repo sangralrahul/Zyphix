@@ -1,18 +1,18 @@
 import React from 'react';
 import { SiteHeader, SiteFooter } from '@/components/layout/SiteChrome';
 import { FONT } from '@/ui/kit';
+import { ScrollProgress } from '@/ui/cinema';
 import { useCategories } from './home/shared';
-import { Hero, SignalRow } from './home/Hero';
-import { Features, Stories } from './home/Products';
-import { Statement, HowItWorks, Categories } from './home/HowItWorks';
-import { Partners } from './home/Partners';
-import { AppSection } from './home/AppSection';
+import { Hero, PromiseTicker } from './home/Hero';
+import { NowChapter, EatsChapter, BookChapter } from './home/Products';
+import { HowItWorks, LiveProof } from './home/HowItWorks';
+import { AppSection, PartnerBand } from './home/AppSection';
 import { Faq, FinalCta, StickyCta } from './home/Faq';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Zyphix — company landing page (zyphix.in), Stripe / Linear direction.
-   Sections live in ./home/*. Only the lightweight /api/categories call is
-   made here (no product-list fetch); it is shared with every section.
+   Zyphix — company landing page (zyphix.in), cinematic direction.
+   Sections live in ./home/*. Only the lightweight /api/categories and
+   /api/partners calls are made here (no product-list fetch).
 ──────────────────────────────────────────────────────────────────────────── */
 
 export function Landing() {
@@ -20,18 +20,19 @@ export function Landing() {
   React.useEffect(() => { document.title = 'Zyphix — Your neighbourhood, delivered in 30 minutes'; }, []);
 
   return (
-    <div className="min-h-screen bg-white pb-[72px] text-gray-900 antialiased md:pb-0" style={{ fontFamily: FONT }}>
-      <SiteHeader />
+    <div className="min-h-screen bg-[#05080E] pb-[72px] text-gray-900 antialiased md:pb-0" style={{ fontFamily: FONT }}>
+      <ScrollProgress />
+      <SiteHeader variant="transparent" />
       <main>
-        <Hero categories={categories} />
-        <SignalRow categories={categories} />
-        <Features />
-        <Stories />
-        <Statement />
+        <Hero />
+        <PromiseTicker />
+        <NowChapter categories={categories} />
+        <EatsChapter />
+        <BookChapter />
         <HowItWorks />
-        <Categories categories={categories} />
-        <Partners />
+        <LiveProof />
         <AppSection />
+        <PartnerBand />
         <Faq />
         <FinalCta />
       </main>

@@ -36,8 +36,21 @@ function NavLink({ item, onClick, className }: { item: NavItem; onClick?: () => 
 }
 
 /* ── Header ───────────────────────────────────────────────────────────────── */
-export function SiteHeader() {
+/**
+ * `variant="transparent"`: white text over a video/photo hero, absolutely positioned;
+ * turns into the solid white sticky header once the page scrolls 40px.
+ */
+export function SiteHeader({ variant = 'solid' }: { variant?: 'solid' | 'transparent' } = {}) {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    if (variant !== 'transparent') return;
+    const on = () => setScrolled(window.scrollY > 40);
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, [variant]);
+  const clear = variant === 'transparent' && !scrolled && !open;
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -49,14 +62,14 @@ export function SiteHeader() {
   // Signed-in visitors go straight to their account; everyone else to auth.zyphix.in and back here.
   const signIn = user ? { href: '/account', label: 'My account' } : { href: typeof window !== 'undefined' ? authUrl(window.location.href) : '/auth', label: 'Sign in' };
 
-  const desktop = 'text-[14px] font-medium tracking-[-0.01em] text-gray-600 transition-colors hover:text-gray-900';
+  const desktop = clear ? 'text-[14px] font-medium tracking-[-0.01em] text-white/80 transition-colors hover:text-white' : 'text-[14px] font-medium tracking-[-0.01em] text-gray-600 transition-colors hover:text-gray-900';
   const mobile = 'flex items-center justify-between py-3.5 text-[17px] font-medium tracking-[-0.01em] text-gray-900';
 
   return (
-    <header className={`sticky top-0 z-50 border-b ${BORDER} bg-white/80 backdrop-blur-xl`} style={{ fontFamily: FONT }}>
+    <header className={`${variant === 'transparent' ? 'fixed' : 'sticky'} top-0 z-50 w-full border-b transition-[background-color,border-color,box-shadow] duration-300 ${clear ? 'border-transparent bg-transparent' : `${BORDER} bg-white/80 backdrop-blur-xl`}`} style={{ fontFamily: FONT }}>
       <Container className="relative flex h-16 items-center justify-between">
         <Link href="/" aria-label="Zyphix home" className="flex items-center" onClick={() => setOpen(false)}>
-          <ZyphixLogo size={30} />
+          <ZyphixLogo size={30} ixColor={clear ? '#FFFFFF' : '#0A0F1A'} />
         </Link>
 
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 lg:flex">
@@ -64,11 +77,11 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <Button href={signIn.href} sameTab variant="ghost" size="sm">{signIn.label}</Button>
+          <Button href={signIn.href} sameTab variant="ghost" size="sm" className={clear ? 'text-white/85 hover:bg-white/10 hover:text-white' : ''}>{signIn.label}</Button>
           <Button href="/now" variant="primary" size="sm">Order now</Button>
         </div>
 
-        <button className="-mr-2 rounded-lg p-2 text-gray-700 lg:hidden" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} onClick={() => setOpen(v => !v)}>
+        <button className={`-mr-2 rounded-lg p-2 lg:hidden ${clear ? 'text-white' : 'text-gray-700'}`} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} onClick={() => setOpen(v => !v)}>
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </Container>

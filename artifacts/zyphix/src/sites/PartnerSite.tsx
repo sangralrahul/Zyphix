@@ -8,8 +8,8 @@ import { MerchantSetup } from '@/pages/MerchantSetup';
 import { ServiceProSetup } from '@/pages/ServiceProSetup';
 import { Shell } from './partner/Shell';
 import { Hero, Signals } from './partner/Hero';
-import { TrackBento, Stories } from './partner/Tracks';
-import { TermsBand, Steps } from './partner/Terms';
+import { TrackBento, ListedAutomatically, LiveDirectory } from './partner/Tracks';
+import { WhatYouGet, TermsBand, Steps } from './partner/Terms';
 import { Faq, FinalCta } from './partner/Faq';
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -25,7 +25,9 @@ function PartnerHome() {
       <Hero />
       <Signals />
       <TrackBento />
-      <Stories />
+      <WhatYouGet />
+      <ListedAutomatically />
+      <LiveDirectory />
       <TermsBand />
       <Steps />
       <Faq />
@@ -51,7 +53,7 @@ function PartnerNotFound() {
 export default function PartnerSite() {
   return (
     <Switch>
-      <Route path="/"><Shell sticky><PartnerHome /></Shell></Route>
+      <Route path="/"><Shell sticky hero><PartnerHome /></Shell></Route>
       <Route path="/delivery" component={DeliverySetup} />
       <Route path="/restaurant" component={RestaurantSetup} />
       <Route path="/store" component={MerchantSetup} />

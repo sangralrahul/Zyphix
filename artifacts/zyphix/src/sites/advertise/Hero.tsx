@@ -1,89 +1,75 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, MapPin, Tag } from 'lucide-react';
-import { Container, Mesh, Aurora, Eyebrow, Display, GradientText, Lead, Button, Glass, Phone, SampleTag, fade } from '@/ui/kit';
-import { AppHeader, AppSearch, AppBanner, AppDots, AppRow, AppTile } from './shared';
+import { ArrowRight } from 'lucide-react';
+import { VideoHero, Words, Kicker, GlowButton, GhostButton, Ticker, Reveal, Light, isStatic, EASE } from '@/ui/cinema';
+import { Container } from '@/ui/kit';
+import { VIDEOS } from '@/data/media';
+import { SURFACES } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Hero — headline + Phone mock of the Zyphix home with three sponsored slots,
-   floating over Mesh + Aurora with two Glass satellites. Then a signal row.
+   Full-viewport supermarket-aisle video hero, glass strip of the ad surfaces,
+   then a ticker of the advertiser promises.
 ──────────────────────────────────────────────────────────────────────────── */
 
-function HomeMock() {
-  return (
-    <Phone>
-      <AppHeader />
-      <AppSearch />
-      <AppBanner highlight />
-      <AppDots />
-      <AppRow title="Breakfast by YourBrand" sponsored>
-        <AppTile name="Rolled oats 1kg" price="₹189" tone="green" />
-        <AppTile name="Muesli 500g" price="₹249" tone="amber" />
-        <AppTile name="Instant oats" price="₹99" tone="green" />
-      </AppRow>
-      <AppRow title="Tea & coffee">
-        <AppTile name="Chai masala" price="₹65" tone="amber" spotlight />
-        <AppTile name="Assam tea" price="₹120" />
-        <AppTile name="Filter coffee" price="₹180" />
-      </AppRow>
-      <AppRow title="Dairy & eggs">
-        <AppTile name="Toned milk" price="₹28" tone="blue" />
-        <AppTile name="Curd 400g" price="₹35" tone="blue" />
-        <AppTile name="Eggs ×6" price="₹48" tone="amber" />
-      </AppRow>
-      <SampleTag className="absolute bottom-3 right-3" />
-    </Phone>
-  );
-}
-
 export function Hero() {
+  const stat = isStatic();
+  const fade = (d: number) => stat ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.8, ease: EASE, delay: d } };
   return (
-    <section className="relative overflow-hidden">
-      <Mesh />
-      <Container className="grid items-center gap-14 pb-20 pt-16 md:pt-24 lg:grid-cols-[1.05fr_.95fr] lg:pb-28">
-        <div className="max-w-[600px]">
-          <motion.div {...fade(0)}><Eyebrow>Advertise on Zyphix</Eyebrow></motion.div>
-          <motion.div {...fade(0.05)}>
-            <Display className="mt-5 text-gray-900">Reach customers in <GradientText>the neighbourhoods they shop in.</GradientText></Display>
-          </motion.div>
-          <motion.div {...fade(0.1)}>
-            <Lead className="mt-6 max-w-[520px]">Placements inside a shopping app — not a feed. Your brand appears on the home screen, in search and in categories, only in the delivery areas you choose, and always labelled Sponsored.</Lead>
-          </motion.div>
-          <motion.div {...fade(0.15)} className="mt-8 flex flex-wrap gap-3">
-            <Button href="#contact" size="lg">Talk to partnerships <ArrowRight size={16} /></Button>
-            <Button href="#formats" variant="secondary" size="lg">See formats</Button>
-          </motion.div>
-        </div>
+    <VideoHero clip={VIDEOS.groceryShelf} height="min-h-[100svh]" dim={0.5} position="center 50%">
+      <Container className="pb-8 pt-36 sm:pb-10 md:pt-48">
+        <motion.div {...fade(0.1)}>
+          <Kicker light>Zyphix Ads · Jammu</Kicker>
+        </motion.div>
+        <Words
+          text="Put your brand in front of Jammu, at the moment they buy."
+          delay={0.25}
+          className="max-w-[1040px] text-[40px] font-semibold leading-[1.03] tracking-[-0.035em] text-white sm:text-[64px] md:text-[80px]"
+        />
+        <motion.p {...fade(0.85)} className="mt-6 max-w-[600px] text-[17px] leading-[1.6] text-white/75 sm:text-[19px]">
+          Placements inside a shopping app, not a feed. Your brand shows on the home screen, in search and in categories, only in the delivery areas you choose, and always labelled Sponsored.
+        </motion.p>
+        <motion.div {...fade(1)} className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <GlowButton href="#contact">Talk to partnerships <ArrowRight size={17} /></GlowButton>
+          <GhostButton href="#formats">See the formats</GhostButton>
+        </motion.div>
 
-        <motion.div {...fade(0.2, 24)} className="relative mx-auto w-full max-w-[460px] py-10">
-          <div className="absolute inset-0 -z-10 overflow-hidden rounded-[40px]"><Aurora className="opacity-60" /></div>
-          <HomeMock />
-          <Glass className="absolute left-0 top-[18%] hidden items-center gap-3 px-4 py-3 sm:flex">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700"><MapPin size={15} /></span>
-            <div><p className="text-[13px] font-semibold text-gray-900">Shown in 6 pin codes</p><p className="text-[12px] text-gray-500">Dwarka, South-West Delhi</p></div>
-          </Glass>
-          <Glass className="absolute bottom-[14%] right-0 hidden items-center gap-3 px-4 py-3 sm:flex">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-700"><Tag size={15} /></span>
-            <div><p className="text-[13px] font-semibold text-gray-900">Always labelled Sponsored</p><p className="text-[12px] text-gray-500">On every placement, every screen</p></div>
-          </Glass>
+        {/* glass strip: where placements run */}
+        <motion.div {...fade(1.15)} className="mt-14 rounded-2xl border border-white/15 bg-white/[.08] p-2 backdrop-blur-xl sm:mt-20">
+          <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50 sm:hidden">Where your placement runs</p>
+          <ul className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-5">
+            {SURFACES.map((s, i) => (
+              <li key={s.name} className={`flex min-h-[52px] flex-col justify-center rounded-xl px-3.5 py-2.5 ${i === SURFACES.length - 1 ? 'col-span-2 sm:col-span-1' : ''}`}>
+                <span className="flex items-center gap-2 text-[14px] font-semibold text-white">
+                  <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />{s.name}
+                </span>
+                <span className="mt-0.5 block pl-3.5 text-[12.5px] leading-snug text-white/55">{s.where}</span>
+              </li>
+            ))}
+          </ul>
         </motion.div>
       </Container>
-
-      <SignalRow />
-    </section>
+    </VideoHero>
   );
 }
 
-const SIGNALS = ['Launching across India', 'Early advertiser programme', 'Flat rates', 'Placement-level reporting'];
+/* ── Promise ticker ─────────────────────────────────────────────────────── */
+const SIGNALS = [
+  'Always labelled Sponsored', 'Flat rates, no auctions', 'Written quote before go-live',
+  'Targeted by delivery area', 'One report per placement', 'Early advertiser programme',
+];
 
-function SignalRow() {
+export function Signals() {
+  const items = SIGNALS.map(t => (
+    <React.Fragment key={t}>
+      <span className="text-gray-900">{t}</span>
+      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-[#0DA366]" />
+    </React.Fragment>
+  ));
   return (
-    <Container className="pb-14">
-      <div className="grid grid-cols-2 divide-y divide-gray-200 border-y border-gray-200 md:grid-cols-4 md:divide-x md:divide-y-0">
-        {SIGNALS.map((s, i) => (
-          <motion.p key={s} {...fade(0.25 + i * 0.05)} className={`py-4 text-center text-[14px] font-medium text-gray-700 ${i % 2 === 1 ? 'border-l border-gray-200 md:border-l-0' : ''}`}>{s}</motion.p>
-        ))}
-      </div>
-    </Container>
+    <Light className="border-b border-gray-100">
+      <Reveal y={0}>
+        <Ticker items={items} speed={36} size="text-[15px] sm:text-[16px]" className="py-5 sm:py-6" />
+      </Reveal>
+    </Light>
   );
 }

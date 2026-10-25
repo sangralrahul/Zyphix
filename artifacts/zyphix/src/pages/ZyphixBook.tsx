@@ -1,286 +1,121 @@
-import React, { useEffect, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import {
-  Check, Wrench, Zap, Sparkles, Paintbrush, Snowflake, Droplets, Hammer, ChefHat, Truck, ShieldCheck,
-  Radar, Bike, MapPin, Clock, CalendarClock, Receipt, Headset, BadgeCheck, PhoneCall, ArrowRight, type LucideIcon,
-} from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowRight, ArrowUpRight, BadgeCheck, CalendarClock, MapPin, Search, ShieldCheck, Wrench, X } from 'lucide-react';
 import { services } from '@/data/mockData';
 import { usePartners, tagList, type PartnerListing } from '@/lib/partners';
-import { Chip, IconTile, Card, Button, Accordion, Eyebrow, Display, Lead, Mesh, Grid, G, G_DEEP, TEAL, FONT, fade } from '@/ui/kit';
+import { PHOTOS, VIDEOS } from '@/data/media';
+import { Chip, Accordion, Button, FONT } from '@/ui/kit';
+import { VideoHero, Words, Reveal, Stagger, Kicker, Headline, Sub, ParallaxImage, Counter, Dark, Glow, Grain, GlowButton, GhostButton, BgVideo, G } from '@/ui/cinema';
+import { BookingPanel, type BookingState } from './book/BookingPanel';
+import { ServiceTiles } from './book/ServiceTiles';
+import { DAYS, FAQ, PANEL_ID, PANEL_ID_MOBILE, PARTNER_URL, PROMISES, metaFor, proInitials, serviceForPro, type Day, type Service } from './book/shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Zyphix Book — home services from verified professionals.
-   Premium, animated, image-rich page: video hero with a looping booking demo,
-   photo service cards, animated "how it works", sticky booking panel, live
-   professionals from the partner directory, FAQ and CTA.
+   Zyphix Book — home services from verified professionals (book.zyphix.in).
+   Cinematic direction: compact video hero with a service picker, photo bento
+   of services (hover video), split "how a booking works", sticky booking
+   panel, live professionals, dark policy band, FAQ, final CTA for pros.
+   Renders inside LightLayout (Navbar + BottomNav, 1280 container).
 ──────────────────────────────────────────────────────────────────────────── */
 
-const TIME_SLOTS = ['10:00 AM', '11:00 AM', '12:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM'];
-const DAYS = ['Today', 'Tomorrow'] as const;
-type Day = typeof DAYS[number];
+const STEPS = [
+  { icon: Wrench, title: 'Pick a service', body: 'Plumbing, electrical, cleaning, AC and more. Each one comes with a clear scope so you know what is covered.' },
+  { icon: CalendarClock, title: 'Choose a slot', body: 'Today or tomorrow, morning to evening. The visit charge is shown before you confirm.' },
+  { icon: BadgeCheck, title: 'A verified pro arrives', body: 'ID and police-verified, tracked to your door. Reschedule free if plans change; cancel free up to an hour before.' },
+];
 
-type Service = typeof services[0];
-type Tone = React.ComponentProps<typeof IconTile>['tone'];
-
-/* Icon, tile tone and photo per service (keyed by id) */
-const unsplash = (id: string, w = 800) => `https://images.unsplash.com/${id}?w=${w}&q=80&auto=format&fit=crop`;
-const SERVICE_META: Record<string, { icon: LucideIcon; tone: Tone; photo: string }> = {
-  sv1:  { icon: Wrench,     tone: 'blue',   photo: 'photo-1621905251189-08b45d6a269e' },
-  sv2:  { icon: Zap,        tone: 'orange', photo: 'photo-1581578731548-c64695cc6952' },
-  sv3:  { icon: Sparkles,   tone: 'green',  photo: 'photo-1527515637462-cff94eecc1ac' },
-  sv4:  { icon: Paintbrush, tone: 'violet', photo: 'photo-1562259949-e8e7689d7828' },
-  sv5:  { icon: Snowflake,  tone: 'teal',   photo: 'photo-1631545806609-4d7b19a8a6b0' },
-  sv6:  { icon: Droplets,   tone: 'blue',   photo: 'photo-1548839140-29a749e1cf4d' },
-  sv7:  { icon: Hammer,     tone: 'orange', photo: 'photo-1504148455328-c376907d081c' },
-  sv8:  { icon: ChefHat,    tone: 'green',  photo: 'photo-1556910103-1c02745aae4d' },
-  sv9:  { icon: Truck,      tone: 'violet', photo: 'photo-1600518464441-9154a4dea21b' },
-  sv10: { icon: Wrench,     tone: 'teal',   photo: 'photo-1581244277943-fe4a9c777189' },
-};
-const metaFor = (s: Service) => SERVICE_META[s.id] || { icon: Wrench, tone: 'blue' as Tone, photo: 'photo-1584622650111-993a426fbf0a' };
-
-const HERO_POSTER = unsplash('photo-1581578731548-c64695cc6952', 1600);
-const BOOKING_PANEL_ID = 'booking-panel';
-
-/** Match a professional's category (and skills) to a service tile; falls back to the first service. */
-function serviceForPro(p: PartnerListing): Service {
-  const terms = [p.category, ...tagList(p.tags || '')].map(t => t.trim().toLowerCase()).filter(Boolean);
-  for (const term of terms) {
-    const hit = services.find(s => {
-      const title = s.title.toLowerCase(), cat = s.category.toLowerCase();
-      return title === term || cat === term || title.includes(term) || term.includes(title) || cat.includes(term) || term.includes(cat);
-    });
-    if (hit) return hit;
-  }
-  return services[0];
-}
-
-const proInitials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]!.toUpperCase()).join('') || '•';
-
-const EASE = [0.22, 1, 0.36, 1] as const;
-
-/** Translucent pill button for use on ink/video backgrounds. */
-function GlassButton({ href, children }: { href: string; children: React.ReactNode }) {
-  const ext = href.startsWith('http');
-  return (
-    <a href={href} target={ext ? '_blank' : undefined} rel={ext ? 'noopener noreferrer' : undefined}
-      className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 text-[15px] font-semibold tracking-[-0.01em] text-white backdrop-blur transition-all duration-200 hover:-translate-y-px hover:bg-white/20">
-      {children}
-    </a>
-  );
-}
-// Reveal on mount (not on scroll) so content is never left invisible in browsers that
-// don't fire intersection events reliably (in-app webviews, print, prerender).
-const inView = (delay = 0, y = 18) => ({
-  initial: { opacity: 0, y },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: EASE, delay: Math.min(delay, 0.6) },
-});
-
-/* ── Service photo with graceful fallback to a tinted icon tile ─────────── */
-function ServicePhoto({ service, className = '', eager = false, sizes = '(min-width: 1024px) 25vw, 50vw' }: { service: Service; className?: string; eager?: boolean; sizes?: string }) {
-  const [broken, setBroken] = useState(false);
-  const m = metaFor(service);
-  const Icon = m.icon;
-  if (broken) {
-    return (
-      <div className={`flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-cyan-50 ${className}`}>
-        <IconTile tone={m.tone} className="h-14 w-14 rounded-2xl"><Icon size={26} /></IconTile>
-      </div>
-    );
-  }
-  return (
-    <img src={unsplash(m.photo)} alt={service.title} loading={eager ? 'eager' : 'lazy'} decoding="async" sizes={sizes}
-      onError={() => setBroken(true)} className={`object-cover ${className}`} draggable={false} />
-  );
-}
-
-/* ── Hero: looping booking demo card ────────────────────────────────────── */
-const DEMO_STEPS = 4;
-const DEMO_INTERVAL = 2500;
-
-function DemoCard() {
-  const reduce = useReducedMotion();
-  const [step, setStep] = useState(0);
+/* ── Hero service picker ───────────────────────────────────────────────── */
+function ServicePicker({ onPick }: { onPick: (s: Service) => void }) {
+  const [q, setQ] = useState('');
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+  const matches = useMemo(() => {
+    const t = q.trim().toLowerCase();
+    if (!t) return services.slice(0, 6);
+    return services.filter(s => s.title.toLowerCase().includes(t) || s.category.toLowerCase().includes(t) || metaFor(s).blurb.toLowerCase().includes(t));
+  }, [q]);
   useEffect(() => {
-    const t = setInterval(() => setStep(s => (s + 1) % DEMO_STEPS), DEMO_INTERVAL);
-    return () => clearInterval(t);
+    const on = (e: MouseEvent) => { if (wrap.current && !wrap.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', on);
+    return () => document.removeEventListener('mousedown', on);
   }, []);
-  const loop = reduce ? {} : { repeat: Infinity };
-
+  const pick = (s: Service) => { setQ(''); setOpen(false); onPick(s); };
   return (
-    <div className="relative w-full max-w-[360px]">
-      <div className="absolute -inset-6 -z-10 rounded-[32px] opacity-60 blur-2xl" style={{ background: `radial-gradient(closest-side, ${G}55, transparent 70%)` }} />
-      <div className="rounded-2xl border border-white/15 bg-white/[.08] p-1.5 shadow-[0_30px_80px_rgba(0,0,0,.45)] backdrop-blur-xl">
-        <div className="rounded-[12px] bg-white text-gray-900">
-          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2.5">
-            <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md text-white" style={{ background: G }}><Zap size={12} /></span>
-              <span className="text-[12.5px] font-semibold">Electrician · Switchboard repair</span>
-            </div>
-            <span className="rounded-md border border-gray-200 bg-white px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider text-gray-400">Demo</span>
-          </div>
+    <div ref={wrap} className="relative mt-6 max-w-[640px]">
+      <form role="search" onSubmit={e => { e.preventDefault(); if (matches[0]) pick(matches[0]); }}
+        className="flex h-[52px] items-center gap-2 rounded-2xl bg-white pl-4 pr-1.5 text-gray-900 shadow-[0_24px_60px_-15px_rgba(0,0,0,.6)] md:h-14">
+        <Search size={18} className="shrink-0 text-gray-400" />
+        <input value={q} onChange={e => { setQ(e.target.value); setOpen(true); }} onFocus={() => setOpen(true)}
+          placeholder="What do you need done? Try “AC service”" aria-label="Search services"
+          className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-gray-400 md:text-[16px]" />
+        {q && <button type="button" onClick={() => setQ('')} aria-label="Clear" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700"><X size={15} /></button>}
+        <button type="submit" className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl px-4 text-[13.5px] font-semibold text-white md:h-11 md:px-5" style={{ background: `linear-gradient(180deg, #19C27C 0%, ${G} 100%)` }}>
+          Book <ArrowRight size={14} />
+        </button>
+      </form>
+      {open && (
+        <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-gray-200 bg-white text-gray-900 shadow-[0_30px_80px_-20px_rgba(0,0,0,.5)]">
+          {matches.length === 0 ? (
+            <p className="px-4 py-4 text-[13.5px] text-gray-500">No service matches “{q}”. Try “plumber”, “cleaning” or “AC”.</p>
+          ) : (
+            <ul className="max-h-[320px] overflow-y-auto py-1.5">
+              {matches.map(s => {
+                const m = metaFor(s); const Icon = m.icon;
+                return (
+                  <li key={s.id}>
+                    <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => pick(s)} className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-50">
+                      <span className="h-10 w-12 shrink-0 overflow-hidden rounded-lg bg-gray-100"><img src={m.photo.src} alt="" loading="lazy" className="h-full w-full object-cover" /></span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[14px] font-semibold tracking-[-0.01em]">{s.title}</span>
+                        <span className="block truncate text-[12.5px] text-gray-500">{m.blurb} · next slot {s.nextSlot}</span>
+                      </span>
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-600"><Icon size={14} /></span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
-          <div className="relative h-[168px] overflow-hidden px-4">
-            <AnimatePresence mode="wait" initial={false}>
-              {step === 0 && (
-                <motion.div key="s0" className="absolute inset-0 flex items-center gap-4 px-4"
-                  initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.35, ease: EASE }}>
-                  <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
-                    {[0, 1, 2].map(i => (
-                      <motion.span key={i} className="absolute inset-0 rounded-full border-2" style={{ borderColor: G }}
-                        initial={{ scale: 0.3, opacity: 0.8 }} animate={{ scale: 1.15, opacity: 0 }}
-                        transition={{ duration: 1.8, delay: i * 0.6, ease: 'easeOut', ...loop }} />
-                    ))}
-                    <span className="relative flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"><Radar size={20} /></span>
-                  </div>
-                  <div>
-                    <p className="text-[14.5px] font-semibold tracking-[-0.01em]">Finding an electrician near you</p>
-                    <p className="mt-1 text-[12.5px] text-gray-500">Checking verified pros within 5 km</p>
-                    <div className="mt-2.5 flex gap-1">
-                      {[0, 1, 2].map(i => (
-                        <motion.span key={i} className="h-1.5 w-1.5 rounded-full" style={{ background: G }}
-                          animate={reduce ? {} : { opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, delay: i * 0.2, ...loop }} />
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {step === 1 && (
-                <motion.div key="s1" className="absolute inset-0 flex items-center gap-4 px-4"
-                  initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.35, ease: EASE }}>
-                  <motion.div className="relative shrink-0" initial={{ x: -40, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.45, ease: EASE }}>
-                    <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-900 text-[18px] font-semibold text-white">RK</span>
-                    <motion.span className="absolute -bottom-1.5 -right-1.5 flex h-6 w-6 items-center justify-center rounded-full text-white ring-2 ring-white" style={{ background: G }}
-                      initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 18, delay: 0.4 }}>
-                      <Check size={13} strokeWidth={3} />
-                    </motion.span>
-                  </motion.div>
-                  <div>
-                    <p className="text-[14.5px] font-semibold tracking-[-0.01em]">Ramesh K. assigned</p>
-                    <p className="mt-1 inline-flex items-center gap-1 text-[12.5px] font-medium text-emerald-700"><ShieldCheck size={13} /> ID &amp; background verified</p>
-                    <p className="mt-1 text-[12px] text-gray-500">Electrician · 4 yrs experience</p>
-                  </div>
-                </motion.div>
-              )}
-
-              {step === 2 && (
-                <motion.div key="s2" className="absolute inset-0 flex flex-col justify-center px-4"
-                  initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.35, ease: EASE }}>
-                  <div className="flex items-center justify-between">
-                    <p className="text-[14.5px] font-semibold tracking-[-0.01em]">On the way</p>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[12px] font-semibold text-emerald-700"><Clock size={12} /> 12 min</span>
-                  </div>
-                  <div className="relative mt-5 h-1.5 w-full rounded-full bg-gray-100">
-                    <motion.div className="absolute left-0 top-0 h-full rounded-full" style={{ background: `linear-gradient(90deg, ${G}, ${TEAL})` }}
-                      initial={{ width: '8%' }} animate={{ width: '72%' }} transition={{ duration: 2, ease: 'easeInOut' }} />
-                    <motion.span className="absolute -top-[15px] flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full bg-gray-900 text-white shadow-md"
-                      initial={{ left: '8%' }} animate={{ left: '72%' }} transition={{ duration: 2, ease: 'easeInOut' }}>
-                      <Bike size={15} />
-                    </motion.span>
-                    <span className="absolute -right-1 -top-[9px] text-gray-400"><MapPin size={18} /></span>
-                  </div>
-                  <p className="mt-5 text-[12.5px] text-gray-500">Live location shared until arrival</p>
-                </motion.div>
-              )}
-
-              {step === 3 && (
-                <motion.div key="s3" className="absolute inset-0 flex items-center gap-4 px-4"
-                  initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.35, ease: EASE }}>
-                  <motion.span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"
-                    initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 400, damping: 16 }}>
-                    <Check size={30} strokeWidth={2.5} />
-                  </motion.span>
-                  <div>
-                    <p className="text-[14.5px] font-semibold tracking-[-0.01em]">Job done</p>
-                    <p className="mt-1 inline-flex items-center gap-1 text-[12.5px] text-gray-600"><Receipt size={13} /> ₹ shown before you confirm</p>
-                    <p className="mt-1 text-[12px] text-gray-500">No surprises on the final bill</p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* step indicator */}
-          <div className="flex items-center gap-1.5 border-t border-gray-100 px-4 py-2.5">
-            {Array.from({ length: DEMO_STEPS }).map((_, i) => (
-              <motion.span key={i} className="h-1 rounded-full" animate={{ width: i === step ? 22 : 8, background: i === step ? G : '#E5E7EB' }} transition={{ duration: 0.3 }} />
-            ))}
-          </div>
+/* ── Professionals from the live directory ─────────────────────────────── */
+function ProCard({ p, onBook }: { p: PartnerListing; onBook: () => void }) {
+  const skills = tagList(p.tags || '').filter(t => t.toLowerCase() !== (p.category || '').toLowerCase()).slice(0, 3);
+  const place = [p.locality, p.city].filter(Boolean).join(', ');
+  const svc = serviceForPro(p);
+  const photo = metaFor(svc).photo;
+  return (
+    <div className="group flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,.03)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_50px_-20px_rgba(11,15,25,.25)]">
+      <div className="relative h-28 overflow-hidden bg-gray-900">
+        <img src={photo.src} alt="" loading="lazy" className="h-full w-full object-cover opacity-80 transition-transform duration-[1200ms] group-hover:scale-[1.06]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#05080E]/80 to-transparent" />
+        <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11.5px] font-semibold text-white backdrop-blur"><ShieldCheck size={12} /> Verified member</span>
+        <span className="absolute -bottom-5 left-4 flex h-12 w-12 items-center justify-center rounded-2xl text-[15px] font-semibold text-white ring-4 ring-white" style={{ background: `linear-gradient(135deg, #19C27C, ${G})` }}>{proInitials(p.name)}</span>
+      </div>
+      <div className="flex flex-1 flex-col p-4 pt-7">
+        <p className="truncate text-[15.5px] font-semibold tracking-[-0.01em] text-gray-900">{p.name}</p>
+        <p className="truncate text-[12.5px] text-gray-500">{p.category || svc.title}{place ? ` · ${place}` : ''}</p>
+        {skills.length > 0 && <div className="mt-3 flex flex-wrap gap-1.5">{skills.map(s => <Chip key={s}>{s}</Chip>)}</div>}
+        <div className="mt-auto pt-4">
+          <Button size="sm" variant="secondary" onClick={onBook} className="w-full">Request booking <ArrowRight size={14} /></Button>
         </div>
       </div>
     </div>
   );
 }
 
-/* ── Hero background video with poster fallback ─────────────────────────── */
-function HeroVideo() {
-  const [failed, setFailed] = useState(false);
-  return (
-    <>
-      <img src={HERO_POSTER} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
-      {!failed && (
-        <video autoPlay muted loop playsInline preload="metadata" aria-hidden poster={HERO_POSTER}
-          onError={() => setFailed(true)} className="absolute inset-0 h-full w-full object-cover">
-          <source src="/videos/book-hero.mp4" type="video/mp4" onError={() => setFailed(true)} />
-        </video>
-      )}
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(5,10,8,.86) 0%, rgba(5,10,8,.7) 45%, rgba(5,10,8,.45) 100%)' }} />
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,10,8,.1) 0%, rgba(5,10,8,.15) 60%, rgba(5,10,8,.75) 100%)' }} />
-    </>
-  );
-}
-
-/* ── How it works: animated connector ───────────────────────────────────── */
-function Connector({ vertical = false, delay = 0 }: { vertical?: boolean; delay?: number }) {
-  const reduce = useReducedMotion();
-  return (
-    <div aria-hidden className={`relative ${vertical ? 'mx-auto h-10 w-px' : 'h-px w-full'} bg-gray-200`}>
-      {!reduce && (
-        <motion.span className="absolute h-2 w-2 rounded-full shadow-[0_0_0_4px_rgba(13,163,102,.15)]" style={{ background: G, ...(vertical ? { left: -3.5 } : { top: -3.5 }) }}
-          animate={vertical ? { top: ['0%', '100%'] } : { left: ['0%', '100%'] }}
-          transition={{ duration: 1.8, delay, repeat: Infinity, repeatDelay: 0.6, ease: 'easeInOut' }} />
-      )}
-    </div>
-  );
-}
-
-const STEPS: { icon: LucideIcon; title: string; body: string }[] = [
-  { icon: Wrench, title: 'Pick a service', body: 'Choose from plumbing, electrical, cleaning, AC and more. Each one comes with a clear scope.' },
-  { icon: CalendarClock, title: 'Choose a slot', body: 'Pick a time that suits you today or tomorrow. The visit charge is shown before you confirm.' },
-  { icon: BadgeCheck, title: 'Confirm', body: 'A verified professional is assigned and you can track their arrival. Reschedule for free if plans change.' },
-];
-
-const TRUST = [
-  { icon: ShieldCheck, label: 'ID & background verified' },
-  { icon: Receipt, label: 'Price shown before you confirm' },
-  { icon: CalendarClock, label: 'Reschedule free' },
-  { icon: Headset, label: 'Support Mon–Sat' },
-];
-
-const INCLUDED: { icon: LucideIcon; tone: Tone; title: string; body: string }[] = [
-  { icon: ShieldCheck, tone: 'green', title: 'Verified professionals', body: 'Every pro completes ID, address and background checks before their first booking.' },
-  { icon: Receipt, tone: 'blue', title: 'Transparent pricing', body: 'The visit charge is shown before you confirm. Any extra parts are quoted before work starts.' },
-  { icon: PhoneCall, tone: 'orange', title: 'On time, or we call you', body: 'If your professional is running late, we let you know and you can reschedule at no cost.' },
-  { icon: BadgeCheck, tone: 'violet', title: '7-day work guarantee', body: 'If a completed job has an issue within 7 days, we send a professional back as part of our policy.' },
-];
-
-const FAQ = [
-  { q: 'How are professionals verified?', a: 'Each professional submits a government ID, address proof and completes a background check and a skill confirmation call before they can accept bookings on Zyphix Book.' },
-  { q: 'When do I see the price?', a: 'The visit charge for the selected service is shown in the booking panel before you confirm. If the job needs extra parts or time, the professional quotes it before starting.' },
-  { q: 'Can I reschedule or cancel?', a: 'Yes. You can reschedule for free, and cancel at no charge up to 1 hour before your slot.' },
-  { q: 'What if the professional is late?', a: 'We notify you if they are running behind. You can wait, pick a new slot, or cancel without any charge.' },
-  { q: 'Is there a guarantee on the work?', a: 'Yes. Under our 7-day work guarantee, if a completed job has an issue within 7 days we send a professional back to fix it.' },
-  { q: 'Which areas do you cover?', a: 'Coverage depends on the professionals registered in your city. The list below shows verified professionals currently available near you.' },
-];
-
 /* ════════════════════════════════════════════════════════════════════════════ */
 export function ZyphixBook() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [booked, setBooked] = useState(false);
-  const [day, setDay] = useState<Day>('Today');
+  const [day, setDay] = useState<Day>(DAYS[0]);
   const [address, setAddress] = useState('');
+
+  useEffect(() => { document.title = 'Zyphix Book — Home services by verified pros'; }, []);
 
   const handleBook = () => {
     if (selectedSlot) {
@@ -293,367 +128,239 @@ export function ZyphixBook() {
 
   const scrollToPanel = () => {
     requestAnimationFrame(() => {
-      const el = document.getElementById(BOOKING_PANEL_ID);
+      const desktop = window.matchMedia('(min-width: 1024px)').matches;
+      const el = document.getElementById(desktop ? PANEL_ID : PANEL_ID_MOBILE);
       if (!el) return;
-      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96, behavior: 'smooth' });
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 88, behavior: 'smooth' });
     });
   };
 
   const { partners: pros, loading: prosLoading } = usePartners('service');
   const requestBooking = (p: PartnerListing) => {
-    const svc = serviceForPro(p);
-    setSelectedService(svc.id);
+    setSelectedService(serviceForPro(p).id);
     setSelectedSlot(null);
     scrollToPanel();
   };
-
   const selectService = (service: Service) => {
     const isSelected = selectedService === service.id;
     setSelectedService(isSelected ? null : service.id);
     if (isSelected) setSelectedSlot(null);
     else scrollToPanel();
   };
+  const pickFromHero = (service: Service) => {
+    setSelectedService(service.id);
+    setSelectedSlot(null);
+    scrollToPanel();
+  };
+
+  const booking: BookingState = { activeService, day, setDay, slot: selectedSlot, setSlot: setSelectedSlot, address, setAddress, booked, onBook: handleBook };
 
   return (
-    <div className="mx-auto w-full max-w-[1180px] pt-4 text-gray-900" style={{ fontFamily: FONT }}>
+    <div className="w-full text-gray-900" style={{ fontFamily: FONT }}>
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <motion.section {...fade(0)} className="relative overflow-hidden rounded-2xl bg-[#0B0F19] text-white shadow-[0_30px_80px_rgba(11,15,25,.25)] lg:min-h-[520px]">
-        <HeroVideo />
-        <div className="relative grid grid-cols-1 gap-10 px-6 py-10 sm:px-10 sm:py-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:px-14 lg:py-16">
-          <div>
-            <Eyebrow dark>Zyphix Book · Home services</Eyebrow>
-            <Display as="h1" size="lg" className="mt-4 max-w-[560px] text-white">Trusted professionals, booked in minutes.</Display>
-            <Lead dark className="mt-5 max-w-[520px]">Plumbers, electricians, cleaners and more — ID-verified, with the price shown before you confirm. Pick a service, choose a slot, done.</Lead>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button href="#services" size="lg">Book a service <ArrowRight size={16} /></Button>
-              <GlassButton href="#how">How it works</GlassButton>
+      <div className="-mx-4 md:mx-0 md:mt-4">
+        <VideoHero clip={VIDEOS.cleaning} height="min-h-[560px] md:min-h-[62svh]" dim={0.45} className="md:rounded-3xl">
+          <div className="px-4 pb-7 pt-16 md:px-10 md:pb-10 md:pt-20 lg:px-14">
+            <Kicker light>Zyphix Book · Jammu</Kicker>
+            <Words as="h1" text="Home services, done by verified pros." className="max-w-[760px] text-[36px] font-semibold leading-[1.02] tracking-[-0.035em] text-white sm:text-[48px] md:text-[64px]" />
+            <p className="mt-4 max-w-[540px] text-[15.5px] leading-[1.55] text-white/75 md:text-[18px]">
+              Plumbers, electricians, cleaners and more from your own neighbourhood. ID and police-verified, price shown before you confirm.
+            </p>
+            <ServicePicker onPick={pickFromHero} />
+            <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {PROMISES.slice(0, 4).map(t => (
+                <span key={t} className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3.5 text-[13px] font-medium text-white/90 backdrop-blur-md">
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: G }} />{t}
+                </span>
+              ))}
             </div>
           </div>
-          <motion.div className="flex justify-center lg:justify-end" initial={{ opacity: 0, y: 24, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.7, ease: EASE, delay: 0.2 }}>
-            <DemoCard />
-          </motion.div>
-        </div>
-      </motion.section>
+        </VideoHero>
+      </div>
 
-      {/* ── Trust strip ──────────────────────────────────────────────────── */}
-      <motion.ul {...fade(0.15)} className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {TRUST.map(({ icon: Icon, label }, i) => (
-          <motion.li key={label} {...inView(i * 0.06, 10)} className="flex items-center gap-2.5 rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-[13px] font-medium text-gray-700 shadow-[0_1px_2px_rgba(0,0,0,.03)]">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"><Icon size={15} /></span>
-            {label}
-          </motion.li>
-        ))}
-      </motion.ul>
-
-      {/* ── Services + sticky booking panel ──────────────────────────────── */}
-      <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
+      {/* ── Services + how it works + pros, with the sticky booking panel ── */}
+      <div className="mt-10 grid grid-cols-1 gap-8 md:mt-14 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-10">
         <div className="min-w-0">
           <section id="services" className="scroll-mt-24">
-            <motion.div {...inView()} className="flex items-end justify-between gap-4">
+            <Reveal className="flex items-end justify-between gap-4">
               <div>
-                <Eyebrow>Services</Eyebrow>
-                <Display as="h2" size="md" className="mt-2 text-gray-900">What do you need done?</Display>
+                <Kicker>Services</Kicker>
+                <Headline size="md" as="h2">What do you need done?</Headline>
               </div>
-              <span className="hidden text-[13px] text-gray-500 sm:block">{services.length} services</span>
-            </motion.div>
-
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
-              {services.map((service, i) => {
-                const isSelected = selectedService === service.id;
-                const m = metaFor(service);
-                const Icon = m.icon;
-                return (
-                  <motion.button key={service.id} type="button" {...inView(Math.min(i, 7) * 0.05, 16)}
-                    whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }}
-                    onClick={() => selectService(service)} aria-pressed={isSelected}
-                    className={`group relative overflow-hidden rounded-2xl border bg-white text-left shadow-[0_1px_2px_rgba(0,0,0,.03)] transition-shadow duration-300 hover:shadow-[0_16px_40px_rgba(11,15,25,.12)] ${
-                      isSelected ? 'border-emerald-600 ring-2 ring-emerald-500/60' : 'border-gray-200'
-                    }`}>
-                    <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
-                      <ServicePhoto service={service} className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-110" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent" />
-                      <span className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg bg-white/90 text-gray-900 shadow-sm backdrop-blur"><Icon size={15} /></span>
-                      <AnimatePresence>
-                        {isSelected && (
-                          <motion.span key="check" className="absolute right-3 top-3 inline-flex h-7 w-7 items-center justify-center rounded-full text-white ring-2 ring-white" style={{ background: G }}
-                            initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }} transition={{ type: 'spring', stiffness: 500, damping: 20 }}>
-                            <Check size={14} strokeWidth={3} />
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
-                      <div className="absolute inset-x-3 bottom-3 text-white">
-                        <p className="text-[14.5px] font-semibold tracking-[-0.01em] drop-shadow">{service.title}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between px-3.5 py-3">
-                      <p className="text-[12.5px] text-gray-500">{service.category}</p>
-                      <span className={`text-[12px] font-semibold ${isSelected ? 'text-emerald-700' : 'text-gray-400 group-hover:text-gray-700'}`}>{isSelected ? 'Selected' : 'Select'}</span>
-                    </div>
-                  </motion.button>
-                );
-              })}
+              <span className="hidden shrink-0 pb-2 text-[13px] text-gray-500 sm:block">{services.length} services · Today &amp; tomorrow</span>
+            </Reveal>
+            <div className="mt-6">
+              <ServiceTiles selected={selectedService} onSelect={selectService} />
             </div>
           </section>
 
-          {/* ── How it works ──────────────────────────────────────────────── */}
-          <section id="how" className="mt-14 scroll-mt-24">
-            <motion.div {...inView()}>
-              <Eyebrow>How it works</Eyebrow>
-              <Display as="h2" size="md" className="mt-2 text-gray-900">Three steps, no phone tag.</Display>
-            </motion.div>
-            <Card hover={false} className="relative mt-6 overflow-hidden p-6 sm:p-8">
-              <Mesh intensity={0.5} />
-              <Grid />
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_auto_1fr_auto_1fr] md:items-start md:gap-4">
-                {STEPS.map(({ icon: Icon, title, body }, i) => (
-                  <React.Fragment key={title}>
-                    {i > 0 && (
-                      <>
-                        <div className="md:hidden"><Connector vertical delay={i * 0.9} /></div>
-                        <div className="hidden w-16 self-center md:block"><Connector delay={i * 0.9} /></div>
-                      </>
-                    )}
-                    <motion.div {...inView(i * 0.12)} className="relative">
-                      <div className="flex items-center gap-3">
-                        <motion.span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-emerald-700 shadow-[0_6px_20px_rgba(13,163,102,.18)] ring-1 ring-emerald-100"
-                          whileInView={{ scale: [0.9, 1.05, 1] }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 + i * 0.12 }}>
-                          <Icon size={20} />
-                        </motion.span>
-                        <span className="text-[12px] font-semibold uppercase tracking-wider text-gray-400">Step {i + 1}</span>
+          {/* Booking panel inline on mobile / tablet */}
+          <div className="mt-8 lg:hidden">
+            <BookingPanel id={PANEL_ID_MOBILE} state={booking} />
+          </div>
+
+          {/* ── How a booking works (split: parallax photo + steps) ──────── */}
+          <section id="how" className="mt-20 scroll-mt-24 md:mt-28">
+            <div className="grid gap-8 md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] md:items-center md:gap-12">
+              <Reveal x={-16} y={0}>
+                <ParallaxImage photo={PHOTOS.electrician[1]} ratio="4/5" strength={10} className="shadow-[0_30px_80px_-30px_rgba(11,15,25,.35)]">
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#05080E]/70 via-transparent to-transparent" />
+                  <div className="absolute inset-x-5 bottom-5 flex items-center gap-3 text-white">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur"><ShieldCheck size={18} /></span>
+                    <div>
+                      <p className="text-[14.5px] font-semibold">Every pro is ID &amp; police-verified</p>
+                      <p className="text-[12.5px] text-white/70">Before their first booking, not after</p>
+                    </div>
+                  </div>
+                </ParallaxImage>
+              </Reveal>
+              <div>
+                <Reveal><Kicker>How a booking works</Kicker></Reveal>
+                <Reveal delay={0.05}><Headline size="md" as="h2">Three steps. No phone tag.</Headline></Reveal>
+                <Reveal delay={0.1}><Sub className="mt-4">Pick, schedule, done. You see the price before you confirm and you can track your professional to the door.</Sub></Reveal>
+                <Stagger className="mt-8 space-y-0" step={0.12}>
+                  {STEPS.map(({ icon: Icon, title, body }, i) => (
+                    <div key={title} className="relative flex gap-4 pb-10 last:pb-0">
+                      {i < STEPS.length - 1 && <span aria-hidden className="absolute left-[22px] top-12 h-[calc(100%-56px)] w-px bg-gradient-to-b from-emerald-300 to-gray-200" />}
+                      <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-emerald-700 shadow-[0_8px_24px_-8px_rgba(13,163,102,.5)] ring-1 ring-emerald-100"><Icon size={19} /></span>
+                      <div>
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-gray-400">Step {i + 1}</p>
+                        <p className="mt-0.5 text-[18px] font-semibold tracking-[-0.02em] text-gray-900">{title}</p>
+                        <p className="mt-1.5 text-[14.5px] leading-[1.6] text-gray-600">{body}</p>
                       </div>
-                      <p className="mt-3 text-[16px] font-semibold tracking-[-0.01em] text-gray-900">{title}</p>
-                      <p className="mt-1.5 text-[14px] leading-[1.6] text-gray-600">{body}</p>
-                    </motion.div>
-                  </React.Fragment>
-                ))}
+                    </div>
+                  ))}
+                </Stagger>
               </div>
-            </Card>
+            </div>
           </section>
 
-          {/* ── Verified professionals (live partner directory) ───────────── */}
-          <section className="mt-14">
-            <motion.div {...inView()} className="flex items-end justify-between gap-4">
+          {/* ── Pros near you (live partner directory) ───────────────────── */}
+          <section id="pros" className="mt-20 scroll-mt-24 md:mt-28">
+            <Reveal className="flex items-end justify-between gap-4">
               <div>
-                <Eyebrow>Professionals</Eyebrow>
-                <Display as="h2" size="md" className="mt-2 text-gray-900">Verified professionals near you</Display>
+                <Kicker>Pros near you</Kicker>
+                <Headline size="md" as="h2">Verified professionals, listed live.</Headline>
               </div>
-              {!prosLoading && pros.length > 0 && <span className="hidden text-[13px] text-gray-500 sm:block">{pros.length} pro{pros.length > 1 ? 's' : ''}</span>}
-            </motion.div>
+              {!prosLoading && pros.length > 0 && <span className="hidden shrink-0 pb-2 text-[13px] text-gray-500 sm:block">{pros.length} pro{pros.length > 1 ? 's' : ''}</span>}
+            </Reveal>
 
             {prosLoading ? (
-              <Card hover={false} className="mt-5 divide-y divide-gray-100">
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {[0, 1].map(i => (
-                  <div key={i} className="flex items-center gap-3 px-4 py-4">
-                    <div className="h-11 w-11 animate-pulse rounded-xl bg-gray-200" />
-                    <div className="flex-1 space-y-2"><div className="h-3.5 w-1/3 animate-pulse rounded bg-gray-200" /><div className="h-3 w-1/4 animate-pulse rounded bg-gray-100" /></div>
-                    <div className="h-9 w-28 animate-pulse rounded-full bg-gray-100" />
+                  <div key={i} className="overflow-hidden rounded-3xl border border-gray-200 bg-white">
+                    <div className="h-28 animate-pulse bg-gray-100" />
+                    <div className="space-y-2 p-4 pt-7"><div className="h-3.5 w-1/2 animate-pulse rounded bg-gray-200" /><div className="h-3 w-1/3 animate-pulse rounded bg-gray-100" /><div className="mt-4 h-9 animate-pulse rounded-full bg-gray-100" /></div>
                   </div>
                 ))}
-              </Card>
+              </div>
             ) : pros.length > 0 ? (
-              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {pros.map((p, i) => {
-                  const skills = tagList(p.tags || '').filter(t => t.toLowerCase() !== (p.category || '').toLowerCase()).slice(0, 3);
-                  const place = [p.locality, p.city].filter(Boolean).join(', ');
-                  return (
-                    <motion.div key={p.id} {...inView(Math.min(i, 6) * 0.07, 14)}>
-                      <Card className="h-full p-4">
-                        <div className="flex items-start gap-3">
-                          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[14px] font-semibold text-white" style={{ background: `linear-gradient(135deg, ${G}, ${G_DEEP})` }}>{proInitials(p.name)}</span>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-[15px] font-semibold tracking-[-0.01em] text-gray-900">{p.name}</p>
-                            {p.category && <p className="truncate text-[12.5px] text-gray-500">{p.category}</p>}
-                          </div>
-                          <Chip tone="green"><ShieldCheck size={12} /> Verified member</Chip>
-                        </div>
-                        {skills.length > 0 && (
-                          <div className="mt-3 flex flex-wrap gap-1.5">
-                            {skills.map(s => <Chip key={s}>{s}</Chip>)}
-                          </div>
-                        )}
-                        <div className="mt-4 flex items-center justify-between gap-3">
-                          {place ? <p className="inline-flex min-w-0 items-center gap-1 truncate text-[12.5px] text-gray-500"><MapPin size={13} className="shrink-0" /> <span className="truncate">{place}</span></p> : <span />}
-                          <Button size="sm" variant="secondary" onClick={() => requestBooking(p)}>Request booking</Button>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  );
-                })}
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {pros.map((p, i) => (
+                  <Reveal key={p.id} delay={Math.min(i, 6) * 0.06} y={14} amount={0.1}><ProCard p={p} onBook={() => requestBooking(p)} /></Reveal>
+                ))}
               </div>
             ) : (
-              <p className="mt-4 text-[13.5px] text-gray-500">
-                No professionals are listed in your area yet. Are you a professional?{' '}
-                <a href="https://partner.zyphix.in/services" target="_blank" rel="noopener noreferrer" className="font-semibold text-emerald-700 hover:underline">Join Zyphix Book</a>.
-              </p>
+              <Reveal className="mt-6">
+                <div className="relative overflow-hidden rounded-3xl bg-[#05080E] text-white">
+                  <img src={PHOTOS.plumbing[0].src} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-40" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#05080E] via-[#05080E]/80 to-[#05080E]/30" />
+                  <Grain />
+                  <div className="relative p-6 md:p-8">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[12px] font-semibold text-white/85"><MapPin size={12} /> Opening area by area</span>
+                    <p className="mt-4 max-w-[460px] text-[22px] font-semibold leading-[1.15] tracking-[-0.02em] md:text-[26px]">No professionals are listed in your area yet.</p>
+                    <p className="mt-2 max-w-[440px] text-[14.5px] leading-[1.6] text-white/70">Pros appear here the moment they pass verification. If you work in home services, listing is free.</p>
+                    <div className="mt-6 flex flex-wrap gap-3">
+                      <GlowButton href={`${PARTNER_URL}/services`} size="md">Join as a professional <ArrowUpRight size={15} /></GlowButton>
+                      <GhostButton href="#services" size="md">Browse services</GhostButton>
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
             )}
           </section>
         </div>
 
-        {/* ── Booking panel ──────────────────────────────────────────────── */}
-        <aside id={BOOKING_PANEL_ID} className="scroll-mt-24 lg:sticky lg:top-24">
-          <Card hover={false} className="overflow-hidden p-5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-[16px] font-semibold tracking-[-0.01em] text-gray-900">Your booking</h2>
-              {activeService && <Chip tone="green">Step 2 of 3</Chip>}
-            </div>
-
-            <AnimatePresence mode="wait" initial={false}>
-              {activeService ? (
-                <motion.div key={activeService.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.25, ease: EASE }}>
-                  <div className="mt-4 flex items-center gap-3 rounded-xl border border-gray-200 bg-[#FAFAFA] p-2.5">
-                    <div className="h-14 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                      <ServicePhoto service={activeService} className="h-full w-full" sizes="64px" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-[14.5px] font-semibold text-gray-900">{activeService.title}</p>
-                      <p className="truncate text-[12.5px] text-gray-500">{activeService.category} · next slot {activeService.nextSlot}</p>
-                    </div>
-                  </div>
-
-                  {/* Day tabs */}
-                  <div className="mt-4 flex rounded-lg bg-gray-100 p-1">
-                    {DAYS.map(d => {
-                      const on = day === d;
-                      return (
-                        <button key={d} type="button" onClick={() => { setDay(d); setSelectedSlot(null); }} aria-pressed={on}
-                          className={`relative flex-1 rounded-md py-1.5 text-[13px] font-semibold transition ${on ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>
-                          {on && <motion.span layoutId="book-day-tab" className="absolute inset-0 rounded-md bg-white shadow-[0_1px_2px_rgba(0,0,0,.08)]" transition={{ type: 'spring', stiffness: 500, damping: 35 }} />}
-                          <span className="relative">{d}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="mt-3 grid grid-cols-4 gap-2">
-                    {TIME_SLOTS.map(slot => {
-                      const on = selectedSlot === slot;
-                      return (
-                        <motion.button key={slot} type="button" onClick={() => setSelectedSlot(slot)} aria-pressed={on} whileTap={{ scale: 0.95 }}
-                          className={`rounded-lg border py-2 text-[12.5px] font-medium transition ${
-                            on ? 'border-emerald-600 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-600' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                          }`}>
-                          {slot.replace(':00', '')}
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-
-                  <label className="mt-4 block">
-                    <span className="text-[12.5px] font-medium text-gray-700">Address <span className="font-normal text-gray-400">(optional)</span></span>
-                    <span className="mt-1.5 flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600">
-                      <MapPin size={14} className="shrink-0 text-gray-400" />
-                      <input value={address} onChange={e => setAddress(e.target.value)} placeholder="Flat, street, locality" className="h-10 w-full bg-transparent text-[13.5px] text-gray-900 outline-none placeholder:text-gray-400" />
-                    </span>
-                  </label>
-
-                  <dl className="mt-4 space-y-1.5 text-[13px]">
-                    <div className="flex justify-between"><dt className="text-gray-500">Service</dt><dd className="font-medium text-gray-900">{activeService.title}</dd></div>
-                    <div className="flex justify-between"><dt className="text-gray-500">Slot</dt><dd className="font-medium text-gray-900">{selectedSlot ? `${day}, ${selectedSlot}` : '—'}</dd></div>
-                    <div className="flex justify-between"><dt className="text-gray-500">Visit charge</dt><dd className="inline-flex items-center gap-1 text-gray-900"><Receipt size={13} className="text-gray-400" /> Shown before you confirm</dd></div>
-                  </dl>
-
-                  <div className="relative mt-4">
-                    <AnimatePresence mode="wait" initial={false}>
-                      {booked ? (
-                        <motion.div key="done" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}
-                          className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                          <svg viewBox="0 0 48 48" className="h-10 w-10 shrink-0" aria-hidden>
-                            <motion.circle cx="24" cy="24" r="20" fill="none" stroke={G} strokeWidth="3" strokeLinecap="round"
-                              initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.5, ease: 'easeOut' }} />
-                            <motion.path d="M15 24.5l6 6 12-13" fill="none" stroke={G} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"
-                              initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.35, ease: 'easeOut', delay: 0.4 }} />
-                          </svg>
-                          <div>
-                            <p className="text-[14px] font-semibold text-emerald-900">Booking confirmed</p>
-                            <p className="text-[12.5px] text-emerald-800/80">{activeService.title} · {day}, {selectedSlot}</p>
-                          </div>
-                        </motion.div>
-                      ) : (
-                        <motion.div key="cta" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                          <button type="button" onClick={handleBook} disabled={!selectedSlot}
-                            className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full text-[14.5px] font-semibold text-white shadow-[0_1px_2px_rgba(0,0,0,.2),inset_0_1px_0_rgba(255,255,255,.2)] transition hover:-translate-y-px hover:shadow-[0_8px_24px_rgba(13,163,102,.35)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                            style={{ background: `linear-gradient(180deg, #13B874 0%, ${G} 100%)` }}>
-                            {selectedSlot ? 'Confirm booking' : 'Choose a time slot'}
-                          </button>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                  <p className="mt-2.5 text-center text-[12px] text-gray-500">Free cancellation up to 1 hour before your slot.</p>
-                </motion.div>
-              ) : (
-                <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="mt-4">
-                  <div className="relative flex flex-col items-center overflow-hidden rounded-xl border border-dashed border-gray-200 bg-[#FAFAFA] px-4 py-8 text-center">
-                    <motion.span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-emerald-700 shadow-[0_6px_20px_rgba(13,163,102,.15)] ring-1 ring-emerald-100"
-                      animate={{ y: [0, -4, 0] }} transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}>
-                      <CalendarClock size={22} />
-                    </motion.span>
-                    <p className="mt-3 text-[14px] font-semibold text-gray-900">Pick a service to start</p>
-                    <p className="mt-1 text-[12.5px] text-gray-500">Time slots for today and tomorrow appear here.</p>
-                  </div>
-                  <ul className="mt-4 space-y-2 text-[12.5px] text-gray-600">
-                    {['Price shown before you confirm', 'Reschedule free', 'ID & background verified pros'].map(t => (
-                      <li key={t} className="flex items-center gap-2"><Check size={13} className="text-emerald-600" /> {t}</li>
-                    ))}
-                  </ul>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </Card>
+        {/* ── Sticky booking panel (desktop) ──────────────────────────────── */}
+        <aside className="hidden lg:sticky lg:top-20 lg:block">
+          <BookingPanel id={PANEL_ID} state={booking} />
         </aside>
       </div>
 
-      {/* ── What's included ──────────────────────────────────────────────── */}
-      <section className="mt-16">
-        <motion.div {...inView()} className="mx-auto max-w-[640px] text-center">
-          <Eyebrow className="justify-center">What's included</Eyebrow>
-          <Display as="h2" size="md" className="mt-2 text-gray-900">Every booking, the same standard.</Display>
-          <Lead className="mt-3 text-[15.5px]">These are our policies on every job, not promises we make case by case.</Lead>
-        </motion.div>
-        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {INCLUDED.map(({ icon: Icon, tone, title, body }, i) => (
-            <motion.div key={title} {...inView(i * 0.08, 20)} whileHover={{ y: -4 }} className="h-full">
-              <Card className="group relative h-full overflow-hidden p-5">
-                <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100" style={{ background: `${G}33` }} />
-                <motion.div whileInView={{ rotate: [0, -8, 6, 0] }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.3 + i * 0.08 }} className="inline-block">
-                  <IconTile tone={tone}><Icon size={19} /></IconTile>
-                </motion.div>
-                <p className="mt-4 text-[15.5px] font-semibold tracking-[-0.01em] text-gray-900">{title}</p>
-                <p className="mt-1.5 text-[13.5px] leading-[1.6] text-gray-600">{body}</p>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      {/* ── Policy band ──────────────────────────────────────────────────── */}
+      <div className="-mx-4 mt-20 md:mx-0 md:mt-28">
+        <Dark className="py-20 md:rounded-3xl md:py-28">
+          <Glow x="20%" y="10%" alpha={0.3} />
+          <Glow x="85%" y="90%" size={700} alpha={0.2} />
+          <Grain />
+          <div className="relative px-5 md:px-12 lg:px-16">
+            <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+              <div className="lg:col-span-5">
+                <Reveal><Kicker light>Our policies</Kicker></Reveal>
+                <Reveal delay={0.05}><Headline size="lg" as="h2" light>Every booking, the same standard.</Headline></Reveal>
+                <Reveal delay={0.1}><Sub light className="mt-5">These are rules on every job, not promises we make case by case. If we fall short, the remedy is already decided.</Sub></Reveal>
+                <Reveal delay={0.15}>
+                  <ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-3 text-[14px] text-white/80">
+                    {PROMISES.map(t => <li key={t} className="flex items-start gap-2"><BadgeCheck size={16} className="mt-0.5 shrink-0 text-emerald-300" />{t}</li>)}
+                  </ul>
+                </Reveal>
+              </div>
+              <div className="lg:col-span-7">
+                <Stagger className="grid grid-cols-2 gap-4 md:gap-5" step={0.1}>
+                  {[
+                    { n: 100, f: (n: number) => `${Math.round(n)}%`, t: 'of pros ID & police-verified', s: 'Before their first booking' },
+                    { n: 100, f: (n: number) => `₹${Math.round(n)}`, t: 'off if we are late', s: 'More than 30 minutes past your slot' },
+                    { n: 7, f: (n: number) => `${Math.round(n)}-day`, t: 'work guarantee', s: 'We come back and fix it, free' },
+                    { n: 0, f: (n: number) => `₹${Math.round(n)}`, t: 'to reschedule or cancel', s: 'Up to 1 hour before your slot' },
+                  ].map(c => (
+                    <div key={c.t} className="rounded-3xl border border-white/10 bg-white/[.04] p-5 md:p-7">
+                      <p className="text-[40px] font-semibold leading-none tracking-[-0.04em] text-white md:text-[56px]"><Counter to={c.n} format={c.f} /></p>
+                      <p className="mt-3 text-[15px] font-semibold tracking-[-0.01em] text-white">{c.t}</p>
+                      <p className="mt-1 text-[13px] text-white/60">{c.s}</p>
+                    </div>
+                  ))}
+                </Stagger>
+              </div>
+            </div>
+          </div>
+        </Dark>
+      </div>
 
       {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-      <section className="mt-16 grid grid-cols-1 gap-8 lg:grid-cols-[320px_1fr]">
-        <motion.div {...inView()}>
-          <Eyebrow>FAQ</Eyebrow>
-          <Display as="h2" size="md" className="mt-2 text-gray-900">Questions, answered.</Display>
-          <Lead className="mt-3 text-[15.5px]">Anything else? Support is available Mon–Sat.</Lead>
-        </motion.div>
-        <motion.div {...inView(0.1)}>
-          <Card hover={false} className="px-5 sm:px-7">
-            <Accordion items={FAQ} />
-          </Card>
-        </motion.div>
+      <section id="faq" className="mt-20 scroll-mt-24 md:mt-28">
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-4">
+            <Reveal><Kicker>FAQ</Kicker></Reveal>
+            <Reveal delay={0.05}><Headline size="md" as="h2">Questions, answered.</Headline></Reveal>
+            <Reveal delay={0.1}><Sub className="mt-4">Anything else? Support is available Mon–Sat at <a href="mailto:support@zyphix.in" className="font-semibold text-emerald-700">support@zyphix.in</a>.</Sub></Reveal>
+          </div>
+          <Reveal delay={0.1} className="lg:col-span-8">
+            <div className="rounded-3xl border border-gray-200 bg-white px-5 sm:px-8">
+              <Accordion items={FAQ} />
+            </div>
+          </Reveal>
+        </div>
       </section>
 
-      {/* ── Final CTA ────────────────────────────────────────────────────── */}
-      <motion.section {...inView()} className="relative mt-16 mb-8 overflow-hidden rounded-2xl bg-[#0B0F19] px-6 py-12 text-center text-white sm:px-10 sm:py-16">
-        <Grid dark />
-        <motion.div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[420px] w-[720px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
-          style={{ background: `radial-gradient(closest-side, ${G}66, transparent 70%)` }}
-          animate={{ scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }} />
-        <Eyebrow dark className="justify-center">Ready when you are</Eyebrow>
-        <Display as="h2" size="md" className="mx-auto mt-3 max-w-[560px] text-white">Book a verified professional for today or tomorrow.</Display>
-        <Lead dark className="mx-auto mt-4 max-w-[480px]">The visit charge is shown before you confirm. Reschedule for free if plans change.</Lead>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Button href="#services" size="lg">Book a service <ArrowRight size={16} /></Button>
-          <GlassButton href="https://partner.zyphix.in/services">Join as a professional</GlassButton>
-        </div>
-      </motion.section>
+      {/* ── Final CTA for professionals ──────────────────────────────────── */}
+      <div className="-mx-4 mt-20 md:mx-0 md:mt-28">
+        <section className="relative isolate flex min-h-[460px] items-end overflow-hidden bg-[#05080E] text-white md:min-h-[520px] md:rounded-3xl">
+          <BgVideo clip={VIDEOS.salon} dim={0.5} />
+          <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.2) 0%, rgba(5,8,14,.1) 40%, rgba(5,8,14,.95) 100%)' }} />
+          <Grain />
+          <div className="relative z-10 w-full px-5 pb-10 pt-24 md:px-12 md:pb-14 lg:px-16">
+            <Reveal><Kicker light>For professionals</Kicker></Reveal>
+            <Reveal delay={0.05}><Headline size="lg" as="h2" light className="max-w-[720px]">Work from your own neighbourhood. Get paid every week.</Headline></Reveal>
+            <Reveal delay={0.1}><Sub light className="mt-4 max-w-[520px]">Electricians, plumbers, cleaners, beauticians and more. Listing is free; verification takes a few days.</Sub></Reveal>
+            <Reveal delay={0.15}>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <GlowButton href={PARTNER_URL}>Join Zyphix Book <ArrowUpRight size={16} /></GlowButton>
+                <GhostButton href="#faq">How verification works</GhostButton>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

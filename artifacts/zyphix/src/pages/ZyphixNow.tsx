@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Minus, ChevronDown, ShoppingBag, ArrowRight, Store, X, Search } from 'lucide-react';
+import { Plus, Minus, ChevronDown, ShoppingBag, ArrowRight, Store, X, Search, Clock, Truck, Package, MapPin } from 'lucide-react';
 import { Link, useSearch, useLocation } from 'wouter';
 import { useCatalog, type Product, type Category } from '@/lib/catalog';
 import { productImageFor } from '@/lib/productImage';
@@ -8,6 +8,8 @@ import { useCart } from '@/context/CartContext';
 import { COUPONS } from '@/data/coupons';
 import { usePartners, type PartnerListing } from '@/lib/partners';
 import { Button, IconTile, FONT, G } from '@/ui/kit';
+import { BgVideo, Reveal, Headline, Kicker, Grain } from '@/ui/cinema';
+import { VIDEOS, landscape, type Photo } from '@/data/media';
 import {
   discountOf, buildOffers, dealsOfTheDay, bestsellers as pickBestsellers, underPrice, topBrands, freshProduce,
   type Offer, type OfferTheme,
@@ -41,7 +43,12 @@ export function ZyphixNow() {
   const [path, navigate] = useLocation();
   const urlQuery = useMemo(() => new URLSearchParams(searchString).get('q') || '', [searchString]);
   const q = urlQuery.trim().toLowerCase();
-  const clearSearch = useCallback(() => navigate(path || '/'), [navigate, path]);
+  const clearSearch = useCallback(() => {
+    const params = new URLSearchParams(searchString);
+    params.delete('q');
+    const qs = params.toString();
+    navigate(`${path || '/'}${qs ? `?${qs}` : ''}`);
+  }, [navigate, path, searchString]);
 
   const [sortBy, setSortBy] = useState<SortKey>('featured');
   const [onlyDiscounted, setOnlyDiscounted] = useState(false);
@@ -137,10 +144,16 @@ export function ZyphixNow() {
     scrollToId(sectionId(name));
   }, [scrollToId]);
 
-  const searchBrand = useCallback((brand: string) => {
-    navigate(`${path || '/'}?q=${encodeURIComponent(brand)}`);
+  /** Route to ?q= the same way the Navbar does, keeping any other params (e.g. ?site=) intact. */
+  const goSearch = useCallback((term: string) => {
+    const t = term.trim();
+    const params = new URLSearchParams(searchString);
+    if (t) params.set('q', t); else params.delete('q');
+    const qs = params.toString();
+    navigate(`${path || '/'}${qs ? `?${qs}` : ''}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [navigate, path]);
+  }, [navigate, path, searchString]);
+  const searchBrand = goSearch;
 
   const openOffer = useCallback((o: Offer) => {
     if (o.target.kind === 'category') jumpTo(o.target.name); else scrollToId(o.target.id);
@@ -189,28 +202,42 @@ export function ZyphixNow() {
   const productCount = products.length.toLocaleString('en-IN');
 
   return (
-    <div className="relative mx-auto w-full max-w-[1180px] pt-4 text-gray-900" style={{ fontFamily: FONT }}>
+    <div className="relative mx-auto w-full max-w-[1180px] pt-0 text-gray-900 md:pt-4" style={{ fontFamily: FONT }}>
 
-      {/* ── Store header: one compact row ── */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
-          <h1 className="text-[20px] font-semibold leading-tight tracking-[-0.01em]">Zyphix Now</h1>
-          <p className="text-[13px] text-gray-500">
-            Delivery in 30 min · {catalogLoading ? 'Loading catalogue' : `${productCount} products`}
-          </p>
+      {/* ── Cinematic hero (store mode) / compact search bar (search mode) ── */}
+      {showStore ? (
+        <Hero productCount={catalogLoading ? '' : productCount} onSearch={goSearch} />
+      ) : (
+        <div className="pt-4">
+          <SearchField initial={urlQuery.trim()} onSearch={goSearch} compact />
         </div>
-        <div className="ml-auto flex items-center gap-2">
-          <SortControls sortBy={sortBy} setSortBy={setSortBy} onlyDiscounted={onlyDiscounted} setOnlyDiscounted={setOnlyDiscounted} />
+      )}
+
+      {/* ── Category card overlapping the hero's bottom edge ── */}
+      {showStore && (
+        <div className="relative z-10 -mt-9 md:-mt-14">
+          <div className="rounded-2xl border border-gray-200 bg-white p-3 shadow-[0_18px_50px_-18px_rgba(11,15,25,.28)] md:p-4">
+            <div className="mb-2.5 flex flex-wrap items-end justify-between gap-x-3 gap-y-2 md:mb-3">
+              <div className="flex min-w-0 items-baseline gap-2">
+                <h2 className="shrink-0 text-[15px] font-semibold tracking-[-0.01em] md:text-[17px]">Shop by category</h2>
+                {categories.length > 0 && <span className="shrink-0 text-[12.5px] text-gray-500">{categories.length} categories</span>}
+              </div>
+              <SortControls sortBy={sortBy} setSortBy={setSortBy} onlyDiscounted={onlyDiscounted} setOnlyDiscounted={setOnlyDiscounted} />
+            </div>
+            {categories.length > 0
+              ? <CategoryGrid categories={categories} counts={countByCategory} onPick={jumpTo} />
+              : <SkeletonCategories />}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Coupon strip (single, slim, dismissible) ── */}
       {showStore && coupon && !couponDismissed && (
-        <div className="mt-3 flex h-12 items-center gap-3 rounded-xl border border-gray-200 bg-white px-3.5 text-[13px]">
-          <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[12px] font-semibold tracking-wide text-emerald-700">{coupon.code}</span>
+        <div className="mt-4 flex h-12 items-center gap-3 rounded-xl border border-emerald-200/80 bg-emerald-50/60 px-3.5 text-[13px]">
+          <span className="rounded-md border border-emerald-200 bg-white px-2 py-0.5 text-[12px] font-semibold tracking-wide text-emerald-700">{coupon.code}</span>
           <span className="min-w-0 flex-1 truncate text-gray-700">{coupon.desc}</span>
           <button type="button" onClick={dismissCoupon} aria-label="Dismiss offer"
-            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 transition hover:bg-gray-100 hover:text-gray-700">
+            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 transition hover:bg-white hover:text-gray-700">
             <X size={14} />
           </button>
         </div>
@@ -218,7 +245,7 @@ export function ZyphixNow() {
 
       {/* ── Mobile category rail (sticky under the Navbar) ── */}
       {showStore && categories.length > 0 && (
-        <div className="sticky z-30 -mx-4 mt-3 border-b border-gray-200 bg-[#FAFAFA]/95 backdrop-blur md:hidden" style={{ top: NAV_H }}>
+        <div className="sticky z-30 -mx-4 mt-4 border-b border-gray-200 bg-[#F8F9FA]/95 backdrop-blur md:hidden" style={{ top: NAV_H }}>
           <div ref={mobileRailRef} className="flex gap-1.5 overflow-x-auto px-4 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {categories.map(c => {
               const active = activeCat === c.name;
@@ -236,7 +263,7 @@ export function ZyphixNow() {
         </div>
       )}
 
-      <div className="mt-4 flex items-start gap-6">
+      <div className="mt-6 flex items-start gap-6">
 
         {/* ── Desktop category rail ── */}
         {showStore && (
@@ -276,9 +303,12 @@ export function ZyphixNow() {
                 <h2 className="text-[17px] font-semibold tracking-[-0.01em]">
                   {searchResults.length > 0 ? `${searchResults.length.toLocaleString('en-IN')} results` : 'No results'} for “{urlQuery.trim()}”
                 </h2>
-                <button type="button" onClick={clearSearch} className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-emerald-700 hover:text-emerald-800">
-                  <X size={14} /> Clear
-                </button>
+                <div className="flex items-center gap-2">
+                  <SortControls sortBy={sortBy} setSortBy={setSortBy} onlyDiscounted={onlyDiscounted} setOnlyDiscounted={setOnlyDiscounted} />
+                  <button type="button" onClick={clearSearch} className="inline-flex h-8 items-center gap-1 text-[13.5px] font-semibold text-emerald-700 hover:text-emerald-800">
+                    <X size={14} /> Clear
+                  </button>
+                </div>
               </div>
               {catalogLoading ? (
                 <SkeletonGrid />
@@ -303,13 +333,6 @@ export function ZyphixNow() {
                 <>
                   {offers.length > 0 && (
                     <OfferCarousel offers={offers} categories={categories} onShop={openOffer} />
-                  )}
-
-                  {categories.length > 0 && (
-                    <section>
-                      <SectionHead title="Shop by category" sub={`${categories.length} categories`} />
-                      <CategoryGrid categories={categories} counts={countByCategory} onPick={jumpTo} />
-                    </section>
                   )}
 
                   {dealsRow.length > 0 && (
@@ -443,12 +466,84 @@ function CategoryIcon({ category: c }: { category: Category }) {
 
 function SectionHead({ title, sub, action }: { title: string; sub?: string; action?: React.ReactNode }) {
   return (
-    <div className="mb-3 flex items-end justify-between gap-3">
+    <Reveal y={12} amount={0.4} className="mb-3 flex items-end justify-between gap-3">
       <div className="flex min-w-0 items-baseline gap-2">
         <h2 className="truncate text-[17px] font-semibold tracking-[-0.01em] md:text-[18px]">{title}</h2>
         {sub && <span className="shrink-0 text-[12.5px] text-gray-500">{sub}</span>}
       </div>
       {action}
+    </Reveal>
+  );
+}
+
+/* ─── Hero: compact video hero with search, promise chips; the category card overlaps its bottom edge ─── */
+
+function Hero({ productCount, onSearch }: { productCount: string; onSearch: (q: string) => void }) {
+  const chips: { icon: React.ReactNode; text: string }[] = [
+    { icon: <Clock size={13} />, text: 'Delivered in 30 min' },
+    { icon: <Truck size={13} />, text: 'Free delivery above ₹149' },
+    ...(productCount ? [{ icon: <Package size={13} />, text: `${productCount} products` }] : []),
+    { icon: <MapPin size={13} />, text: 'Live in Jammu' },
+  ];
+  return (
+    <section aria-label="Zyphix Now" className="relative isolate -mx-4 flex min-h-[46svh] items-end overflow-hidden bg-[#05080E] text-white md:mx-0 md:min-h-[56svh] md:rounded-3xl">
+      <BgVideo clip={VIDEOS.groceryShelf} dim={0.35} position="center" />
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.35) 0%, rgba(5,8,14,.05) 30%, rgba(5,8,14,.55) 65%, rgba(5,8,14,.92) 100%)' }} />
+      <Grain opacity={0.05} />
+      <div className="relative z-10 w-full px-4 pb-16 pt-14 md:px-10 md:pb-24 md:pt-16">
+        <Kicker light>Zyphix Now · Jammu</Kicker>
+        <Headline as="h1" size="md" light className="max-w-[640px]">Groceries in 30 minutes</Headline>
+        <p className="mt-3 max-w-[520px] text-[15px] leading-[1.55] text-white/75 md:text-[17px]">
+          Fresh produce, dairy, snacks and daily staples from stores near you, at your door before the chai goes cold.
+        </p>
+        <div className="mt-5 max-w-[640px] md:mt-6">
+          <SearchField onSearch={onSearch} />
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {chips.map(c => (
+            <span key={c.text} className="inline-flex h-8 items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 text-[12.5px] font-medium text-white/90 backdrop-blur-md">
+              <span className="text-emerald-300">{c.icon}</span>{c.text}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Big white search field. Submits to ?q= (same route the Navbar uses). */
+function SearchField({ onSearch, initial = '', compact = false }: { onSearch: (q: string) => void; initial?: string; compact?: boolean }) {
+  const [v, setV] = useState(initial);
+  useEffect(() => { setV(initial); }, [initial]);
+  return (
+    <form role="search" onSubmit={e => { e.preventDefault(); onSearch(v); }}
+      className={`flex items-center gap-2 rounded-2xl bg-white pl-4 pr-1.5 text-gray-900 ${compact ? 'h-12 border border-gray-200' : 'h-12 shadow-[0_20px_60px_-15px_rgba(0,0,0,.6)] md:h-14'}`}>
+      <Search size={18} className="shrink-0 text-gray-400" />
+      <input value={v} onChange={e => setV(e.target.value)} aria-label="Search products"
+        placeholder="Search for atta, milk, chips…"
+        className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-gray-400 md:text-[16px]" />
+      {v && (
+        <button type="button" onClick={() => { setV(''); if (compact) onSearch(''); }} aria-label="Clear" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700"><X size={15} /></button>
+      )}
+      <button type="submit" className={`inline-flex shrink-0 items-center justify-center rounded-xl px-4 text-[13.5px] font-semibold text-white transition hover:brightness-105 ${compact ? 'h-9' : 'h-9 md:h-11 md:px-5'}`} style={{ background: `linear-gradient(180deg, #13B874 0%, ${G} 100%)` }}>
+        Search
+      </button>
+    </form>
+  );
+}
+
+function SkeletonCategories() {
+  return (
+    <div className="-mx-3 flex gap-2 overflow-hidden px-3 md:mx-0 md:grid md:grid-cols-8 md:px-0">
+      {Array.from({ length: 8 }, (_, i) => (
+        <div key={i} className="w-[88px] shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-white md:w-auto">
+          <div className="aspect-[4/3] animate-pulse bg-gray-100" />
+          <div className="space-y-1.5 px-2 py-2">
+            <div className="h-3 w-4/5 animate-pulse rounded bg-gray-100" />
+            <div className="h-2.5 w-1/3 animate-pulse rounded bg-gray-100" />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -461,13 +556,14 @@ function SeeAll({ onClick, label = 'See all' }: { onClick: () => void; label?: s
   );
 }
 
-/* ─── Offer carousel: pastel cards with a 3-image product collage, every number computed ─── */
+/* ─── Offer carousel: photo-led tiles with a 3-image product collage, every number computed ─── */
 
-const OFFER_TONE: Record<OfferTheme, { bg: string; label: string; ring: string }> = {
-  green: { bg: 'bg-emerald-50', label: 'text-emerald-700', ring: 'border-emerald-100' },
-  amber: { bg: 'bg-amber-50',   label: 'text-amber-700',   ring: 'border-amber-100' },
-  sky:   { bg: 'bg-sky-50',     label: 'text-sky-700',     ring: 'border-sky-100' },
-  rose:  { bg: 'bg-rose-50',    label: 'text-rose-700',    ring: 'border-rose-100' },
+/** Backdrop photo + accent per offer theme (snacks / dairy / produce / grocery). */
+const OFFER_TONE: Record<OfferTheme, { photo: Photo; label: string; tint: string }> = {
+  amber: { photo: landscape('snacks'),  label: 'text-amber-300',   tint: 'rgba(120,53,15,.55)' },
+  sky:   { photo: landscape('dairy'),   label: 'text-sky-300',     tint: 'rgba(12,74,110,.55)' },
+  green: { photo: landscape('produce'), label: 'text-emerald-300', tint: 'rgba(6,78,59,.55)' },
+  rose:  { photo: landscape('grocery'), label: 'text-rose-300',    tint: 'rgba(136,19,55,.55)' },
 };
 
 function OfferCarousel({ offers, categories, onShop }: { offers: Offer[]; categories: Category[]; onShop: (o: Offer) => void }) {
@@ -494,22 +590,30 @@ function OfferCarousel({ offers, categories, onShop }: { offers: Offer[]; catego
   return (
     <section aria-label="Offers">
       <div ref={ref} className="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden">
-        {offers.map(o => {
+        {offers.map((o, i) => {
           const t = OFFER_TONE[o.theme];
           return (
-            <div key={o.key} className={`flex h-[164px] w-[86%] shrink-0 snap-start items-stretch justify-between overflow-hidden rounded-xl border ${t.ring} ${t.bg} md:h-[176px] md:w-[calc(50%-5px)] lg:w-[calc(33.333%-7px)]`}>
-              <div className="flex min-w-0 flex-col justify-between p-4">
+            <Reveal key={o.key} delay={i * 0.08} y={16} amount={0.3}
+              className="group relative flex h-[184px] w-[86%] shrink-0 snap-start items-stretch justify-between overflow-hidden rounded-2xl bg-[#05080E] text-white md:h-[220px] md:w-[calc(50%-5px)]">
+              <img src={t.photo.src} alt="" aria-hidden loading="lazy" decoding="async" draggable={false}
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.06]" />
+              <div aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(5,8,14,.92) 0%, rgba(5,8,14,.7) 48%, rgba(5,8,14,.25) 100%)` }} />
+              <div aria-hidden className="absolute inset-0 mix-blend-multiply" style={{ background: t.tint }} />
+              <div className="relative flex min-w-0 flex-col justify-between p-4 md:p-5">
                 <div className="min-w-0">
-                  <p className={`truncate text-[12px] font-semibold ${t.label}`}>{o.label}</p>
-                  <p className="mt-1 text-[22px] font-semibold leading-[1.1] tracking-[-0.02em] text-gray-900">{o.headline}</p>
-                  <p className="mt-1.5 line-clamp-2 text-[12.5px] leading-snug text-gray-600">{o.sub}</p>
+                  <p className={`truncate text-[12px] font-semibold uppercase tracking-[0.12em] ${t.label}`}>{o.label}</p>
+                  <p className="mt-1.5 text-[26px] font-semibold leading-[1.02] tracking-[-0.03em] text-white [overflow-wrap:anywhere] md:text-[34px]">{o.headline}</p>
+                  <p className="mt-2 line-clamp-2 text-[12.5px] leading-snug text-white/70 md:text-[13.5px]">{o.sub}</p>
                 </div>
                 <div>
-                  <Button size="sm" variant="secondary" onClick={() => onShop(o)}>Shop <ArrowRight size={13} /></Button>
+                  <button type="button" onClick={() => onShop(o)}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full bg-white px-4 text-[13px] font-semibold text-gray-900 transition hover:-translate-y-px hover:bg-emerald-50">
+                    Shop <ArrowRight size={13} />
+                  </button>
                 </div>
               </div>
               <Collage products={o.images} categories={categories} />
-            </div>
+            </Reveal>
           );
         })}
       </div>
@@ -529,17 +633,17 @@ function OfferCarousel({ offers, categories, onShop }: { offers: Offer[]; catego
 function Collage({ products, categories }: { products: Product[]; categories: Category[] }) {
   const [a, b, c] = products;
   const tile = (p: Product | undefined, cls: string) => {
-    if (!p) return <div className={`${cls} rounded-lg bg-white/60`} />;
+    if (!p) return <div className={`${cls} rounded-lg bg-white/20`} />;
     const { src, isFallback } = productImageFor(p, categories);
     return (
-      <div className={`${cls} overflow-hidden rounded-lg border border-black/[.04] bg-white`}>
+      <div className={`${cls} overflow-hidden rounded-lg bg-white shadow-[0_6px_20px_rgba(0,0,0,.25)]`}>
         <img src={src} alt="" loading="lazy" decoding="async" draggable={false}
           className={isFallback ? 'h-full w-full object-cover' : 'h-full w-full object-contain p-1.5'} />
       </div>
     );
   };
   return (
-    <div className="flex w-[132px] shrink-0 gap-1.5 p-3 pl-0 md:w-[148px]">
+    <div className="relative flex w-[120px] shrink-0 gap-1.5 p-3 pl-0 md:w-[172px] md:p-4 md:pl-0">
       {tile(a, 'h-full flex-1')}
       <div className="flex flex-1 flex-col gap-1.5">
         {tile(b, 'flex-1')}
@@ -552,11 +656,11 @@ function Collage({ products, categories }: { products: Product[]; categories: Ca
 /* ─── Shop by category: photo tiles. 8 across on desktop, two scrolling rows on mobile ─── */
 function CategoryGrid({ categories, counts, onPick }: { categories: Category[]; counts: Map<string, number>; onPick: (name: string) => void }) {
   return (
-    <div className="-mx-4 grid grid-flow-col grid-rows-2 gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:grid-flow-row md:grid-cols-8 md:grid-rows-1 md:px-0 [&::-webkit-scrollbar]:hidden"
+    <div className="-mx-3 grid grid-flow-col grid-rows-2 gap-2 overflow-x-auto px-3 pb-0.5 [scrollbar-width:none] md:mx-0 md:grid-flow-row md:grid-cols-8 md:grid-rows-1 md:px-0 [&::-webkit-scrollbar]:hidden"
       style={{ gridAutoColumns: '88px' }}>
       {categories.map((c, i) => (
         <button key={c.name} type="button" onClick={() => onPick(c.name)}
-          className={`group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-left transition hover:border-gray-300 hover:shadow-[0_4px_14px_rgba(11,15,25,.06)] ${i >= 8 ? 'md:hidden' : ''}`}>
+          className={`group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-left transition duration-300 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-[0_10px_24px_rgba(11,15,25,.08)] ${i >= 8 ? 'md:hidden' : ''}`}>
           <div className="aspect-[4/3] w-full overflow-hidden" style={{ background: `${c.color}1A` }}>
             {c.image
               ? <img src={c.image} alt="" loading="lazy" decoding="async" draggable={false} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
@@ -577,11 +681,11 @@ function ProductRow({ products, categories, cart, add, remove, tagTone }: {
   products: Product[]; categories: Category[]; cart: Record<string, number>; add: (id: string) => void; remove: (id: string) => void; tagTone?: 'green' | 'red';
 }) {
   return (
-    <div className="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden">
-      {products.map(p => (
-        <div key={p.id} className="w-[140px] shrink-0 snap-start md:w-[164px]">
+    <div className="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-2 pt-1 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden">
+      {products.map((p, i) => (
+        <Reveal key={p.id} delay={Math.min(i * 0.05, 0.4)} y={14} amount={0.1} className="w-[140px] shrink-0 snap-start md:w-[164px]">
           <ProductCard product={p} categories={categories} qty={cart[p.id] || 0} onAdd={() => add(p.id)} onRemove={() => remove(p.id)} tagTone={tagTone} />
-        </div>
+        </Reveal>
       ))}
     </div>
   );
@@ -629,8 +733,10 @@ function ProductGrid({ products, categories, cart, add, remove }: {
 }) {
   return (
     <div className="grid grid-cols-3 gap-2.5 md:grid-cols-4 lg:grid-cols-6 lg:gap-3">
-      {products.map(p => (
-        <ProductCard key={p.id} product={p} categories={categories} qty={cart[p.id] || 0} onAdd={() => add(p.id)} onRemove={() => remove(p.id)} />
+      {products.map((p, i) => (
+        <Reveal key={p.id} delay={Math.min((i % 12) * 0.04, 0.4)} y={14} amount={0.1}>
+          <ProductCard product={p} categories={categories} qty={cart[p.id] || 0} onAdd={() => add(p.id)} onRemove={() => remove(p.id)} />
+        </Reveal>
       ))}
     </div>
   );
@@ -683,10 +789,10 @@ const ProductCard = React.memo(function ProductCard({ product: p, categories, qt
   const displayName = stripped.trim() || p.name;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition hover:border-gray-300 hover:shadow-[0_4px_14px_rgba(11,15,25,.06)]">
+    <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-1 hover:border-gray-300 hover:shadow-[0_14px_30px_-8px_rgba(11,15,25,.16)]">
       <Link href={`/now/product/${p.id}`} className="relative block aspect-square overflow-hidden bg-[#FAFAFA] no-underline">
         <img src={src} alt={p.name} loading="lazy" decoding="async" draggable={false}
-          className={isFallback ? 'h-full w-full object-cover' : 'h-full w-full bg-white object-contain p-2'} />
+          className={`transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.04] ${isFallback ? 'h-full w-full object-cover' : 'h-full w-full bg-white object-contain p-2'}`} />
         {discount > 0 && (
           <span className={`absolute left-1.5 top-1.5 rounded-md px-1.5 py-0.5 text-[10.5px] font-semibold leading-none text-white ${tagTone === 'red' ? 'bg-red-600' : 'bg-emerald-600'}`}>{discount}% off</span>
         )}

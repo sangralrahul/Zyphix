@@ -22,18 +22,20 @@ import { BottomNav } from "@/components/layout/BottomNav";
 const PartnerSite = lazy(() => import("@/sites/PartnerSite"));
 const AdvertiseSite = lazy(() => import("@/sites/AdvertiseSite"));
 const AuthSite = lazy(() => import("@/sites/AuthSite"));
+const SupportSite = lazy(() => import("@/sites/SupportSite"));
 
 /**
  * One Worker serves zyphix.in and its sub-sites. The hostname (or ?site= for local previews)
  * decides which site renders: partner.zyphix.in → partner portal, advertise.zyphix.in → ads site,
  * auth.zyphix.in → the shared sign-in page.
  */
-export function detectSite(): "main" | "partner" | "advertise" | "now" | "eats" | "book" | "auth" {
+export function detectSite(): "main" | "partner" | "advertise" | "now" | "eats" | "book" | "auth" | "support" {
   if (typeof window === "undefined") return "main";
   const override = new URLSearchParams(window.location.search).get("site");
-  if (override === "partner" || override === "advertise" || override === "now" || override === "eats" || override === "book" || override === "auth") return override;
+  if (override === "partner" || override === "advertise" || override === "now" || override === "eats" || override === "book" || override === "auth" || override === "support") return override;
   const host = window.location.hostname.toLowerCase();
   if (host.startsWith("auth.") || host.startsWith("account.")) return "auth";
+  if (host.startsWith("support.") || host.startsWith("help.")) return "support";
   if (host.startsWith("partner.") || host.startsWith("partners.")) return "partner";
   if (host.startsWith("advertise.") || host.startsWith("ads.")) return "advertise";
   if (host.startsWith("now.") || host.startsWith("shop.")) return "now";
@@ -104,6 +106,7 @@ function Router() {
   if (site === "partner") return <PartnerSite />;
   if (site === "advertise") return <AdvertiseSite />;
   if (site === "auth") return <AuthSite />;
+  if (site === "support") return <SupportSite />;
   // now.|eats.|book.zyphix.in: the app section is the root; all other paths keep working.
   const appRoot = site === "now" ? <LightLayout><ZyphixNow /></LightLayout>
     : site === "eats" ? <LightLayout><ZyphixEats /></LightLayout>
@@ -176,6 +179,8 @@ function Router() {
       <Route path="/service-setup" component={ServiceProSetup} />
       <Route path="/advertise" component={AdvertiseSite} />
       <Route path="/auth" component={AuthSite} />
+      <Route path="/support" component={SupportSite} />
+      <Route path="/support/:rest*" component={SupportSite} />
       <Route path="/app" component={AppComingSoon} />
       <Route path="/account">
         <DarkLayout><Account /></DarkLayout>
