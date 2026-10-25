@@ -1,9 +1,10 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import { Light, VideoHero, Kicker, Headline, Sub, Reveal, Words, GlowButton, GhostButton } from '@/ui/cinema';
+import { Light, Kicker, Sub, Reveal, GlowButton, GhostButton } from '@/ui/cinema';
+import { Accent, Magnetic, ZoomVideo } from '@/ui/motion2';
 import { Container, Accordion, ArrowLink, Button } from '@/ui/kit';
 import { VIDEOS } from '@/data/media';
-import { NOW_SITE, EATS_SITE, PARTNER_SITE } from './shared';
+import { NOW_SITE, EATS_SITE, PARTNER_SITE, SUPPORT_SITE, Display } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
    FAQ accordion, final full-bleed video CTA and the sticky mobile bottom CTA.
@@ -25,8 +26,12 @@ export function Faq() {
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <Reveal><Kicker>FAQ</Kicker></Reveal>
-            <Reveal delay={0.05}><Headline size="md">Questions, answered.</Headline></Reveal>
-            <Reveal delay={0.1}><Sub className="mt-5">Still stuck? <ArrowLink href="/contact" className="ml-1 align-baseline">Contact support</ArrowLink></Sub></Reveal>
+            <Reveal delay={0.05}><Display size="md">Questions, <Accent green>answered</Accent>.</Display></Reveal>
+            <Reveal delay={0.1}><Sub className="mt-5 max-w-[34ch]">Everything else lives in the help centre.</Sub></Reveal>
+            <Reveal delay={0.15} className="mt-6 flex flex-col items-start gap-3">
+              <ArrowLink href={SUPPORT_SITE}>Visit support.zyphix.in</ArrowLink>
+              <ArrowLink href="/contact">Contact support</ArrowLink>
+            </Reveal>
           </div>
           <Reveal delay={0.1} className="border-t border-gray-200 lg:col-span-8">
             <Accordion items={FAQ} />
@@ -37,20 +42,20 @@ export function Faq() {
   );
 }
 
-/* ── Final full-bleed CTA ─────────────────────────────────────────────────── */
+/* ── Final CTA: inset frame that zooms to full-bleed ─────────────────────── */
 export function FinalCta() {
   return (
-    <VideoHero clip={VIDEOS.unboxing} height="min-h-[82svh]" dim={0.5} position="center 30%">
-      <Container className="flex min-h-[82svh] flex-col justify-center py-24 text-center md:py-32">
-        <Reveal><Kicker light className="justify-center">Jammu · more cities soon</Kicker></Reveal>
-        <Words as="h2" text="Your neighbourhood is already on Zyphix." className="mx-auto max-w-[900px] text-[38px] font-semibold leading-[1.04] tracking-[-0.035em] text-white sm:text-[56px] md:text-[72px]" />
-        <Reveal delay={0.3}><Sub light className="mx-auto mt-6 max-w-[520px]">Place your first order and see how fast local can be.</Sub></Reveal>
-        <Reveal delay={0.4} className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <GlowButton href={NOW_SITE} sameTab>Order on Zyphix Now <ArrowRight size={17} /></GlowButton>
+    <ZoomVideo clip={VIDEOS.nightCity}>
+      <Container className="w-full pb-20 md:pb-28">
+        <Kicker light>Jammu · more cities soon</Kicker>
+        <Display light size="xl" className="!max-w-[16ch]">Your neighbourhood is <Accent green>already here</Accent>.</Display>
+        <Sub light className="mt-6 max-w-[46ch]">Place your first order and see how fast local can be.</Sub>
+        <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <Magnetic><GlowButton href={NOW_SITE} sameTab className="w-full sm:w-auto">Order on Zyphix Now <ArrowRight size={17} /></GlowButton></Magnetic>
           <GhostButton href={EATS_SITE}>Order food instead</GhostButton>
-        </Reveal>
+        </div>
       </Container>
-    </VideoHero>
+    </ZoomVideo>
   );
 }
 

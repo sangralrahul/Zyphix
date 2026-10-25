@@ -1,13 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import { VideoHero, Words, Kicker, GlowButton, GhostButton, Ticker, Reveal, Light, isStatic, EASE } from '@/ui/cinema';
+import { VideoHero, Kicker, GlowButton, GhostButton, Ticker, Reveal, Light, isStatic, EASE } from '@/ui/cinema';
 import { Container } from '@/ui/kit';
 import { VIDEOS } from '@/data/media';
+import { Magnetic } from '@/ui/motion2';
+import { AccentWords } from '@/pages/book/AccentWords';
 import { SURFACES } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Full-viewport supermarket-aisle video hero, glass strip of the ad surfaces,
+   Full-viewport supermarket-aisle video hero (accent headline, magnetic CTA), glass strip of the ad surfaces,
    then a ticker of the advertiser promises.
 ──────────────────────────────────────────────────────────────────────────── */
 
@@ -20,16 +22,16 @@ export function Hero() {
         <motion.div {...fade(0.1)}>
           <Kicker light>Zyphix Ads · Jammu</Kicker>
         </motion.div>
-        <Words
-          text="Put your brand in front of Jammu, at the moment they buy."
+        <AccentWords
+          parts={['Put your brand in front of Jammu, at the', { accent: 'moment', green: true }, 'they buy.']}
           delay={0.25}
-          className="max-w-[1040px] text-[40px] font-semibold leading-[1.03] tracking-[-0.035em] text-white sm:text-[64px] md:text-[80px]"
+          className="max-w-[20ch] text-balance text-[40px] font-semibold leading-[1] tracking-[-0.045em] text-white sm:text-[64px] md:text-[84px]"
         />
         <motion.p {...fade(0.85)} className="mt-6 max-w-[600px] text-[17px] leading-[1.6] text-white/75 sm:text-[19px]">
           Placements inside a shopping app, not a feed. Your brand shows on the home screen, in search and in categories, only in the delivery areas you choose, and always labelled Sponsored.
         </motion.p>
         <motion.div {...fade(1)} className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <GlowButton href="#contact">Talk to partnerships <ArrowRight size={17} /></GlowButton>
+          <Magnetic className="w-full sm:w-auto"><GlowButton href="#contact" className="w-full sm:w-auto">Talk to partnerships <ArrowRight size={17} /></GlowButton></Magnetic>
           <GhostButton href="#formats">See the formats</GhostButton>
         </motion.div>
 

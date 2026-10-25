@@ -7,7 +7,7 @@ import { usePromo, maxWalletUsable } from '@/context/PromoContext';
 import { findCoupon, evaluateCoupon, COUPONS } from '@/data/coupons';
 import { Button, FONT, G } from '@/ui/kit';
 
-const card = 'rounded-xl border border-gray-200 bg-white';
+const card = 'rounded-2xl border border-gray-200 bg-white';
 
 export function Cart() {
   const { items, add, remove, setQty, subtotal, totalItems } = useCart();
@@ -55,7 +55,7 @@ export function Cart() {
     return (
       <div className="mx-auto w-full max-w-[1180px] pt-4 text-gray-900" style={{ fontFamily: FONT }}>
         <div className={`${card} px-6 py-14 text-center`}>
-          <h1 className="text-[17px] font-semibold tracking-[-0.01em]">Your cart is empty</h1>
+          <h1 className="text-[18px] font-semibold tracking-[-0.02em]">Your cart is empty</h1>
           <p className="mt-1 text-[13px] text-gray-500">Groceries delivered in 30 minutes.</p>
           <div className="mt-4"><Button href="/now" size="sm">Start shopping</Button></div>
         </div>
@@ -71,11 +71,11 @@ export function Cart() {
   return (
     <div className="mx-auto w-full max-w-[1180px] pb-24 pt-4 text-gray-900" style={{ fontFamily: FONT }}>
       <div className="flex items-baseline gap-3">
-        <h1 className="text-[20px] font-semibold tracking-[-0.01em]">Cart</h1>
+        <h1 className="text-[24px] font-semibold tracking-[-0.03em] md:text-[28px]">Cart</h1>
         <p className="text-[13px] text-gray-500">{totalItems} item{totalItems > 1 ? 's' : ''} · Delivery in 30 min</p>
       </div>
 
-      <div className="mt-4 grid items-start gap-4 md:grid-cols-[1fr_320px]">
+      <div className="mt-5 grid items-start gap-4 md:grid-cols-[1fr_340px] md:gap-6">
         <div className="space-y-3">
           <div className={`${card} divide-y divide-gray-100`}>
             <AnimatePresence initial={false}>
@@ -178,8 +178,8 @@ export function Cart() {
         </div>
 
         {/* Bill */}
-        <div className={`${card} p-4 md:sticky md:top-[80px]`}>
-          <p className="text-[14px] font-semibold">Bill details</p>
+        <div className={`${card} p-4 md:sticky md:top-[80px] md:p-5`}>
+          <p className="text-[15px] font-semibold tracking-[-0.01em]">Bill details</p>
           <div className="mt-2">
             <Row label="Item total" value={`₹${subtotal}`} />
             {itemDiscount > 0 && <Row label={`Coupon (${activeCoupon?.code})`} value={`− ₹${itemDiscount}`} green />}
@@ -191,7 +191,7 @@ export function Cart() {
           )}
           <div className="my-3 border-t border-gray-200" />
           <div className="flex items-center justify-between text-[15px] font-semibold">
-            <span>To pay</span><span>₹{grand}</span>
+            <span>To pay</span><span className="text-[18px] tabular-nums tracking-[-0.02em]">₹{grand}</span>
           </div>
           {totalSavings > 0 && <p className="mt-1 text-[12.5px] font-medium text-emerald-700">You save ₹{totalSavings} on this order</p>}
           <p className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-gray-500"><Clock size={12} /> Delivery in 30 min</p>

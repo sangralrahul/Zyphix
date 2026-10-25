@@ -9,7 +9,7 @@ import { ServiceProSetup } from '@/pages/ServiceProSetup';
 import { Shell } from './partner/Shell';
 import { Hero, Signals } from './partner/Hero';
 import { TrackBento, ListedAutomatically, LiveDirectory } from './partner/Tracks';
-import { WhatYouGet, TermsBand, Steps } from './partner/Terms';
+import { WhatYouGet, TermsBand, Steps, WhoPartners } from './partner/Terms';
 import { Faq, FinalCta } from './partner/Faq';
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -27,8 +27,9 @@ function PartnerHome() {
       <TrackBento />
       <WhatYouGet />
       <ListedAutomatically />
-      <LiveDirectory />
+      <WhoPartners />
       <TermsBand />
+      <LiveDirectory />
       <Steps />
       <Faq />
       <FinalCta />

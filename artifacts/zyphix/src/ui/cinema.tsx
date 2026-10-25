@@ -84,17 +84,19 @@ export function Words({ text, className = '', delay = 0, as: Tag = 'h1', style }
   return (
     <Tag className={className} style={style} aria-label={text}>
       {words.map((w, i) => (
-        <span key={i} className="inline-block overflow-hidden align-bottom">
-          <motion.span
-            className="inline-block"
-            initial={{ y: '110%', opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.7, ease: EASE, delay: delay + i * 0.05 }}
-          >
-            {w}
-          </motion.span>
-          {i < words.length - 1 ? ' ' : ''}
-        </span>
+        <React.Fragment key={i}>
+          <span className="inline-block overflow-hidden pb-[0.08em] align-bottom">
+            <motion.span
+              className="inline-block"
+              initial={{ y: '110%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.7, ease: EASE, delay: delay + i * 0.05 }}
+            >
+              {w}
+            </motion.span>
+          </span>
+          {i < words.length - 1 ? ' ' : ''}
+        </React.Fragment>
       ))}
     </Tag>
   );
@@ -272,10 +274,10 @@ export function GhostButton({ href, children, className = '', size = 'lg', onCli
 
 /* ── Section wrappers ────────────────────────────────────────────────────── */
 export function Dark({ children, className = '', id }: { children: React.ReactNode; className?: string; id?: string }) {
-  return <section id={id} className={`relative overflow-hidden bg-[#05080E] text-white ${className}`}>{children}</section>;
+  return <section id={id} className={`relative overflow-clip bg-[#05080E] text-white ${className}`}>{children}</section>;
 }
 export function Light({ children, className = '', id, tone = 'white' }: { children: React.ReactNode; className?: string; id?: string; tone?: 'white' | 'soft' }) {
-  return <section id={id} className={`relative overflow-hidden ${tone === 'soft' ? 'bg-[#F6F7F9]' : 'bg-white'} text-gray-900 ${className}`}>{children}</section>;
+  return <section id={id} className={`relative overflow-clip ${tone === 'soft' ? 'bg-[#F6F7F9]' : 'bg-white'} text-gray-900 ${className}`}>{children}</section>;
 }
 /** Green radial glow for dark sections. */
 export function Glow({ className = '', x = '50%', y = '0%', size = 900, alpha = 0.35 }: { className?: string; x?: string; y?: string; size?: number; alpha?: number }) {
@@ -288,10 +290,10 @@ export function Grain({ opacity = 0.06 }: { opacity?: number }) {
 
 /* ── Big type ────────────────────────────────────────────────────────────── */
 export function Headline({ children, className = '', as: Tag = 'h2', size = 'lg', light = false }: { children: React.ReactNode; className?: string; as?: 'h1' | 'h2' | 'h3'; size?: 'xl' | 'lg' | 'md'; light?: boolean }) {
-  const s = size === 'xl' ? 'text-[44px] leading-[1.02] sm:text-[64px] md:text-[84px] tracking-[-0.035em]'
-    : size === 'lg' ? 'text-[34px] leading-[1.05] sm:text-[46px] md:text-[58px] tracking-[-0.03em]'
-    : 'text-[26px] leading-[1.1] sm:text-[32px] md:text-[40px] tracking-[-0.025em]';
-  return <Tag className={`font-semibold ${s} ${light ? 'text-white' : 'text-gray-900'} ${className}`}>{children}</Tag>;
+  const s = size === 'xl' ? 'text-[44px] leading-[1.02] sm:text-[64px] md:text-[84px] tracking-[-0.045em]'
+    : size === 'lg' ? 'text-[34px] leading-[1.05] sm:text-[46px] md:text-[58px] tracking-[-0.04em]'
+    : 'text-[26px] leading-[1.1] sm:text-[32px] md:text-[40px] tracking-[-0.03em]';
+  return <Tag className={`text-balance font-semibold ${s} ${light ? 'text-white' : 'text-gray-900'} ${className}`}>{children}</Tag>;
 }
 export function Kicker({ children, light = false, className = '' }: { children: React.ReactNode; light?: boolean; className?: string }) {
   return <div className={`mb-4 inline-flex items-center gap-2 text-[12.5px] font-semibold uppercase tracking-[0.14em] ${light ? 'text-emerald-300' : 'text-emerald-700'} ${className}`}><span className="h-1.5 w-1.5 rounded-full" style={{ background: G }} />{children}</div>;

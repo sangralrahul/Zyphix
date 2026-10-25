@@ -1,176 +1,95 @@
 import React from 'react';
-import { Timer, BadgeIndianRupee, ShoppingBasket, ChefHat, Bike, CreditCard, BadgeCheck, CalendarCheck, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { type Category } from '@/lib/catalog';
-import { Dark, Light, Glow, Grain, Kicker, Headline, Sub, Reveal, Stagger, VideoCard, ParallaxImage, PhotoTile, Counter, Tilt } from '@/ui/cinema';
-import { Container, ArrowLink } from '@/ui/kit';
-import { VIDEOS, PHOTOS, landscape } from '@/data/media';
-import { NOW_SITE, EATS_SITE, BOOK_SITE, PRODUCT_COUNT_N, CATEGORY_NAMES, Proof, TileLabel, NUM } from './shared';
+import { Kicker, PhotoTile } from '@/ui/cinema';
+import { Accent, ScrollStory, HScrollGallery, type Chapter } from '@/ui/motion2';
+import { ArrowLink } from '@/ui/kit';
+import { VIDEOS } from '@/data/media';
+import { NOW_SITE, EATS_SITE, BOOK_SITE, PRODUCT_COUNT, CATEGORY_NAMES, Display, categoryPhoto } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Three product chapters: Now (dark, text-left) → Eats (white, reversed) →
-   Book (dark, bento). The `products` anchor sits on the first chapter.
+   Products: a pinned three-chapter story (Now → Eats → Book, id="products")
+   and a pinned horizontal gallery of the real Zyphix Now aisles.
 ──────────────────────────────────────────────────────────────────────────── */
 
-/* ── NOW ─────────────────────────────────────────────────────────────────── */
-export function NowChapter({ categories }: { categories: Category[] }) {
-  const names = categories.length ? categories.map(c => c.name) : CATEGORY_NAMES;
-  const shown = names.slice(0, 10);
-  const rest = names.length - shown.length;
+function Pills({ items }: { items: string[] }) {
   return (
-    <Dark id="products" className="scroll-mt-16 py-24 md:py-36">
-      <Glow x="8%" y="15%" size={900} alpha={0.2} />
-      <Grain />
-      <Container>
-        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-5">
-            <Reveal><Kicker light>Zyphix Now · Groceries</Kicker></Reveal>
-            <Reveal delay={0.05}><Headline light size="lg">The kirana, at your door in 30 minutes.</Headline></Reveal>
-            <Reveal delay={0.1}><Sub light className="mt-6 max-w-[480px]">Real shelves from stores near you, at shelf prices. Milk at 7am, atta on Sunday, the chips you forgot — on the way before the kettle boils.</Sub></Reveal>
-            <Stagger className="mt-8 flex flex-wrap gap-2" step={0.03} y={8}>
-              {shown.map(n => <span key={n} className="inline-flex h-9 items-center rounded-full border border-white/12 bg-white/[.05] px-3.5 text-[13px] font-medium text-white/80">{n}</span>)}
-              {rest > 0 && <span className="inline-flex h-9 items-center rounded-full border border-dashed border-white/20 px-3.5 text-[13px] font-medium text-white/50">+{rest} more</span>}
-            </Stagger>
-            <ul className="mt-9 space-y-4">
-              <Reveal as="li" delay={0.1} className="contents"><Proof light icon={<Timer size={18} />}>30-minute delivery promise, tracked live</Proof></Reveal>
-              <Reveal as="li" delay={0.15} className="contents"><Proof light icon={<BadgeIndianRupee size={18} />}>₹0 delivery above ₹199, no surge</Proof></Reveal>
-              <Reveal as="li" delay={0.2} className="contents"><Proof light icon={<ShoppingBasket size={18} />}><span style={NUM}><Counter to={PRODUCT_COUNT_N} format={n => `${Math.round(n).toLocaleString('en-IN')}+`} /></span> products from local stores</Proof></Reveal>
-            </ul>
-            <Reveal delay={0.25} className="mt-9"><ArrowLink href={NOW_SITE} dark>Shop on now.zyphix.in</ArrowLink></Reveal>
-          </div>
-
-          <div className="lg:col-span-7">
-            <Reveal y={32}>
-              <Tilt max={3}>
-                <VideoCard clip={VIDEOS.groceryShelf} ratio="16/10" rounded="rounded-3xl" className="ring-1 ring-white/10">
-                  <TileLabel title="Every aisle, every day" meta="Live stock from partner stores" />
-                </VideoCard>
-              </Tilt>
-            </Reveal>
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              <Reveal delay={0.1} y={32}>
-                <VideoCard clip={VIDEOS.grocery} ratio="4/5" rounded="rounded-3xl" className="ring-1 ring-white/10">
-                  <TileLabel title="Handed over, not dropped" />
-                </VideoCard>
-              </Reveal>
-              <Reveal delay={0.18} y={32}>
-                <ParallaxImage photo={PHOTOS.produce[0]} ratio="4/5" className="ring-1 ring-white/10">
-                  <TileLabel title="Fresh from the mandi" />
-                </ParallaxImage>
-              </Reveal>
-            </div>
-          </div>
-        </div>
-      </Container>
-    </Dark>
+    <ul className="flex flex-wrap gap-2">
+      {items.map(t => <li key={t} className="inline-flex h-9 items-center rounded-full border border-white/12 bg-white/[.06] px-3.5 text-[13px] font-medium text-white/80 backdrop-blur">{t}</li>)}
+    </ul>
   );
 }
 
-/* ── EATS ────────────────────────────────────────────────────────────────── */
-export function EatsChapter() {
-  return (
-    <Light className="py-24 md:py-36">
-      <Container>
-        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="order-2 lg:order-1 lg:col-span-7">
-            <Reveal y={32}>
-              <Tilt max={3}>
-                <VideoCard clip={VIDEOS.food} ratio="16/10" rounded="rounded-3xl" className="shadow-[0_30px_80px_rgba(11,15,25,.14)]">
-                  <TileLabel title="Cooked when you order" meta="Local kitchens, local prices" />
-                </VideoCard>
-              </Tilt>
-            </Reveal>
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              <Reveal delay={0.1} y={32}>
-                <PhotoTile photo={landscape('indianFood')} ratio="4/5" rounded="rounded-3xl">
-                  <TileLabel title="Thali, biryani, momos" />
-                </PhotoTile>
-              </Reveal>
-              <Reveal delay={0.18} y={32}>
-                <VideoCard clip={VIDEOS.foodDelivery} ratio="4/5" rounded="rounded-3xl">
-                  <TileLabel title="Still hot at the door" />
-                </VideoCard>
-              </Reveal>
-            </div>
-          </div>
+const CHAPTERS: Chapter[] = [
+  {
+    kicker: '01 · Zyphix Now · Groceries',
+    title: <>The kirana, at your door in <Accent green>30 minutes</Accent>.</>,
+    body: `Real shelves from stores near you, at shelf prices. ${PRODUCT_COUNT} products, packed the moment you order and tracked to your gate.`,
+    clip: VIDEOS.packing,
+    extra: <><Pills items={['30-min promise', '₹0 delivery above ₹199', 'Cash on delivery']} /><div className="mt-6"><ArrowLink href={NOW_SITE} dark>Shop on now.zyphix.in</ArrowLink></div></>,
+  },
+  {
+    kicker: '02 · Zyphix Eats · Food',
+    title: <>Dinner from the dhaba you <Accent green>already love</Accent>.</>,
+    body: 'Restaurants, cafés and home kitchens around you list their own menus at their own prices. No markup, no surge, still hot at the door.',
+    clip: VIDEOS.tandoor,
+    extra: <><Pills items={['Menu prices', 'Riders from your area', 'UPI or cash']} /><div className="mt-6"><ArrowLink href={EATS_SITE} dark>Order on eats.zyphix.in</ArrowLink></div></>,
+  },
+  {
+    kicker: '03 · Zyphix Book · Home services',
+    title: <>Verified pros, booked <Accent green>in a minute</Accent>.</>,
+    body: 'Plumbers, electricians, AC technicians, cleaners and salon artists who have shown us their ID and their work. Fixed quote first, pay when it is done.',
+    clip: VIDEOS.plumber,
+    extra: <><Pills items={['ID-verified', 'Pick a slot', '7-day work guarantee']} /><div className="mt-6"><ArrowLink href={BOOK_SITE} dark>Book on book.zyphix.in</ArrowLink></div></>,
+  },
+];
 
-          <div className="order-1 lg:order-2 lg:col-span-5">
-            <Reveal><Kicker>Zyphix Eats · Food</Kicker></Reveal>
-            <Reveal delay={0.05}><Headline size="lg">Dinner from the dhaba you already love.</Headline></Reveal>
-            <Reveal delay={0.1}><Sub className="mt-6 max-w-[480px]">Restaurants, cafés and home kitchens around you list their own menus at their own prices. No markup, no hidden packaging fee, no surge.</Sub></Reveal>
-            <ul className="mt-9 space-y-4">
-              <Reveal as="li" delay={0.1} className="contents"><Proof icon={<ChefHat size={18} />}>Menu prices as in the restaurant</Proof></Reveal>
-              <Reveal as="li" delay={0.15} className="contents"><Proof icon={<Bike size={18} />}>Riders from the same area, tracked live</Proof></Reveal>
-              <Reveal as="li" delay={0.2} className="contents"><Proof icon={<CreditCard size={18} />}>UPI, cards or cash on delivery</Proof></Reveal>
-            </ul>
-            <Reveal delay={0.25} className="mt-9"><ArrowLink href={EATS_SITE}>Order on eats.zyphix.in</ArrowLink></Reveal>
-            <Reveal delay={0.3} y={32} className="mt-10 hidden lg:block">
-              <ParallaxImage photo={landscape('restaurant', 1)} ratio="16/9" rounded="rounded-3xl" strength={8}>
-                <TileLabel title="Jammu's favourite tables" meta="Street stalls to family restaurants" />
-              </ParallaxImage>
-            </Reveal>
-          </div>
-        </div>
-      </Container>
-    </Light>
-  );
+export function ProductStory() {
+  return <ScrollStory id="products" chapters={CHAPTERS} />;
 }
 
-/* ── BOOK ────────────────────────────────────────────────────────────────── */
-export function BookChapter() {
+/* ── Aisles gallery (real categories) ───────────────────────────────────── */
+export function AislesGallery({ categories }: { categories: Category[] }) {
+  const cats = categories.length ? categories : CATEGORY_NAMES.map(name => ({ name, icon: '', color: '', image: '' }));
+  const shown = cats.slice(0, 10);
+  const items = shown.map((c, i) => (
+    <a key={c.name} href={NOW_SITE} className="group block" aria-label={`Shop ${c.name} on Zyphix Now`}>
+      <PhotoTile photo={categoryPhoto(c, i)} ratio="4/5" rounded="rounded-3xl" className="!bg-[#0B1220] ring-1 ring-white/10">
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#05080E]/90 via-[#05080E]/10 to-transparent" />
+        <span className="absolute left-5 top-5 rounded-full border border-white/20 bg-black/30 px-3 py-1 text-[12px] font-medium tabular-nums text-white/80 backdrop-blur-md">{String(i + 1).padStart(2, '0')}</span>
+        <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-3">
+          <div>
+            <p className="text-[24px] font-semibold leading-[1.1] tracking-[-0.03em] text-white sm:text-[28px]">{c.name}</p>
+            <p className="mt-1 text-[13px] text-white/60">On Zyphix Now</p>
+          </div>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-gray-900 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-105"><ArrowUpRight size={18} /></span>
+        </div>
+      </PhotoTile>
+    </a>
+  ));
+  items.push(
+    <a key="all" href={NOW_SITE} className="group flex aspect-[4/5] flex-col justify-between rounded-3xl p-7 text-white ring-1 ring-white/10" style={{ background: 'linear-gradient(160deg, #0DA366 0%, #077A46 100%)' }}>
+      <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-white/70">All aisles</p>
+      <div>
+        <p className="text-[34px] font-semibold leading-[1.02] tracking-[-0.04em] sm:text-[40px]">{cats.length} categories, {PRODUCT_COUNT} products.</p>
+        <span className="mt-6 inline-flex items-center gap-1.5 text-[15px] font-semibold">Open now.zyphix.in <ArrowUpRight size={17} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></span>
+      </div>
+    </a>,
+  );
   return (
-    <Dark className="py-24 md:py-36">
-      <Glow x="85%" y="10%" size={1000} alpha={0.22} />
-      <Grain />
-      <Container>
-        <div className="grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-16">
-          <div className="lg:col-span-7">
-            <Reveal><Kicker light>Zyphix Book · Home services</Kicker></Reveal>
-            <Reveal delay={0.05}><Headline light size="lg">Verified professionals, booked in a minute.</Headline></Reveal>
-            <Reveal delay={0.1}><Sub light className="mt-6 max-w-[560px]">Cleaners, electricians, plumbers, AC technicians and salon artists who have shown us their ID and their work. Pick a slot, get a fixed quote, pay when it is done.</Sub></Reveal>
+    <HScrollGallery
+      id="aisles"
+      items={items}
+      cardClass="w-[74vw] sm:w-[340px] lg:w-[380px]"
+      header={
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div>
+            <Kicker light>Zyphix Now aisles</Kicker>
+            <Display light>Every aisle of the <Accent green>kirana</Accent>.</Display>
           </div>
-          <div className="lg:col-span-5">
-            <ul className="space-y-4">
-              <Reveal as="li" delay={0.1} className="contents"><Proof light icon={<BadgeCheck size={18} />}>ID-verified, background-checked pros</Proof></Reveal>
-              <Reveal as="li" delay={0.15} className="contents"><Proof light icon={<CalendarCheck size={18} />}>Pick a slot, same-day where available</Proof></Reveal>
-              <Reveal as="li" delay={0.2} className="contents"><Proof light icon={<ShieldCheck size={18} />}>Fixed quote before anyone arrives</Proof></Reveal>
-            </ul>
-            <Reveal delay={0.25} className="mt-8"><ArrowLink href={BOOK_SITE} dark>Book on book.zyphix.in</ArrowLink></Reveal>
-          </div>
+          <p className="max-w-[40ch] text-[16px] leading-[1.6] text-white/60 md:text-right">The live catalogue, straight from partner shelves. Scroll the aisles, then shop them in one basket.</p>
         </div>
-
-        <div className="mt-14 grid auto-rows-[220px] grid-cols-2 gap-4 md:auto-rows-[280px] md:grid-cols-12">
-          <Reveal y={32} className="col-span-2 row-span-2 md:col-span-7">
-            <VideoCard clip={VIDEOS.cleaning} ratio="auto" rounded="rounded-3xl" className="h-full ring-1 ring-white/10">
-              <TileLabel title="Home cleaning" meta="Deep clean, kitchen, bathroom, sofa" />
-            </VideoCard>
-          </Reveal>
-          <Reveal y={32} delay={0.08} className="col-span-1 md:col-span-5">
-            <ParallaxImage photo={PHOTOS.plumbing[0]} ratio="auto" className="h-full ring-1 ring-white/10" strength={8}>
-              <TileLabel title="Plumbing" />
-            </ParallaxImage>
-          </Reveal>
-          <Reveal y={32} delay={0.14} className="col-span-1 md:col-span-5">
-            <PhotoTile photo={PHOTOS.appliance[0]} ratio="auto" rounded="rounded-3xl" className="h-full ring-1 ring-white/10">
-              <TileLabel title="AC & appliance repair" />
-            </PhotoTile>
-          </Reveal>
-          <Reveal y={32} delay={0.2} className="col-span-1 md:col-span-4">
-            <VideoCard clip={VIDEOS.electrician} ratio="auto" rounded="rounded-3xl" className="h-full ring-1 ring-white/10">
-              <TileLabel title="Electrician" />
-            </VideoCard>
-          </Reveal>
-          <Reveal y={32} delay={0.26} className="col-span-1 md:col-span-4">
-            <VideoCard clip={VIDEOS.salon} ratio="auto" rounded="rounded-3xl" className="h-full ring-1 ring-white/10">
-              <TileLabel title="Salon at home" />
-            </VideoCard>
-          </Reveal>
-          <Reveal y={32} delay={0.32} className="col-span-2 md:col-span-4">
-            <PhotoTile photo={PHOTOS.cleaning[1]} ratio="auto" rounded="rounded-3xl" className="h-full ring-1 ring-white/10">
-              <TileLabel title="Kitchen & bathroom deep clean" />
-            </PhotoTile>
-          </Reveal>
-        </div>
-      </Container>
-    </Dark>
+      }
+    />
   );
 }

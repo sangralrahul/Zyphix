@@ -1,27 +1,75 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, ArrowUpRight, BadgeCheck, CalendarClock, MapPin, Search, ShieldCheck, Wrench, X } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BadgeCheck, Clock, IndianRupee, MapPin, Search, ShieldCheck, X } from 'lucide-react';
 import { services } from '@/data/mockData';
 import { usePartners, tagList, type PartnerListing } from '@/lib/partners';
-import { PHOTOS, VIDEOS } from '@/data/media';
+import { PHOTOS, VIDEOS, type Photo } from '@/data/media';
 import { Chip, Accordion, Button, FONT } from '@/ui/kit';
-import { VideoHero, Words, Reveal, Stagger, Kicker, Headline, Sub, ParallaxImage, Counter, Dark, Glow, Grain, GlowButton, GhostButton, BgVideo, G } from '@/ui/cinema';
+import { VideoHero, Reveal, Stagger, Kicker, Headline, Sub, Counter, Dark, Glow, Grain, GlowButton, GhostButton, G } from '@/ui/cinema';
+import { ScrollStory, ZoomVideo, Spotlight, Magnetic, type Chapter } from '@/ui/motion2';
 import { BookingPanel, type BookingState } from './book/BookingPanel';
 import { ServiceTiles } from './book/ServiceTiles';
+import { AccentWords } from './book/AccentWords';
+import { LiveJob } from './book/LiveJob';
 import { DAYS, FAQ, PANEL_ID, PANEL_ID_MOBILE, PARTNER_URL, PROMISES, metaFor, proInitials, serviceForPro, type Day, type Service } from './book/shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Zyphix Book — home services from verified professionals (book.zyphix.in).
-   Cinematic direction: compact video hero with a service picker, photo bento
-   of services (hover video), split "how a booking works", sticky booking
-   panel, live professionals, dark policy band, FAQ, final CTA for pros.
+   Premium pass: video hero with an accent headline, a live "pro on the way"
+   card, service bento (hover video on every tile that has a clip), the sticky
+   booking panel, a pinned ScrollStory of how a booking works, a craft photo
+   bento, Spotlight safety cards, FAQ and a ZoomVideo CTA for professionals.
    Renders inside LightLayout (Navbar + BottomNav, 1280 container).
+   Clips used once each: cleaning (hero), plumber / electrician / acRepair
+   (tiles), phoneOrder / doorHandoff / salon / homeSpa (story), haircut (CTA).
 ──────────────────────────────────────────────────────────────────────────── */
 
-const STEPS = [
-  { icon: Wrench, title: 'Pick a service', body: 'Plumbing, electrical, cleaning, AC and more. Each one comes with a clear scope so you know what is covered.' },
-  { icon: CalendarClock, title: 'Choose a slot', body: 'Today or tomorrow, morning to evening. The visit charge is shown before you confirm.' },
-  { icon: BadgeCheck, title: 'A verified pro arrives', body: 'ID and police-verified, tracked to your door. Reschedule free if plans change; cancel free up to an hour before.' },
+const H2 = 'text-balance tracking-[-0.04em]';
+
+/* ── How a booking works (pinned chapters) ─────────────────────────────── */
+const tag = (t: string) => <span key={t} className="inline-flex h-8 items-center rounded-full border border-white/15 bg-white/[.06] px-3 text-[12.5px] font-medium text-white/80">{t}</span>;
+const CHAPTERS: Chapter[] = [
+  { kicker: '01 · Pick', title: 'Pick a service.', clip: VIDEOS.phoneOrder,
+    body: 'Plumbing, electrical, cleaning, AC and more. Each one comes with a clear scope, so you know what is covered before anyone arrives.',
+    extra: <div className="flex flex-wrap gap-2">{['Clear scope', 'Search or browse'].map(tag)}</div> },
+  { kicker: '02 · Schedule', title: 'Choose a slot. They show up in it.', clip: VIDEOS.doorHandoff,
+    body: 'Today or tomorrow, morning to evening. The visit charge is shown before you confirm, and if your pro runs more than 30 minutes late, ₹100 comes off.',
+    extra: <div className="flex flex-wrap gap-2">{['Price before you confirm', 'On-time or ₹100 off'].map(tag)}</div> },
+  { kicker: '03 · At your door', title: 'A verified pro does the work.', clip: VIDEOS.salon,
+    body: 'ID and police-verified before their first booking. Any extra parts or time are quoted before the job starts, never after.',
+    extra: <div className="flex flex-wrap gap-2">{['ID & police-verified', 'Quote before extra work'].map(tag)}</div> },
+  { kicker: '04 · After', title: 'Done, and guaranteed.', clip: VIDEOS.homeSpa,
+    body: 'If a completed job has an issue within 7 days, we send a professional back to fix it. Reschedule free; cancel free up to an hour before.',
+    extra: <div className="flex flex-wrap gap-2">{['7-day work guarantee', 'Free reschedule'].map(tag)}</div> },
 ];
+
+/* ── Safety & policy cards ─────────────────────────────────────────────── */
+const POLICIES = [
+  { icon: ShieldCheck, n: 100, f: (n: number) => `${Math.round(n)}%`, t: 'of pros ID & police-verified', s: 'Checks finish before their first booking, not after.' },
+  { icon: Clock, n: 100, f: (n: number) => `₹${Math.round(n)}`, t: 'off if we are late', s: 'More than 30 minutes past your slot, it comes off the visit charge.' },
+  { icon: BadgeCheck, n: 7, f: (n: number) => `${Math.round(n)}-day`, t: 'work guarantee', s: 'An issue within 7 days? A pro comes back and fixes it, free.' },
+  { icon: IndianRupee, n: 0, f: (n: number) => `₹${Math.round(n)}`, t: 'to reschedule or cancel', s: 'Up to 1 hour before your slot. No questions.' },
+];
+
+/* ── Craft bento (photos) ──────────────────────────────────────────────── */
+function CraftTile({ photo, title, sub, className = '', onClick }: { photo: Photo; title: string; sub: string; className?: string; onClick?: () => void }) {
+  const inner = (
+    <>
+      <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.06]" />
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#05080E]/85 via-[#05080E]/10 to-transparent" />
+      <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3 text-left text-white md:inset-x-5 md:bottom-5">
+        <div className="min-w-0">
+          <p className="text-[18px] font-semibold tracking-[-0.03em] md:text-[24px]">{title}</p>
+          <p className="mt-0.5 text-[13px] text-white/70">{sub}</p>
+        </div>
+        {onClick && <span className="hidden h-10 w-10 sm:flex shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md transition-colors group-hover:bg-white group-hover:text-gray-900"><ArrowUpRight size={16} /></span>}
+      </div>
+    </>
+  );
+  const cls = `group relative isolate block overflow-hidden rounded-3xl bg-gray-900 ${className}`;
+  return onClick
+    ? <button type="button" onClick={onClick} className={`${cls} w-full outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2`}>{inner}</button>
+    : <div className={cls}>{inner}</div>;
+}
 
 /* ── Hero service picker ───────────────────────────────────────────────── */
 function ServicePicker({ onPick }: { onPick: (s: Service) => void }) {
@@ -48,9 +96,11 @@ function ServicePicker({ onPick }: { onPick: (s: Service) => void }) {
           placeholder="What do you need done? Try “AC service”" aria-label="Search services"
           className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-gray-400 md:text-[16px]" />
         {q && <button type="button" onClick={() => setQ('')} aria-label="Clear" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700"><X size={15} /></button>}
-        <button type="submit" className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl px-4 text-[13.5px] font-semibold text-white md:h-11 md:px-5" style={{ background: `linear-gradient(180deg, #19C27C 0%, ${G} 100%)` }}>
-          Book <ArrowRight size={14} />
-        </button>
+        <Magnetic strength={0.25} className="shrink-0">
+          <button type="submit" className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl px-4 text-[13.5px] font-semibold text-white shadow-[0_8px_24px_-6px_rgba(13,163,102,.6)] md:h-11 md:px-5" style={{ background: `linear-gradient(180deg, #19C27C 0%, ${G} 100%)` }}>
+            Book <ArrowRight size={14} />
+          </button>
+        </Magnetic>
       </form>
       {open && (
         <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-gray-200 bg-white text-gray-900 shadow-[0_30px_80px_-20px_rgba(0,0,0,.5)]">
@@ -152,6 +202,7 @@ export function ZyphixBook() {
     setSelectedSlot(null);
     scrollToPanel();
   };
+  const pickById = (id: string) => { const s = services.find(x => x.id === id); if (s) pickFromHero(s); };
 
   const booking: BookingState = { activeService, day, setDay, slot: selectedSlot, setSlot: setSelectedSlot, address, setAddress, booked, onBook: handleBook };
 
@@ -159,37 +210,46 @@ export function ZyphixBook() {
     <div className="w-full text-gray-900" style={{ fontFamily: FONT }}>
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <div className="-mx-4 md:mx-0 md:mt-4">
-        <VideoHero clip={VIDEOS.cleaning} height="min-h-[560px] md:min-h-[62svh]" dim={0.45} className="md:rounded-3xl">
-          <div className="px-4 pb-7 pt-16 md:px-10 md:pb-10 md:pt-20 lg:px-14">
-            <Kicker light>Zyphix Book · Jammu</Kicker>
-            <Words as="h1" text="Home services, done by verified pros." className="max-w-[760px] text-[36px] font-semibold leading-[1.02] tracking-[-0.035em] text-white sm:text-[48px] md:text-[64px]" />
-            <p className="mt-4 max-w-[540px] text-[15.5px] leading-[1.55] text-white/75 md:text-[18px]">
-              Plumbers, electricians, cleaners and more from your own neighbourhood. ID and police-verified, price shown before you confirm.
-            </p>
-            <ServicePicker onPick={pickFromHero} />
-            <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {PROMISES.slice(0, 4).map(t => (
-                <span key={t} className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3.5 text-[13px] font-medium text-white/90 backdrop-blur-md">
-                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: G }} />{t}
-                </span>
-              ))}
+        <VideoHero clip={VIDEOS.cleaning} height="min-h-[600px] md:min-h-[72svh]" dim={0.45} className="md:rounded-3xl">
+          <div className="relative px-4 pb-7 pt-20 md:px-10 md:pb-12 md:pt-24 lg:px-14">
+            <div className="lg:max-w-[640px] xl:max-w-[700px]">
+              <Kicker light>Zyphix Book · Jammu</Kicker>
+              <AccentWords parts={['Home services, done by', { accent: 'verified', green: true }, 'pros.']}
+                className="max-w-[16ch] text-balance text-[40px] font-semibold leading-[1] tracking-[-0.045em] text-white sm:text-[54px] md:text-[72px]" />
+              <p className="mt-5 max-w-[52ch] text-[15.5px] leading-[1.55] text-white/75 md:text-[18px]">
+                Plumbers, electricians, cleaners and more from your own neighbourhood. Price shown before you confirm.
+              </p>
+              <ServicePicker onPick={pickFromHero} />
+              <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] md:flex-wrap md:overflow-visible [&::-webkit-scrollbar]:hidden">
+                {PROMISES.slice(0, 4).map(t => (
+                  <span key={t} className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3.5 text-[13px] font-medium text-white/90 backdrop-blur-md">
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: G }} />{t}
+                  </span>
+                ))}
+              </div>
+            </div>
+            {/* live "pro on the way" card, desktop only */}
+            <div className="pointer-events-none absolute bottom-12 right-10 hidden lg:block xl:right-14">
+              <Reveal delay={0.6} y={24} className="pointer-events-auto">
+                <LiveJob />
+              </Reveal>
             </div>
           </div>
         </VideoHero>
       </div>
 
-      {/* ── Services + how it works + pros, with the sticky booking panel ── */}
-      <div className="mt-10 grid grid-cols-1 gap-8 md:mt-14 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-10">
+      {/* ── Services + pros, with the sticky booking panel ───────────────── */}
+      <div className="mt-12 grid grid-cols-1 gap-8 md:mt-20 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-10">
         <div className="min-w-0">
           <section id="services" className="scroll-mt-24">
             <Reveal className="flex items-end justify-between gap-4">
               <div>
                 <Kicker>Services</Kicker>
-                <Headline size="md" as="h2">What do you need done?</Headline>
+                <Headline size="md" as="h2" className={H2}>What do you need done?</Headline>
               </div>
-              <span className="hidden shrink-0 pb-2 text-[13px] text-gray-500 sm:block">{services.length} services · Today &amp; tomorrow</span>
+              <span className="hidden shrink-0 pb-2 text-[13px] text-gray-500 sm:block">{services.length} services · Hover a tile to preview</span>
             </Reveal>
-            <div className="mt-6">
+            <div className="mt-8">
               <ServiceTiles selected={selectedService} onSelect={selectService} />
             </div>
           </section>
@@ -199,54 +259,18 @@ export function ZyphixBook() {
             <BookingPanel id={PANEL_ID_MOBILE} state={booking} />
           </div>
 
-          {/* ── How a booking works (split: parallax photo + steps) ──────── */}
-          <section id="how" className="mt-20 scroll-mt-24 md:mt-28">
-            <div className="grid gap-8 md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] md:items-center md:gap-12">
-              <Reveal x={-16} y={0}>
-                <ParallaxImage photo={PHOTOS.electrician[1]} ratio="4/5" strength={10} className="shadow-[0_30px_80px_-30px_rgba(11,15,25,.35)]">
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#05080E]/70 via-transparent to-transparent" />
-                  <div className="absolute inset-x-5 bottom-5 flex items-center gap-3 text-white">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur"><ShieldCheck size={18} /></span>
-                    <div>
-                      <p className="text-[14.5px] font-semibold">Every pro is ID &amp; police-verified</p>
-                      <p className="text-[12.5px] text-white/70">Before their first booking, not after</p>
-                    </div>
-                  </div>
-                </ParallaxImage>
-              </Reveal>
-              <div>
-                <Reveal><Kicker>How a booking works</Kicker></Reveal>
-                <Reveal delay={0.05}><Headline size="md" as="h2">Three steps. No phone tag.</Headline></Reveal>
-                <Reveal delay={0.1}><Sub className="mt-4">Pick, schedule, done. You see the price before you confirm and you can track your professional to the door.</Sub></Reveal>
-                <Stagger className="mt-8 space-y-0" step={0.12}>
-                  {STEPS.map(({ icon: Icon, title, body }, i) => (
-                    <div key={title} className="relative flex gap-4 pb-10 last:pb-0">
-                      {i < STEPS.length - 1 && <span aria-hidden className="absolute left-[22px] top-12 h-[calc(100%-56px)] w-px bg-gradient-to-b from-emerald-300 to-gray-200" />}
-                      <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-emerald-700 shadow-[0_8px_24px_-8px_rgba(13,163,102,.5)] ring-1 ring-emerald-100"><Icon size={19} /></span>
-                      <div>
-                        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-gray-400">Step {i + 1}</p>
-                        <p className="mt-0.5 text-[18px] font-semibold tracking-[-0.02em] text-gray-900">{title}</p>
-                        <p className="mt-1.5 text-[14.5px] leading-[1.6] text-gray-600">{body}</p>
-                      </div>
-                    </div>
-                  ))}
-                </Stagger>
-              </div>
-            </div>
-          </section>
-
           {/* ── Pros near you (live partner directory) ───────────────────── */}
           <section id="pros" className="mt-20 scroll-mt-24 md:mt-28">
             <Reveal className="flex items-end justify-between gap-4">
               <div>
                 <Kicker>Pros near you</Kicker>
-                <Headline size="md" as="h2">Verified professionals, listed live.</Headline>
+                <Headline size="md" as="h2" className={H2}>Verified professionals, listed live.</Headline>
               </div>
               {!prosLoading && pros.length > 0 && <span className="hidden shrink-0 pb-2 text-[13px] text-gray-500 sm:block">{pros.length} pro{pros.length > 1 ? 's' : ''}</span>}
             </Reveal>
 
             {prosLoading ? (
-              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {[0, 1].map(i => (
                   <div key={i} className="overflow-hidden rounded-3xl border border-gray-200 bg-white">
                     <div className="h-28 animate-pulse bg-gray-100" />
@@ -255,21 +279,21 @@ export function ZyphixBook() {
                 ))}
               </div>
             ) : pros.length > 0 ? (
-              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {pros.map((p, i) => (
                   <Reveal key={p.id} delay={Math.min(i, 6) * 0.06} y={14} amount={0.1}><ProCard p={p} onBook={() => requestBooking(p)} /></Reveal>
                 ))}
               </div>
             ) : (
-              <Reveal className="mt-6">
+              <Reveal className="mt-8">
                 <div className="relative overflow-hidden rounded-3xl bg-[#05080E] text-white">
                   <img src={PHOTOS.plumbing[0].src} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-40" />
                   <div className="absolute inset-0 bg-gradient-to-r from-[#05080E] via-[#05080E]/80 to-[#05080E]/30" />
                   <Grain />
-                  <div className="relative p-6 md:p-8">
+                  <div className="relative p-6 md:p-10">
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[12px] font-semibold text-white/85"><MapPin size={12} /> Opening area by area</span>
-                    <p className="mt-4 max-w-[460px] text-[22px] font-semibold leading-[1.15] tracking-[-0.02em] md:text-[26px]">No professionals are listed in your area yet.</p>
-                    <p className="mt-2 max-w-[440px] text-[14.5px] leading-[1.6] text-white/70">Pros appear here the moment they pass verification. If you work in home services, listing is free.</p>
+                    <p className="mt-4 max-w-[22ch] text-balance text-[24px] font-semibold leading-[1.1] tracking-[-0.035em] md:text-[30px]">No professionals are listed in your area yet.</p>
+                    <p className="mt-3 max-w-[48ch] text-[14.5px] leading-[1.6] text-white/70">Pros appear here the moment they pass verification. If you work in home services, listing is free.</p>
                     <div className="mt-6 flex flex-wrap gap-3">
                       <GlowButton href={`${PARTNER_URL}/services`} size="md">Join as a professional <ArrowUpRight size={15} /></GlowButton>
                       <GhostButton href="#services" size="md">Browse services</GhostButton>
@@ -287,51 +311,82 @@ export function ZyphixBook() {
         </aside>
       </div>
 
-      {/* ── Policy band ──────────────────────────────────────────────────── */}
-      <div className="-mx-4 mt-20 md:mx-0 md:mt-28">
-        <Dark className="py-20 md:rounded-3xl md:py-28">
+      {/* ── How a booking works (pinned story) ───────────────────────────── */}
+      <div className="-mx-4 mt-24 md:mx-0 md:mt-36 md:overflow-clip md:rounded-3xl">
+        <ScrollStory id="how" chapters={CHAPTERS}
+          intro={<Kicker light>How a booking works</Kicker>} />
+      </div>
+
+      {/* ── Craft bento ──────────────────────────────────────────────────── */}
+      <section className="mt-24 md:mt-36">
+        <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-7">
+            <Reveal><Kicker>Every room, every fix</Kicker></Reveal>
+            <Reveal delay={0.05}><Headline size="lg" as="h2" className={`max-w-[18ch] ${H2}`}>Skilled hands, booked like an order.</Headline></Reveal>
+          </div>
+          <Reveal delay={0.1} className="lg:col-span-5"><Sub className="max-w-[52ch]">Carpentry, painting and the jobs nobody wants to chase a number for. Tap one to start a booking.</Sub></Reveal>
+        </div>
+        <div className="mt-10 grid grid-cols-2 gap-3 md:mt-14 md:grid-cols-12 md:gap-4 md:[grid-auto-rows:240px]">
+          <Reveal y={24} className="col-span-2 md:col-span-7 md:row-span-2">
+            <CraftTile photo={PHOTOS.carpenter[0]} title="Carpenter" sub="Repairs, fittings, assembly" onClick={() => pickById('sv7')} className="aspect-[4/3] md:aspect-auto md:h-full" />
+          </Reveal>
+          <Reveal y={24} delay={0.08} className="col-span-2 md:col-span-5">
+            <CraftTile photo={PHOTOS.painting[0]} title="Painter" sub="Rooms, touch-ups, textures" onClick={() => pickById('sv4')} className="aspect-[16/10] md:aspect-auto md:h-full" />
+          </Reveal>
+          <Reveal y={24} delay={0.14} className="col-span-2 md:col-span-5">
+            <CraftTile photo={PHOTOS.pestControl[2]} title="Pest control" sub="Listed as verified pros join" className="aspect-[16/10] md:aspect-auto md:h-full" />
+          </Reveal>
+          <Reveal y={24} delay={0.06} className="md:col-span-4">
+            <CraftTile photo={PHOTOS.acRepair[4]} title="AC service" sub="Service, gas refill, install" onClick={() => pickById('sv5')} className="aspect-[4/5] sm:aspect-[16/10] md:aspect-auto md:h-full" />
+          </Reveal>
+          <Reveal y={24} delay={0.12} className="md:col-span-4">
+            <CraftTile photo={PHOTOS.carpenter[3]} title="Handyman" sub="Small fixes, mounting" onClick={() => pickById('sv10')} className="aspect-[4/5] sm:aspect-[16/10] md:aspect-auto md:h-full" />
+          </Reveal>
+          <Reveal y={24} delay={0.18} className="col-span-2 md:col-span-4">
+            <CraftTile photo={PHOTOS.painting[1]} title="Fresh coat" sub="Painter · one room or the whole home" onClick={() => pickById('sv4')} className="aspect-[16/10] md:aspect-auto md:h-full" />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── Safety & policies (Spotlight cards) ──────────────────────────── */}
+      <div className="-mx-4 mt-24 md:mx-0 md:mt-36">
+        <Dark className="py-24 md:rounded-3xl md:py-32">
           <Glow x="20%" y="10%" alpha={0.3} />
           <Glow x="85%" y="90%" size={700} alpha={0.2} />
           <Grain />
           <div className="relative px-5 md:px-12 lg:px-16">
-            <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
-              <div className="lg:col-span-5">
-                <Reveal><Kicker light>Our policies</Kicker></Reveal>
-                <Reveal delay={0.05}><Headline size="lg" as="h2" light>Every booking, the same standard.</Headline></Reveal>
-                <Reveal delay={0.1}><Sub light className="mt-5">These are rules on every job, not promises we make case by case. If we fall short, the remedy is already decided.</Sub></Reveal>
-                <Reveal delay={0.15}>
-                  <ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-3 text-[14px] text-white/80">
-                    {PROMISES.map(t => <li key={t} className="flex items-start gap-2"><BadgeCheck size={16} className="mt-0.5 shrink-0 text-emerald-300" />{t}</li>)}
-                  </ul>
-                </Reveal>
-              </div>
+            <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
               <div className="lg:col-span-7">
-                <Stagger className="grid grid-cols-2 gap-4 md:gap-5" step={0.1}>
-                  {[
-                    { n: 100, f: (n: number) => `${Math.round(n)}%`, t: 'of pros ID & police-verified', s: 'Before their first booking' },
-                    { n: 100, f: (n: number) => `₹${Math.round(n)}`, t: 'off if we are late', s: 'More than 30 minutes past your slot' },
-                    { n: 7, f: (n: number) => `${Math.round(n)}-day`, t: 'work guarantee', s: 'We come back and fix it, free' },
-                    { n: 0, f: (n: number) => `₹${Math.round(n)}`, t: 'to reschedule or cancel', s: 'Up to 1 hour before your slot' },
-                  ].map(c => (
-                    <div key={c.t} className="rounded-3xl border border-white/10 bg-white/[.04] p-5 md:p-7">
-                      <p className="text-[40px] font-semibold leading-none tracking-[-0.04em] text-white md:text-[56px]"><Counter to={c.n} format={c.f} /></p>
-                      <p className="mt-3 text-[15px] font-semibold tracking-[-0.01em] text-white">{c.t}</p>
-                      <p className="mt-1 text-[13px] text-white/60">{c.s}</p>
-                    </div>
-                  ))}
-                </Stagger>
+                <Reveal><Kicker light>Safety &amp; policies</Kicker></Reveal>
+                <Reveal delay={0.05}><Headline size="lg" as="h2" light className={`max-w-[16ch] ${H2}`}>Every booking, the same standard.</Headline></Reveal>
               </div>
+              <Reveal delay={0.1} className="lg:col-span-5"><Sub light className="max-w-[48ch]">Rules on every job, not promises made case by case. If we fall short, the remedy is already decided.</Sub></Reveal>
             </div>
+            <Stagger className="mt-12 grid grid-cols-2 gap-3 md:mt-16 md:gap-4 lg:grid-cols-4 lg:gap-5" step={0.1}>
+              {POLICIES.map(c => (
+                <Spotlight key={c.t} className="h-full">
+                  <div className="flex h-full flex-col p-4 sm:p-6 md:p-7">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/[.06] text-emerald-300 ring-1 ring-white/10"><c.icon size={19} /></span>
+                    <p className="mt-6 text-[34px] font-semibold leading-none tracking-[-0.05em] text-white sm:mt-10 sm:text-[44px] md:text-[52px]"><Counter to={c.n} format={c.f} /></p>
+                    <p className="mt-3 text-[14px] font-semibold tracking-[-0.01em] text-white sm:text-[15.5px]">{c.t}</p>
+                    <p className="mt-1.5 text-[12.5px] leading-[1.5] text-white/60 sm:text-[13.5px]">{c.s}</p>
+                  </div>
+                </Spotlight>
+              ))}
+            </Stagger>
+            <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-3 border-t border-white/10 pt-8 text-[13.5px] text-white/70">
+              {PROMISES.map(t => <li key={t} className="flex items-center gap-2"><BadgeCheck size={15} className="shrink-0 text-emerald-300" />{t}</li>)}
+            </ul>
           </div>
         </Dark>
       </div>
 
       {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-      <section id="faq" className="mt-20 scroll-mt-24 md:mt-28">
+      <section id="faq" className="mt-24 scroll-mt-24 md:mt-36">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <Reveal><Kicker>FAQ</Kicker></Reveal>
-            <Reveal delay={0.05}><Headline size="md" as="h2">Questions, answered.</Headline></Reveal>
+            <Reveal delay={0.05}><Headline size="md" as="h2" className={H2}>Questions, answered.</Headline></Reveal>
             <Reveal delay={0.1}><Sub className="mt-4">Anything else? Support is available Mon–Sat at <a href="mailto:support@zyphix.in" className="font-semibold text-emerald-700">support@zyphix.in</a>.</Sub></Reveal>
           </div>
           <Reveal delay={0.1} className="lg:col-span-8">
@@ -342,24 +397,21 @@ export function ZyphixBook() {
         </div>
       </section>
 
-      {/* ── Final CTA for professionals ──────────────────────────────────── */}
-      <div className="-mx-4 mt-20 md:mx-0 md:mt-28">
-        <section className="relative isolate flex min-h-[460px] items-end overflow-hidden bg-[#05080E] text-white md:min-h-[520px] md:rounded-3xl">
-          <BgVideo clip={VIDEOS.salon} dim={0.5} />
-          <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.2) 0%, rgba(5,8,14,.1) 40%, rgba(5,8,14,.95) 100%)' }} />
-          <Grain />
-          <div className="relative z-10 w-full px-5 pb-10 pt-24 md:px-12 md:pb-14 lg:px-16">
-            <Reveal><Kicker light>For professionals</Kicker></Reveal>
-            <Reveal delay={0.05}><Headline size="lg" as="h2" light className="max-w-[720px]">Work from your own neighbourhood. Get paid every week.</Headline></Reveal>
-            <Reveal delay={0.1}><Sub light className="mt-4 max-w-[520px]">Electricians, plumbers, cleaners, beauticians and more. Listing is free; verification takes a few days.</Sub></Reveal>
-            <Reveal delay={0.15}>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <GlowButton href={PARTNER_URL}>Join Zyphix Book <ArrowUpRight size={16} /></GlowButton>
-                <GhostButton href="#faq">How verification works</GhostButton>
-              </div>
-            </Reveal>
+      {/* ── Final CTA for professionals (zooming video) ──────────────────── */}
+      <div className="-mx-4 mt-24 md:mx-0 md:mt-36 md:overflow-hidden md:rounded-3xl">
+        <ZoomVideo clip={VIDEOS.haircut}>
+          <div className="w-full px-5 pb-12 md:px-12 md:pb-16 lg:px-16">
+            <Kicker light>For professionals</Kicker>
+            <h2 className="max-w-[16ch] text-balance text-[36px] font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-[52px] md:text-[68px]">
+              Work your own neighbourhood. Get paid every week.
+            </h2>
+            <p className="mt-5 max-w-[50ch] text-[16px] leading-[1.6] text-white/75 md:text-[18px]">Electricians, plumbers, cleaners, beauticians and more. Listing is free; verification takes a few days.</p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Magnetic><GlowButton href={PARTNER_URL}>Join Zyphix Book <ArrowUpRight size={16} /></GlowButton></Magnetic>
+              <GhostButton href="#faq">How verification works</GhostButton>
+            </div>
           </div>
-        </section>
+        </ZoomVideo>
       </div>
     </div>
   );

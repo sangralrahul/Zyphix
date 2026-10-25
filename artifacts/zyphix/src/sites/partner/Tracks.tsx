@@ -1,105 +1,87 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo } from 'react';
 import { ArrowRight, Check, Store, UtensilsCrossed, Wrench, Bike, ClipboardCheck } from 'lucide-react';
-import { Light, Dark, Glow, Grain, Kicker, Headline, Sub, Reveal, Stagger, GlowButton, Counter, Ticker, PhotoTile, VideoCard, isStatic } from '@/ui/cinema';
+import { Light, Dark, Glow, Grain, Kicker, Headline, Sub, Reveal, Stagger, GlowButton, Counter, Ticker, PhotoTile, BgVideo } from '@/ui/cinema';
+import { HScrollGallery, Accent, GiantMarquee } from '@/ui/motion2';
 import { Container, Chip } from '@/ui/kit';
-import { VIDEOS, PHOTOS, landscape, type Clip } from '@/data/media';
+import { PHOTOS, landscape } from '@/data/media';
 import { SERVICES, TRACKS, NUM, NOW_SITE, EATS_SITE, BOOK_SITE, type Track } from './shared';
 import { usePartners, type PartnerListing, type PartnerType } from '@/lib/partners';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Track bento (photo cards with hover video) · "Listed automatically" band ·
-   live partner directory (renders nothing until the API has partners).
+   Track gallery (pinned horizontal track of tall video cards) · giant
+   marquee + "Listed automatically" band · live partner directory (renders
+   nothing until the API has partners).
 ──────────────────────────────────────────────────────────────────────────── */
 
-/* ── Hover clip: poster is already painted by the card; video fades in on hover */
-function HoverClip({ clip, active }: { clip: Clip; active: boolean }) {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [failed, setFailed] = useState(false);
-  const [wanted, setWanted] = useState(false);
-  useEffect(() => {
-    const v = ref.current;
-    if (!v) return;
-    if (active) { setWanted(true); v.play().catch(() => {}); }
-    else v.pause();
-  }, [active]);
-  if (failed || isStatic()) return null;
+/* ── Track gallery: pinned horizontal track of tall video cards ─────────── */
+function TrackCard({ tr, i }: { tr: Track; i: number }) {
   return (
-    <video
-      ref={ref}
-      aria-hidden
-      src={wanted ? clip.src720 || clip.src : undefined}
-      muted loop playsInline preload="none"
-      onError={() => setFailed(true)}
-      className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${active ? 'opacity-100' : 'opacity-0'}`}
-    />
+    <article className="group relative flex h-[min(64svh,560px)] min-h-[440px] flex-col justify-end overflow-hidden rounded-3xl bg-[#0B1220] text-white ring-1 ring-white/10">
+      <a href={tr.href} aria-label={tr.cta} className="absolute inset-0 z-0">
+        <div className="absolute inset-0 transition-transform duration-[1400ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.05]">
+          {tr.clip ? <BgVideo clip={tr.clip} dim={0.1} /> : <img src={tr.photo.src} alt={tr.photo.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />}
+        </div>
+        <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.55) 0%, rgba(5,8,14,0) 28%, rgba(5,8,14,.45) 55%, rgba(5,8,14,.96) 100%)' }} />
+      </a>
+      <div className="pointer-events-none absolute inset-x-5 top-5 z-10 flex items-center justify-between sm:inset-x-6 sm:top-6">
+        <span className="flex items-center gap-2">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-md"><tr.icon size={15} /></span>
+          <span className="rounded-full bg-white/15 px-3 py-1.5 text-[12px] font-semibold text-white/90 ring-1 ring-white/25 backdrop-blur-md">{tr.product}</span>
+        </span>
+        <span className="text-[13px] font-semibold tabular-nums text-white/60" style={NUM}>0{i + 1}</span>
+      </div>
+      <div className="relative z-10 p-5 sm:p-7">
+        <h3 className="text-[28px] font-semibold leading-[1.04] tracking-[-0.04em] sm:text-[32px]">{tr.title}</h3>
+        <p className="mt-2 max-w-[38ch] text-[14.5px] leading-[1.55] text-white/75">{tr.line}</p>
+        <ul className="mt-4 space-y-1.5">
+          {tr.bullets.map(b => (
+            <li key={b} className="flex items-start gap-2 text-[13.5px] text-white/85"><Check size={15} className="mt-0.5 shrink-0 text-emerald-300" /> {b}</li>
+          ))}
+        </ul>
+        <div className="mt-6">
+          <GlowButton href={tr.href} size="md">{tr.cta} <ArrowRight size={15} /></GlowButton>
+        </div>
+      </div>
+    </article>
   );
 }
 
-function TrackCard({ tr, className = '', delay = 0, chips = false }: { tr: Track; className?: string; delay?: number; chips?: boolean }) {
-  const [hover, setHover] = useState(false);
+/** Closing card of the gallery: every service a Zyphix Book pro can list. */
+function ServicesCard() {
   return (
-    <Reveal delay={delay} y={32} className={className}>
-      <article
-        onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-        className="group relative flex h-full min-h-[460px] flex-col justify-end overflow-hidden rounded-3xl bg-[#05080E] text-white shadow-[0_24px_60px_rgba(11,15,25,.12)] md:min-h-[500px]"
-      >
-        <a href={tr.href} aria-label={tr.cta} className="absolute inset-0 z-0">
-          <img src={tr.photo.src} alt={tr.photo.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.05]" />
-          {tr.clip && <HoverClip clip={tr.clip} active={hover} />}
-          <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.35) 0%, rgba(5,8,14,.05) 30%, rgba(5,8,14,.55) 60%, rgba(5,8,14,.94) 100%)' }} />
-        </a>
-
-        <div className="pointer-events-none absolute left-5 top-5 z-10 flex items-center gap-2 sm:left-6 sm:top-6">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-md"><tr.icon size={15} /></span>
-          <span className="rounded-full bg-white/15 px-3 py-1.5 text-[12px] font-semibold text-white/90 ring-1 ring-white/25 backdrop-blur-md">{tr.product}</span>
-        </div>
-
-        <div className="relative z-10 p-5 pt-20 sm:p-7 sm:pt-24">
-          <h3 className="text-[26px] font-semibold leading-[1.1] tracking-[-0.025em] sm:text-[30px]">{tr.title}</h3>
-          <p className="mt-2 max-w-[420px] text-[15px] leading-[1.55] text-white/75">{tr.line}</p>
-          {chips && (
-            <ul className="mt-4 flex flex-wrap gap-1.5">
-              {SERVICES.slice(0, 6).map(s => <li key={s} className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[12px] font-medium text-white/85 backdrop-blur-sm">{s}</li>)}
-              <li className="rounded-full border border-white/15 bg-white/[.04] px-2.5 py-1 text-[12px] font-medium text-white/60">+{SERVICES.length - 6} more</li>
-            </ul>
-          )}
-          <ul className="mt-4 space-y-1.5">
-            {tr.bullets.map(b => (
-              <li key={b} className="flex items-start gap-2 text-[14px] text-white/85"><Check size={15} className="mt-0.5 shrink-0 text-emerald-300" /> {b}</li>
-            ))}
-          </ul>
-          <div className="mt-6">
-            <GlowButton href={tr.href} size="md">{tr.cta} <ArrowRight size={15} /></GlowButton>
-          </div>
-        </div>
-      </article>
-    </Reveal>
+    <div className="flex h-[min(64svh,560px)] min-h-[440px] flex-col justify-between rounded-3xl border border-white/10 bg-white/[.03] p-6 sm:p-7">
+      <div>
+        <p className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-emerald-300">Zyphix Book categories</p>
+        <p className="mt-4 text-[26px] font-semibold leading-[1.08] tracking-[-0.04em] text-white">Ten trades, one verified badge.</p>
+      </div>
+      <ul className="flex flex-wrap gap-2">
+        {SERVICES.map(s => <li key={s} className="rounded-full border border-white/15 bg-white/[.06] px-3 py-1.5 text-[13px] font-medium text-white/85">{s}</li>)}
+      </ul>
+      <a href="/services" className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-emerald-300 hover:text-emerald-200">Join as a professional <ArrowRight size={15} /></a>
+    </div>
   );
 }
 
 export function TrackBento() {
   const [delivery, restaurant, services, store] = TRACKS;
+  const order = [delivery, restaurant, store, services];
   return (
-    <Light id="tracks" className="scroll-mt-16 py-24 md:py-36">
-      <Container>
-        <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
-          <div className="lg:col-span-8">
-            <Reveal><Kicker>Choose your track</Kicker></Reveal>
-            <Reveal delay={0.05}><Headline size="lg">Four ways to partner. One neighbourhood network.</Headline></Reveal>
+    <HScrollGallery
+      id="tracks"
+      cardClass="w-[84vw] sm:w-[400px]"
+      header={
+        <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-7">
+            <Kicker light>Choose your track</Kicker>
+            <h2 className="max-w-[18ch] text-balance text-[34px] font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-[46px] md:text-[58px]">
+              Four ways in. One <Accent green>neighbourhood</Accent> network.
+            </h2>
           </div>
-          <Reveal delay={0.1} className="lg:col-span-4">
-            <Sub>Pick the track that matches how you work. Each has a short guided application and its own onboarding manager.</Sub>
-          </Reveal>
+          <p className="hidden max-w-[44ch] text-[17px] leading-[1.6] text-white/65 lg:col-span-5 lg:block">Each track has a short guided application and its own onboarding manager. Scroll to see them all.</p>
         </div>
-
-        <div className="mt-12 grid gap-4 md:mt-16 md:grid-cols-12">
-          <TrackCard tr={delivery} className="md:col-span-7" delay={0} />
-          <TrackCard tr={restaurant} className="md:col-span-5" delay={0.08} />
-          <TrackCard tr={store} className="md:col-span-5" delay={0.16} />
-          <TrackCard tr={services} className="md:col-span-7" delay={0.24} chips />
-        </div>
-      </Container>
-    </Light>
+      }
+      items={[...order.map((tr, i) => <TrackCard key={tr.id} tr={tr} i={i} />), <ServicesCard key="svc" />]}
+    />
   );
 }
 
@@ -122,14 +104,15 @@ function DestLabel({ host, who, what }: { host: string; who: string; what: strin
 
 export function ListedAutomatically() {
   return (
-    <Dark className="py-24 md:py-36">
+    <Dark className="pb-24 pt-16 md:pb-36 md:pt-24">
       <Glow x="15%" y="20%" size={900} alpha={0.22} />
       <Grain />
-      <Container>
+      <GiantMarquee words={['Deliver', 'Cook', 'Sell', 'Fix']} className="relative border-b border-white/10 pb-12 md:pb-20" />
+      <Container className="mt-16 md:mt-24">
         <div className="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
           <div className="lg:col-span-5">
             <Reveal><Kicker light>Listed automatically</Kicker></Reveal>
-            <Reveal delay={0.05}><Headline light size="lg">Register once. Appear where your customers already shop.</Headline></Reveal>
+            <Reveal delay={0.05}><Headline light size="lg" className="text-balance">Register once. Appear where your customers already shop.</Headline></Reveal>
             <Reveal delay={0.1}><Sub light className="mt-6 max-w-[480px]">Your listing is built from your registration and goes live on the Zyphix product for your track. People in your area see you in the app and on the web, with no separate storefront to maintain.</Sub></Reveal>
             <Stagger className="mt-8 grid gap-3" step={0.08}>
               {[
@@ -151,9 +134,9 @@ export function ListedAutomatically() {
           <div className="lg:col-span-7">
             <div className="grid grid-cols-2 gap-4">
               <Reveal y={32} className="col-span-2">
-                <VideoCard clip={VIDEOS.groceryShelf} ratio="16/8" rounded="rounded-3xl" className="!bg-[#111827] ring-1 ring-white/10">
+                <PhotoTile photo={landscape('kirana', 0)} ratio="16/8" rounded="rounded-3xl" className="!bg-[#111827] ring-1 ring-white/10">
                   <DestLabel {...DESTINATIONS[0]} />
-                </VideoCard>
+                </PhotoTile>
               </Reveal>
               <Reveal y={32} delay={0.1}>
                 <PhotoTile photo={landscape('indianFood', 0)} ratio="4/5" rounded="rounded-3xl" className="!bg-[#111827] ring-1 ring-white/10">

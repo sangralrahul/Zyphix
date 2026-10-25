@@ -4,9 +4,13 @@
  * Everything renders without /api; registered restaurants arrive via usePartners.
  */
 import React from 'react';
-import { ArrowRight, Star, Clock, CheckCircle2, ClipboardList, Zap } from 'lucide-react';
-import { VideoCard, Reveal, Headline, Kicker, Sub, GlowButton, Dark, Glow, Grain, PhotoTile } from '@/ui/cinema';
+import { ArrowRight, Star, Clock, CheckCircle2, ClipboardList, Zap, ChefHat, Flame, Bike } from 'lucide-react';
+import { Reveal, Kicker, Sub, GlowButton, Dark, Glow, Grain, PhotoTile } from '@/ui/cinema';
+import { Accent, ClipWall, VideoText, RouteMap, LiveOrder, Magnetic } from '@/ui/motion2';
 import { VIDEOS, PHOTOS, landscape, type Photo } from '@/data/media';
+
+/** Display headline style for Eats bands (Geist, tight tracking). */
+export const DISPLAY = 'font-semibold tracking-[-0.04em] text-balance';
 
 /** Deterministic photo for a listing with no image: landscape food/restaurant shots first, then the rest. */
 const POOL: Photo[] = [
@@ -24,39 +28,44 @@ export const cuisinePhoto = (i: number): Photo => {
   return i % 2 === 0 ? a : b;
 };
 
+/** Hand-matched photo per cuisine chip; falls back to the index-based pool. */
+const CUISINE_PHOTO: Record<string, () => Photo> = {
+  'North Indian': () => landscape('thali', 0),
+  'South Indian': () => PHOTOS.indianFood[5] || landscape('indianFood', 0),
+  'Biryani': () => landscape('biryani', 0),
+  'Pizza': () => landscape('restaurant', 0),
+  'Burgers': () => landscape('restaurant', 2),
+  'Momos': () => PHOTOS.indianFood[4] || landscape('streetFood', 0),
+  'Chinese': () => landscape('chef', 0),
+  'Sweets': () => landscape('streetFood', 3),
+  'Chai & Snacks': () => landscape('chai', 1),
+  'Healthy': () => landscape('produce', 0),
+};
+const photoForCuisine = (c: string, i: number): Photo => CUISINE_PHOTO[c]?.() || cuisinePhoto(i);
+
 export type PickRestaurant = { id: string; name: string; cuisine: string; eta: string; rating?: number; image: string };
 
-/* ── Tonight's picks: two in-view videos + the three top restaurants on photo tiles ── */
+/* ── Tonight's picks: kitchen ClipWall + the three top restaurants on photo tiles ── */
 export function TonightsPicks({ picks, onOpen }: { picks: PickRestaurant[]; onOpen: (id: string) => void }) {
   return (
     <section className="mt-8 md:mt-10" aria-label="Tonight's picks">
-      <Reveal y={12} amount={0.4} className="mb-3 flex items-end justify-between gap-3">
-        <div className="flex min-w-0 items-baseline gap-2">
-          <h2 className="truncate text-[17px] font-semibold tracking-[-0.01em] md:text-[18px]">Tonight's picks</h2>
-          <span className="shrink-0 text-[12.5px] text-gray-500">hot, tracked, on time</span>
+      <Reveal y={12} amount={0.4} className="mb-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+        <div className="min-w-0">
+          <p className="mb-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-emerald-700">Tonight's picks</p>
+          <h2 className={`${DISPLAY} max-w-[22ch] text-[26px] leading-[1.06] text-gray-900 md:text-[34px]`}>
+            Straight off the <Accent green>tandoor</Accent>, tracked to your gate.
+          </h2>
         </div>
+        <p className="max-w-[340px] text-[13.5px] leading-[1.55] text-gray-600">Kitchens start cooking the moment you tap order. Every delivery comes with a live ETA.</p>
       </Reveal>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
-        <Reveal className="md:col-span-7" y={18} amount={0.2}>
-          <VideoCard clip={VIDEOS.foodDelivery} ratio="16/10" rounded="rounded-2xl"
-            overlay={<div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,0) 40%, rgba(5,8,14,.85) 100%)' }} />}>
-            <div className="absolute inset-x-0 bottom-0 p-4 text-white md:p-6">
-              <Kicker light className="mb-2">Live tracking</Kicker>
-              <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.02em] md:text-[28px]">Watch your rider, door to door.</p>
-              <p className="mt-1.5 max-w-[420px] text-[13px] text-white/70 md:text-[14px]">Every order is tracked from the kitchen to your gate, with a live ETA.</p>
-            </div>
-          </VideoCard>
-        </Reveal>
-        <Reveal className="md:col-span-5" y={18} delay={0.1} amount={0.2}>
-          <VideoCard clip={VIDEOS.food} ratio="8/7" rounded="rounded-2xl"
-            overlay={<div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,0) 40%, rgba(5,8,14,.85) 100%)' }} />}>
-            <div className="absolute inset-x-0 bottom-0 p-4 text-white md:p-6">
-              <Kicker light className="mb-2">Cooked to order</Kicker>
-              <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.02em] md:text-[26px]">Straight off the tawa.</p>
-              <p className="mt-1.5 text-[13px] text-white/70 md:text-[14px]">Kitchens start cooking the moment you tap order.</p>
-            </div>
-          </VideoCard>
-        </Reveal>
+      <Reveal y={18} amount={0.15}>
+        {/* 3-col override: the shared 5-tile spans fill a 3×3 grid exactly (4 cols leaves a hole) */}
+        <ClipWall
+          clips={[VIDEOS.tandoor, VIDEOS.streetFood, VIDEOS.chai, VIDEOS.plating, VIDEOS.chefTeam]}
+          labels={['Fresh off the tandoor', 'Street favourites', 'Chai stalls', 'Plated to order', 'Busy kitchens']}
+        />
+      </Reveal>
+      <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-12">
         {picks.slice(0, 3).map((r, i) => (
           <Reveal key={r.id} className="md:col-span-4" y={18} delay={0.08 * i} amount={0.2}>
             <button type="button" onClick={() => onOpen(r.id)} className="group block w-full text-left">
@@ -96,7 +105,7 @@ export function CuisineTiles({ cuisines, active, onPick }: { cuisines: string[];
             <Reveal key={c} delay={Math.min(i * 0.05, 0.4)} y={14} amount={0.1} className="w-[150px] shrink-0 md:w-auto">
               <button type="button" onClick={() => onPick(c)} aria-pressed={on}
                 className={`group block w-full overflow-hidden rounded-2xl text-left transition duration-300 hover:-translate-y-0.5 ${on ? 'ring-2 ring-emerald-500 ring-offset-2 ring-offset-[#F8F9FA]' : ''}`}>
-                <PhotoTile photo={cuisinePhoto(i)} ratio="4/3" rounded="rounded-2xl">
+                <PhotoTile photo={photoForCuisine(c, i)} ratio="4/3" rounded="rounded-2xl">
                   <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.0) 35%, rgba(5,8,14,.8) 100%)' }} />
                   <p className="absolute inset-x-0 bottom-0 flex items-center justify-between p-3 text-[14px] font-semibold text-white">
                     <span className="truncate">{c}</span>
@@ -163,14 +172,75 @@ export function RestaurantCta() {
       <div className="relative px-5 py-14 md:px-12 md:py-20">
         <Reveal y={16} amount={0.3}>
           <Kicker light>Own a kitchen in Jammu?</Kicker>
-          <Headline size="lg" light className="max-w-[640px]">Put your restaurant on every phone in the city.</Headline>
+          <h2 className={`${DISPLAY} max-w-[18ch] text-[34px] leading-[1.04] text-white sm:text-[46px] md:text-[56px]`}>Put your kitchen on every <Accent green>phone</Accent> in the city.</h2>
           <Sub light className="mt-4 max-w-[520px]">No joining fee, commission explained before you go live, a real-time order dashboard, and Zyphix riders at your counter.</Sub>
           <div className="mt-7 flex flex-wrap items-center gap-3">
-            <GlowButton href="https://partner.zyphix.in">Partner with Zyphix <ArrowRight size={16} /></GlowButton>
+            <Magnetic><GlowButton href="https://partner.zyphix.in">Partner with Zyphix <ArrowRight size={16} /></GlowButton></Magnetic>
             <span className="text-[13px] text-white/55">partner.zyphix.in</span>
           </div>
         </Reveal>
       </div>
     </Dark>
+  );
+}
+
+/* ── Hero live order (desktop) ── */
+export function EatsHeroLiveOrder() {
+  return (
+    <div className="pointer-events-none absolute bottom-24 right-10 z-10 hidden w-[320px] lg:block">
+      <Reveal delay={0.5} y={20}>
+        <LiveOrder dark className="pointer-events-auto" items={['Chicken Biryani · Half', 'Butter Naan × 4', 'Masala Chai × 2']} />
+      </Reveal>
+    </div>
+  );
+}
+
+/* ── "HUNGRY?" video-in-letters band ── */
+export function HungryBand() {
+  return (
+    <section aria-label="Hungry?" className="relative -mx-4 mt-10 overflow-hidden bg-[#05080E] md:mx-0 md:mt-12 md:rounded-3xl">
+      <VideoText clip={VIDEOS.cooking} text="HUNGRY?" size="text-[19vw] md:text-[190px] lg:text-[226px]" className="pt-6 md:pt-8" />
+      <div className="relative flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-4 text-white md:px-8">
+        <p className="text-[14px] text-white/70">Cooked to order in kitchens across Jammu.</p>
+        <a href="#eats-grid" className="inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-[13.5px] font-semibold text-gray-900 no-underline transition hover:-translate-y-px hover:bg-emerald-50">
+          See what's open <ArrowRight size={14} />
+        </a>
+      </div>
+    </section>
+  );
+}
+
+/* ── RouteMap band: kitchen → rider → gate ── */
+export function EatsTrackBand() {
+  const steps = [
+    { icon: <ChefHat size={15} />, t: 'Kitchen accepts', s: 'The restaurant confirms and starts cooking right away.' },
+    { icon: <Flame size={15} />, t: 'Packed hot', s: 'Sealed at the counter the moment it leaves the tawa.' },
+    { icon: <Bike size={15} />, t: 'Rider to your gate', s: 'Follow the rider on the map with a live ETA.' },
+  ];
+  return (
+    <section aria-label="Live tracking" className="mt-10 overflow-hidden rounded-3xl border border-gray-200 bg-white md:mt-12">
+      <div className="grid items-stretch md:grid-cols-[1fr_1.15fr]">
+        <Reveal y={16} amount={0.25} className="flex flex-col justify-center p-6 md:p-10">
+          <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-emerald-700">Live tracking</p>
+          <h2 className={`${DISPLAY} max-w-[16ch] text-[28px] leading-[1.05] text-gray-900 md:text-[40px]`}>
+            Hot food, tracked <Accent green>live</Accent>.
+          </h2>
+          <ol className="mt-6 space-y-4 border-t border-gray-100 pt-6">
+            {steps.map((st, i) => (
+              <li key={st.t} className="flex gap-3.5">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">{st.icon}</span>
+                <div className="min-w-0">
+                  <p className="text-[14.5px] font-semibold tracking-[-0.01em] text-gray-900"><span className="mr-1.5 tabular-nums text-gray-400">0{i + 1}</span>{st.t}</p>
+                  <p className="mt-0.5 text-[13px] leading-[1.5] text-gray-600">{st.s}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </Reveal>
+        <div className="p-3 pt-0 md:p-3 md:pl-0">
+          <RouteMap dark className="aspect-[56/38] md:aspect-auto md:h-full md:min-h-[420px]" minutes={28} />
+        </div>
+      </div>
+    </section>
   );
 }

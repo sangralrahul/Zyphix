@@ -4,9 +4,10 @@ import { Search, Star, X, Plus, Minus, ShoppingBag, ChevronLeft, ChevronRight } 
 import { restaurants, menuItems, FOOD_CUISINE_TYPES } from '@/data/mockData';
 import { usePartners, tagList } from '@/lib/partners';
 import { Chip, Card, Button, G, FONT } from '@/ui/kit';
-import { VideoHero, Words, Reveal, Kicker } from '@/ui/cinema';
+import { VideoHero, Reveal, Kicker } from '@/ui/cinema';
+import { Accent, Spotlight } from '@/ui/motion2';
 import { VIDEOS } from '@/data/media';
-import { TonightsPicks, CuisineTiles, PartnerStrip, RestaurantCta, fallbackPhoto } from './eats/picks';
+import { TonightsPicks, CuisineTiles, PartnerStrip, RestaurantCta, fallbackPhoto, EatsHeroLiveOrder, HungryBand, EatsTrackBand, DISPLAY } from './eats/picks';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Zyphix Eats — restaurants near you.
@@ -168,15 +169,20 @@ export function ZyphixEats() {
         <motion.div key="list" {...enter}>
           {/* Hero: video, headline, search, cuisine chips */}
           <div className="-mx-4 md:mx-0">
-            <VideoHero clip={VIDEOS.food} height="min-h-[46svh] md:min-h-[56svh]" dim={0.4} className="md:rounded-3xl">
+            <VideoHero clip={VIDEOS.food} height="min-h-[50svh] md:min-h-[60svh]" dim={0.4} className="md:rounded-3xl">
+              <EatsHeroLiveOrder />
               <div className="px-4 pb-7 pt-14 md:px-10 md:pb-10 md:pt-16">
                 <Kicker light>Zyphix Eats · Jammu</Kicker>
-                <Words as="h1" text="Hungry? Jammu's kitchens, at your door." className="max-w-[720px] text-[30px] font-semibold leading-[1.05] tracking-[-0.03em] text-white sm:text-[38px] md:text-[48px]" />
+                <Reveal y={18}>
+                  <h1 className={`${DISPLAY} max-w-[15ch] text-[38px] leading-[1.0] text-white sm:text-[48px] md:text-[64px]`}>
+                    Jammu's kitchens, at your <Accent green>door</Accent>.
+                  </h1>
+                </Reveal>
                 <p className="mt-3 max-w-[520px] text-[15px] leading-[1.55] text-white/75 md:text-[17px]">
                   Dhabas, biryani houses, momo stalls and cafés near you, cooked to order and tracked to your gate.
                 </p>
                 <form role="search" onSubmit={e => e.preventDefault()}
-                  className="mt-5 flex h-12 max-w-[640px] items-center gap-2 rounded-2xl bg-white pl-4 pr-1.5 text-gray-900 shadow-[0_20px_60px_-15px_rgba(0,0,0,.6)] md:mt-6 md:h-14">
+                  className="relative z-10 mt-5 flex h-12 max-w-[640px] items-center gap-2 rounded-2xl bg-white pl-4 pr-1.5 text-gray-900 shadow-[0_20px_60px_-15px_rgba(0,0,0,.6)] md:mt-6 md:h-14">
                   <Search size={18} className="shrink-0 text-gray-400" />
                   <input
                     value={search}
@@ -216,6 +222,7 @@ export function ZyphixEats() {
               <TonightsPicks picks={popular.slice(0, 3)} onOpen={setActiveRestaurant} />
               <CuisineTiles cuisines={FOOD_CUISINE_TYPES.filter(c => c !== 'All')} active={activeCuisine}
                 onPick={c => { setActiveCuisine(c); setActiveRestaurant(null); document.getElementById('eats-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} />
+              <HungryBand />
             </>
           )}
 
@@ -251,6 +258,7 @@ export function ZyphixEats() {
 
           {showPopular && (
             <>
+              <EatsTrackBand />
               <PartnerStrip registeredCount={registered.length} />
               <RestaurantCta />
             </>
@@ -344,7 +352,8 @@ function QtyStepper({ qty, onAdd, onRemove }: { qty: number; onAdd: () => void; 
 function RestaurantCard({ restaurant: r, index = 0, onClick }: { restaurant: Restaurant; index?: number; onClick: () => void }) {
   const photo = r.image || fallbackPhoto(index).src;
   return (
-    <button onClick={onClick} className="group block h-full w-full overflow-hidden rounded-xl border border-gray-200 bg-white text-left shadow-[0_1px_2px_rgba(0,0,0,.03)] transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-1 hover:border-gray-300 hover:shadow-[0_14px_30px_-8px_rgba(11,15,25,.16)]">
+    <Spotlight dark={false} color="rgba(13,163,102,.14)" className="h-full !rounded-xl transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-1">
+    <button onClick={onClick} className="group block h-full w-full overflow-hidden rounded-xl text-left">
       <div className="relative w-full overflow-hidden bg-gray-100" style={{ aspectRatio: '16 / 10' }}>
         <img src={photo} alt={r.image ? r.name : ''} loading="lazy" className="h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.05]" />
         {r.registered && <Chip tone="green" className="absolute left-2 top-2">New</Chip>}
@@ -365,6 +374,7 @@ function RestaurantCard({ restaurant: r, index = 0, onClick }: { restaurant: Res
         <p className="mt-1.5 truncate text-[12px] text-gray-600">{r.eta} · Min ₹{r.minOrder} · {feeLabel(r.deliveryFee)}</p>
       </div>
     </button>
+    </Spotlight>
   );
 }
 

@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { Accordion, Container } from '@/ui/kit';
 import { BgVideo, GhostButton, GlowButton, Grain, Headline, Kicker, Light, Reveal, Sub } from '@/ui/cinema';
 import { VIDEOS } from '@/data/media';
+import { Accent, Magnetic } from '@/ui/motion2';
 import { PARTNERSHIPS_EMAIL, TRACKS } from './shared';
 
 /* ── FAQ ─────────────────────────────────────────────────────────────────── */
@@ -39,11 +40,11 @@ export function FinalCta() {
       <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.85) 0%, rgba(5,8,14,.35) 50%, rgba(5,8,14,.9) 100%)' }} />
       <Grain />
       <Container className="relative text-center">
-        <Reveal><Headline size="lg" light className="mx-auto max-w-[760px]">Pick a track and apply in ten minutes.</Headline></Reveal>
+        <Reveal><Headline size="lg" light className="mx-auto max-w-[18ch] text-balance">Pick a track and apply in <Accent green>ten</Accent> minutes.</Headline></Reveal>
         <Reveal delay={0.05}><Sub light className="mx-auto mt-5 max-w-[520px]">Free to apply. A real person calls you within two working days.</Sub></Reveal>
         <Reveal delay={0.1} className="mx-auto mt-10 flex max-w-[760px] flex-wrap justify-center gap-3">
           {TRACKS.map((t, i) => i === 0
-            ? <GlowButton key={t.id} href={t.href} size="md">{t.name} <ArrowRight size={15} /></GlowButton>
+            ? <Magnetic key={t.id}><GlowButton href={t.href} size="md">{t.name} <ArrowRight size={15} /></GlowButton></Magnetic>
             : <GhostButton key={t.id} href={t.href} size="md">{t.name} <ArrowRight size={15} /></GhostButton>)}
         </Reveal>
       </Container>

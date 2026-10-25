@@ -1,12 +1,14 @@
 import React from 'react';
 import { ShoppingCart, Store, Tag } from 'lucide-react';
 import { Container } from '@/ui/kit';
-import { BgVideo, Grain, Kicker, Reveal, Stagger } from '@/ui/cinema';
+import { Grain, Glow, Kicker, Stagger } from '@/ui/cinema';
+import { VideoText, ZoomVideo, Spotlight, Accent } from '@/ui/motion2';
 import { VIDEOS } from '@/data/media';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Statement — full-bleed video band with one large white statement (a claim
-   about the product, not a testimonial) and the three reasons beneath it.
+   Statement — a giant "INTENT" with video inside the letters, then a framed
+   neighbourhood-store clip that zooms to full-bleed carrying one statement
+   (a claim about the product, not a testimonial), then the three reasons.
 ──────────────────────────────────────────────────────────────────────────── */
 
 const COLS = [
@@ -17,27 +19,41 @@ const COLS = [
 
 export function Statement() {
   return (
-    <section className="relative isolate overflow-hidden bg-[#05080E] text-white">
-      <BgVideo clip={VIDEOS.unboxing} dim={0.55} />
-      <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.75) 0%, rgba(5,8,14,.25) 40%, rgba(5,8,14,.92) 100%)' }} />
-      <Grain />
-      <Container className="relative flex min-h-[92svh] flex-col justify-end pb-16 pt-32 md:pb-24 md:pt-44">
-        <Reveal><Kicker light>Why it works</Kicker></Reveal>
-        <Reveal delay={0.05} y={32} blur>
-          <h2 className="max-w-[1080px] text-[34px] font-semibold leading-[1.08] tracking-[-0.03em] text-white sm:text-[52px] md:text-[64px]">
-            Intent at the point of purchase. <span className="text-white/55">The closer a message sits to the basket, the less it has to shout.</span>
+    <div className="bg-[#05080E] text-white">
+      {/* video inside the letters */}
+      <div className="pt-20 md:pt-28">
+        <Container><Kicker light>Why it works</Kicker></Container>
+        <VideoText clip={VIDEOS.spices} text="INTENT" className="mt-2" size="text-[25vw] md:text-[22vw]" />
+      </div>
+
+      {/* framed clip that grows to full-bleed */}
+      <ZoomVideo clip={VIDEOS.merchant}>
+        <Container className="w-full pb-14 md:pb-20">
+          <h2 className="max-w-[20ch] text-balance text-[34px] font-semibold leading-[1.04] tracking-[-0.045em] text-white sm:text-[52px] md:text-[68px]">
+            The closer a message sits to the <Accent green>basket</Accent>, the less it has to shout.
           </h2>
-        </Reveal>
-        <Stagger className="mt-14 grid gap-8 border-t border-white/15 pt-10 md:mt-20 md:grid-cols-3 md:gap-10" step={0.08}>
-          {COLS.map(c => (
-            <div key={c.title}>
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-emerald-300 ring-1 ring-white/15 backdrop-blur-md">{c.icon}</span>
-              <h3 className="mt-5 text-[18px] font-semibold tracking-[-0.01em] text-white">{c.title}</h3>
-              <p className="mt-2 max-w-[380px] text-[15px] leading-[1.65] text-white/65">{c.text}</p>
-            </div>
-          ))}
-        </Stagger>
-      </Container>
-    </section>
+          <p className="mt-5 max-w-[52ch] text-[16px] leading-[1.6] text-white/75 md:text-[18px]">Intent at the point of purchase: placements sit right beside the neighbourhood shelf people are already buying from.</p>
+        </Container>
+      </ZoomVideo>
+
+      {/* the three reasons */}
+      <section className="relative overflow-hidden py-20 md:py-28">
+        <Glow x="80%" y="0%" size={800} alpha={0.2} />
+        <Grain />
+        <Container className="relative">
+          <Stagger className="grid gap-4 md:grid-cols-3 md:gap-5" step={0.08}>
+            {COLS.map(c => (
+              <Spotlight key={c.title} className="h-full">
+                <div className="p-6 md:p-8">
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/[.06] text-emerald-300 ring-1 ring-white/10">{c.icon}</span>
+                  <h3 className="mt-6 text-[19px] font-semibold tracking-[-0.025em] text-white">{c.title}</h3>
+                  <p className="mt-2 text-[15px] leading-[1.65] text-white/65">{c.text}</p>
+                </div>
+              </Spotlight>
+            ))}
+          </Stagger>
+        </Container>
+      </section>
+    </div>
   );
 }

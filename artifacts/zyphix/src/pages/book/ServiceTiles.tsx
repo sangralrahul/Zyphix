@@ -1,12 +1,12 @@
 import React from 'react';
-import { ArrowUpRight, Check } from 'lucide-react';
+import { ArrowUpRight, Check, Play } from 'lucide-react';
 import { BgVideo, Reveal, G } from '@/ui/cinema';
 import { WIDE, metaFor, orderedServices, type Service } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Service category grid — big photo tiles in a bento; the tiles that have a
-   clip (Home Cleaning, Electrician) are wide and reveal their video on hover
-   (always visible on touch devices, where it plays once in view).
+   Service category grid — big photo tiles in a bento; every tile that has a
+   clip (Plumber, Electrician, AC Service) reveals its video on hover (always
+   visible on touch devices, where it plays once in view).
 ──────────────────────────────────────────────────────────────────────────── */
 
 function Tile({ service, selected, onSelect, wide, index }: { service: Service; selected: boolean; onSelect: () => void; wide: boolean; index: number }) {
@@ -27,14 +27,17 @@ function Tile({ service, selected, onSelect, wide, index }: { service: Service; 
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#05080E]/85 via-[#05080E]/20 to-[#05080E]/10" />
 
-        <span className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-white backdrop-blur-md"><Icon size={16} /></span>
+        <span className="absolute left-4 top-4 flex items-center gap-1.5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-white backdrop-blur-md"><Icon size={16} /></span>
+          {m.clip && <span className="hidden h-7 items-center gap-1 rounded-full border border-white/15 bg-black/25 px-2.5 text-[11px] font-medium text-white/85 backdrop-blur-md transition-opacity group-hover:opacity-0 sm:inline-flex [@media(hover:none)]:hidden"><Play size={10} fill="currentColor" /> Preview</span>}
+        </span>
         <span className={`absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white transition-all duration-300 ${selected ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}`} style={{ background: G }}>
           <Check size={14} strokeWidth={3} />
         </span>
 
         <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
           <div className="min-w-0">
-            <p className={`font-semibold tracking-[-0.02em] ${wide ? 'text-[20px] md:text-[26px]' : 'text-[16px] md:text-[18px]'}`}>{service.title}</p>
+            <p className={`font-semibold tracking-[-0.03em] ${wide ? 'text-[20px] md:text-[26px]' : 'text-[16px] md:text-[18px]'}`}>{service.title}</p>
             <p className="mt-0.5 truncate text-[12.5px] text-white/70 md:text-[13px]">{m.blurb}</p>
           </div>
           <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md transition-colors ${selected ? 'bg-white text-gray-900' : 'group-hover:bg-white group-hover:text-gray-900'}`}>

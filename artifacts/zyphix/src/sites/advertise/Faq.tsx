@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { Container, Accordion } from '@/ui/kit';
 import { BgVideo, GhostButton, GlowButton, Grain, Headline, Kicker, Light, Reveal, Sub } from '@/ui/cinema';
 import { VIDEOS } from '@/data/media';
+import { Magnetic } from '@/ui/motion2';
 import { PARTNERSHIPS_EMAIL, PARTNER_SITE } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -43,10 +44,10 @@ export function FinalCta() {
       <Grain />
       <Container className="relative text-center">
         <Reveal><Kicker light className="justify-center">Early advertiser programme</Kicker></Reveal>
-        <Reveal delay={0.05}><Headline size="lg" light className="mx-auto max-w-[760px]">Be in the app when your neighbourhood opens.</Headline></Reveal>
+        <Reveal delay={0.05}><Headline size="lg" light className="mx-auto max-w-[18ch] text-balance">Be in the app when your neighbourhood opens.</Headline></Reveal>
         <Reveal delay={0.1}><Sub light className="mx-auto mt-5 max-w-[520px]">Send a brief and get a written plan, the live areas near you and a flat quote.</Sub></Reveal>
         <Reveal delay={0.15} className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-          <GlowButton href="#contact">Talk to partnerships <ArrowRight size={17} /></GlowButton>
+          <Magnetic className="w-full sm:w-auto"><GlowButton href="#contact" className="w-full sm:w-auto">Talk to partnerships <ArrowRight size={17} /></GlowButton></Magnetic>
           <GhostButton href={PARTNER_SITE}>Become a partner instead</GhostButton>
         </Reveal>
       </Container>

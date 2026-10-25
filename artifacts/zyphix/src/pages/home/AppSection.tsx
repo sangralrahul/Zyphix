@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link } from 'wouter';
 import { ArrowUpRight, Bike, Smartphone, Wallet, BellRing } from 'lucide-react';
-import { Dark, Light, Glow, Grain, Kicker, Headline, Sub, Reveal, VideoCard, PhotoTile, Counter } from '@/ui/cinema';
+import { Dark, Light, Glow, Grain, Kicker, Sub, Reveal, VideoCard, PhotoTile, Counter } from '@/ui/cinema';
+import { Accent } from '@/ui/motion2';
 import { Container, Phone } from '@/ui/kit';
-import { VIDEOS, PHOTOS, landscape } from '@/data/media';
-import { NUM, PARTNER_SITE, ADVERTISE_SITE } from './shared';
+import { VIDEOS, landscape } from '@/data/media';
+import { NUM, PARTNER_SITE, ADVERTISE_SITE, SUPPORT_SITE, Display } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
    App section (phone mock-up with a looping clip) and the partner / advertise
@@ -55,8 +56,8 @@ export function AppSection() {
         <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-6">
             <Reveal><Kicker light>The Zyphix app</Kicker></Reveal>
-            <Reveal delay={0.05}><Headline light size="lg">Now, Eats and Book. One app, one account.</Headline></Reveal>
-            <Reveal delay={0.1}><Sub light className="mt-6 max-w-[500px]">Everything already works in your browser. The native app adds push updates for every order and one-tap reordering of your weekly basket.</Sub></Reveal>
+            <Reveal delay={0.05}><Display light>Now, Eats and Book. <Accent green>One app.</Accent></Display></Reveal>
+            <Reveal delay={0.1}><Sub light className="mt-6 max-w-[48ch]">Everything already works in your browser. The native app adds push updates for every order and one-tap reordering of your weekly basket.</Sub></Reveal>
 
             <Reveal delay={0.15} className="mt-9 flex flex-wrap gap-3">
               {STORES.map(s => (
@@ -102,27 +103,35 @@ export function AppSection() {
   );
 }
 
-/* ── Partner / advertise split band ─────────────────────────────────────── */
+/* ── Partner / advertise / support split ────────────────────────────────── */
 const BANDS = [
-  { href: PARTNER_SITE, photo: PHOTOS.restaurant[2], kicker: 'For businesses', title: 'Put your store, kitchen or skill on Zyphix.', body: 'Free to list. An onboarding manager calls within two working days.', cta: 'partner.zyphix.in' },
-  { href: ADVERTISE_SITE, photo: landscape('city'), kicker: 'For brands', title: 'Reach Jammu at the moment they are buying.', body: 'Sponsored placements inside the Now, Eats and Book apps.', cta: 'advertise.zyphix.in' },
+  { href: PARTNER_SITE, photo: landscape('shopOwner', 0), kicker: 'For businesses', title: 'Put your store, kitchen or skill on Zyphix.', body: 'Free to list. An onboarding manager calls within two working days.', cta: 'partner.zyphix.in' },
+  { href: ADVERTISE_SITE, photo: landscape('kirana', 4), kicker: 'For brands', title: 'Reach Jammu at the moment it is buying.', body: 'Sponsored placements inside the Now, Eats and Book apps.', cta: 'advertise.zyphix.in' },
+  { href: SUPPORT_SITE, photo: landscape('phone', 0), kicker: 'For customers', title: 'Help with an order, refund or booking.', body: 'Answers in under a minute, or a person by email.', cta: 'support.zyphix.in' },
 ];
 
 export function PartnerBand() {
   return (
-    <Light className="py-24 md:py-36">
+    <Light tone="soft" className="py-24 md:py-36">
       <Container>
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-16">
+          <div className="lg:col-span-7">
+            <Reveal><Kicker>Beyond ordering</Kicker></Reveal>
+            <Reveal delay={0.05}><Display>Built with the <Accent green>neighbourhood</Accent>.</Display></Reveal>
+          </div>
+          <Reveal delay={0.1} className="lg:col-span-5"><Sub className="max-w-[44ch]">Sell on Zyphix, advertise to local buyers, or get help with anything you ordered.</Sub></Reveal>
+        </div>
+        <div className="mt-12 grid gap-5 md:mt-16 md:grid-cols-3">
           {BANDS.map((b, i) => (
-            <Reveal key={b.href} delay={i * 0.1} y={32}>
+            <Reveal key={b.href} delay={i * 0.08} y={32}>
               <a href={b.href} target="_blank" rel="noopener noreferrer" className="group block">
-                <PhotoTile photo={b.photo} ratio="4/3" rounded="rounded-3xl" className="shadow-[0_24px_60px_rgba(11,15,25,.12)]">
-                  <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.15) 0%, rgba(5,8,14,.25) 45%, rgba(5,8,14,.9) 100%)' }} />
-                  <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8">
+                <PhotoTile photo={b.photo} ratio="4/5" rounded="rounded-3xl" className="!bg-[#0B1220] shadow-[0_24px_60px_-20px_rgba(11,15,25,.25)]">
+                  <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.1) 0%, rgba(5,8,14,.2) 40%, rgba(5,8,14,.92) 100%)' }} />
+                  <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-7">
                     <p className="mb-3 inline-flex items-center gap-2 text-[12.5px] font-semibold uppercase tracking-[0.14em] text-emerald-300"><span className="h-1.5 w-1.5 rounded-full bg-[#0DA366]" />{b.kicker}</p>
-                    <h3 className="max-w-[420px] text-[26px] font-semibold leading-[1.1] tracking-[-0.025em] text-white sm:text-[32px]">{b.title}</h3>
-                    <p className="mt-3 max-w-[420px] text-[15px] leading-[1.55] text-white/70">{b.body}</p>
-                    <span className="mt-5 inline-flex items-center gap-1.5 text-[14.5px] font-semibold text-white">{b.cta}<ArrowUpRight size={16} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></span>
+                    <h3 className="max-w-[18ch] text-balance text-[24px] font-semibold leading-[1.08] tracking-[-0.035em] text-white sm:text-[28px]">{b.title}</h3>
+                    <p className="mt-3 max-w-[36ch] text-[14.5px] leading-[1.55] text-white/70">{b.body}</p>
+                    <span className="mt-5 inline-flex items-center gap-1.5 border-t border-white/15 pt-4 text-[14.5px] font-semibold text-white">{b.cta}<ArrowUpRight size={16} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></span>
                   </div>
                 </PhotoTile>
               </a>

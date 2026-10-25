@@ -3,9 +3,10 @@ import { SiteHeader, SiteFooter } from '@/components/layout/SiteChrome';
 import { FONT } from '@/ui/kit';
 import { ScrollProgress } from '@/ui/cinema';
 import { useCategories } from './home/shared';
-import { Hero, PromiseTicker } from './home/Hero';
-import { NowChapter, EatsChapter, BookChapter } from './home/Products';
+import { Hero, IntroMarquee } from './home/Hero';
+import { ProductStory, AislesGallery } from './home/Products';
 import { HowItWorks, LiveProof } from './home/HowItWorks';
+import { CityWall, JammuBand } from './home/City';
 import { AppSection, PartnerBand } from './home/AppSection';
 import { Faq, FinalCta, StickyCta } from './home/Faq';
 
@@ -25,14 +26,15 @@ export function Landing() {
       <SiteHeader variant="transparent" />
       <main>
         <Hero />
-        <PromiseTicker />
-        <NowChapter categories={categories} />
-        <EatsChapter />
-        <BookChapter />
+        <IntroMarquee />
+        <ProductStory />
         <HowItWorks />
         <LiveProof />
-        <AppSection />
+        <AislesGallery categories={categories} />
+        <CityWall />
+        <JammuBand />
         <PartnerBand />
+        <AppSection />
         <Faq />
         <FinalCta />
       </main>

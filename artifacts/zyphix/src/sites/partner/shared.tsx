@@ -59,7 +59,7 @@ export const TRACKS: Track[] = [
     line: 'Short runs from neighbourhood stores and kitchens to customers a few streets away.',
     bullets: ['Payout shown before you accept', 'Weekly settlement to your bank', 'No forced hours or penalty targets'],
     cta: 'Start delivering',
-    photo: landscape('rider', 0), clip: VIDEOS.foodDelivery,
+    photo: landscape('rider', 0), clip: VIDEOS.rider,
   },
   {
     id: 'restaurant', href: '/restaurant', tone: 'orange', tint: ORANGE, icon: UtensilsCrossed,
@@ -68,7 +68,7 @@ export const TRACKS: Track[] = [
     line: 'Restaurants, dhabas, cloud kitchens, bakeries and sweet shops.',
     bullets: ['Commission explained before go-live', 'Menu, prices and hours stay yours', 'Prep-time control on every order'],
     cta: 'Register restaurant',
-    photo: landscape('restaurant', 1), clip: VIDEOS.food,
+    photo: landscape('chef', 0), clip: VIDEOS.chefTeam,
   },
   {
     id: 'services', href: '/services', tone: 'violet', tint: VIOLET, icon: Sparkles,
@@ -77,7 +77,7 @@ export const TRACKS: Track[] = [
     line: 'Booking requests from your locality, with a verified badge once checks are complete.',
     bullets: ['Verified badge after ID checks', 'You set days, slots and rate card', 'Solo pros and small teams welcome'],
     cta: 'Join Zyphix Book',
-    photo: landscape('cleaning', 0), clip: VIDEOS.cleaning,
+    photo: landscape('plumbing', 0), clip: VIDEOS.plumber,
   },
   {
     id: 'store', href: '/store', tone: 'green', tint: '#0DA366', icon: Store,
@@ -86,7 +86,7 @@ export const TRACKS: Track[] = [
     line: 'Kirana stores, pharmacies, dairies and local retail.',
     bullets: ['Free catalogue setup', 'Stock toggles from your phone', 'Shelf price is the app price'],
     cta: 'List your store',
-    photo: landscape('grocery', 1), clip: VIDEOS.groceryShelf,
+    photo: landscape('shopOwner', 0), clip: VIDEOS.merchant,
   },
 ];
 

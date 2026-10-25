@@ -27,8 +27,8 @@ export function ProductDetail() {
   if (!product) {
     return (
       <div className="mx-auto w-full max-w-[1180px] pt-4 text-gray-900" style={{ fontFamily: FONT }}>
-        <div className="rounded-xl border border-gray-200 bg-white px-6 py-14 text-center">
-          <h1 className="text-[17px] font-semibold tracking-[-0.01em]">Product not found</h1>
+        <div className="rounded-2xl border border-gray-200 bg-white px-6 py-14 text-center">
+          <h1 className="text-[18px] font-semibold tracking-[-0.02em]">Product not found</h1>
           <p className="mt-1 text-[13px] text-gray-500">The item you're looking for isn't available.</p>
           <div className="mt-4"><Button href="/now" size="sm" variant="secondary">Back to store</Button></div>
         </div>
@@ -61,9 +61,9 @@ export function ProductDetail() {
         <span className="truncate">{product.category}</span>
       </div>
 
-      <div className="mt-4 grid items-start gap-5 md:grid-cols-[minmax(260px,420px)_1fr]">
+      <div className="mt-5 grid items-start gap-6 md:grid-cols-[minmax(260px,440px)_1fr] md:gap-10">
         {/* image */}
-        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white">
           <div className="relative aspect-square bg-[#FAFAFA]">
             <img src={mainImage?.src || product.image} alt={product.name}
               className={mainImage?.isFallback ? 'h-full w-full object-cover' : 'h-full w-full bg-white object-contain p-4'} />
@@ -82,7 +82,7 @@ export function ProductDetail() {
         {/* info */}
         <div>
           <p className="text-[12.5px] font-medium text-gray-500">{product.brand}</p>
-          <h1 className="mt-0.5 text-[20px] font-semibold leading-snug tracking-[-0.01em] md:text-[22px]">{product.name}</h1>
+          <h1 className="mt-1 text-balance text-[22px] font-semibold leading-[1.15] tracking-[-0.025em] md:text-[28px]">{product.name}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px] text-gray-500">
             {s.count > 0 && (
               <span className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-1.5 py-0.5 text-[12px] font-semibold text-gray-900">
@@ -94,7 +94,7 @@ export function ProductDetail() {
           </div>
 
           <div className="mt-4 flex items-baseline gap-2.5">
-            <span className="text-[24px] font-semibold tracking-[-0.01em]">₹{product.price}</span>
+            <span className="text-[26px] font-semibold tabular-nums tracking-[-0.03em]">₹{product.price}</span>
             {product.origPrice && product.origPrice > product.price && (
               <>
                 <span className="text-[14px] text-gray-400 line-through">₹{product.origPrice}</span>
@@ -105,7 +105,7 @@ export function ProductDetail() {
           <p className="mt-0.5 text-[12px] text-gray-500">Inclusive of all taxes</p>
 
           {/* delivery facts */}
-          <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="mt-5 grid grid-cols-3 gap-2">
             {[
               { icon: <Clock size={14} />, t: '30 min', s: 'Delivery' },
               { icon: <Truck size={14} />, t: 'Free', s: 'Above ₹149' },
@@ -119,7 +119,7 @@ export function ProductDetail() {
           </div>
 
           {/* add to cart */}
-          <div className="mt-4">
+          <div className="mt-5">
             {q === 0 ? (
               <Button onClick={() => add(snap)} className="w-full sm:w-auto sm:min-w-[200px]">Add to cart</Button>
             ) : (
@@ -135,7 +135,7 @@ export function ProductDetail() {
           </div>
 
           {/* description */}
-          <div className="mt-5 rounded-xl border border-gray-200 bg-white p-4">
+          <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-4 md:p-5">
             <p className="text-[14px] font-semibold">About this product</p>
             <p className="mt-1.5 text-[13px] leading-[1.6] text-gray-600">
               {product.name} by {product.brand}{product.weight ? `, ${product.weight}` : ''}. Sourced daily from trusted local suppliers and delivered in about 30 minutes.
@@ -148,8 +148,8 @@ export function ProductDetail() {
 
       {/* related */}
       {related.length > 0 && (
-        <section className="mt-8">
-          <h2 className="mb-3 text-[17px] font-semibold tracking-[-0.01em] md:text-[18px]">You might also like</h2>
+        <section className="mt-10 border-t border-gray-200 pt-8 md:mt-14">
+          <h2 className="mb-4 text-[18px] font-semibold tracking-[-0.02em] md:text-[20px]">You might also like</h2>
           <div className="grid grid-cols-3 gap-2.5 md:grid-cols-4 lg:grid-cols-6 lg:gap-3">
             {related.map(r => {
               const img = productImageFor(r, categories);

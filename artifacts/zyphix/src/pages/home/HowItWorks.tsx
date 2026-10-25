@@ -1,75 +1,74 @@
 import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { MapPin, Store, CreditCard, Navigation, UtensilsCrossed, Wrench } from 'lucide-react';
-import { Dark, Light, Glow, Grain, Kicker, Headline, Sub, Reveal, Counter, Ticker, isStatic, EASE } from '@/ui/cinema';
+import { MapPin, Store, CreditCard, Navigation, UtensilsCrossed, Wrench, Check } from 'lucide-react';
+import { Light, Kicker, Sub, Reveal, Counter, Ticker, PhotoTile } from '@/ui/cinema';
+import { Accent, RouteMap } from '@/ui/motion2';
 import { Container } from '@/ui/kit';
+import { landscape } from '@/data/media';
 import { usePartners, type PartnerListing } from '@/lib/partners';
-import { NUM, PARTNER_SITE } from './shared';
+import { NUM, PARTNER_SITE, Display, TileLabel } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   "How it works" (id="how") — four horizontal steps with an animated connector,
-   then the live-proof band fed by the real partner directory.
+   "How it works" (id="how") — live route animation beside the four steps and
+   the promise list, then the live-proof band fed by the real partner directory.
 ──────────────────────────────────────────────────────────────────────────── */
 
 const STEPS = [
-  { icon: <MapPin size={20} />, title: 'Set your location', body: 'Drop a pin or type your colony. We only show stores, kitchens and pros that actually serve your street.' },
-  { icon: <Store size={20} />, title: 'Pick from local partners', body: 'Real shelves, real menus, real slots. Prices are the partner’s own, with no markup from us.' },
-  { icon: <CreditCard size={20} />, title: 'Pay how you like', body: 'UPI, cards, net banking, wallets or cash on delivery. The total you see is the total you pay.' },
-  { icon: <Navigation size={20} />, title: 'Track it live', body: 'Watch your rider or pro on the map. Groceries in 30 minutes, food while it is hot, pros on the slot you chose.' },
+  { icon: <MapPin size={17} />, title: 'Set your location', body: 'We only show stores, kitchens and pros that serve your street.' },
+  { icon: <Store size={17} />, title: 'Pick from local partners', body: 'Real shelves, real menus, real slots, at the partner’s own prices.' },
+  { icon: <CreditCard size={17} />, title: 'Pay how you like', body: 'UPI, cards, wallets or cash on delivery. No hidden charges.' },
+  { icon: <Navigation size={17} />, title: 'Track it live', body: 'Watch the rider or pro on the map, right to your door.' },
 ];
 
-function Connector() {
-  const stat = isStatic();
-  return (
-    <div aria-hidden className="pointer-events-none absolute left-0 top-6 hidden h-px w-full md:block">
-      <div className="absolute inset-0 bg-white/10" />
-      <motion.div
-        className="absolute inset-0 origin-left"
-        style={{ background: 'linear-gradient(90deg, #0DA366, #19C27C 60%, rgba(25,194,124,.3))' }}
-        initial={stat ? false : { scaleX: 0 }}
-        whileInView={stat ? undefined : { scaleX: 1 }}
-        viewport={{ once: true, amount: 0.6 }}
-        transition={{ duration: 1.6, ease: EASE, delay: 0.2 }}
-      />
-    </div>
-  );
-}
+const PROMISES = ['₹0 delivery above ₹199', 'No markup on shelf or menu prices', 'No surge pricing', 'Refunds to source or wallet'];
 
 export function HowItWorks() {
   return (
-    <Dark id="how" className="scroll-mt-16 border-t border-white/[.06] py-24 md:py-36">
-      <Glow x="50%" y="0%" size={1100} alpha={0.3} />
-      <Grain />
+    <Light id="how" className="scroll-mt-16 py-24 md:py-36">
       <Container>
-        <div className="max-w-[720px]">
-          <Reveal><Kicker light>How it works</Kicker></Reveal>
-          <Reveal delay={0.05}><Headline light size="lg">Four taps between you and your door.</Headline></Reveal>
-          <Reveal delay={0.1}><Sub light className="mt-6">The same flow for groceries, food and services. One login, one wallet, one order history.</Sub></Reveal>
-        </div>
+        <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-5">
+            <Reveal><Kicker>How it works</Kicker></Reveal>
+            <Reveal delay={0.05}><Display>Watch your order <Accent green>move</Accent>.</Display></Reveal>
+            <Reveal delay={0.1}><Sub className="mt-6 max-w-[44ch]">The same four steps for groceries, food and services. One login, one wallet, one order history.</Sub></Reveal>
 
-        <div className="relative mt-16 md:mt-20">
-          <Connector />
-          <ol className="relative grid gap-10 md:grid-cols-4 md:gap-8">
-            {STEPS.map((s, i) => (
-              <Reveal as="li" key={s.title} delay={0.12 + i * 0.12} y={28} className="relative flex gap-5 md:block">
-                {/* vertical connector on mobile */}
-                {i < STEPS.length - 1 && <span aria-hidden className="absolute left-6 top-12 h-[calc(100%+40px)] w-px bg-white/10 md:hidden" />}
-                <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-emerald-300/30 bg-[#05080E] text-emerald-300 shadow-[0_0_0_6px_#05080E,0_0_40px_rgba(13,163,102,.35)]">
-                  {s.icon}
-                </div>
-                <div className="md:mt-7">
-                  <p className="text-[13px] font-semibold tracking-[0.12em] text-emerald-300/80" style={NUM}>
-                    <Counter to={i + 1} duration={0.9} format={n => String(Math.round(n)).padStart(2, '0')} />
-                  </p>
-                  <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-white">{s.title}</h3>
-                  <p className="mt-2 text-[15px] leading-[1.6] text-white/60">{s.body}</p>
-                </div>
+            <ol className="mt-10 border-t border-gray-200">
+              {STEPS.map((s, i) => (
+                <Reveal as="li" key={s.title} delay={0.1 + i * 0.06} y={16} className="flex gap-4 border-b border-gray-200 py-5">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">{s.icon}</span>
+                  <div>
+                    <p className="text-[16.5px] font-semibold tracking-[-0.02em] text-gray-900"><span className="mr-2 text-[13px] font-medium text-gray-400" style={NUM}>0{i + 1}</span>{s.title}</p>
+                    <p className="mt-1 text-[14.5px] leading-[1.55] text-gray-600">{s.body}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </ol>
+          </div>
+
+          <div className="lg:col-span-7">
+            <Reveal y={32}>
+              <RouteMap className="aspect-[4/3] w-full shadow-[0_40px_100px_-40px_rgba(11,15,25,.55)] sm:aspect-[560/380]" />
+            </Reveal>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <Reveal delay={0.1} y={24}>
+                <PhotoTile photo={landscape('deliveryBag', 2)} ratio="4/3" rounded="rounded-3xl" className="!bg-[#0B1220]">
+                  <TileLabel title="Handed over, not dropped" />
+                </PhotoTile>
               </Reveal>
-            ))}
-          </ol>
+              <Reveal delay={0.16} y={24} className="flex flex-col justify-between rounded-3xl bg-[#F6F7F9] p-5 ring-1 ring-gray-200 sm:p-6">
+                <p className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-emerald-700">The promise</p>
+                <ul className="mt-3 space-y-2.5">
+                  {PROMISES.map(p => (
+                    <li key={p} className="flex items-start gap-2.5 text-[13.5px] font-medium leading-[1.4] text-gray-800 sm:text-[14.5px]">
+                      <span className="mt-0.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-[#0DA366] text-white"><Check size={11} strokeWidth={3} /></span>{p}
+                    </li>
+                  ))}
+                </ul>
+              </Reveal>
+            </div>
+          </div>
         </div>
       </Container>
-    </Dark>
+    </Light>
   );
 }
 
@@ -102,12 +101,12 @@ export function LiveProof() {
     );
   });
   return (
-    <Light tone="soft" className="py-16 md:py-20">
+    <Light tone="soft" className="border-y border-gray-100 py-16 md:py-20">
       <Container>
         <Reveal className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Kicker>Live partner directory</Kicker>
-            <h2 className="text-[26px] font-semibold tracking-[-0.025em] text-gray-900 sm:text-[32px]">
+            <h2 className="text-[26px] font-semibold tracking-[-0.035em] text-gray-900 sm:text-[32px]">
               <span style={NUM}><Counter to={all.length} /></span> {all.length === 1 ? 'partner' : 'partners'} registered on Zyphix
             </h2>
           </div>

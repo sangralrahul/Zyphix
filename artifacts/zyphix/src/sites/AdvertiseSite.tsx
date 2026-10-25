@@ -28,11 +28,11 @@ function Home() {
       <Hero />
       <Signals />
       <Formats />
-      <Audience />
       <Reporting />
+      <Audience />
+      <Process />
       <Statement />
       <Pricing />
-      <Process />
       <InquiryForm />
       <Faq />
       <FinalCta />

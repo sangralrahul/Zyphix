@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Headset, IndianRupee, UserRound, Wallet, CalendarCheck, BadgeCheck, Smartphone, FileCheck, Clock, Banknote, ListChecks } from 'lucide-react';
+import { ArrowRight, Headset, IndianRupee, UserRound, Wallet, CalendarCheck, BadgeCheck, Smartphone, FileCheck, Clock, Banknote, ListChecks } from 'lucide-react';
 import { Light, Dark, Glow, Grain, Kicker, Headline, Sub, Reveal, Stagger, ParallaxImage, Counter, isStatic, EASE } from '@/ui/cinema';
-import { Container, Chip } from '@/ui/kit';
+import { Container } from '@/ui/kit';
+import { Spotlight, ScrollStory, ClipWall, type Chapter } from '@/ui/motion2';
+import { VIDEOS } from '@/data/media';
 import { PARTNER_PHOTOS, NUM } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -51,17 +53,19 @@ export function WhatYouGet() {
 
           <div className="order-1 lg:order-2 lg:col-span-7">
             <Reveal><Kicker>What you get</Kicker></Reveal>
-            <Reveal delay={0.05}><Headline size="lg">The same deal for every partner, written down.</Headline></Reveal>
+            <Reveal delay={0.05}><Headline size="lg" className="max-w-[18ch] text-balance">The same deal for every partner, written down.</Headline></Reveal>
             <Reveal delay={0.1}><Sub className="mt-6 max-w-[560px]">These are commitments about process, not promises about earnings. They apply to every track from the first week.</Sub></Reveal>
-            <Stagger className="mt-10 grid gap-x-8 gap-y-7 sm:grid-cols-2" step={0.07}>
+            <Stagger className="mt-10 grid gap-3 sm:grid-cols-2 sm:gap-4" step={0.07}>
               {GETS.map(g => (
-                <div key={g.title} className="flex gap-4">
-                  <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-700 shadow-[0_1px_2px_rgba(0,0,0,.05)] ring-1 ring-gray-200"><g.icon size={19} /></span>
-                  <div>
-                    <p className="text-[16px] font-semibold tracking-[-0.01em] text-gray-900">{g.title}</p>
-                    <p className="mt-1 text-[14.5px] leading-[1.55] text-gray-600">{g.body}</p>
+                <Spotlight key={g.title} dark={false} className="h-full">
+                  <div className="flex h-full gap-4 p-5 sm:p-6">
+                    <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"><g.icon size={19} /></span>
+                    <div>
+                      <p className="text-[16px] font-semibold tracking-[-0.02em] text-gray-900">{g.title}</p>
+                      <p className="mt-1 text-[14px] leading-[1.55] text-gray-600">{g.body}</p>
+                    </div>
                   </div>
-                </div>
+                </Spotlight>
               ))}
             </Stagger>
           </div>
@@ -111,7 +115,7 @@ export function TermsBand() {
         <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-7">
             <Reveal><Kicker light>How we work</Kicker></Reveal>
-            <Reveal delay={0.05}><Headline light size="lg">Transparent terms. Real people.</Headline></Reveal>
+            <Reveal delay={0.05}><Headline light size="lg" className="max-w-[18ch] text-balance">Transparent terms. Real people.</Headline></Reveal>
           </div>
           <Reveal delay={0.1} className="lg:col-span-5">
             <Sub light>No surprises after go-live. Here is how a week's payout actually moves, and who you can call when something needs fixing.</Sub>
@@ -142,11 +146,11 @@ export function TermsBand() {
 
         <Stagger className="mt-20 grid gap-6 border-t border-white/10 pt-12 md:grid-cols-3 md:gap-8" step={0.08}>
           {COLS.map(c => (
-            <div key={c.title} className="rounded-3xl border border-white/10 bg-white/[.04] p-6 md:p-7">
+            <Spotlight key={c.title} className="h-full"><div className="p-6 md:p-7">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/[.06] text-emerald-300 ring-1 ring-white/10"><c.icon size={18} /></span>
               <h3 className="mt-5 text-[18px] font-semibold tracking-[-0.01em] text-white">{c.title}</h3>
               <p className="mt-2.5 text-[15px] leading-[1.65] text-white/60">{c.body}</p>
-            </div>
+            </div></Spotlight>
           ))}
         </Stagger>
       </Container>
@@ -154,42 +158,54 @@ export function TermsBand() {
   );
 }
 
-/* ── 4-step onboarding ──────────────────────────────────────────────────── */
+/* ── 4-step onboarding (pinned story) ──────────────────────────────────── */
 const STEPS = [
-  { n: '01', title: 'Apply', body: 'Pick a track and fill a short form. Takes about ten minutes.', need: ['Phone number', 'Your area'] },
-  { n: '02', title: 'Verification call', body: 'Your onboarding manager calls within two working days to confirm details.', need: ['Government ID', 'Bank account'] },
-  { n: '03', title: 'Set up', body: 'Menu, catalogue, rate card or vehicle details, set up together with our team.', need: ['Menu / catalogue', 'FSSAI or RC (if applicable)'] },
-  { n: '04', title: 'Go live', body: 'Your listing or partner app goes live. Same person stays with you through week one.', need: ['Partner app', 'Smartphone'] },
+  { title: 'Apply in ten minutes.', body: 'Pick a track and fill a short form on this portal. No fee, no deposit.', need: ['Phone number', 'Your area'], clip: VIDEOS.phoneOrder },
+  { title: 'A real person calls you.', body: 'Your onboarding manager calls within two working days to confirm details and check documents.', need: ['Government ID', 'Bank account'], clip: VIDEOS.chai },
+  { title: 'Set up, together.', body: 'Menu, catalogue, rate card or vehicle details, set up with our team, not left to a help article.', need: ['Menu / catalogue', 'FSSAI or RC (if applicable)'], clip: VIDEOS.packing },
+  { title: 'Go live.', body: 'Your listing or partner app goes live. The same person stays with you through week one.', need: ['Partner app', 'Smartphone'], clip: VIDEOS.doorHandoff },
 ];
 
 export function Steps() {
+  const chapters: Chapter[] = STEPS.map((s, i) => ({
+    kicker: `Step 0${i + 1} of 04`,
+    title: s.title,
+    body: s.body,
+    clip: s.clip,
+    extra: (
+      <div>
+        <p className="mb-2.5 text-[12px] font-semibold uppercase tracking-[0.12em] text-white/45">What you need</p>
+        <div className="flex flex-wrap gap-2">
+          {s.need.map(n => <span key={n} className="inline-flex h-8 items-center gap-1.5 rounded-full border border-white/15 bg-white/[.06] px-3 text-[12.5px] font-medium text-white/85"><CalendarCheck size={12} className="text-emerald-300" /> {n}</span>)}
+        </div>
+      </div>
+    ),
+  }));
+  return <ScrollStory id="onboarding" chapters={chapters} intro={<Kicker light>Onboarding · application to go-live</Kicker>} />;
+}
+
+/* ── Who partners: clip wall ─────────────────────────────────────────────── */
+export function WhoPartners() {
   return (
-    <Light id="onboarding" className="scroll-mt-16 py-24 md:py-36">
+    <Light className="py-24 md:py-36">
       <Container>
-        <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
+        <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-7">
-            <Reveal><Kicker>Onboarding</Kicker></Reveal>
-            <Reveal delay={0.05}><Headline size="lg">Four steps from application to go-live.</Headline></Reveal>
+            <Reveal><Kicker>Who partners</Kicker></Reveal>
+            <Reveal delay={0.05}><Headline size="lg" className="max-w-[18ch] text-balance">The people who keep a neighbourhood running.</Headline></Reveal>
           </div>
-          <Reveal delay={0.1} className="lg:col-span-5">
-            <Sub>Free to apply, no joining fee. What you need at each step is listed below, so nothing stalls on paperwork.</Sub>
-          </Reveal>
+          <Reveal delay={0.1} className="lg:col-span-5"><Sub className="max-w-[48ch]">Spice sellers, tandoor kitchens, sabzi stalls, street-food stands and the electrician down the road. If customers nearby rely on you, there is a track for you.</Sub></Reveal>
         </div>
-        <div className="relative mt-14 md:mt-20">
-          <div aria-hidden className="absolute left-0 right-0 top-5 hidden h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent md:block" />
-          <ol className="grid gap-10 md:grid-cols-4 md:gap-6">
-            {STEPS.map((s, i) => (
-              <Reveal as="li" key={s.n} delay={0.08 * i} y={24} className="relative">
-                <span className="relative z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-[13px] font-semibold text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,.04)]" style={NUM}>{s.n}</span>
-                <h3 className="mt-5 text-[19px] font-semibold tracking-[-0.015em] text-gray-900">{s.title}</h3>
-                <p className="mt-2 text-[14.5px] leading-relaxed text-gray-600">{s.body}</p>
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {s.need.map(n => <Chip key={n}><CalendarCheck size={11} className="text-emerald-600" /> {n}</Chip>)}
-                </div>
-              </Reveal>
-            ))}
-          </ol>
-        </div>
+        <Reveal delay={0.1} y={32} className="mt-12 md:mt-16">
+          <ClipWall
+            clips={[VIDEOS.tandoor, VIDEOS.spices, VIDEOS.vegMarket, VIDEOS.streetFood, VIDEOS.electrician]}
+            labels={['Kitchens & dhabas', 'Spice & kirana stores', 'Sabzi sellers', 'Street food', 'Home-service pros']}
+          />
+        </Reveal>
+        <Reveal delay={0.1} className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-gray-200 pt-6">
+          <p className="text-[14px] text-gray-500">Free to apply on every track. No joining fee or deposit.</p>
+          <a href="#tracks" className="inline-flex items-center gap-1.5 text-[14.5px] font-semibold text-emerald-700 hover:text-emerald-800">Find your track <ArrowRight size={15} /></a>
+        </Reveal>
       </Container>
     </Light>
   );

@@ -1,13 +1,14 @@
 import React from 'react';
 import { LayoutPanelTop, Rows3, Sparkles, Search, Star, TicketPercent, Plus, Clock, Check, ArrowRight, MapPin, ChevronDown } from 'lucide-react';
 import { Container, Phone, Browser, G, G_DEEP } from '@/ui/kit';
-import { Light, Kicker, Headline, Sub, Reveal, Tilt } from '@/ui/cinema';
+import { Kicker } from '@/ui/cinema';
+import { HScrollGallery } from '@/ui/motion2';
 import { AppHeader, AppSearch, AppBanner, AppDots, AppRow, AppTile, AppGhost, SponsoredTag, IllustrativeTag } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Ad formats — bento of six cards. Each card shows the placement as an
-   illustrative in-app mock (Phone / Browser), then what / where / best for,
-   with specs and billing behind a disclosure.
+   Ad formats — pinned horizontal gallery of six cards (dark band). Each card
+   shows the placement as an illustrative in-app mock (Phone / Browser), then
+   what / best for, with where / specs / billing behind a disclosure.
 ──────────────────────────────────────────────────────────────────────────── */
 
 type Format = {
@@ -183,113 +184,83 @@ const FORMATS: Format[] = [
 ];
 
 /* ── Card pieces ─────────────────────────────────────────────────────────── */
-/** Soft stage that crops the top of a Phone mock and fades it into the card. */
-function Stage({ children, phone = true, fill = false, className = '' }: { children: React.ReactNode; phone?: boolean; fill?: boolean; className?: string }) {
+/** Soft stage that crops the top of a mock and fades it into the card. */
+function Stage({ children, phone = true }: { children: React.ReactNode; phone?: boolean }) {
   return (
-    <div className={`relative overflow-hidden bg-[#F3F5F4] ${phone ? 'h-[340px] sm:h-[380px]' : ''} ${className}`}>
-      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(60% 55% at 50% 30%, rgba(13,163,102,.14), transparent 70%)' }} />
-      <div className={`${fill ? 'relative lg:absolute lg:inset-x-0 lg:top-0' : 'relative'} ${phone ? 'flex justify-center pt-8' : 'px-4 py-8 sm:px-8 sm:py-10'}`}>
-        <div className="transition-transform duration-700 ease-[cubic-bezier(.22,1,.36,1)] group-hover:-translate-y-2">{children}</div>
+    <div className="relative h-[230px] overflow-hidden bg-[#F3F5F4] sm:h-[270px]">
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(60% 55% at 50% 30%, rgba(13,163,102,.16), transparent 70%)' }} />
+      <div className={phone ? 'flex justify-center pt-7' : 'px-4 pt-7 sm:px-6'}>
+        <div className="origin-top transition-transform duration-700 ease-[cubic-bezier(.22,1,.36,1)] group-hover:-translate-y-2">{children}</div>
       </div>
-      {phone && <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-24" style={{ background: 'linear-gradient(180deg, rgba(243,245,244,0), #F3F5F4 85%)' }} />}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-20" style={{ background: 'linear-gradient(180deg, rgba(243,245,244,0), #F3F5F4 85%)' }} />
       <IllustrativeTag className="absolute right-3 top-3" />
     </div>
   );
 }
 
-function Details({ f }: { f: Format }) {
+function Details({ f, i }: { f: Format; i: number }) {
   return (
-    <div className="flex flex-1 flex-col p-6 sm:p-7">
+    <div className="flex flex-1 flex-col p-5 sm:p-6">
       <div className="flex items-center gap-3">
         <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">{f.icon}</span>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-[11.5px] font-semibold uppercase tracking-[0.12em] text-gray-400">{f.product}</p>
-          <h3 className="text-[20px] font-semibold leading-tight tracking-[-0.02em] text-gray-900">{f.label}</h3>
+          <h3 className="text-[20px] font-semibold leading-tight tracking-[-0.03em] text-gray-900">{f.label}</h3>
         </div>
+        <span className="text-[12.5px] font-semibold tabular-nums text-gray-300">0{i + 1}</span>
       </div>
-      <p className="mt-4 text-[15px] leading-[1.6] text-gray-700">{f.what}</p>
-      <p className="mt-3 text-[13.5px] leading-[1.6] text-gray-500"><span className="font-semibold text-gray-700">Where it appears. </span>{f.where}</p>
-      <ul className="mt-4 flex flex-wrap gap-1.5">
+      <p className="mt-3.5 text-[14.5px] leading-[1.55] text-gray-700">{f.what}</p>
+      <ul className="mt-3.5 flex flex-wrap gap-1.5">
         {f.bestFor.map(b => <li key={b} className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-[12px] font-medium text-gray-700"><Check size={12} className="text-emerald-600" />{b}</li>)}
       </ul>
-      <details className="group/d mt-5 rounded-xl border border-gray-200 bg-[#FAFAFA] open:bg-white">
+      <details className="group/d mt-4 rounded-xl border border-gray-200 bg-[#FAFAFA] open:bg-white">
         <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between px-4 text-[13.5px] font-semibold text-gray-900 [&::-webkit-details-marker]:hidden">
-          Specs &amp; billing <ChevronDown size={16} className="text-gray-400 transition-transform group-open/d:rotate-180" />
+          Where, specs &amp; billing <ChevronDown size={16} className="text-gray-400 transition-transform group-open/d:rotate-180" />
         </summary>
-        <div className="border-t border-gray-200 px-4 pb-4 pt-3">
+        <div className="max-h-[220px] overflow-y-auto border-t border-gray-200 px-4 pb-4 pt-3">
+          <p className="mb-3 text-[13px] leading-[1.55] text-gray-600"><span className="font-semibold text-gray-900">Where it appears. </span>{f.where}</p>
           <dl className="grid gap-y-1.5">
             {f.specs.map(([k, v]) => (
-              <div key={k} className="flex gap-3 text-[13.5px]"><dt className="w-[84px] shrink-0 font-medium text-gray-900">{k}</dt><dd className="text-gray-600">{v}</dd></div>
+              <div key={k} className="flex gap-3 text-[13px]"><dt className="w-[84px] shrink-0 font-medium text-gray-900">{k}</dt><dd className="text-gray-600">{v}</dd></div>
             ))}
           </dl>
-          <p className="mt-3 border-t border-gray-200 pt-3 text-[13.5px] text-gray-600"><span className="font-medium text-gray-900">Billing</span> · {f.billing}</p>
+          <p className="mt-3 border-t border-gray-200 pt-3 text-[13px] text-gray-600"><span className="font-medium text-gray-900">Billing</span> · {f.billing}</p>
         </div>
       </details>
-      <a href="#contact" className="mt-auto inline-flex items-center gap-1.5 pt-6 text-[14px] font-semibold text-emerald-700 transition hover:gap-2.5 hover:text-emerald-800">
-        Get a quote for {f.label.toLowerCase()} <ArrowRight size={15} />
+      <a href="#contact" className="mt-auto inline-flex items-center gap-1.5 pt-5 text-[14px] font-semibold text-emerald-700 transition hover:gap-2.5 hover:text-emerald-800">
+        Get a quote <ArrowRight size={15} />
       </a>
     </div>
   );
 }
 
-const cardCls = 'group flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(11,15,25,.04)] transition-shadow duration-500 hover:shadow-[0_30px_70px_rgba(11,15,25,.10)]';
-
-function FormatCard({ f, delay = 0, className = '' }: { f: Format; delay?: number; className?: string }) {
+function FormatCard({ f, i }: { f: Format; i: number }) {
   return (
-    <Reveal delay={delay} y={28} className={className}>
-      <Tilt max={3} className="h-full">
-        <article className={cardCls}>
-          <Stage>{f.preview}</Stage>
-          <Details f={f} />
-        </article>
-      </Tilt>
-    </Reveal>
+    <article className="group flex h-full flex-col overflow-hidden rounded-3xl bg-white shadow-[0_30px_70px_-30px_rgba(0,0,0,.6)] ring-1 ring-white/10">
+      <Stage phone={f.id !== 'featured'}>{f.preview}</Stage>
+      <Details f={f} i={i} />
+    </article>
   );
 }
 
-/* ── Section ─────────────────────────────────────────────────────────────── */
+/* ── Section: pinned horizontal gallery of the six formats ───────────────── */
 export function Formats() {
-  const [banner, row, spotlight, search, featured, offers] = FORMATS;
   return (
-    <Light id="formats" className="scroll-mt-16 py-24 md:py-36">
-      <Container>
-        <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
+    <HScrollGallery
+      id="formats"
+      cardClass="w-[84vw] sm:w-[400px]"
+      header={
+        <div className="grid gap-5 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-7">
-            <Reveal><Kicker>Formats</Kicker></Reveal>
-            <Reveal delay={0.05}><Headline size="lg">Six placements, built into the shopping journey.</Headline></Reveal>
+            <Kicker light>Formats</Kicker>
+            <h2 className="max-w-[18ch] text-balance text-[32px] font-semibold leading-[1.03] tracking-[-0.045em] text-white sm:text-[46px] md:text-[56px]">
+              Six placements, built into the shopping journey.
+            </h2>
           </div>
-          <Reveal delay={0.1} className="lg:col-span-5">
-            <Sub>Each one sits where a decision is being made. All are labelled Sponsored, priced flat and reported individually.</Sub>
-          </Reveal>
+          <p className="hidden max-w-[46ch] text-[17px] leading-[1.6] text-white/65 lg:col-span-5 lg:block">Each one sits where a decision is being made. All are labelled Sponsored, priced flat and reported individually.</p>
         </div>
-
-        <div className="mt-12 grid gap-4 md:mt-16 md:grid-cols-2 lg:grid-cols-3">
-          <FormatCard f={banner} />
-          <FormatCard f={row} delay={0.06} />
-          <FormatCard f={spotlight} delay={0.12} className="md:col-span-2 lg:col-span-1" />
-          <FormatCard f={search} />
-
-          {/* Eats on the web, in a browser frame */}
-          <Reveal delay={0.06} y={28} className="md:col-span-1 lg:col-span-2">
-            <Tilt max={2} className="h-full">
-              <article className={cardCls}>
-                <Stage phone={false}><FeaturedPreview /></Stage>
-                <Details f={featured} />
-              </article>
-            </Tilt>
-          </Reveal>
-
-          {/* Offers: wide horizontal card */}
-          <Reveal y={28} className="md:col-span-2 lg:col-span-3">
-            <Tilt max={1.5} className="h-full">
-              <article className={`${cardCls} lg:flex-row`}>
-                <Stage fill className="lg:h-auto lg:min-h-[420px] lg:w-[44%] lg:shrink-0">{offers.preview}</Stage>
-                <Details f={offers} />
-              </article>
-            </Tilt>
-          </Reveal>
-        </div>
-      </Container>
-    </Light>
+      }
+      items={FORMATS.map((f, i) => <FormatCard key={f.id} f={f} i={i} />)}
+    />
   );
 }

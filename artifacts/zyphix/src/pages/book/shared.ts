@@ -21,13 +21,14 @@ type Meta = { icon: LucideIcon; photo: Photo; clip?: Clip; blurb: string };
 
 /** Icon, verified Pexels photo (and clip where one exists) per service id. */
 export const SERVICE_META: Record<string, Meta> = {
-  sv1:  { icon: Wrench,     photo: PHOTOS.plumbing[0],    blurb: 'Leaks, taps, fittings' },
+  sv1:  { icon: Wrench,     photo: PHOTOS.plumbing[0],    clip: VIDEOS.plumber,     blurb: 'Leaks, taps, fittings' },
   sv2:  { icon: Zap,        photo: PHOTOS.electrician[0], clip: VIDEOS.electrician, blurb: 'Switchboards, fans, wiring' },
-  sv3:  { icon: Sparkles,   photo: PHOTOS.cleaning[1],    clip: VIDEOS.cleaning,    blurb: 'Deep clean, kitchen, bathroom' },
-  sv4:  { icon: Paintbrush, photo: PHOTOS.cleaning[5],    blurb: 'Rooms, touch-ups, textures' },
-  sv5:  { icon: Snowflake,  photo: PHOTOS.appliance[0],   blurb: 'Service, gas refill, install' },
+  // the hero already plays the cleaning clip, so this tile stays a photo (no clip twice per page)
+  sv3:  { icon: Sparkles,   photo: PHOTOS.cleaning[1],    blurb: 'Deep clean, kitchen, bathroom' },
+  sv4:  { icon: Paintbrush, photo: PHOTOS.painting[0],    blurb: 'Rooms, touch-ups, textures' },
+  sv5:  { icon: Snowflake,  photo: PHOTOS.appliance[0],   clip: VIDEOS.acRepair,    blurb: 'Service, gas refill, install' },
   sv6:  { icon: Droplets,   photo: PHOTOS.plumbing[1],    blurb: 'Filter change, repair' },
-  sv7:  { icon: Hammer,     photo: PHOTOS.plumbing[4],    blurb: 'Repairs, fittings, assembly' },
+  sv7:  { icon: Hammer,     photo: PHOTOS.carpenter[0],   blurb: 'Repairs, fittings, assembly' },
   sv8:  { icon: ChefHat,    photo: PHOTOS.indianFood[0],  blurb: 'Daily meals, parties' },
   sv9:  { icon: Truck,      photo: PHOTOS.people[2],      blurb: 'Local shifting, packing' },
   sv10: { icon: Wrench,     photo: PHOTOS.plumbing[5],    blurb: 'Small fixes, mounting' },

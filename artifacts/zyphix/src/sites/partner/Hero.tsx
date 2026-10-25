@@ -1,34 +1,36 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import { VideoHero, Words, Kicker, GlowButton, GhostButton, Ticker, Reveal, Light, isStatic, EASE } from '@/ui/cinema';
+import { VideoHero, Kicker, GlowButton, GhostButton, Ticker, Reveal, Light, isStatic, EASE } from '@/ui/cinema';
 import { Container } from '@/ui/kit';
 import { VIDEOS } from '@/data/media';
+import { Magnetic } from '@/ui/motion2';
+import { AccentWords } from '@/pages/book/AccentWords';
 import { PARTNERSHIPS_EMAIL, TRACKS } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Full-viewport rider video hero + the four track pills, then a promise ticker.
+   Full-viewport city video hero (accent headline, magnetic CTA) + the four track pills, then a promise ticker.
 ──────────────────────────────────────────────────────────────────────────── */
 
 export function Hero() {
   const stat = isStatic();
   const fade = (d: number) => stat ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.8, ease: EASE, delay: d } };
   return (
-    <VideoHero clip={VIDEOS.rider} height="min-h-[100svh]" dim={0.45} position="center 45%">
+    <VideoHero clip={VIDEOS.heroCity} height="min-h-[100svh]" dim={0.45} position="center 45%">
       <Container className="pb-8 pt-40 sm:pb-10 md:pt-48">
         <motion.div {...fade(0.1)}>
           <Kicker light>Partner portal · Jammu first</Kicker>
         </motion.div>
-        <Words
-          text="Grow with Jammu's SuperLocal app."
+        <AccentWords
+          parts={["Grow with Jammu's", { accent: 'SuperLocal', green: true }, 'app.']}
           delay={0.25}
-          className="max-w-[980px] text-[44px] font-semibold leading-[1.02] tracking-[-0.035em] text-white sm:text-[64px] md:text-[84px]"
+          className="max-w-[14ch] text-balance text-[46px] font-semibold leading-[0.98] tracking-[-0.045em] text-white sm:text-[68px] md:text-[92px]"
         />
         <motion.p {...fade(0.8)} className="mt-6 max-w-[580px] text-[17px] leading-[1.6] text-white/75 sm:text-[19px]">
           Deliver, cook, fix or sell for customers a few streets away. Free to apply, transparent terms, weekly payouts and a real onboarding manager from application to go-live.
         </motion.p>
         <motion.div {...fade(0.95)} className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <GlowButton href="#tracks">Choose your track <ArrowRight size={17} /></GlowButton>
+          <Magnetic className="w-full sm:w-auto"><GlowButton href="#tracks" className="w-full sm:w-auto">Choose your track <ArrowRight size={17} /></GlowButton></Magnetic>
           <GhostButton href={`mailto:${PARTNERSHIPS_EMAIL}`}>Talk to us</GhostButton>
         </motion.div>
 

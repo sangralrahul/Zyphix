@@ -2,9 +2,10 @@ import React from 'react';
 import { Check, ArrowRight } from 'lucide-react';
 import { Container, Button } from '@/ui/kit';
 import { Light, Kicker, Headline, Sub, Reveal } from '@/ui/cinema';
+import { Spotlight, Magnetic } from '@/ui/motion2';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Pricing — three tiers described by inclusions only. No prices.
+   Pricing — three tiers described by inclusions only (Spotlight cards). No prices.
 ──────────────────────────────────────────────────────────────────────────── */
 
 const TIERS = [
@@ -31,20 +32,20 @@ export function Pricing() {
       <Container>
         <div className="mx-auto max-w-[760px] text-center">
           <Reveal><Kicker>Pricing</Kicker></Reveal>
-          <Reveal delay={0.05}><Headline size="lg">Flat rates. Written quotes.</Headline></Reveal>
+          <Reveal delay={0.05}><Headline size="lg" className="text-balance">Flat rates. Written quotes.</Headline></Reveal>
           <Reveal delay={0.1}><Sub className="mx-auto mt-5 max-w-[620px]">Every placement is priced flat per period and quoted before anything goes live. Pick the shape that fits and we'll send a custom quote.</Sub></Reveal>
         </div>
 
         <div className="mt-14 grid gap-4 md:mt-20 lg:grid-cols-3 lg:items-stretch">
           {TIERS.map((t, i) => (
             <Reveal key={t.name} delay={i * 0.08} y={28}>
-              <article className={`relative flex h-full flex-col overflow-hidden rounded-3xl p-7 sm:p-8 ${t.featured
-                ? 'bg-[#05080E] text-white shadow-[0_40px_90px_rgba(5,8,14,.28)]'
-                : 'border border-gray-200 bg-white text-gray-900'}`}>
+              <Spotlight dark={t.featured} color={t.featured ? 'rgba(52,211,153,.22)' : 'rgba(13,163,102,.10)'}
+                className={`h-full [&>div:last-child]:h-full ${t.featured ? '!bg-[#05080E] shadow-[0_40px_90px_rgba(5,8,14,.28)]' : ''}`}>
+              <article className={`relative flex h-full flex-col p-7 sm:p-8 ${t.featured ? 'text-white' : 'text-gray-900'}`}>
                 {t.featured && <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(13,163,102,.45), transparent 70%)' }} />}
                 <div className="relative flex items-center justify-between gap-3">
-                  <h3 className="text-[26px] font-semibold tracking-[-0.025em]">{t.name}</h3>
-                  {t.featured && <span className="rounded-full bg-emerald-400/15 px-2.5 py-1 text-[12px] font-semibold text-emerald-200 ring-1 ring-emerald-300/30">Most chosen</span>}
+                  <h3 className="text-[28px] font-semibold tracking-[-0.04em]">{t.name}</h3>
+                  {t.featured && <span className="rounded-full bg-emerald-400/15 px-2.5 py-1 text-[12px] font-semibold text-emerald-200 ring-1 ring-emerald-300/30">Recommended</span>}
                 </div>
                 <p className={`relative mt-1 text-[13.5px] font-semibold ${t.featured ? 'text-emerald-300' : 'text-emerald-700'}`}>{t.tag}</p>
                 <p className={`relative mt-4 text-[15px] leading-[1.6] ${t.featured ? 'text-white/65' : 'text-gray-600'}`}>{t.d}</p>
@@ -59,8 +60,11 @@ export function Pricing() {
                     </div>
                   ))}
                 </dl>
-                <Button href="#contact" variant={t.featured ? 'primary' : 'secondary'} size="lg" className="relative mt-7 w-full">Custom quote <ArrowRight size={15} /></Button>
+                {t.featured
+                  ? <Magnetic strength={0.2} className="relative mt-7 w-full"><Button href="#contact" variant="primary" size="lg" className="w-full">Custom quote <ArrowRight size={15} /></Button></Magnetic>
+                  : <Button href="#contact" variant="secondary" size="lg" className="relative mt-7 w-full">Custom quote <ArrowRight size={15} /></Button>}
               </article>
+              </Spotlight>
             </Reveal>
           ))}
         </div>

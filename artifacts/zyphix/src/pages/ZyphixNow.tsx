@@ -8,7 +8,9 @@ import { useCart } from '@/context/CartContext';
 import { COUPONS } from '@/data/coupons';
 import { usePartners, type PartnerListing } from '@/lib/partners';
 import { Button, IconTile, FONT, G } from '@/ui/kit';
-import { BgVideo, Reveal, Headline, Kicker, Grain } from '@/ui/cinema';
+import { BgVideo, Reveal, Kicker, Grain, isStatic } from '@/ui/cinema';
+import { Accent, Magnetic } from '@/ui/motion2';
+import { HeroLiveOrder, MandiBand, TrackBand, useRotatingWord, DISPLAY } from './now/bands';
 import { VIDEOS, landscape, type Photo } from '@/data/media';
 import {
   discountOf, buildOffers, dealsOfTheDay, bestsellers as pickBestsellers, underPrice, topBrands, freshProduce,
@@ -350,6 +352,8 @@ export function ZyphixNow() {
                     </section>
                   )}
 
+                  <MandiBand onShopProduce={countByCategory.get(PRODUCE_CATEGORY) ? () => jumpTo(PRODUCE_CATEGORY) : undefined} />
+
                   {(under49.length > 0 || under99.length > 0) && (
                     <section>
                       <SectionHead title="Budget picks" sub={`${(priceTab === 49 ? under49Count : under99Count).toLocaleString('en-IN')} products`}
@@ -380,6 +384,8 @@ export function ZyphixNow() {
                     </section>
                   )}
 
+                  <TrackBand />
+
                   {produceRow.length > 0 && (
                     <section>
                       <SectionHead title="Fresh from local farms" sub={`${(countByCategory.get(PRODUCE_CATEGORY) || 0).toLocaleString('en-IN')} products`}
@@ -393,8 +399,8 @@ export function ZyphixNow() {
               {/* Stores near you — live partner directory, only when there are entries */}
               {stores.length > 0 && (
                 <section>
-                  <SectionHead title="Stores near you" sub={`${stores.length} on Zyphix`} />
-                  <div className="-mx-4 flex gap-2.5 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden">
+                  <SectionHead title="Shop by store" sub={`${stores.length} near you on Zyphix`} />
+                  <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-2.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden">
                     {stores.map(s => <StoreRow key={s.id} store={s} />)}
                   </div>
                 </section>
@@ -486,14 +492,17 @@ function Hero({ productCount, onSearch }: { productCount: string; onSearch: (q: 
     { icon: <MapPin size={13} />, text: 'Live in Jammu' },
   ];
   return (
-    <section aria-label="Zyphix Now" className="relative isolate -mx-4 flex min-h-[46svh] items-end overflow-hidden bg-[#05080E] text-white md:mx-0 md:min-h-[56svh] md:rounded-3xl">
+    <section aria-label="Zyphix Now" className="relative isolate -mx-4 flex min-h-[50svh] items-end overflow-hidden bg-[#05080E] text-white md:mx-0 md:min-h-[60svh] md:rounded-3xl">
       <BgVideo clip={VIDEOS.groceryShelf} dim={0.35} position="center" />
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.35) 0%, rgba(5,8,14,.05) 30%, rgba(5,8,14,.55) 65%, rgba(5,8,14,.92) 100%)' }} />
       <Grain opacity={0.05} />
+      <HeroLiveOrder />
       <div className="relative z-10 w-full px-4 pb-16 pt-14 md:px-10 md:pb-24 md:pt-16">
         <Kicker light>Zyphix Now · Jammu</Kicker>
-        <Headline as="h1" size="md" light className="max-w-[640px]">Groceries in 30 minutes</Headline>
-        <p className="mt-3 max-w-[520px] text-[15px] leading-[1.55] text-white/75 md:text-[17px]">
+        <h1 className={`${DISPLAY} max-w-[13ch] text-[38px] leading-[1.0] text-white sm:text-[48px] md:text-[64px]`}>
+          Groceries in <Accent green>30</Accent> minutes
+        </h1>
+        <p className="mt-4 max-w-[520px] text-[15px] leading-[1.55] text-white/75 md:text-[17px]">
           Fresh produce, dairy, snacks and daily staples from stores near you, at your door before the chai goes cold.
         </p>
         <div className="mt-5 max-w-[640px] md:mt-6">
@@ -512,23 +521,32 @@ function Hero({ productCount, onSearch }: { productCount: string; onSearch: (q: 
 }
 
 /** Big white search field. Submits to ?q= (same route the Navbar uses). */
+const PLACEHOLDER_WORDS = ['milk', 'atta', 'bananas', 'paneer', 'maggi', 'onions', 'basmati rice', 'eggs'];
+
 function SearchField({ onSearch, initial = '', compact = false }: { onSearch: (q: string) => void; initial?: string; compact?: boolean }) {
   const [v, setV] = useState(initial);
+  const word = useRotatingWord(PLACEHOLDER_WORDS, 2000);
   useEffect(() => { setV(initial); }, [initial]);
   return (
     <form role="search" onSubmit={e => { e.preventDefault(); onSearch(v); }}
       className={`flex items-center gap-2 rounded-2xl bg-white pl-4 pr-1.5 text-gray-900 ${compact ? 'h-12 border border-gray-200' : 'h-12 shadow-[0_20px_60px_-15px_rgba(0,0,0,.6)] md:h-14'}`}>
       <Search size={18} className="shrink-0 text-gray-400" />
       <input value={v} onChange={e => setV(e.target.value)} aria-label="Search products"
-        placeholder="Search for atta, milk, chips…"
+        placeholder={compact ? 'Search for atta, milk, chips…' : `Search for ${word}…`}
         className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-gray-400 md:text-[16px]" />
       {v && (
         <button type="button" onClick={() => { setV(''); if (compact) onSearch(''); }} aria-label="Clear" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700"><X size={15} /></button>
       )}
-      <button type="submit" className={`inline-flex shrink-0 items-center justify-center rounded-xl px-4 text-[13.5px] font-semibold text-white transition hover:brightness-105 ${compact ? 'h-9' : 'h-9 md:h-11 md:px-5'}`} style={{ background: `linear-gradient(180deg, #13B874 0%, ${G} 100%)` }}>
-        Search
-      </button>
+      {compact ? <SearchSubmit compact /> : <Magnetic strength={0.2}><SearchSubmit /></Magnetic>}
     </form>
+  );
+}
+
+function SearchSubmit({ compact = false }: { compact?: boolean }) {
+  return (
+    <button type="submit" className={`inline-flex shrink-0 items-center justify-center rounded-xl px-4 text-[13.5px] font-semibold text-white transition hover:brightness-105 ${compact ? 'h-9' : 'h-9 md:h-11 md:px-5'}`} style={{ background: `linear-gradient(180deg, #13B874 0%, ${G} 100%)` }}>
+      Search
+    </button>
   );
 }
 
@@ -566,6 +584,13 @@ const OFFER_TONE: Record<OfferTheme, { photo: Photo; label: string; tint: string
   rose:  { photo: landscape('grocery'), label: 'text-rose-300',    tint: 'rgba(136,19,55,.55)' },
 };
 
+/** Slow Ken-Burns drift for offer photos; stops for reduced-motion users. */
+const KENBURNS_CSS = `
+@keyframes zx-kb { 0% { transform: scale(1.04) translate3d(0,0,0); } 100% { transform: scale(1.16) translate3d(-2.5%,-1.5%,0); } }
+.zx-kenburns { animation: zx-kb 16s ease-in-out infinite alternate; will-change: transform; }
+@media (prefers-reduced-motion: reduce) { .zx-kenburns { animation: none; } }
+`;
+
 function OfferCarousel({ offers, categories, onShop }: { offers: Offer[]; categories: Category[]; onShop: (o: Offer) => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -587,16 +612,20 @@ function OfferCarousel({ offers, categories, onShop }: { offers: Offer[]; catego
     if (card) el.scrollTo({ left: card.offsetLeft - el.offsetLeft, behavior: 'smooth' });
   };
 
+  const kb = !isStatic();
   return (
     <section aria-label="Offers">
+      {kb && <style>{KENBURNS_CSS}</style>}
       <div ref={ref} className="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden">
         {offers.map((o, i) => {
           const t = OFFER_TONE[o.theme];
           return (
             <Reveal key={o.key} delay={i * 0.08} y={16} amount={0.3}
               className="group relative flex h-[184px] w-[86%] shrink-0 snap-start items-stretch justify-between overflow-hidden rounded-2xl bg-[#05080E] text-white md:h-[220px] md:w-[calc(50%-5px)]">
-              <img src={t.photo.src} alt="" aria-hidden loading="lazy" decoding="async" draggable={false}
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.06]" />
+              <div aria-hidden className="absolute inset-0 overflow-hidden transition-transform duration-[1200ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.04]">
+                <img src={t.photo.src} alt="" loading="lazy" decoding="async" draggable={false}
+                  className={`h-full w-full object-cover ${kb ? 'zx-kenburns' : ''}`} style={kb ? { animationDelay: `${-i * 4}s`, animationDirection: i % 2 ? 'alternate-reverse' : 'alternate' } : undefined} />
+              </div>
               <div aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(5,8,14,.92) 0%, rgba(5,8,14,.7) 48%, rgba(5,8,14,.25) 100%)` }} />
               <div aria-hidden className="absolute inset-0 mix-blend-multiply" style={{ background: t.tint }} />
               <div className="relative flex min-w-0 flex-col justify-between p-4 md:p-5">
@@ -695,7 +724,7 @@ function ProductRow({ products, categories, cart, add, remove, tagTone }: {
 function StoreRow({ store: s }: { store: PartnerListing }) {
   const where = [s.locality, s.city].filter(Boolean).join(', ');
   return (
-    <div className="flex w-[240px] shrink-0 items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2.5 md:w-[260px]">
+    <div className="flex w-[240px] shrink-0 snap-start items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2.5 md:w-[260px]">
       <IconTile className="h-9 w-9 rounded-lg"><Store size={16} /></IconTile>
       <div className="min-w-0 flex-1">
         <p className="truncate text-[13.5px] font-semibold leading-snug">{s.name}</p>
