@@ -11,7 +11,7 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useInView, useMotionValue, useScroll, useSpring, useTransform, animate as fmAnimate, type MotionProps } from 'framer-motion';
-import type { Clip, Photo } from '@/data/media';
+import { pickRendition, posterAt, photoSrcSet, type Clip, type Photo } from '@/data/media';
 
 export const EASE = [0.22, 1, 0.36, 1] as const;
 export const G = '#0DA366';
@@ -113,34 +113,64 @@ function useSmall() {
   return small;
 }
 
-/** Background video that fills its parent (parent must be `relative overflow-hidden`). */
-export function BgVideo({ clip, className = '', dim = 0.45, position = 'center', blur = false, playWhenVisible = true }: { clip: Clip; className?: string; dim?: number; position?: string; blur?: boolean; playWhenVisible?: boolean }) {
+/**
+ * Background video that fills its parent (parent must be `relative overflow-hidden`).
+ * Performance rules:
+ *  - nothing is downloaded until the box is within ~1 screen of the viewport (`priority` skips this for heroes);
+ *  - the rendition matches the box size (360p / 540p / 720p / 1080p);
+ *  - it only plays while visible and pauses off-screen; once loaded it stays loaded,
+ *    so scrolling back up is instant;
+ *  - the poster is a resized JPEG, never the full-size original.
+ */
+export function BgVideo({ clip, className = '', dim = 0.45, position = 'center', blur = false, playWhenVisible = true, priority = false }: { clip: Clip; className?: string; dim?: number; position?: string; blur?: boolean; playWhenVisible?: boolean; priority?: boolean }) {
+  const box = useRef<HTMLDivElement>(null);
   const ref = useRef<HTMLVideoElement>(null);
-  const small = useSmall();
-  const inView = useInView(ref, { amount: 0.1 });
+  const [width, setWidth] = useState(0);
+  const [near, setNear] = useState(priority);
+  const [visible, setVisible] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    setWidth(el.getBoundingClientRect().width || window.innerWidth);
+    if (typeof IntersectionObserver === 'undefined') { setNear(true); setVisible(true); return; }
+    const nearObs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setNear(true); nearObs.disconnect(); } }, { rootMargin: '120% 0px 120% 0px' });
+    const visObs = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { threshold: 0.12 });
+    nearObs.observe(el); visObs.observe(el);
+    return () => { nearObs.disconnect(); visObs.disconnect(); };
+  }, []);
+
   useEffect(() => {
     const v = ref.current;
-    if (!v || !playWhenVisible) return;
-    if (inView) v.play().catch(() => {});
+    if (!v) return;
+    if (playWhenVisible && visible && document.visibilityState === 'visible') { const p = v.play(); if (p) p.catch(() => {}); }
     else v.pause();
-  }, [inView, playWhenVisible]);
-  const src = small ? clip.src720 || clip.src : clip.src;
+  }, [visible, near, playWhenVisible, ready]);
+
+  const src = useMemo(() => (width ? pickRendition(clip, width) : ''), [clip, width]);
+  const poster = useMemo(() => posterAt(clip.poster, width > 900 ? 1280 : width > 500 ? 960 : 640), [clip.poster, width]);
+
   return (
-    <div aria-hidden className={`absolute inset-0 ${className}`}>
-      <img src={clip.poster} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: position }} loading="eager" />
-      {!failed && !isStatic() && (
+    <div ref={box} aria-hidden className={`absolute inset-0 ${className}`}>
+      {width > 0 && (
+        <img src={poster} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: position }}
+          loading={priority ? 'eager' : 'lazy'} decoding="async" {...(priority ? { fetchpriority: 'high' } as any : {})} />
+      )}
+      {!failed && !isStatic() && near && src && (
         <video
           ref={ref}
-          className="absolute inset-0 h-full w-full object-cover"
-          style={{ objectPosition: position, filter: blur ? 'blur(6px) scale(1.05)' : undefined }}
+          className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
+          style={{ objectPosition: position, filter: blur ? 'blur(6px) scale(1.05)' : undefined, opacity: ready ? 1 : 0 }}
           src={src}
-          poster={clip.poster}
           muted
           loop
-          autoPlay
           playsInline
-          preload="metadata"
+          autoPlay={priority}
+          preload={priority ? 'auto' : 'metadata'}
+          disablePictureInPicture
+          onLoadedData={() => setReady(true)}
           onError={() => setFailed(true)}
         />
       )}
@@ -172,7 +202,7 @@ export function VideoHero({ clip, children, height = 'min-h-[92svh]', dim = 0.5,
   return (
     <section ref={ref} className={`relative isolate flex ${height} w-full items-end overflow-hidden bg-[#05080E] text-white ${className}`}>
       <motion.div className="absolute inset-0" style={stat ? undefined : { y, scale }}>
-        <BgVideo clip={clip} dim={dim} position={position} />
+        <BgVideo clip={clip} dim={dim} position={position} priority />
       </motion.div>
       {gradient && (
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.55) 0%, rgba(5,8,14,.05) 35%, rgba(5,8,14,.25) 70%, rgba(5,8,14,.95) 100%)' }} />
@@ -194,8 +224,11 @@ export function ParallaxImage({ photo, className = '', strength = 12, ratio = '4
     <div ref={ref} className={`relative overflow-hidden bg-gray-100 ${rounded} ${className}`} style={{ aspectRatio: ratio }}>
       <motion.img
         src={photo.src}
+        srcSet={photoSrcSet(photo.src)}
+        sizes="(max-width: 768px) 100vw, 50vw"
         alt={photo.alt}
         loading="lazy"
+        decoding="async"
         className="absolute inset-0 h-[130%] w-full -top-[15%] object-cover"
         style={stat ? { top: 0, height: '100%' } : { y }}
       />
@@ -208,7 +241,7 @@ export function ParallaxImage({ photo, className = '', strength = 12, ratio = '4
 export function PhotoTile({ photo, className = '', ratio = '4/3', rounded = 'rounded-2xl', children, sizes }: { photo: Photo; className?: string; ratio?: string; rounded?: string; children?: React.ReactNode; sizes?: string }) {
   return (
     <div className={`group relative overflow-hidden bg-gray-100 ${rounded} ${className}`} style={{ aspectRatio: ratio }}>
-      <img src={photo.src} alt={photo.alt} loading="lazy" sizes={sizes} className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.06]" />
+      <img src={photo.src} srcSet={photoSrcSet(photo.src)} alt={photo.alt} loading="lazy" decoding="async" sizes={sizes || '(max-width: 768px) 100vw, 40vw'} className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.06]" />
       {children}
     </div>
   );

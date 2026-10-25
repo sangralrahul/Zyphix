@@ -56,9 +56,14 @@ function ChapterVideo({ c, i, n, progress }: { c: Chapter; i: number; n: number;
   const pad = 0.05;
   const opacity = useTransform(progress, [start - pad, start + pad, end - pad, end + pad], i === 0 ? [1, 1, 1, 0] : i === n - 1 ? [0, 1, 1, 1] : [0, 1, 1, 0]);
   const scale = useTransform(progress, [start, end], [1.08, 1]);
+  const [state, setState] = useState<'off' | 'near' | 'on'>(i === 0 ? 'on' : 'off');
+  useEffect(() => progress.on('change', p => {
+    const next = p >= start - pad && p <= end + pad ? 'on' : p >= start - 1 / n && p <= end + 1 / n ? 'near' : 'off';
+    setState(prev => (prev === next ? prev : (prev !== 'off' && next === 'off' ? 'near' : next)));
+  }), [progress, start, end, n, pad]);
   return (
     <motion.div className="absolute inset-0" style={{ opacity, scale }}>
-      <BgVideo clip={c.clip} dim={0.15} />
+      {state !== 'off' && <BgVideo clip={c.clip} dim={0.15} playWhenVisible={state === 'on'} />}
     </motion.div>
   );
 }
@@ -139,7 +144,6 @@ export function HScrollGallery({ items, header, id, cardClass = 'w-[78vw] sm:w-[
   }, [items.length]);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] });
   const x = useTransform(scrollYProgress, [0, 1], [0, -dist]);
-  const sx = useSpring(x, { stiffness: 120, damping: 30, mass: 0.4 });
 
   if (isStatic()) {
     return (
@@ -153,7 +157,7 @@ export function HScrollGallery({ items, header, id, cardClass = 'w-[78vw] sm:w-[
     <section id={id} ref={ref} className="relative bg-[#05080E] text-white" style={{ height: `calc(100svh + ${dist}px)` }}>
       <div className="sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden">
         <div className="mx-auto w-full max-w-[1120px] px-5 sm:px-8">{header}</div>
-        <motion.div ref={track} className="mt-10 flex gap-5 pl-5 pr-10 sm:pl-[max(32px,calc((100vw-1120px)/2+32px))]" style={{ x: sx }}>
+        <motion.div ref={track} className="mt-10 flex gap-5 pl-5 pr-10 sm:pl-[max(32px,calc((100vw-1120px)/2+32px))]" style={{ x }}>
           {items.map((it, i) => <div key={i} className={`shrink-0 ${cardClass}`}>{it}</div>)}
         </motion.div>
       </div>
@@ -226,7 +230,7 @@ export function RouteMap({ className = '', dark = true, minutes = 18 }: { classN
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { amount: 0.3 });
   const t = useMotionValue(isStatic() ? 0.62 : 0);
-  const [pos, setPos] = useState({ x: 60, y: 300 });
+  const rx = useMotionValue(60), ry = useMotionValue(300);
   const [eta, setEta] = useState(minutes);
   const [done, setDone] = useState(false);
   useEffect(() => { if (pathRef.current) setLen(pathRef.current.getTotalLength()); }, []);
@@ -239,12 +243,14 @@ export function RouteMap({ className = '', dark = true, minutes = 18 }: { classN
   useEffect(() => t.on('change', p => {
     if (!pathRef.current) return;
     const pt = pathRef.current.getPointAtLength(p * len);
-    setPos({ x: pt.x, y: pt.y });
-    setEta(Math.max(1, Math.ceil(minutes * (1 - p))));
-    setDone(p >= 0.999);
-  }), [t, len, minutes]);
+    rx.set(pt.x); ry.set(pt.y);
+    const e = Math.max(1, Math.ceil(minutes * (1 - p)));
+    setEta(prev => (prev === e ? prev : e));
+    const d = p >= 0.999;
+    setDone(prev => (prev === d ? prev : d));
+  }), [t, len, minutes, rx, ry]);
   useEffect(() => { // static frame
-    if (isStatic() && pathRef.current) { const pt = pathRef.current.getPointAtLength(0.62 * len); setPos({ x: pt.x, y: pt.y }); setEta(Math.ceil(minutes * 0.38)); }
+    if (isStatic() && pathRef.current) { const pt = pathRef.current.getPointAtLength(0.62 * len); rx.set(pt.x); ry.set(pt.y); setEta(Math.ceil(minutes * 0.38)); }
   }, [len, minutes]);
   const dash = useTransform(t, p => len * (1 - p));
   const grid = dark ? 'rgba(255,255,255,.06)' : 'rgba(15,23,42,.06)';
@@ -275,11 +281,11 @@ export function RouteMap({ className = '', dark = true, minutes = 18 }: { classN
           <path d="M -6 1 L 0 -5 L 6 1 V 6 H -6 Z" fill={dark ? '#0B0F19' : '#fff'} />
         </g>
         {/* rider */}
-        <g transform={`translate(${pos.x} ${pos.y})`}>
+        <motion.g style={{ x: rx, y: ry }}>
           <circle r="20" fill="#34D399" opacity=".18" />
           <circle r="11" fill="#fff" />
           <circle r="6.5" fill="#0DA366" />
-        </g>
+        </motion.g>
       </svg>
       {/* ETA chip */}
       <div className={`absolute left-4 top-4 flex items-center gap-3 rounded-2xl px-4 py-3 backdrop-blur-xl ${dark ? 'bg-white/10 text-white ring-1 ring-white/15' : 'bg-white/90 text-gray-900 ring-1 ring-gray-200'}`}>
@@ -371,8 +377,9 @@ export function GiantMarquee({ words, className = '', outline = true, light = tr
   const vel = useSpring(useVelocity(scrollY), { damping: 50, stiffness: 400 });
   const factor = useTransform(vel, [-1500, 0, 1500], [-4, 1, 4], { clamp: false });
   const row = useRef<HTMLDivElement>(null);
+  const onScreen = useInView(row, { amount: 0 });
   useAnimationFrame((_, delta) => {
-    if (isStatic() || !row.current) return;
+    if (isStatic() || !row.current || !onScreen) return;
     const w = row.current.scrollWidth / 2;
     let v = x.get() - baseSpeed * (delta / 16) * Math.max(0.6, Math.abs(factor.get()));
     if (v <= -w) v += w;

@@ -88,6 +88,7 @@ export default {
     try {
       if (pathname.startsWith('/api/')) return await handleApi(request, env, url);
       if (pathname.startsWith('/img/')) return await handleImage(request, env, ctx, pathname.slice('/img/'.length));
+      if (pathname.startsWith('/media/')) return await handleMedia(request, env, ctx, url);
       if (pathname.startsWith('/admin/')) return await handleAdmin(request, env, url);
     } catch (err) {
       console.error(err);
@@ -113,6 +114,94 @@ export default {
     })());
   },
 } satisfies ExportedHandler<Env>;
+
+/* ───────────────────────── media proxy ─────────────────────────
+   Stock videos/photos (Pexels) are served from our own domain:
+   first request copies the file into R2, every later request is
+   answered from R2 / the edge cache with long-lived caching and
+   byte-range support (needed for <video> seeking on Safari).
+     /media/v/<id>/<file>.mp4        → videos.pexels.com/video-files/<id>/<file>
+     /media/vp/<id>/<name>.jpg?w=N   → images.pexels.com/videos/<id>/<name>   (poster)
+     /media/p/<id>?w=N               → images.pexels.com/photos/<id>/pexels-photo-<id>.jpeg
+   If Pexels refuses the Worker, we redirect the browser straight to Pexels. */
+const MEDIA_WIDTHS = [320, 480, 640, 960, 1280, 1600, 1920];
+const IMMUTABLE = 'public, max-age=31536000, immutable';
+
+async function handleMedia(request: Request, env: Env, ctx: ExecutionContext, url: URL): Promise<Response> {
+  if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('method not allowed', { status: 405 });
+  const parts = url.pathname.split('/').filter(Boolean); // ['media', kind, ...]
+  const kind = parts[1];
+  const w = (() => { const n = Number(url.searchParams.get('w') || 1280); return MEDIA_WIDTHS.reduce((a, b) => (Math.abs(b - n) < Math.abs(a - n) ? b : a)); })();
+
+  if (kind === 'v') {
+    const [id, file] = [parts[2], parts[3]];
+    if (!/^\d+$/.test(id || '') || !/^[\w.-]+\.mp4$/.test(file || '')) return new Response('bad request', { status: 400 });
+    const upstream = `https://videos.pexels.com/video-files/${id}/${file}`;
+    const key = `media/v/${id}/${file}`;
+    let head = await env.IMAGES.head(key);
+    if (!head) {
+      const up = await fetch(upstream, { headers: { 'user-agent': 'Mozilla/5.0 (compatible; ZyphixMedia/1.0)' } });
+      if (!up.ok) return Response.redirect(upstream, 302);
+      const buf = await up.arrayBuffer();
+      await env.IMAGES.put(key, buf, { httpMetadata: { contentType: 'video/mp4', cacheControl: IMMUTABLE } });
+      head = await env.IMAGES.head(key);
+      if (!head) return Response.redirect(upstream, 302);
+    }
+    return rangedR2(request, env, key, head.size, 'video/mp4');
+  }
+
+  if (kind === 'vp' || kind === 'p') {
+    const cache = caches.default;
+    const cacheKey = new Request(`${url.origin}${url.pathname}?w=${w}`, { method: 'GET' });
+    const hit = await cache.match(cacheKey);
+    if (hit) return hit;
+    let upstream: string, key: string;
+    if (kind === 'p') {
+      const id = parts[2];
+      if (!/^\d+$/.test(id || '')) return new Response('bad request', { status: 400 });
+      upstream = `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}`;
+      key = `media/p/${id}-${w}.jpg`;
+    } else {
+      const [id, name] = [parts[2], parts[3]];
+      if (!/^\d+$/.test(id || '') || !/^[\w.-]+\.(jpe?g|png)$/.test(name || '')) return new Response('bad request', { status: 400 });
+      upstream = `https://images.pexels.com/videos/${id}/${name}?auto=compress&cs=tinysrgb&w=${w}`;
+      key = `media/vp/${id}-${w}.jpg`;
+    }
+    let obj = await env.IMAGES.get(key);
+    let body: ArrayBuffer;
+    if (obj) body = await obj.arrayBuffer();
+    else {
+      const up = await fetch(upstream, { headers: { 'user-agent': 'Mozilla/5.0 (compatible; ZyphixMedia/1.0)', accept: 'image/jpeg,image/*' } });
+      if (!up.ok) return Response.redirect(upstream, 302);
+      body = await up.arrayBuffer();
+      ctx.waitUntil(env.IMAGES.put(key, body, { httpMetadata: { contentType: 'image/jpeg', cacheControl: IMMUTABLE } }));
+    }
+    const res = new Response(body, { headers: { 'content-type': 'image/jpeg', 'cache-control': IMMUTABLE, 'access-control-allow-origin': '*' } });
+    ctx.waitUntil(cache.put(cacheKey, res.clone()));
+    return res;
+  }
+  return new Response('not found', { status: 404 });
+}
+
+async function rangedR2(request: Request, env: Env, key: string, size: number, type: string): Promise<Response> {
+  const base: Record<string, string> = { 'content-type': type, 'accept-ranges': 'bytes', 'cache-control': IMMUTABLE, 'access-control-allow-origin': '*' };
+  const range = request.headers.get('range');
+  const m = range && /^bytes=(\d*)-(\d*)$/.exec(range.trim());
+  if (m && (m[1] || m[2])) {
+    let start: number, end: number;
+    if (m[1] === '') { const n = Number(m[2]); start = Math.max(0, size - n); end = size - 1; }
+    else { start = Number(m[1]); end = m[2] ? Math.min(Number(m[2]), size - 1) : size - 1; }
+    if (start >= size || start > end) return new Response(null, { status: 416, headers: { ...base, 'content-range': `bytes */${size}` } });
+    if (request.method === 'HEAD') return new Response(null, { status: 206, headers: { ...base, 'content-range': `bytes ${start}-${end}/${size}`, 'content-length': String(end - start + 1) } });
+    const obj = await env.IMAGES.get(key, { range: { offset: start, length: end - start + 1 } });
+    if (!obj) return new Response('not found', { status: 404 });
+    return new Response(obj.body, { status: 206, headers: { ...base, 'content-range': `bytes ${start}-${end}/${size}`, 'content-length': String(end - start + 1) } });
+  }
+  if (request.method === 'HEAD') return new Response(null, { headers: { ...base, 'content-length': String(size) } });
+  const obj = await env.IMAGES.get(key);
+  if (!obj) return new Response('not found', { status: 404 });
+  return new Response(obj.body, { headers: { ...base, 'content-length': String(size) } });
+}
 
 /* ───────────────────────── public API ───────────────────────── */
 

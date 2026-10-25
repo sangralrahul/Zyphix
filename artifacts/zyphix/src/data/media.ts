@@ -7,6 +7,8 @@ export type Clip = {
   id: string;
   src: string;
   src720: string;
+  src540?: string;
+  src360?: string;
   poster: string;
   alt: string;
   credit: string;
@@ -14,11 +16,43 @@ export type Clip = {
 
 export type Photo = { id: string; src: string; alt: string; portrait?: boolean };
 
-export const pexelsPhoto = (id: number, w = 1200) =>
-  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}`;
+/**
+ * On *.zyphix.in every file is served through our own Worker (`/media/...`):
+ * copied once into R2, then cached at the Cloudflare edge — much faster and more
+ * reliable than hot-linking Pexels. Elsewhere (local preview) we use Pexels directly.
+ */
+const PROXY = typeof window !== 'undefined' && /(^|\.)zyphix\.in$/.test(window.location.hostname);
+
+export const pexelsPhoto = (id: number, w = 960) =>
+  PROXY ? `/media/p/${id}?w=${w}` : `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}`;
+
+/** Responsive srcset for a Pexels photo URL produced by `pexelsPhoto`. */
+export function photoSrcSet(src: string): string | undefined {
+  const m = /\/media\/p\/(\d+)|photos\/(\d+)\//.exec(src);
+  const id = m && Number(m[1] || m[2]);
+  if (!id) return undefined;
+  return [480, 960, 1600].map(w => `${pexelsPhoto(id, w)} ${w}w`).join(', ');
+}
+
+/** Poster image at a given width (posters are full-size JPEGs otherwise). */
+export function posterAt(poster: string, w = 1280): string {
+  const m = /images\.pexels\.com\/videos\/(\d+)\/([^?]+)/.exec(poster);
+  if (!m) return poster;
+  return PROXY ? `/media/vp/${m[1]}/${m[2]}?w=${w}` : `https://images.pexels.com/videos/${m[1]}/${m[2]}?auto=compress&cs=tinysrgb&w=${w}`;
+}
 
 const vid = (id: number, file: string) =>
-  `https://videos.pexels.com/video-files/${id}/${file}`;
+  PROXY ? `/media/v/${id}/${file}` : `https://videos.pexels.com/video-files/${id}/${file}`;
+
+/** Best rendition for a box of `cssWidth` px (accounts for device pixel ratio, capped for data). */
+export function pickRendition(c: Clip, cssWidth: number): string {
+  const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+  const px = cssWidth * dpr;
+  if (px <= 700 && c.src360) return c.src360;
+  if (px <= 1100 && c.src540) return c.src540;
+  if (px <= 1600) return c.src720;
+  return c.src;
+}
 
 const CREDIT = "Pexels";
 
@@ -27,6 +61,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "7362583",
     src: vid(7362583, "7362583-hd_1920_1080_24fps.mp4"),
     src720: vid(7362583, "7362583-hd_1280_720_24fps.mp4"),
+    src540: vid(7362583, "7362583-sd_960_540_24fps.mp4"),
+    src360: vid(7362583, "7362583-sd_640_360_24fps.mp4"),
     poster:
       "https://images.pexels.com/videos/7362583/action-adult-appoint-architecture-7362583.jpeg",
     alt: "Delivery rider on a motorcycle weaving through a busy city street with a food bag on the back",
@@ -36,6 +72,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "6994800",
     src: vid(6994800, "6994800-hd_1920_1080_30fps.mp4"),
     src720: vid(6994800, "6994800-hd_1280_720_30fps.mp4"),
+    src540: vid(6994800, "6994800-sd_960_540_30fps.mp4"),
+    src360: vid(6994800, "6994800-sd_640_360_30fps.mp4"),
     poster:
       "https://images.pexels.com/videos/6994800/attractive-beautiful-black-black-female-6994800.jpeg",
     alt: "Delivery person handing over a crate of fresh vegetables at a customer's door",
@@ -45,6 +83,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "29376327",
     src: vid(29376327, "12655224_1918_1080_30fps.mp4"),
     src720: vid(29376327, "12655223_1278_720_30fps.mp4"),
+    src540: vid(29376327, "12655222_958_540_30fps.mp4"),
+    src360: vid(29376327, "12655221_640_360_30fps.mp4"),
     poster: "https://images.pexels.com/videos/29376327/pexels-photo-29376327.jpeg",
     alt: "Slow tracking shot down a brightly lit supermarket aisle stocked with everyday essentials",
     credit: CREDIT,
@@ -53,6 +93,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "4912725",
     src: vid(4912725, "4912725-hd_1920_1080_24fps.mp4"),
     src720: vid(4912725, "4912725-hd_1280_720_24fps.mp4"),
+    src540: vid(4912725, "4912725-sd_960_540_24fps.mp4"),
+    src360: vid(4912725, "4912725-sd_640_360_24fps.mp4"),
     poster:
       "https://images.pexels.com/videos/4912725/cooking-eastern-cuisine-food-blog-food-blogger-4912725.jpeg",
     alt: "Close-up of a cook scooping fragrant spiced yellow rice from a hot pan",
@@ -62,6 +104,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "8926183",
     src: vid(8926183, "8926183-hd_1920_1080_25fps.mp4"),
     src720: vid(8926183, "8926183-hd_1280_720_25fps.mp4"),
+    src540: vid(8926183, "8926183-sd_960_540_25fps.mp4"),
+    src360: vid(8926183, "8926183-sd_640_360_25fps.mp4"),
     poster: "https://images.pexels.com/videos/8926183/pexels-photo-8926183.jpeg",
     alt: "Food delivery courier handing a takeaway bag to a smiling customer at the doorstep",
     credit: CREDIT,
@@ -70,6 +114,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "7551100",
     src: vid(7551100, "7551100-hd_1920_1080_25fps.mp4"),
     src720: vid(7551100, "7551100-hd_1280_720_25fps.mp4"),
+    src540: vid(7551100, "7551100-sd_960_540_25fps.mp4"),
+    src360: vid(7551100, "7551100-sd_640_360_25fps.mp4"),
     poster: "https://images.pexels.com/videos/7551100/pexels-photo-7551100.jpeg",
     alt: "Professional cleaner mopping a bright living-room floor in a modern home",
     credit: CREDIT,
@@ -78,6 +124,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "4334561",
     src: vid(4334561, "4334561-hd_1920_1080_24fps.mp4"),
     src720: vid(4334561, "4334561-hd_1280_720_24fps.mp4"),
+    src540: vid(4334561, "4334561-sd_960_540_24fps.mp4"),
+    src360: vid(4334561, "4334561-sd_640_360_24fps.mp4"),
     poster: "https://images.pexels.com/videos/4334561/pexels-photo-4334561.jpeg",
     alt: "Electrician carefully fixing wiring inside a home electrical fitting",
     credit: CREDIT,
@@ -86,6 +134,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "7987790",
     src: vid(7987790, "7987790-hd_1920_1080_25fps.mp4"),
     src720: vid(7987790, "7987790-hd_1280_720_50fps.mp4"),
+    src540: vid(7987790, "7987790-sd_960_540_25fps.mp4"),
+    src360: vid(7987790, "7987790-sd_640_360_25fps.mp4"),
     poster: "https://images.pexels.com/videos/7987790/pexels-photo-7987790.jpeg",
     alt: "Beautician applying makeup to a client during an at-home salon session",
     credit: CREDIT,
@@ -94,6 +144,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "8992553",
     src: vid(8992553, "8992553-hd_1920_1080_30fps.mp4"),
     src720: vid(8992553, "8992553-hd_1280_720_30fps.mp4"),
+    src540: vid(8992553, "8992553-sd_960_540_30fps.mp4"),
+    src360: vid(8992553, "8992553-sd_640_360_30fps.mp4"),
     poster:
       "https://images.pexels.com/videos/8992553/adult-backpack-bag-bicycle-8992553.jpeg",
     alt: "Tracking shot of a delivery rider on a scooter carrying an insulated thermal bag through the city",
@@ -103,6 +155,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "6715786",
     src: vid(6715786, "6715786-hd_1920_1080_25fps.mp4"),
     src720: vid(6715786, "6715786-hd_1280_720_25fps.mp4"),
+    src540: vid(6715786, "6715786-sd_960_540_25fps.mp4"),
+    src360: vid(6715786, "6715786-sd_640_360_25fps.mp4"),
     poster: "https://images.pexels.com/videos/6715786/pexels-photo-6715786.jpeg",
     alt: "Smiling woman opening her front door and receiving a parcel from a courier",
     credit: CREDIT,
@@ -111,6 +165,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "28283517",
     src: vid(28283517, "12351602_1920_1080_30fps.mp4"),
     src720: vid(28283517, "12351599_1280_720_30fps.mp4"),
+    src540: vid(28283517, "12351598_960_540_30fps.mp4"),
+    src360: vid(28283517, "12351597_640_360_30fps.mp4"),
     poster:
       "https://images.pexels.com/videos/28283517/authenticindianspices-chaispices-cuminandcoriander-curryspices-28283517.jpeg",
     alt: "Close-up of colourful Indian whole and ground spices — cumin, coriander and chai masala",
@@ -120,6 +176,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "29695848",
     src: vid(29695848, "12770716_1920_1080_30fps.mp4"),
     src720: vid(29695848, "12770715_1280_720_30fps.mp4"),
+    src540: vid(29695848, "12770714_960_540_30fps.mp4"),
+    src360: vid(29695848, "12770713_640_360_30fps.mp4"),
     poster: "https://images.pexels.com/videos/29695848/pexels-photo-29695848.jpeg",
     alt: "Vendor selling fresh vegetables at a vibrant Indian sabzi market",
     credit: CREDIT,
@@ -128,6 +186,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "37649378",
     src: vid(37649378, "15959080_1920_1080_30fps.mp4"),
     src720: vid(37649378, "15959079_1280_720_30fps.mp4"),
+    src540: vid(37649378, "15959078_960_540_30fps.mp4"),
+    src360: vid(37649378, "15959077_640_360_30fps.mp4"),
     poster:
       "https://images.pexels.com/videos/37649378/beautiful-morning-chai-cinnamon-cultural-37649378.jpeg",
     alt: "Steaming masala chai being poured into a cup",
@@ -137,6 +197,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "38483155",
     src: vid(38483155, "16343321_1920_1080_60fps.mp4"),
     src720: vid(38483155, "16343320_1280_720_60fps.mp4"),
+    src540: vid(38483155, "16343319_960_540_60fps.mp4"),
+    src360: vid(38483155, "16343318_640_360_60fps.mp4"),
     poster: "https://images.pexels.com/videos/38483155/pexels-photo-38483155.jpeg",
     alt: "Traditional bread baking against the hot walls of a clay tandoor",
     credit: CREDIT,
@@ -145,6 +207,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "29875902",
     src: vid(29875902, "12827151_1920_1080_24fps.mp4"),
     src720: vid(29875902, "12827150_1280_720_24fps.mp4"),
+    src540: vid(29875902, "12827149_960_540_24fps.mp4"),
+    src360: vid(29875902, "12827148_640_360_24fps.mp4"),
     poster: "https://images.pexels.com/videos/29875902/pexels-photo-29875902.jpeg",
     alt: "Street food vendor frying crisp golden samosas in a large kadhai",
     credit: CREDIT,
@@ -153,6 +217,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "39498949",
     src: vid(39498949, "16826547_1920_1080_50fps.mp4"),
     src720: vid(39498949, "16826545_1280_720_50fps.mp4"),
+    src540: vid(39498949, "16826543_960_540_50fps.mp4"),
+    src360: vid(39498949, "16826541_640_360_50fps.mp4"),
     poster: "https://images.pexels.com/videos/39498949/kitchen-39498949.jpeg",
     alt: "Professional chef carefully plating a gourmet dish in slow motion",
     credit: CREDIT,
@@ -161,6 +227,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "4818259",
     src: vid(4818259, "4818259-hd_1920_1080_30fps.mp4"),
     src720: vid(4818259, "4818259-hd_1280_720_30fps.mp4"),
+    src540: vid(4818259, "4818259-sd_960_540_30fps.mp4"),
+    src360: vid(4818259, "4818259-sd_640_360_30fps.mp4"),
     poster: "https://images.pexels.com/videos/4818259/pexels-photo-4818259.jpeg",
     alt: "Hands packing fresh fruits and groceries into a reusable cloth bag",
     credit: CREDIT,
@@ -169,6 +237,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "6994864",
     src: vid(6994864, "6994864-hd_1920_1080_30fps.mp4"),
     src720: vid(6994864, "6994864-hd_1280_720_30fps.mp4"),
+    src540: vid(6994864, "6994864-sd_960_540_30fps.mp4"),
+    src360: vid(6994864, "6994864-sd_640_360_30fps.mp4"),
     poster:
       "https://images.pexels.com/videos/6994864/attractive-beautiful-black-black-female-6994864.jpeg",
     alt: "Close-up of hands browsing and ordering groceries on a smartphone",
@@ -178,6 +248,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "8938170",
     src: vid(8938170, "8938170-hd_1920_1080_30fps.mp4"),
     src720: vid(8938170, "8938170-hd_1280_720_30fps.mp4"),
+    src540: vid(8938170, "8938170-sd_960_540_30fps.mp4"),
+    src360: vid(8938170, "8938170-sd_640_360_30fps.mp4"),
     poster: "https://images.pexels.com/videos/8938170/pexels-photo-8938170.jpeg",
     alt: "Delivery partner handing an order to a smiling customer at her door",
     credit: CREDIT,
@@ -186,6 +258,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "30739577",
     src: vid(30739577, "13149275_1920_1080_25fps.mp4"),
     src720: vid(30739577, "13149274_1280_720_25fps.mp4"),
+    src540: vid(30739577, "13149273_960_540_25fps.mp4"),
+    src360: vid(30739577, "13149272_640_360_25fps.mp4"),
     poster:
       "https://images.pexels.com/videos/30739577/4k-drone-4k-drone-shot-4k-timelapse-above-the-city-30739577.jpeg",
     alt: "Aerial night time-lapse of busy city traffic with streaking headlight trails",
@@ -195,6 +269,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "9890450",
     src: vid(9890450, "9890450-hd_1920_1080_30fps.mp4"),
     src720: vid(9890450, "9890450-hd_1280_720_30fps.mp4"),
+    src540: vid(9890450, "9890450-sd_960_540_30fps.mp4"),
+    src360: vid(9890450, "9890450-sd_640_360_30fps.mp4"),
     poster:
       "https://images.pexels.com/videos/9890450/leak-plumbing-repair-tools-9890450.jpeg",
     alt: "Close-up of a plumber fixing a leaking kitchen faucet",
@@ -204,6 +280,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "31150098",
     src: vid(31150098, "13309368_1920_1080_60fps.mp4"),
     src720: vid(31150098, "13309367_1280_720_60fps.mp4"),
+    src540: vid(31150098, "13309366_960_540_60fps.mp4"),
+    src360: vid(31150098, "13309365_640_360_60fps.mp4"),
     poster:
       "https://images.pexels.com/videos/31150098/afternoon-chill-cinematic-cozy-31150098.jpeg",
     alt: "Close-up of a modern wall-mounted split air conditioner running indoors",
@@ -213,6 +291,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "30747522",
     src: vid(30747522, "13153649_1920_1080_30fps.mp4"),
     src720: vid(30747522, "13153648_1280_720_30fps.mp4"),
+    src540: vid(30747522, "13153647_960_540_30fps.mp4"),
+    src360: vid(30747522, "13153646_640_360_30fps.mp4"),
     poster: "https://images.pexels.com/videos/30747522/pexels-photo-30747522.jpeg",
     alt: "Barber trimming a client's beard in a modern men's grooming salon",
     credit: CREDIT,
@@ -221,6 +301,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "9335765",
     src: vid(9335765, "9335765-hd_1920_1080_25fps.mp4"),
     src720: vid(9335765, "9335765-hd_1280_720_25fps.mp4"),
+    src540: vid(9335765, "9335765-sd_960_540_25fps.mp4"),
+    src360: vid(9335765, "9335765-sd_640_360_25fps.mp4"),
     poster:
       "https://images.pexels.com/videos/9335765/applying-back-comfort-cure-9335765.jpeg",
     alt: "Relaxing facial massage during a spa treatment",
@@ -230,6 +312,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "39688924",
     src: vid(39688924, "16922654_1920_1080_30fps.mp4"),
     src720: vid(39688924, "16922653_1280_720_30fps.mp4"),
+    src540: vid(39688924, "16922652_960_540_30fps.mp4"),
+    src360: vid(39688924, "16922651_640_360_30fps.mp4"),
     poster: "https://images.pexels.com/videos/39688924/pexels-photo-39688924.jpeg",
     alt: "Busy neighbourhood Indian grocery store with packed shelves and counter",
     credit: CREDIT,
@@ -238,6 +322,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "3768941",
     src: vid(3768941, "3768941-hd_1920_1080_25fps.mp4"),
     src720: vid(3768941, "3768941-hd_1280_720_25fps.mp4"),
+    src540: vid(3768941, "3768941-sd_960_540_25fps.mp4"),
+    src360: vid(3768941, "3768941-sd_640_360_25fps.mp4"),
     poster: "https://images.pexels.com/videos/3768941/pexels-photo-3768941.jpeg",
     alt: "Team of chefs busy cooking and plating in a restaurant kitchen",
     credit: CREDIT,
@@ -246,6 +332,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "2894888",
     src: vid(2894888, "2894888-hd_1920_1080_24fps.mp4"),
     src720: vid(2894888, "2894888-hd_1280_720_24fps.mp4"),
+    src540: vid(2894888, "2894888-sd_960_540_24fps.mp4"),
+    src360: vid(2894888, "2894888-sd_640_360_24fps.mp4"),
     poster: "https://images.pexels.com/videos/2894888/free-video-2894888.jpg",
     alt: "Slow-motion close-up of fried rice tossed in a wok over roaring flames",
     credit: CREDIT,
@@ -254,6 +342,8 @@ export const VIDEOS: Record<string, Clip> = {
     id: "8212561",
     src: vid(8212561, "8212561-hd_1920_1080_25fps.mp4"),
     src720: vid(8212561, "8212561-hd_1280_720_25fps.mp4"),
+    src540: vid(8212561, "8212561-sd_960_540_25fps.mp4"),
+    src360: vid(8212561, "8212561-sd_640_360_25fps.mp4"),
     poster: "https://images.pexels.com/videos/8212561/pexels-photo-8212561.jpeg",
     alt: "Assorted fresh fruit splashing into water in slow motion",
     credit: CREDIT,
@@ -263,7 +353,7 @@ export const VIDEOS: Record<string, Clip> = {
 /** All URLs below were verified to load in a real browser on 2026-10-25. `portrait` = taller than wide (use object-cover or reserve for tall slots). */
 const p = (id: number, alt: string, portrait = false): Photo => ({
   id: String(id),
-  src: pexelsPhoto(id),
+  src: pexelsPhoto(id, 960),
   alt,
   ...(portrait ? { portrait: true } : {}),
 });
