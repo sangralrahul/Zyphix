@@ -26,7 +26,7 @@ const NAV: NavItem[] = [
   { label: 'Partners', href: 'https://partner.zyphix.in', external: true },
   { label: 'Advertise', href: 'https://advertise.zyphix.in', external: true },
   { label: 'About', href: '/about' },
-  { label: 'Contact', href: '/contact' },
+  { label: 'Help', href: 'https://support.zyphix.in', external: true },
 ];
 
 function NavLink({ item, onClick, className }: { item: NavItem; onClick?: () => void; className: string }) {
@@ -107,10 +107,10 @@ export function SiteHeader({ variant = 'solid' }: { variant?: 'solid' | 'transpa
 
 /* ── Footer ───────────────────────────────────────────────────────────────── */
 const FOOT: Array<[string, Array<[string, string]>]> = [
-  ['Products', [['Zyphix Now', '/now'], ['Zyphix Eats', '/eats'], ['Zyphix Book', '/book'], ['Offers', '/offers'], ['Kirana map', '/kirana-map'], ['Mobile app', '/app']]],
+  ['Products', [['Zyphix Now', '/now'], ['Zyphix Eats', '/eats'], ['Zyphix Book', '/book'], ['Offers', '/offers'], ['Store map', '/kirana-map'], ['Mobile app', '/app']]],
   ['Partners', [['Partner portal', 'https://partner.zyphix.in'], ['Deliver with us', '/delivery-setup'], ['Register a restaurant', '/restaurant-setup'], ['Join as a professional', '/service-setup'], ['List your store', '/merchant-setup']]],
   ['Company', [['About', '/about'], ['Investors', '/investors'], ['Contact', '/contact'], ['Press', 'mailto:press@zyphix.in']]],
-  ['Resources', [['Blog', '/blog'], ['Advertise', 'https://advertise.zyphix.in'], ['Support', 'mailto:support@zyphix.in'], ['Partnerships', 'mailto:partnerships@zyphix.in']]],
+  ['Resources', [['Blog', '/blog'], ['Advertise', 'https://advertise.zyphix.in'], ['Help centre', 'https://support.zyphix.in'], ['Partnerships', 'mailto:partnerships@zyphix.in']]],
   ['Legal', [['Privacy', '/privacy'], ['Terms', '/terms'], ['Legal enquiries', 'mailto:legal@zyphix.in']]],
 ];
 const SOCIALS: Array<[React.ReactNode, string, string]> = [
@@ -126,7 +126,7 @@ export function SiteFooter() {
       <Container className="grid grid-cols-2 gap-x-6 gap-y-10 py-14 sm:grid-cols-3 lg:grid-cols-[1.2fr_repeat(5,1fr)]">
         <div className="col-span-2 sm:col-span-3 lg:col-span-1">
           <ZyphixLogo size={28} />
-          <p className="mt-4 max-w-[260px] text-[13.5px] leading-[1.6] text-gray-500">India's SuperLocal App. Groceries, food and home services from the businesses already in your neighbourhood.</p>
+          <p className="mt-4 max-w-[260px] text-[13.5px] leading-[1.6] text-gray-500">The SuperLocal app. Groceries, food and home services from the businesses already in your neighbourhood.</p>
         </div>
         {FOOT.map(([h, links]) => (
           <div key={h}>
@@ -150,7 +150,7 @@ export function SiteFooter() {
         <Container className="flex flex-col gap-4 py-5 text-[13px] text-gray-500 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex flex-wrap items-center gap-x-2">
             <span>© {new Date().getFullYear()} Zyphix</span><span className="text-gray-300">·</span>
-            <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full" style={{ background: G }} />Made in India</span><span className="text-gray-300">·</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full" style={{ background: G }} />Built for every neighbourhood</span><span className="text-gray-300">·</span>
             <a href="mailto:hello@zyphix.in" className="font-medium text-gray-700 hover:text-gray-900">hello@zyphix.in</a>
           </p>
           <div className="flex items-center gap-2">

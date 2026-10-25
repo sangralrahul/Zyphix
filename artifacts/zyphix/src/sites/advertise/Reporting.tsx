@@ -30,7 +30,7 @@ function Dashboard() {
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4 sm:px-6">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400">Campaign report</p>
-          <p className="mt-0.5 truncate text-[15.5px] font-semibold tracking-[-0.01em] text-gray-900">YourBrand oats · Jammu · 14 days</p>
+          <p className="mt-0.5 truncate text-[15.5px] font-semibold tracking-[-0.01em] text-gray-900">YourBrand oats · 6 areas · 14 days</p>
         </div>
         <div className="flex items-center gap-2">
           <IllustrativeTag />

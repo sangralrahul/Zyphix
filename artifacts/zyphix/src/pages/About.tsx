@@ -1,38 +1,34 @@
 import React from 'react';
-import { Link } from 'wouter';
-import { motion } from 'framer-motion';
 import {
-  ArrowRight, Store, Warehouse, Leaf, BadgeIndianRupee, Clock, ShieldCheck,
+  ArrowRight, Store, Warehouse, Leaf, BadgePercent, Clock, ShieldCheck,
   Handshake, MapPin, Check, X,
 } from 'lucide-react';
-import { SitePage, PageHero, SectionHead, btnPrimary, btnSecondary, card, G, INK, HEAD_FONT } from '@/components/layout/SiteChrome';
+import { Kicker, Reveal, ParallaxImage, PhotoTile, GlowButton, GhostButton } from '@/ui/cinema';
+import { Accent, Magnetic } from '@/ui/motion2';
+import { VIDEOS, landscape } from '@/data/media';
+import { InnerPage, InnerHero, SectionIntro, Band, panel, iconChip, h3, body } from './home/Inner';
+import { Display } from './home/shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
    About — company story, mission, values, local-first vs dark stores.
 ──────────────────────────────────────────────────────────────────────────── */
 
-const fade = (delay = 0) => ({
-  initial: { opacity: 0, y: 14 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: .5, ease: 'easeOut' as const, delay },
-});
-
 const FACTS = [
-  { icon: <MapPin size={18} />, v: 'Founded 2024', l: 'Built in India, for India' },
+  { icon: <MapPin size={18} />, v: 'Founded 2024', l: 'Independent and founder-led' },
   { icon: <Clock size={18} />, v: 'Under 30 minutes', l: 'Doorstep delivery target' },
-  { icon: <BadgeIndianRupee size={18} />, v: 'Zero surge', l: 'Shelf price is the app price' },
-  { icon: <Store size={18} />, v: 'Onboarding across India', l: 'Neighbourhood by neighbourhood' },
+  { icon: <BadgePercent size={18} />, v: 'Zero surge', l: 'Shelf price is the app price' },
+  { icon: <Store size={18} />, v: 'Rolling out', l: 'Neighbourhood by neighbourhood' },
 ];
 
 const VALUES = [
-  { icon: <Handshake size={20} />, t: 'Partners first', d: 'Free onboarding, fair commissions and weekly payouts. Zyphix only works when the kirana and the kitchen win too.' },
-  { icon: <BadgeIndianRupee size={20} />, t: 'Radical transparency', d: 'No surge pricing and no hidden handling fees. Every charge is shown before you pay.' },
+  { icon: <Handshake size={20} />, t: 'Partners first', d: 'Free onboarding, fair commissions and weekly payouts. Zyphix only works when the corner store and the kitchen win too.' },
+  { icon: <BadgePercent size={20} />, t: 'Radical transparency', d: 'No surge pricing and no hidden handling fees. Every charge is shown before you pay.' },
   { icon: <Clock size={20} />, t: 'Speed by design', d: 'Short distances and live local inventory, not giant warehouses, are what make fast delivery possible.' },
   { icon: <ShieldCheck size={20} />, t: 'Trust and safety', d: 'Verified partners, secure payments and live tracking on every order and every service booking.' },
 ];
 
 const COMPARE: Array<{ point: string; local: string; dark: string }> = [
-  { point: 'Where your order comes from', local: 'A real kirana, restaurant or professional near you', dark: 'A warehouse built to compete with them' },
+  { point: 'Where your order comes from', local: 'A real store, restaurant or professional near you', dark: 'A warehouse built to compete with them' },
   { point: 'Who keeps the margin', local: 'The local business, with a fair platform fee', dark: 'The platform, after heavy discounting' },
   { point: 'Pricing', local: 'Shelf price, no surge', dark: 'Dynamic pricing and handling fees' },
   { point: 'Impact on the neighbourhood', local: 'More customers for existing shops', dark: 'Fewer independent shops over time' },
@@ -40,118 +36,113 @@ const COMPARE: Array<{ point: string; local: string; dark: string }> = [
 
 export function About() {
   return (
-    <SitePage title="About">
-      <PageHero
-        eyebrow="Our story"
-        title={<>Built for India's <span style={{ color: G }}>neighbourhood economy.</span></>}
-        sub="Zyphix started with a simple belief: your local kirana store, favourite dhaba and trusted plumber deserve world-class technology — without being replaced by it."
+    <InnerPage title="About">
+      <InnerHero
+        clip={VIDEOS.merchant}
+        kicker="Our story"
+        parts={['Built for the', { accent: 'neighbourhood', green: true }, 'economy.']}
+        sub="Your corner store, favourite kitchen and trusted plumber deserve world-class technology, without being replaced by it. That is the whole idea."
       >
-        <Link href="/now" className={btnPrimary} style={{ background: G }}>Order now <ArrowRight size={16} /></Link>
-        <Link href="/partner" className={btnSecondary}>Partner with us</Link>
-      </PageHero>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <Magnetic><GlowButton href="/now" className="w-full sm:w-auto">Order now <ArrowRight size={17} /></GlowButton></Magnetic>
+          <GhostButton href="/partner">Partner with us</GhostButton>
+        </div>
+      </InnerHero>
 
       {/* Facts (honest, no invented metrics) */}
-      <section className="mx-auto max-w-[1180px] px-5 py-14">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="border-b border-gray-100 bg-white">
+        <div className="mx-auto grid w-full max-w-[1120px] grid-cols-2 px-5 sm:px-8 lg:grid-cols-4">
           {FACTS.map((f, i) => (
-            <motion.div key={f.v} {...fade(i * .06)} className={`${card} flex items-start gap-4 p-5`}>
-              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">{f.icon}</span>
+            <Reveal key={f.v} delay={i * 0.05} className={`flex items-start gap-3.5 py-8 md:py-10 ${i % 2 ? 'pl-4 sm:pl-6' : 'pr-4'} ${i > 0 ? 'lg:border-l lg:border-gray-100 lg:pl-6' : ''}`}>
+              <span className="mt-0.5 text-emerald-600">{f.icon}</span>
               <div>
-                <p className="text-[16px] font-extrabold text-gray-900">{f.v}</p>
-                <p className="mt-0.5 text-[13px] text-gray-500">{f.l}</p>
+                <p className="text-[17px] font-semibold tracking-[-0.02em] text-gray-900">{f.v}</p>
+                <p className="mt-0.5 text-[13.5px] text-gray-500">{f.l}</p>
               </div>
-            </motion.div>
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* Mission */}
-      <section className="border-y border-gray-200 bg-gray-50">
-        <div className="mx-auto grid max-w-[1180px] items-center gap-12 px-5 py-20 md:grid-cols-[1fr_1fr] md:py-24">
-          <div>
-            <SectionHead align="left" eyebrow="Mission" title="Technology for the businesses that already run your neighbourhood." />
-            <div className="mt-6 space-y-4 text-[15.5px] leading-relaxed text-gray-600">
-              <p>India's neighbourhoods are powered by millions of independent kirana stores, food businesses and service professionals. They know their customers by name, but most of them have never had the tools that large chains take for granted.</p>
-              <p>Zyphix gives every local business a digital storefront, simple order and inventory management, delivery and payments — and gives customers one app for groceries, food, pharmacy and home services from the places they already trust.</p>
-              <p className="font-semibold text-gray-900">We call it SuperLocal: a superapp for the local economy, not a replacement for it.</p>
-            </div>
+      <Band>
+        <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-6">
+            <SectionIntro kicker="Mission" title={<>Technology for the shops that <Accent green>already</Accent> run your street.</>} />
+            <Reveal delay={0.1} className="mt-8 space-y-4 text-[17px] leading-[1.65] text-gray-600">
+              <p>Every neighbourhood runs on independent stores, food businesses and service professionals. They know their customers by name, but most have never had the tools that large chains take for granted.</p>
+              <p>Zyphix gives every local business a digital storefront, simple order and inventory management, delivery and payments, and gives customers one app for groceries, food and home services from the places they already trust.</p>
+              <p className="font-medium text-gray-900">We call it SuperLocal: a superapp for the local economy, not a replacement for it.</p>
+            </Reveal>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 overflow-hidden rounded-3xl border border-gray-200 bg-white">
-              <img src="/images/groceries.png" alt="Groceries from a local kirana store" className="h-[220px] w-full object-cover" loading="lazy" />
-            </div>
-            <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white">
-              <img src="/images/food.png" alt="Food from a neighbourhood restaurant" className="h-[150px] w-full object-cover" loading="lazy" />
-            </div>
-            <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white">
-              <img src="/images/scooter.png" alt="Zyphix delivery partner" className="h-[150px] w-full object-cover" loading="lazy" />
-            </div>
+          <div className="grid grid-cols-2 gap-4 lg:col-span-6">
+            <Reveal y={32} className="col-span-2"><ParallaxImage photo={landscape('shopOwner', 0)} ratio="16/10" /></Reveal>
+            <Reveal y={32} delay={0.08}><PhotoTile photo={landscape('chef', 0)} ratio="1/1" rounded="rounded-3xl" /></Reveal>
+            <Reveal y={32} delay={0.14}><PhotoTile photo={landscape('rider', 0)} ratio="1/1" rounded="rounded-3xl" /></Reveal>
           </div>
         </div>
-      </section>
+      </Band>
 
       {/* Values */}
-      <section className="mx-auto max-w-[1180px] px-5 py-20 md:py-24">
-        <SectionHead eyebrow="What we stand for" title="Four principles behind every decision." />
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {VALUES.map(v => (
-            <div key={v.t} className={`${card} p-6`}>
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">{v.icon}</span>
-              <h3 className="mt-4 text-[16.5px] font-extrabold text-gray-900">{v.t}</h3>
-              <p className="mt-2 text-[14px] leading-relaxed text-gray-600">{v.d}</p>
-            </div>
+      <Band tone="soft">
+        <SectionIntro kicker="What we stand for" title={<>Four principles behind <Accent green>every</Accent> decision.</>} />
+        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {VALUES.map((v, i) => (
+            <Reveal key={v.t} delay={i * 0.06} y={24} className={`${panel} p-7`}>
+              <span className={iconChip}>{v.icon}</span>
+              <h3 className={`mt-6 ${h3}`}>{v.t}</h3>
+              <p className={`mt-3 ${body}`}>{v.d}</p>
+            </Reveal>
           ))}
         </div>
-      </section>
+      </Band>
 
       {/* How we're different */}
-      <section className="border-y border-gray-200 bg-gray-50">
-        <div className="mx-auto max-w-[1180px] px-5 py-20 md:py-24">
-          <SectionHead eyebrow="How we're different" title="Local-first, not dark stores." sub="Most quick-commerce apps build warehouses that compete with the shops around you. Zyphix puts those shops online instead." />
-          <div className="mt-12 grid gap-5 md:grid-cols-2">
-            <div className={`${card} p-7`}>
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl text-white" style={{ background: G }}><Leaf size={20} /></span>
-              <h3 className="mt-4 text-[20px] font-black tracking-tight text-gray-900" style={{ fontFamily: HEAD_FONT }}>Zyphix: local-first</h3>
-              <ul className="mt-4 space-y-3">
-                {COMPARE.map(c => (
-                  <li key={c.point} className="flex gap-3 text-[14px] leading-relaxed">
-                    <Check size={17} className="mt-0.5 shrink-0 text-emerald-600" />
-                    <span><span className="font-semibold text-gray-900">{c.point}:</span> <span className="text-gray-600">{c.local}</span></span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className={`${card} p-7`}>
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-gray-500"><Warehouse size={20} /></span>
-              <h3 className="mt-4 text-[20px] font-black tracking-tight text-gray-500" style={{ fontFamily: HEAD_FONT }}>Dark-store model</h3>
-              <ul className="mt-4 space-y-3">
-                {COMPARE.map(c => (
-                  <li key={c.point} className="flex gap-3 text-[14px] leading-relaxed">
-                    <X size={17} className="mt-0.5 shrink-0 text-gray-400" />
-                    <span><span className="font-semibold text-gray-700">{c.point}:</span> <span className="text-gray-500">{c.dark}</span></span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+      <Band>
+        <SectionIntro kicker="How we're different" title={<>Local-first, not <Accent green>dark stores</Accent>.</>} sub="Most quick-commerce apps build warehouses that compete with the shops around you. Zyphix puts those shops online instead." />
+        <div className="mt-14 grid gap-5 md:grid-cols-2">
+          <Reveal y={24} className="rounded-3xl bg-[#05080E] p-8 text-white md:p-10">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0DA366] text-white"><Leaf size={20} /></span>
+            <h3 className="mt-6 text-[24px] font-semibold tracking-[-0.03em]">Zyphix: local-first</h3>
+            <ul className="mt-6 space-y-4">
+              {COMPARE.map(c => (
+                <li key={c.point} className="flex gap-3 text-[15px] leading-[1.55]">
+                  <Check size={18} className="mt-0.5 shrink-0 text-emerald-400" />
+                  <span><span className="font-medium text-white">{c.point}:</span> <span className="text-white/65">{c.local}</span></span>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+          <Reveal y={24} delay={0.08} className={`${panel} p-8 md:p-10`}>
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-gray-500"><Warehouse size={20} /></span>
+            <h3 className="mt-6 text-[24px] font-semibold tracking-[-0.03em] text-gray-500">Dark-store model</h3>
+            <ul className="mt-6 space-y-4">
+              {COMPARE.map(c => (
+                <li key={c.point} className="flex gap-3 text-[15px] leading-[1.55]">
+                  <X size={18} className="mt-0.5 shrink-0 text-gray-400" />
+                  <span><span className="font-medium text-gray-700">{c.point}:</span> <span className="text-gray-500">{c.dark}</span></span>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
         </div>
-      </section>
+      </Band>
 
       {/* CTA */}
-      <section className="mx-auto max-w-[1180px] px-5 py-20 md:py-24">
-        <div className="flex flex-col gap-6 rounded-[32px] p-8 text-white md:flex-row md:items-center md:justify-between md:p-12" style={{ background: INK }}>
+      <Band tone="dark">
+        <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-[12px] font-bold uppercase tracking-[.12em] text-emerald-400">Join us</p>
-            <h2 className="mt-3 text-[1.8rem] font-black tracking-[-0.03em] leading-[1.1] md:text-[2.2rem]" style={{ fontFamily: HEAD_FONT }}>Be part of your neighbourhood's next chapter.</h2>
-            <p className="mt-3 max-w-[520px] text-[15px] leading-relaxed text-white/65">List your store, restaurant or services for free — or simply order from the businesses around you.</p>
+            <Reveal><Kicker light>Join us</Kicker></Reveal>
+            <Reveal delay={0.05}><Display light>Be part of your neighbourhood's <Accent green>next chapter</Accent>.</Display></Reveal>
+            <Reveal delay={0.1}><p className="mt-6 max-w-[52ch] text-[17px] leading-[1.6] text-white/65">List your store, restaurant or services for free, or simply order from the businesses around you.</p></Reveal>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/partner" className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-[14.5px] font-bold text-gray-900 hover:bg-gray-100">Become a partner <ArrowRight size={16} /></Link>
-            <Link href="/now" className={btnPrimary} style={{ background: G }}>Order now</Link>
-          </div>
+          <Reveal delay={0.15} className="flex shrink-0 flex-col gap-3 sm:flex-row">
+            <GlowButton href="/partner">Become a partner <ArrowRight size={17} /></GlowButton>
+            <GhostButton href="/now">Order now</GhostButton>
+          </Reveal>
         </div>
-      </section>
-    </SitePage>
+      </Band>
+    </InnerPage>
   );
 }
 

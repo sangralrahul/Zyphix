@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, ArrowUpRight, BadgeCheck, Clock, IndianRupee, MapPin, Search, ShieldCheck, X } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BadgeCheck, CalendarClock, Clock, MapPin, Search, ShieldCheck, X } from 'lucide-react';
 import { services } from '@/data/mockData';
 import { usePartners, tagList, type PartnerListing } from '@/lib/partners';
 import { PHOTOS, VIDEOS, type Photo } from '@/data/media';
 import { Chip, Accordion, Button, FONT } from '@/ui/kit';
 import { VideoHero, Reveal, Stagger, Kicker, Headline, Sub, Counter, Dark, Glow, Grain, GlowButton, GhostButton, G } from '@/ui/cinema';
-import { ScrollStory, ZoomVideo, Spotlight, Magnetic, type Chapter } from '@/ui/motion2';
+import { ScrollStory, ZoomVideo, Spotlight, Magnetic, SplitHeadline, type Chapter } from '@/ui/motion2';
 import { BookingPanel, type BookingState } from './book/BookingPanel';
 import { ServiceTiles } from './book/ServiceTiles';
-import { AccentWords } from './book/AccentWords';
+
 import { LiveJob } from './book/LiveJob';
 import { DAYS, FAQ, PANEL_ID, PANEL_ID_MOBILE, PARTNER_URL, PROMISES, metaFor, proInitials, serviceForPro, type Day, type Service } from './book/shared';
 
@@ -32,8 +32,8 @@ const CHAPTERS: Chapter[] = [
     body: 'Plumbing, electrical, cleaning, AC and more. Each one comes with a clear scope, so you know what is covered before anyone arrives.',
     extra: <div className="flex flex-wrap gap-2">{['Clear scope', 'Search or browse'].map(tag)}</div> },
   { kicker: '02 · Schedule', title: 'Choose a slot. They show up in it.', clip: VIDEOS.doorHandoff,
-    body: 'Today or tomorrow, morning to evening. The visit charge is shown before you confirm, and if your pro runs more than 30 minutes late, ₹100 comes off.',
-    extra: <div className="flex flex-wrap gap-2">{['Price before you confirm', 'On-time or ₹100 off'].map(tag)}</div> },
+    body: 'Today or tomorrow, morning to evening. The visit charge is shown before you confirm, and if your pro runs more than 30 minutes late, you get a credit.',
+    extra: <div className="flex flex-wrap gap-2">{['Price before you confirm', "Credit if we're late"].map(tag)}</div> },
   { kicker: '03 · At your door', title: 'A verified pro does the work.', clip: VIDEOS.salon,
     body: 'ID and police-verified before their first booking. Any extra parts or time are quoted before the job starts, never after.',
     extra: <div className="flex flex-wrap gap-2">{['ID & police-verified', 'Quote before extra work'].map(tag)}</div> },
@@ -45,9 +45,9 @@ const CHAPTERS: Chapter[] = [
 /* ── Safety & policy cards ─────────────────────────────────────────────── */
 const POLICIES = [
   { icon: ShieldCheck, n: 100, f: (n: number) => `${Math.round(n)}%`, t: 'of pros ID & police-verified', s: 'Checks finish before their first booking, not after.' },
-  { icon: Clock, n: 100, f: (n: number) => `₹${Math.round(n)}`, t: 'off if we are late', s: 'More than 30 minutes past your slot, it comes off the visit charge.' },
+  { icon: Clock, n: 30, f: (n: number) => `${Math.round(n)} min`, t: "late? You get a credit", s: 'More than 30 minutes past your slot, part of the visit charge comes back.' },
   { icon: BadgeCheck, n: 7, f: (n: number) => `${Math.round(n)}-day`, t: 'work guarantee', s: 'An issue within 7 days? A pro comes back and fixes it, free.' },
-  { icon: IndianRupee, n: 0, f: (n: number) => `₹${Math.round(n)}`, t: 'to reschedule or cancel', s: 'Up to 1 hour before your slot. No questions.' },
+  { icon: CalendarClock, n: 0, f: () => 'Free', t: 'to reschedule or cancel', s: 'Up to 1 hour before your slot. No questions.' },
 ];
 
 /* ── Craft bento (photos) ──────────────────────────────────────────────── */
@@ -213,8 +213,8 @@ export function ZyphixBook() {
         <VideoHero clip={VIDEOS.cleaning} height="min-h-[600px] md:min-h-[72svh]" dim={0.45} className="md:rounded-3xl">
           <div className="relative px-4 pb-7 pt-20 md:px-10 md:pb-12 md:pt-24 lg:px-14">
             <div className="lg:max-w-[640px] xl:max-w-[700px]">
-              <Kicker light>Zyphix Book · Jammu</Kicker>
-              <AccentWords parts={['Home services, done by', { accent: 'verified', green: true }, 'pros.']}
+              <Kicker light>Zyphix Book</Kicker>
+              <SplitHeadline parts={['Home services, done by', { accent: 'verified', green: true }, 'pros.']}
                 className="max-w-[16ch] text-balance text-[40px] font-semibold leading-[1] tracking-[-0.045em] text-white sm:text-[54px] md:text-[72px]" />
               <p className="mt-5 max-w-[52ch] text-[15.5px] leading-[1.55] text-white/75 md:text-[18px]">
                 Plumbers, electricians, cleaners and more from your own neighbourhood. Price shown before you confirm.
@@ -229,7 +229,7 @@ export function ZyphixBook() {
               </div>
             </div>
             {/* live "pro on the way" card, desktop only */}
-            <div className="pointer-events-none absolute bottom-12 right-10 hidden lg:block xl:right-14">
+            <div className="pointer-events-none absolute bottom-12 right-10 hidden xl:block xl:right-14">
               <Reveal delay={0.6} y={24} className="pointer-events-auto">
                 <LiveJob />
               </Reveal>
@@ -374,9 +374,6 @@ export function ZyphixBook() {
                 </Spotlight>
               ))}
             </Stagger>
-            <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-3 border-t border-white/10 pt-8 text-[13.5px] text-white/70">
-              {PROMISES.map(t => <li key={t} className="flex items-center gap-2"><BadgeCheck size={15} className="shrink-0 text-emerald-300" />{t}</li>)}
-            </ul>
           </div>
         </Dark>
       </div>
@@ -402,7 +399,7 @@ export function ZyphixBook() {
         <ZoomVideo clip={VIDEOS.haircut}>
           <div className="w-full px-5 pb-12 md:px-12 md:pb-16 lg:px-16">
             <Kicker light>For professionals</Kicker>
-            <h2 className="max-w-[16ch] text-balance text-[36px] font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-[52px] md:text-[68px]">
+            <h2 className="max-w-[16ch] text-balance text-[36px] font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-[48px] md:text-[58px]">
               Work your own neighbourhood. Get paid every week.
             </h2>
             <p className="mt-5 max-w-[50ch] text-[16px] leading-[1.6] text-white/75 md:text-[18px]">Electricians, plumbers, cleaners, beauticians and more. Listing is free; verification takes a few days.</p>

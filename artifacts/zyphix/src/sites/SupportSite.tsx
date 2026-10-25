@@ -4,8 +4,8 @@ import { ArrowRight, ArrowUpRight, ChevronRight, Clock, Mail, Search, X, CheckCi
 import { SiteHeader, SiteFooter } from '@/components/layout/SiteChrome';
 import { Container, Accordion, FONT, Chip } from '@/ui/kit';
 import { Reveal, Stagger, Kicker, Headline, Sub, Glow, Grain, GhostButton, PhotoTile, Dark, Light, VideoHero, isStatic, G } from '@/ui/cinema';
-import { Accent, Magnetic, Spotlight, LiveOrder, GiantMarquee } from '@/ui/motion2';
-import { VIDEOS, landscape } from '@/data/media';
+import { Accent, Magnetic, Spotlight, LiveOrder, GiantMarquee, SplitHeadline } from '@/ui/motion2';
+import { VIDEOS, landscape, type Clip } from '@/data/media';
 import { apiFetch } from '@/lib/api';
 import { ARTICLES, TOPICS, POPULAR, HOURS, SUPPORT_EMAIL, PARTNERS_EMAIL, articleBySlug, articlesForTopic, searchArticles, topicById, type Article, type Block, type Topic } from './support/articles';
 
@@ -41,14 +41,15 @@ function Page({ children, dark = false }: { children: React.ReactNode; dark?: bo
   );
 }
 
-function Crumbs({ items }: { items: Array<[string, string?]> }) {
+function Crumbs({ items, light = false }: { items: Array<[string, string?]>; light?: boolean }) {
+  const hover = light ? 'hover:text-white' : 'hover:text-gray-900';
   return (
-    <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-[13px] text-gray-500">
-      <Link href="/" className="hover:text-gray-900">Help centre</Link>
+    <nav aria-label="Breadcrumb" className={`flex flex-wrap items-center gap-1.5 text-[13px] ${light ? 'text-white/60' : 'text-gray-500'}`}>
+      <Link href="/" className={hover}>Help centre</Link>
       {items.map(([label, href]) => (
         <React.Fragment key={label}>
-          <ChevronRight size={13} className="text-gray-300" />
-          {href ? <Link href={href} className="hover:text-gray-900">{label}</Link> : <span className="text-gray-900">{label}</span>}
+          <ChevronRight size={13} className={light ? 'text-white/30' : 'text-gray-300'} />
+          {href ? <Link href={href} className={hover}>{label}</Link> : <span className={light ? 'text-white' : 'text-gray-900'}>{label}</span>}
         </React.Fragment>
       ))}
     </nav>
@@ -135,8 +136,8 @@ function Home() {
       <VideoHero clip={VIDEOS.phoneOrder} height="min-h-[640px] md:min-h-[82svh]" dim={0.5} position="center 40%">
         <Container className="pb-14 pt-32 md:pb-20 md:pt-44">
           <Kicker light>Zyphix Support</Kicker>
-          <h1 className="text-balance text-[48px] font-semibold leading-[0.98] tracking-[-0.045em] text-white sm:text-[68px] md:text-[88px]">How can we <Accent green>help</Accent>?</h1>
-          <p className="mt-5 max-w-[52ch] text-[16px] leading-[1.6] text-white/75 md:text-[19px]">Answers for Zyphix Now, Eats and Book, plus partners and payouts. Most questions are answered here in under a minute.</p>
+          <SplitHeadline parts={['How can we', { accent: 'help?', green: true }]} className="max-w-[14ch] text-balance text-[48px] font-semibold leading-[0.98] tracking-[-0.045em] text-white sm:text-[68px] md:text-[84px]" />
+          <p className="mt-5 max-w-[52ch] text-[17px] leading-[1.6] text-white/75 md:text-[19px]">Answers for Zyphix Now, Eats and Book, plus partners and payouts. Most questions take less than a minute.</p>
           <div className="mt-8 max-w-[720px]"><SearchBox value={q} onChange={setQ} big /></div>
           <div className="mt-4 flex flex-wrap items-center gap-2 text-[13px] text-white/70">
             <span className="mr-1">Popular:</span>
@@ -163,7 +164,7 @@ function Home() {
                   <span className="mt-6 inline-flex items-center gap-1.5 text-[14.5px] font-semibold text-emerald-300">Open my orders <ArrowUpRight size={16} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></span>
                 </div>
                 <div className="relative w-full md:w-auto">
-                  <LiveOrder dark />
+                  <LiveOrder dark items={["Fresh milk 1 L", "Whole-wheat flour 5 kg", "Bananas · 6"]} />
                   <p className="mt-2 text-[11.5px] text-white/40">Illustrative order</p>
                 </div>
               </a>
@@ -186,7 +187,7 @@ function Home() {
             <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-16">
               <div className="lg:col-span-7">
                 <Reveal><Kicker>Browse by topic</Kicker></Reveal>
-                <Reveal delay={0.05}><h2 className="max-w-[18ch] text-balance text-[32px] font-semibold leading-[1.04] tracking-[-0.04em] text-gray-900 sm:text-[44px] md:text-[52px]">Pick what you need <Accent green>help</Accent> with.</h2></Reveal>
+                <Reveal delay={0.05}><h2 className="max-w-[18ch] text-balance text-[34px] font-semibold leading-[1.04] tracking-[-0.04em] text-gray-900 sm:text-[46px] md:text-[56px]">Pick a <Accent green>topic</Accent>.</h2></Reveal>
               </div>
               <Reveal delay={0.1} className="lg:col-span-5"><Sub className="max-w-[44ch]">Six topics cover every order, booking and payout. Each article is short, specific and kept up to date.</Sub></Reveal>
             </div>
@@ -205,14 +206,14 @@ function Home() {
           <div className="mt-20 grid gap-12 md:mt-28 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-7">
               <Reveal><Kicker>Most read</Kicker></Reveal>
-              <Reveal delay={0.05}><h2 className="text-[28px] font-semibold tracking-[-0.04em] text-gray-900 sm:text-[36px]">Popular articles</h2></Reveal>
+              <Reveal delay={0.05}><h2 className="text-[28px] font-semibold tracking-[-0.035em] text-gray-900 sm:text-[34px]">Popular articles</h2></Reveal>
               <Reveal delay={0.1} className="mt-6 rounded-3xl border border-gray-200 bg-white px-5 md:px-6">
                 <div className="divide-y divide-gray-100">{popular.map(a => <ArticleRow key={a.slug} a={a} showTopic />)}</div>
               </Reveal>
             </div>
             <div className="lg:col-span-5">
               <Reveal><Kicker>Service status</Kicker></Reveal>
-              <Reveal delay={0.05}><h2 className="text-[28px] font-semibold tracking-[-0.04em] text-gray-900 sm:text-[36px]">Is something down?</h2></Reveal>
+              <Reveal delay={0.05}><h2 className="text-[28px] font-semibold tracking-[-0.035em] text-gray-900 sm:text-[34px]">Is something down?</h2></Reveal>
               <Reveal delay={0.1}>
                 <div className="mt-6 overflow-hidden rounded-3xl border border-gray-200 bg-white">
                   <PhotoTile photo={landscape('rider', 1)} ratio="16/7" rounded="rounded-none" className="!bg-gray-900">
@@ -285,51 +286,77 @@ function ContactBand() {
 }
 
 /* ── Topic page ──────────────────────────────────────────────────────────── */
+const TOPIC_CLIP: Record<string, Clip> = {
+  now: VIDEOS.packing, eats: VIDEOS.cooking, book: VIDEOS.plumber,
+  partners: VIDEOS.merchant, account: VIDEOS.phoneOrder, refunds: VIDEOS.doorHandoff,
+};
+
+function ArticleCard({ a, n }: { a: Article; n: number }) {
+  const words = a.body.reduce((c, b) => c + ('text' in b ? b.text : b.items.join(' ')).split(/\s+/).length, 0);
+  const mins = Math.max(1, Math.round(words / 200));
+  return (
+    <Link href={`/${a.slug}`} className="block h-full">
+      <Spotlight dark={false} className="flex h-full flex-col p-6 transition-transform duration-300 hover:-translate-y-1 md:p-7">
+        <div className="flex items-center justify-between">
+          <span className="text-[13px] font-semibold tabular-nums text-emerald-700">{String(n).padStart(2, '0')}</span>
+          <span className="text-[12.5px] text-gray-400">{mins} min read</span>
+        </div>
+        <p className="mt-6 text-balance text-[21px] font-semibold leading-[1.2] tracking-[-0.03em] text-gray-900">{a.title}</p>
+        <p className="mt-3 text-[14.5px] leading-[1.6] text-gray-500">{a.summary}</p>
+        <span className="mt-auto inline-flex items-center gap-1.5 pt-6 text-[14px] font-semibold text-gray-900">Read article <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" /></span>
+      </Spotlight>
+    </Link>
+  );
+}
+
 function TopicPage({ id }: { id: string }) {
   const t = topicById(id);
   useTitle(t ? t.title : 'Topic');
   const [q, setQ] = useState('');
   if (!t) return <NotFound />;
   const list = articlesForTopic(t.id);
-  const photo = landscape(t.photo);
   const searching = q.trim().length > 1;
   return (
-    <Page>
-      <section className="relative overflow-hidden border-b border-gray-100 bg-[#F6F7F9]">
-        <Container className="grid items-end gap-8 pb-10 pt-10 md:grid-cols-[minmax(0,1fr)_320px] md:pb-14 md:pt-14">
-          <div>
-            <Crumbs items={[[t.title]]} />
-            <Headline size="lg" as="h1" className="mt-6">{t.title}</Headline>
-            <Sub className="mt-4 max-w-[560px]">{t.blurb}</Sub>
-            <div className="mt-6 max-w-[520px]"><SearchBox value={q} onChange={setQ} /></div>
+    <Page dark>
+      <VideoHero clip={TOPIC_CLIP[t.id] ?? VIDEOS.phoneOrder} height="min-h-[520px] md:min-h-[60svh]" dim={0.5}>
+        <Container className="pb-12 pt-28 md:pb-16 md:pt-36">
+          <Crumbs light items={[[t.title]]} />
+          <div className="mt-6 grid gap-8 lg:grid-cols-12 lg:items-end">
+            <div className="lg:col-span-7">
+              <SplitHeadline parts={[t.title]} className="max-w-[18ch] text-balance text-[40px] font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-[56px] md:text-[72px]" />
+              <p className="mt-5 max-w-[52ch] text-[17px] leading-[1.6] text-white/75 md:text-[19px]">{t.blurb}</p>
+            </div>
+            <div className="lg:col-span-5">
+              <SearchBox value={q} onChange={setQ} big />
+              <p className="mt-3 text-[13px] text-white/60">{list.length} article{list.length === 1 ? '' : 's'} in this topic</p>
+            </div>
           </div>
-          <PhotoTile photo={photo} ratio="4/3" rounded="rounded-3xl" className="hidden md:block">
-            <div className="absolute inset-0 bg-gradient-to-t from-[#05080E]/60 to-transparent" />
-          </PhotoTile>
         </Container>
-      </section>
-      <Light className="pb-24 pt-10 md:pb-32 md:pt-14">
+      </VideoHero>
+
+      <Light className="py-24 md:py-32">
         <Container>
           {searching ? <SearchResults q={q} /> : (
-            <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+            <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
               <div className="lg:col-span-8">
-                <Reveal className="rounded-3xl border border-gray-200 bg-white px-5 md:px-6">
-                  <div className="divide-y divide-gray-100">{list.map(a => <ArticleRow key={a.slug} a={a} />)}</div>
-                </Reveal>
+                <Stagger className="grid gap-4 sm:grid-cols-2" step={0.06}>
+                  {list.map((a, i) => <ArticleCard key={a.slug} a={a} n={i + 1} />)}
+                </Stagger>
               </div>
-              <aside className="lg:col-span-4">
+              <aside className="space-y-4 lg:col-span-4">
                 {t.product && (
-                  <Reveal className="rounded-3xl border border-gray-200 bg-white p-5">
-                    <p className="text-[13px] font-semibold text-gray-900">Quick action</p>
-                    <p className="mt-1 text-[13px] text-gray-500">Most issues are fastest to fix from inside the product.</p>
-                    <a href={t.product.href} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold text-white" style={{ background: `linear-gradient(180deg, #19C27C 0%, ${G} 100%)` }}>{t.product.label} <ArrowUpRight size={15} /></a>
+                  <Reveal className="relative overflow-hidden rounded-3xl bg-[#05080E] p-6 text-white">
+                    <Glow x="0%" y="0%" size={420} alpha={0.35} />
+                    <p className="relative text-[16px] font-semibold tracking-[-0.02em]">Fix it in the app</p>
+                    <p className="relative mt-1.5 text-[14px] leading-[1.6] text-white/60">Most issues are fastest to fix from inside the product, where we can already see your order.</p>
+                    <a href={t.product.href} target="_blank" rel="noopener noreferrer" className="relative mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14.5px] font-semibold text-white" style={{ background: `linear-gradient(180deg, #19C27C 0%, ${G} 100%)` }}>{t.product.label} <ArrowUpRight size={15} /></a>
                   </Reveal>
                 )}
-                <Reveal delay={0.05} className="mt-4 rounded-3xl border border-gray-200 bg-white p-5">
-                  <p className="text-[13px] font-semibold text-gray-900">Other topics</p>
-                  <ul className="mt-3 space-y-2">
+                <Reveal delay={0.05} className="rounded-3xl border border-gray-200 bg-white p-6">
+                  <p className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-gray-400">Other topics</p>
+                  <ul className="mt-3 divide-y divide-gray-100">
                     {TOPICS.filter(x => x.id !== t.id).map(x => (
-                      <li key={x.id}><Link href={`/${x.id}`} className="flex items-center justify-between text-[14px] text-gray-600 hover:text-gray-900">{x.title} <ChevronRight size={14} className="text-gray-300" /></Link></li>
+                      <li key={x.id}><Link href={`/${x.id}`} className="flex items-center justify-between py-3 text-[14.5px] font-medium text-gray-700 hover:text-gray-900">{x.title} <ChevronRight size={15} className="text-gray-300" /></Link></li>
                     ))}
                   </ul>
                 </Reveal>
@@ -402,7 +429,7 @@ function ArticlePage({ slug }: { slug: string }) {
   const t = topicById(a.topic)!;
   const related = (a.related || []).map(articleBySlug).filter((x): x is Article => !!x);
   const more = articlesForTopic(a.topic).filter(x => x.slug !== a.slug && !related.includes(x)).slice(0, 4 - related.length);
-  const updated = new Date(a.updated + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  const updated = new Date(a.updated + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const heads = a.body.filter((b): b is Extract<Block, { type: 'h' }> => b.type === 'h').map(b => b.text);
   const words = a.body.reduce((n, b) => n + ('text' in b ? b.text : b.items.join(' ')).split(/\s+/).length, 0);
   const mins = Math.max(1, Math.round(words / 200));
@@ -536,7 +563,7 @@ function ContactPage() {
           <div>
             <Crumbs items={[['Contact us']]} />
             <div className="mt-8"><Kicker>Contact support</Kicker></div>
-            <h1 className="max-w-[16ch] text-balance text-[38px] font-semibold leading-[1.02] tracking-[-0.04em] text-gray-900 sm:text-[52px] md:text-[60px]">Tell us what <Accent green>happened</Accent>.</h1>
+            <SplitHeadline parts={['Tell us what', { accent: 'happened.', green: true }]} className="text-balance text-[38px] sm:max-w-[16ch] font-semibold leading-[1.02] tracking-[-0.04em] text-gray-900 sm:text-[52px] md:text-[58px]" />
             <Sub className="mt-5 max-w-[52ch]">We reply by email {HOURS}. Order issues are fastest from the order page, where support can already see the order.</Sub>
           </div>
           <PhotoTile photo={landscape('teamOffice', 0)} ratio="4/3" rounded="rounded-3xl" className="!bg-gray-200">

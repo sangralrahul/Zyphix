@@ -111,7 +111,7 @@ export function InquiryForm() {
                 <Field label="Phone (10 digits)" hint="Indian mobile number, no country code"><input type="tel" inputMode="numeric" maxLength={10} className={inputCls} value={form.phone} onChange={set('phone')} placeholder="98765 43210" autoComplete="tel-national" required /></Field>
               </div>
               <div className="grid gap-5 sm:grid-cols-3">
-                <Field label="City"><input className={inputCls} value={form.city} onChange={set('city')} placeholder="Jammu" autoComplete="address-level2" required /></Field>
+                <Field label="City"><input className={inputCls} value={form.city} onChange={set('city')} placeholder="Your city" autoComplete="address-level2" required /></Field>
                 <Field label="Business type">
                   <select className={inputCls} value={form.businessType} onChange={set('businessType')} required>
                     <option value="">Select…</option>

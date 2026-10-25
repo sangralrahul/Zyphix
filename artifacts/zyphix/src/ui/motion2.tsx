@@ -73,7 +73,7 @@ export function ScrollStory({ chapters, id, intro }: { chapters: Chapter[]; id?:
   if (isStatic()) {
     return (
       <section id={id} className="relative bg-[#05080E] py-24 text-white">
-        <div className="mx-auto w-full max-w-[1200px] px-5 sm:px-8">
+        <div className="mx-auto w-full max-w-[1120px] px-5 sm:px-8">
           {intro}
           <div className="mt-10 grid gap-16">
             {chapters.map((c, i) => (
@@ -101,7 +101,7 @@ export function ScrollStory({ chapters, id, intro }: { chapters: Chapter[]; id?:
           {chapters.map((c, i) => <ChapterVideo key={i} c={c} i={i} n={n} progress={scrollYProgress} />)}
           <div className="absolute inset-0 bg-gradient-to-t from-[#05080E] via-[#05080E]/70 to-[#05080E]/30" />
         </div>
-        <div className="relative mx-auto grid w-full max-w-[1200px] items-center gap-10 px-5 sm:px-8 md:grid-cols-[1fr_1.1fr]">
+        <div className="relative mx-auto grid w-full max-w-[1120px] items-center gap-10 px-5 sm:px-8 md:grid-cols-[1fr_1.1fr]">
           <div className="relative h-[60svh] md:h-[520px]">
             {intro && <div className="absolute inset-x-0 top-0">{intro}</div>}
             {chapters.map((c, i) => <ChapterText key={i} c={c} i={i} n={n} progress={scrollYProgress} />)}
@@ -144,7 +144,7 @@ export function HScrollGallery({ items, header, id, cardClass = 'w-[78vw] sm:w-[
   if (isStatic()) {
     return (
       <section id={id} className="relative overflow-hidden bg-[#05080E] py-24 text-white">
-        <div className="mx-auto w-full max-w-[1200px] px-5 sm:px-8">{header}</div>
+        <div className="mx-auto w-full max-w-[1120px] px-5 sm:px-8">{header}</div>
         <div className="mt-10 flex gap-5 overflow-x-auto px-5 pb-4 sm:px-8">{items.map((it, i) => <div key={i} className={`shrink-0 ${cardClass}`}>{it}</div>)}</div>
       </section>
     );
@@ -152,8 +152,8 @@ export function HScrollGallery({ items, header, id, cardClass = 'w-[78vw] sm:w-[
   return (
     <section id={id} ref={ref} className="relative bg-[#05080E] text-white" style={{ height: `calc(100svh + ${dist}px)` }}>
       <div className="sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden">
-        <div className="mx-auto w-full max-w-[1200px] px-5 sm:px-8">{header}</div>
-        <motion.div ref={track} className="mt-10 flex gap-5 pl-5 pr-10 sm:pl-[max(32px,calc((100vw-1200px)/2+32px))]" style={{ x: sx }}>
+        <div className="mx-auto w-full max-w-[1120px] px-5 sm:px-8">{header}</div>
+        <motion.div ref={track} className="mt-10 flex gap-5 pl-5 pr-10 sm:pl-[max(32px,calc((100vw-1120px)/2+32px))]" style={{ x: sx }}>
           {items.map((it, i) => <div key={i} className={`shrink-0 ${cardClass}`}>{it}</div>)}
         </motion.div>
       </div>
@@ -391,5 +391,42 @@ export function GiantMarquee({ words, className = '', outline = true, light = tr
         ))}
       </motion.div>
     </div>
+  );
+}
+
+/* ── SplitHeadline (word-by-word reveal with one serif accent) ─────────────── */
+export type Part = string | { accent: string; green?: boolean };
+
+export function SplitHeadline({ parts, className = '', delay = 0, as: Tag = 'h1' }: { parts: Part[]; className?: string; delay?: number; as?: 'h1' | 'h2' }) {
+  const label = parts.map(p => (typeof p === 'string' ? p : p.accent)).join(' ');
+  // flatten into word tokens, remembering which one is the accent
+  const tokens: { w: string; accent?: boolean; green?: boolean }[] = [];
+  parts.forEach(p => {
+    if (typeof p === 'string') p.split(' ').filter(Boolean).forEach(w => tokens.push({ w }));
+    else tokens.push({ w: p.accent, accent: true, green: p.green });
+  });
+  const render = (t: typeof tokens[number]) => (t.accent ? <Accent green={t.green} className="pr-[0.04em]">{t.w}</Accent> : t.w);
+
+  if (isStatic()) {
+    return (
+      <Tag className={className}>
+        {tokens.map((t, i) => <React.Fragment key={i}>{render(t)}{i < tokens.length - 1 ? ' ' : ''}</React.Fragment>)}
+      </Tag>
+    );
+  }
+  return (
+    <Tag className={className} aria-label={label}>
+      {tokens.map((t, i) => (
+        <React.Fragment key={i}>
+          <span aria-hidden className="inline-block overflow-hidden pb-[0.06em] align-bottom">
+            <motion.span className="inline-block" initial={{ y: '110%', opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.75, ease: EASE, delay: delay + i * 0.05 }}>
+              {render(t)}
+            </motion.span>
+          </span>
+          {i < tokens.length - 1 ? ' ' : null}
+        </React.Fragment>
+      ))}
+    </Tag>
   );
 }

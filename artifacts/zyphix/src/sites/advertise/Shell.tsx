@@ -51,7 +51,7 @@ export function Footer() {
       <div className="border-t border-[#E6E8EC]">
         <Container className="flex flex-col gap-2 py-5 text-[13px] text-gray-500 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Zyphix. All sponsored placements are labelled to customers.</p>
-          <p className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full" style={{ background: G }} /> Jammu first, launching across India</p>
+          <p className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full" style={{ background: G }} /> Rolling out neighbourhood by neighbourhood</p>
         </Container>
       </div>
     </footer>

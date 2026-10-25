@@ -959,10 +959,10 @@ function SuccessStep({ storeData, categories, selectedSubs }: { storeData: Recor
 
       {/* How Zyphix helps merchants grow */}
       <div style={{ background:'linear-gradient(135deg,#0A0E1A,#0D1520)', borderRadius:20, padding:'22px 22px', marginBottom:20, textAlign:'left' }}>
-        <p style={{ fontSize:13, fontWeight:800, color:'#fff', marginBottom:14, textAlign:'center' }}>🚀 How Zyphix grows your kirana business</p>
+        <p style={{ fontSize:13, fontWeight:800, color:'#fff', marginBottom:14, textAlign:'center' }}>🚀 How Zyphix grows your local business</p>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
           {[
-            { icon:'📈', title:'3× More Sales',   desc:'Reach customers who can\'t visit your store — online orders add 30–60% revenue' },
+            { icon:'📈', title:'New customers',   desc:'Reach people nearby who can\'t visit your store in person' },
             { icon:'💰', title:'₹0 Setup Cost',   desc:'No monthly fee, no listing charge. We earn only when you earn — tiny commission per order' },
             { icon:'⚡', title:'Live in 24 Hours', desc:'Once verified, your store is searchable on Zyphix and begins receiving orders' },
             { icon:'📦', title:'Delivery Handled', desc:'Our fleet covers your area — you focus on the store, we handle the last mile' },

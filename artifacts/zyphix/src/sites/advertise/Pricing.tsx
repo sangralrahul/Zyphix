@@ -16,12 +16,12 @@ const TIERS = [
   },
   {
     name: 'Growth', tag: 'Multi-format, multi-area', featured: true,
-    d: 'Brands running a launch or promotion across several neighbourhoods in one city.',
+    d: 'Brands running a launch or promotion across several neighbourhoods.',
     rows: [['Placements', 'Up to 3 formats, combined'], ['Areas', 'Up to 5 delivery areas'], ['Duration', '14 or 30 days, dayparts included'], ['Support', 'Named partnerships contact']],
   },
   {
     name: 'Enterprise', tag: 'City-wide and multi-city', featured: false,
-    d: 'National brands and agencies planning always-on or multi-city programmes.',
+    d: 'Large brands and agencies planning always-on or multi-city programmes.',
     rows: [['Placements', 'All six formats, any mix'], ['Areas', 'Multiple cities as they launch'], ['Duration', 'Quarterly or annual'], ['Support', 'Partnerships lead, agency billing']],
   },
 ];
@@ -69,7 +69,7 @@ export function Pricing() {
           ))}
         </div>
         <Reveal delay={0.1}>
-          <p className="mt-10 text-center text-[14px] text-gray-500">No auctions or bidding · Change areas between periods · GST invoice for every period</p>
+          <p className="mt-10 text-center text-[14px] text-gray-500">No auctions or bidding · Change areas between periods · Tax invoice for every period</p>
         </Reveal>
       </Container>
     </Light>

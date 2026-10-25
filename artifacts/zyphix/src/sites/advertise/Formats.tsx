@@ -1,6 +1,6 @@
 import React from 'react';
 import { LayoutPanelTop, Rows3, Sparkles, Search, Star, TicketPercent, Plus, Clock, Check, ArrowRight, MapPin, ChevronDown } from 'lucide-react';
-import { Container, Phone, Browser, G, G_DEEP } from '@/ui/kit';
+import { Phone, Browser, G, G_DEEP } from '@/ui/kit';
 import { Kicker } from '@/ui/cinema';
 import { HScrollGallery } from '@/ui/motion2';
 import { AppHeader, AppSearch, AppBanner, AppDots, AppRow, AppTile, AppGhost, SponsoredTag, IllustrativeTag } from './shared';
@@ -33,7 +33,7 @@ const RowPreview = () => (
     <AppRow title="Breakfast by YourBrand" sponsored highlight>
       <AppTile name="Rolled oats 1kg" price="₹189" tone="green" /><AppTile name="Muesli 500g" price="₹249" tone="green" /><AppTile name="Instant oats" price="₹99" tone="green" />
     </AppRow>
-    <AppRow title="Dairy & eggs"><AppTile name="Toned milk" price="₹28" tone="blue" /><AppTile name="Curd 400g" price="₹35" tone="blue" /><AppTile name="Eggs ×6" price="₹48" tone="amber" /></AppRow>
+    <AppRow title="Dairy & eggs"><AppTile name="Fresh milk 1 L" price="₹28" tone="blue" /><AppTile name="Yogurt 400 g" price="₹35" tone="blue" /><AppTile name="Eggs ×6" price="₹48" tone="amber" /></AppRow>
   </Phone>
 );
 
@@ -44,23 +44,23 @@ const SpotlightPreview = () => (
       {['All', 'Tea & coffee', 'Snacks', 'Staples'].map((c, i) => <span key={c} className={`shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-medium ${i === 1 ? 'text-white' : 'border border-gray-200 bg-white text-gray-600'}`} style={i === 1 ? { background: G } : undefined}>{c}</span>)}
     </div>
     <AppRow title="Tea & coffee">
-      <AppTile name="Chai masala" price="₹65" tone="amber" spotlight /><AppTile name="Assam tea" price="₹120" /><AppTile name="Filter coffee" price="₹180" />
-      <AppTile name="Green tea ×25" price="₹140" /><AppTile name="Ginger tea" price="₹95" /><AppTile name="Jaggery 500g" price="₹60" />
+      <AppTile name="Spiced tea blend" price="₹65" tone="amber" spotlight /><AppTile name="Black tea" price="₹120" /><AppTile name="Ground coffee" price="₹180" />
+      <AppTile name="Green tea ×25" price="₹140" /><AppTile name="Ginger tea" price="₹95" /><AppTile name="Honey 500 g" price="₹60" />
     </AppRow>
   </Phone>
 );
 
 const SearchPreview = () => (
   <Phone>
-    <AppHeader /><AppSearch value="atta" />
-    <p className="mx-4 mt-3 text-[9.5px] font-medium uppercase tracking-wider text-gray-400">Results for "atta"</p>
+    <AppHeader /><AppSearch value="flour" />
+    <p className="mx-4 mt-3 text-[9.5px] font-medium uppercase tracking-wider text-gray-400">Results for "flour"</p>
     <div className="relative mx-4 mt-1.5 flex items-center gap-2.5 rounded-xl border border-emerald-300 bg-white p-2 ring-2 ring-emerald-100">
       <SponsoredTag className="absolute right-2 top-2" />
       <div className="h-10 w-10 shrink-0 rounded-lg" style={{ background: 'linear-gradient(135deg,#FEF3C7,#FDE68A)' }} />
-      <div className="min-w-0 flex-1"><p className="truncate text-[10.5px] font-semibold text-gray-900">YourBrand Chakki Atta 5kg</p><p className="text-[9.5px] text-gray-500">Local kirana · 0.8 km</p><p className="text-[10px] font-semibold">₹265</p></div>
+      <div className="min-w-0 flex-1"><p className="truncate text-[10.5px] font-semibold text-gray-900">YourBrand Whole-wheat Flour 5 kg</p><p className="text-[9.5px] text-gray-500">Corner store · 0.8 km</p><p className="text-[10px] font-semibold">₹265</p></div>
       <span className="flex h-6 w-6 items-center justify-center rounded-md border border-emerald-300 text-emerald-700"><Plus size={11} /></span>
     </div>
-    {[['Whole wheat atta 5kg', '₹240'], ['Multigrain atta 1kg', '₹85'], ['Besan 500g', '₹58']].map(([n, p]) => (
+    {[['Whole-wheat flour 5 kg', '₹240'], ['Multigrain flour 1 kg', '₹85'], ['Rye flour 1 kg', '₹58']].map(([n, p]) => (
       <div key={n} className="mx-4 mt-1.5 flex items-center gap-2.5 rounded-xl border border-gray-200 bg-white p-2">
         <div className="h-10 w-10 shrink-0 rounded-lg bg-gray-100" />
         <div className="min-w-0 flex-1"><p className="truncate text-[10.5px] font-semibold text-gray-800">{n}</p><p className="text-[9.5px] text-gray-500">Local shelf · 1.1 km</p><p className="text-[10px] font-semibold">{p}</p></div>
@@ -77,7 +77,7 @@ const FeaturedPreview = () => (
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400">Zyphix Eats</p>
-          <p className="flex items-center gap-1 text-[12.5px] font-semibold text-gray-900"><MapPin size={12} className="text-orange-600" /> Gandhi Nagar, Jammu <ChevronDown size={12} className="text-gray-400" /></p>
+          <p className="flex items-center gap-1 text-[12.5px] font-semibold text-gray-900"><MapPin size={12} className="text-orange-600" /> Home <ChevronDown size={12} className="text-gray-400" /></p>
         </div>
         <div className="hidden flex-1 items-center gap-2 rounded-lg border border-gray-200 bg-[#FAFAFA] px-3 py-1.5 text-[11px] text-gray-400 sm:flex sm:max-w-[220px]"><Search size={12} /> Search dishes or restaurants</div>
       </div>
@@ -92,7 +92,7 @@ const FeaturedPreview = () => (
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-1">
-          {[['Dosa Corner', '18 min'], ['Punjabi Dhaba', '30 min']].map(([n, t]) => (
+          {[['Dosa Corner', '18 min'], ['Margherita & Co.', '30 min']].map(([n, t]) => (
             <div key={n} className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-2">
               <div className="h-10 w-10 shrink-0 rounded-lg bg-gray-100" />
               <div className="min-w-0"><p className="truncate text-[11px] font-semibold text-gray-900">{n}</p><p className="text-[10px] text-gray-500">{t}</p></div>
@@ -114,11 +114,11 @@ const OffersPreview = () => (
       </div>
       <div className="min-w-0 flex-1 p-2">
         <div className="flex items-center justify-between"><p className="truncate text-[10.5px] font-semibold text-gray-900">YourBrand oats range</p><SponsoredTag /></div>
-        <p className="mt-0.5 text-[9px] text-gray-500">Min. order ₹199 · 6 pin codes</p>
+        <p className="mt-0.5 text-[9px] text-gray-500">Min. order ₹199 · 6 delivery areas</p>
         <div className="mt-1.5 flex items-center justify-between rounded-md bg-emerald-50 px-2 py-0.5 text-[9.5px] font-semibold text-emerald-800 ring-1 ring-emerald-200"><span className="tracking-wider">OATS50</span><span>Copy</span></div>
       </div>
     </div>
-    {[['Free delivery on Eats', 'Till Sunday'], ['10% off at your local kirana', '2 days left']].map(([n, t]) => (
+    {[['Free delivery on Eats', 'Till Sunday'], ['10% off at your corner store', '2 days left']].map(([n, t]) => (
       <div key={n} className="mx-4 mt-1.5 flex items-center gap-2.5 rounded-xl border border-gray-200 bg-white p-2">
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500"><TicketPercent size={13} /></span>
         <div className="min-w-0 flex-1"><p className="truncate text-[10.5px] font-semibold text-gray-800">{n}</p><p className="text-[9px] text-gray-500">{t}</p></div>

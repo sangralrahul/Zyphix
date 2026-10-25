@@ -63,25 +63,28 @@ export function TileLabel({ title, meta }: { title: string; meta?: string }) {
 
 /** Display headline: Geist at tight tracking, balanced, capped at ~18ch. Accepts <Accent> children. */
 export function Display({ children, light = false, size = 'lg', as: Tag = 'h2', className = '' }: { children: React.ReactNode; light?: boolean; size?: 'xl' | 'lg' | 'md'; as?: 'h1' | 'h2' | 'h3'; className?: string }) {
-  const s = size === 'xl' ? 'text-[44px] leading-[1] sm:text-[66px] md:text-[86px]'
-    : size === 'lg' ? 'text-[36px] leading-[1.02] sm:text-[48px] md:text-[62px]'
-    : 'text-[28px] leading-[1.06] sm:text-[36px] md:text-[44px]';
+  const s = size === 'xl' ? 'text-[44px] leading-[1] sm:text-[64px] md:text-[80px]'
+    : size === 'lg' ? 'text-[36px] leading-[1.04] sm:text-[46px] md:text-[56px]'
+    : 'text-[28px] leading-[1.08] sm:text-[34px] md:text-[44px]';
   return <Tag className={`max-w-[18ch] text-balance font-semibold tracking-[-0.04em] ${s} ${light ? 'text-white' : 'text-gray-900'} ${className}`}>{children}</Tag>;
 }
 
-/** Large photo for a catalogue category: curated PHOTOS by keyword, else the category's own image at a larger size. */
-const CAT_PHOTO: Array<[RegExp, string, number]> = [
-  [/fruit|veg/i, 'produce', 0], [/dairy|egg|milk/i, 'dairy', 0], [/snack|munch|chips/i, 'snacks', 0],
-  [/tea|coffee/i, 'chai', 1], [/masala|spice/i, 'spices', 0], [/atta|rice|dal/i, 'kirana', 0],
-  [/bakery|biscuit|bread/i, 'grocery', 2], [/ready|cook|noodle|pasta|frozen/i, 'thali', 0],
-  [/sweet|chocolate|ice cream/i, 'streetFood', 0], [/meat|seafood|fish/i, 'biryani', 0],
-  [/household|clean/i, 'cleaning', 0], [/drink|juice/i, 'grocery', 1], [/oil|ghee/i, 'spices', 2],
-  [/dry fruit|nut/i, 'spices', 3],
+/**
+ * The eight aisles shown on the home gallery, each with the photo that actually
+ * shows that aisle (no doorstep bags standing in for bread).
+ */
+export const AISLES: Array<{ name: string; match: RegExp; photo: Photo }> = [
+  { name: 'Fruits & Veg', match: /fruit|veg/i, photo: landscape('produce', 0) },
+  { name: 'Dairy & Eggs', match: /dairy|egg/i, photo: landscape('dairy', 1) },
+  { name: 'Snacks & Munchies', match: /snack|munch/i, photo: landscape('snacks', 0) },
+  { name: 'Cold Drinks & Juices', match: /drink|juice/i, photo: landscape('snacks', 1) },
+  { name: 'Tea & Coffee', match: /tea|coffee/i, photo: landscape('chai', 1) },
+  { name: 'Masalas & Spices', match: /masala|spice/i, photo: landscape('spices', 4) },
+  { name: 'Dry Fruits & Nuts', match: /dry fruit|nut/i, photo: PHOTOS.dairy[3] },
+  { name: 'Household', match: /household|clean/i, photo: landscape('cleaning', 1) },
 ];
-export function categoryPhoto(c: { name: string; image?: string }, i: number): Photo {
-  const hit = CAT_PHOTO.find(([re]) => re.test(c.name));
-  if (hit) return landscape(hit[1], hit[2]);
-  if (c.image && /^https:\/\/images\.unsplash\.com\//.test(c.image)) return { id: c.name, src: c.image.replace(/w=\d+&h=\d+/, 'w=900&h=1100'), alt: c.name };
-  const pool = PHOTOS.grocery;
-  return pool[i % pool.length];
+
+/** Live category name for an aisle when the API has it (falls back to the curated label). */
+export function aisleName(a: typeof AISLES[number], cats: { name: string }[]): string {
+  return cats.find(c => a.match.test(c.name))?.name ?? a.name;
 }

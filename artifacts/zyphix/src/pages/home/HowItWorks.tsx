@@ -19,7 +19,7 @@ const STEPS = [
   { icon: <Navigation size={17} />, title: 'Track it live', body: 'Watch the rider or pro on the map, right to your door.' },
 ];
 
-const PROMISES = ['₹0 delivery above ₹199', 'No markup on shelf or menu prices', 'No surge pricing', 'Refunds to source or wallet'];
+const PROMISES = ['Free delivery on bigger baskets', 'No markup on shelf or menu prices', 'No surge pricing', 'Credit if we are late'];
 
 export function HowItWorks() {
   return (

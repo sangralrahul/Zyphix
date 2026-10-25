@@ -1,17 +1,19 @@
 import { apiFetch } from '@/lib/api';
 import React, { useState, useEffect } from 'react';
-import { Link } from 'wouter';
-import { motion } from 'framer-motion';
 import {
   Mail, ArrowRight, Check, Bell, Zap, MapPin, Tag, UtensilsCrossed, RefreshCw,
   Smartphone, Globe, Share, PlusSquare, ShoppingBag, Clock,
 } from 'lucide-react';
-import { SitePage, PageHero, SectionHead, btnPrimary, btnSecondary, G, INK, HEAD_FONT } from '@/components/layout/SiteChrome';
+import { G, INK } from '@/components/layout/SiteChrome';
+import { Reveal, GlowButton, GhostButton } from '@/ui/cinema';
+import { Accent } from '@/ui/motion2';
+import { VIDEOS } from '@/data/media';
+import { InnerPage, InnerHero, SectionIntro, Band, panel, iconChip, h3, body } from './home/Inner';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Zyphix mobile app — coming soon (zyphix.in/app)
-   Light page: hero + countdown + notify form, "use it in your browser" steps,
-   feature list, store badges.
+   Video hero with countdown + notify form and a phone preview, then the
+   "use it in your browser" steps and the feature list.
 ──────────────────────────────────────────────────────────────────────────── */
 
 /* Launch target — a fixed future date used for the live countdown */
@@ -29,7 +31,7 @@ function useCountdown(target: number) {
   const m = Math.floor((diff % 3600000) / 60000);
   const s = Math.floor((diff % 60000) / 1000);
   const p = (n: number) => String(n).padStart(2, '0');
-  return [
+  return diff === 0 ? [] : [
     { v: p(d), l: 'Days' },
     { v: p(h), l: 'Hours' },
     { v: p(m), l: 'Minutes' },
@@ -37,15 +39,9 @@ function useCountdown(target: number) {
   ];
 }
 
-const fade = (delay = 0) => ({
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: .55, ease: 'easeOut' as const, delay },
-});
-
 const FEATURES = [
-  { Icon: Zap, t: '30-minute grocery delivery', d: 'Real kirana shelves near you, packed and moving in minutes.' },
-  { Icon: UtensilsCrossed, t: 'Food from local dhabas', d: 'Neighbourhood restaurants and cloud kitchens, fair commissions.' },
+  { Icon: Zap, t: '30-minute grocery delivery', d: 'Real shelves from stores near you, packed and moving in minutes.' },
+  { Icon: UtensilsCrossed, t: 'Food from local kitchens', d: 'Neighbourhood restaurants, cafés and cloud kitchens on fair commissions.' },
   { Icon: MapPin, t: 'Live order tracking', d: 'Follow your delivery partner from pickup to doorstep.' },
   { Icon: Tag, t: 'App-exclusive deals', d: 'Offers and launch-day perks only in the app.' },
   { Icon: Bell, t: 'Instant push updates', d: 'Order confirmed, packed, on the way — without refreshing.' },
@@ -61,13 +57,13 @@ const BROWSER_STEPS = [
 /* ── Light phone preview ──────────────────────────────────────────────────── */
 function PhonePreview() {
   return (
-    <motion.div initial={{ opacity: 0, scale: .96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .6, delay: .15 }} className="mx-auto w-[270px]">
+    <div className="mx-auto w-[270px]">
       <div className="rounded-[40px] border border-gray-200 bg-white p-2.5 shadow-[0_24px_60px_rgba(11,18,32,.12)]">
         <div className="relative overflow-hidden rounded-[32px] bg-gray-50">
           <div className="absolute left-1/2 top-2.5 z-10 h-5 w-20 -translate-x-1/2 rounded-full" style={{ background: INK }} />
           <div className="px-4 pb-4 pt-10 text-white" style={{ background: G }}>
             <div className="flex items-center justify-between">
-              <span className="text-[16px] font-black tracking-tight" style={{ fontFamily: HEAD_FONT }}>Zyphix</span>
+              <span className="text-[16px] font-semibold tracking-[-0.02em]">Zyphix</span>
               <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold"><Clock size={10} /> 30 min</span>
             </div>
             <div className="mt-3 rounded-xl bg-white px-3 py-2 text-[11px] font-medium text-gray-400">Search groceries &amp; food…</div>
@@ -96,7 +92,7 @@ function PhonePreview() {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -135,138 +131,131 @@ export function AppComingSoon() {
   };
 
   return (
-    <SitePage title="Mobile app">
+    <InnerPage title="Mobile app">
       <div data-testid="app-coming-soon">
-        {/* Hero */}
-        <section className="relative overflow-hidden border-b border-gray-200">
-          <div aria-hidden className="pointer-events-none absolute inset-0 -z-10"
-            style={{ background: 'radial-gradient(900px 420px at 15% -10%, rgba(13,163,102,.14), transparent 60%), radial-gradient(700px 380px at 95% 10%, rgba(249,115,22,.08), transparent 60%)' }} />
-          <div className="mx-auto max-w-[1180px] px-5 pt-14 pb-14 md:pt-20 md:pb-20 grid gap-12 md:grid-cols-[1.1fr_.9fr] items-center">
-            <div>
-              <motion.p {...fade(0)} className="text-[12px] font-bold uppercase tracking-[.12em] text-emerald-700">Mobile app · Coming soon</motion.p>
-              <motion.h1 {...fade(.05)} className="mt-3 max-w-[700px] font-black tracking-[-0.04em] leading-[1.04] text-[2.3rem] sm:text-[3rem] lg:text-[3.5rem]" style={{ fontFamily: HEAD_FONT, color: INK }}>
-                The Zyphix app is coming to <span style={{ color: G }}>iOS &amp; Android.</span>
-              </motion.h1>
-              <motion.p {...fade(.1)} className="mt-5 max-w-[560px] text-[16.5px] leading-relaxed text-gray-600">
-                Groceries in 30 minutes, food from local dhabas and trusted home services — in one native app. Leave your email and we'll tell you the moment it's live.
-              </motion.p>
-
-              {/* Countdown */}
-              <motion.div {...fade(.15)} className="mt-8 grid max-w-[460px] grid-cols-4 gap-2.5">
-                {countdown.map(c => (
-                  <div key={c.l} className="rounded-2xl border border-gray-200 bg-white px-2 py-3.5 text-center">
-                    <p className="text-[26px] sm:text-[32px] font-black leading-none tracking-tight tabular-nums text-gray-900" style={{ fontFamily: HEAD_FONT }}>{c.v}</p>
-                    <p className="mt-1.5 text-[10.5px] font-bold uppercase tracking-[.12em] text-gray-400">{c.l}</p>
-                  </div>
-                ))}
-              </motion.div>
-
-              {/* Notify form */}
-              <motion.div {...fade(.2)} className="mt-7 max-w-[520px]">
-                {submitted ? (
-                  <div className="inline-flex items-center gap-3 rounded-2xl bg-emerald-600 px-4 py-3 text-white">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20"><Check size={15} strokeWidth={3} /></span>
-                    <div>
-                      <p className="text-[14px] font-bold">You're on the launch list!</p>
-                      <p className="text-[12.5px] text-white/85">We'll email you the day the app goes live.</p>
-                    </div>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row">
-                    <label className="relative flex-1">
-                      <Mail size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input
-                        data-testid="notify-email-input"
-                        type="email"
-                        value={email}
-                        onChange={e => { setEmail(e.target.value); setError(''); }}
-                        placeholder="you@email.com"
-                        className="w-full rounded-2xl border bg-white py-3.5 pl-11 pr-4 text-[14.5px] text-gray-900 outline-none transition focus:ring-4 focus:ring-emerald-100"
-                        style={{ borderColor: error ? '#EF4444' : '#E5E7EB' }}
-                      />
-                    </label>
-                    <button
-                      data-testid="notify-submit-button"
-                      type="submit" disabled={loading}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-[14.5px] font-bold text-white transition hover:opacity-95 disabled:opacity-70"
-                      style={{ background: G }}>
-                      {loading ? 'Sending…' : <>Notify me <ArrowRight size={16} /></>}
-                    </button>
-                  </form>
-                )}
-                {error && <p className="mt-2 text-[13px] font-semibold text-red-500">{error}</p>}
-                <p className="mt-3 text-[12.5px] text-gray-500">No spam. One email when the app launches.</p>
-              </motion.div>
-
-              {/* Store badges */}
-              <motion.div {...fade(.25)} className="mt-7 flex flex-wrap gap-3">
-                {[['/images/appstore.webp', 'Coming soon on the', 'App Store'], ['/images/googleplay.webp', 'Coming soon on', 'Google Play']].map(([src, small, big]) => (
-                  <span key={big} aria-disabled className="inline-flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-white" style={{ background: INK }}>
-                    <img src={src} alt="" className="h-6 w-6 object-contain" loading="lazy" />
-                    <span className="leading-tight"><span className="block text-[10px] font-medium text-white/70">{small}</span><span className="block text-[14px] font-bold">{big}</span></span>
-                  </span>
-                ))}
-              </motion.div>
+        <InnerHero
+          clip={VIDEOS.phoneOrder}
+          height="min-h-[100svh]"
+          kicker="Mobile app · Coming soon"
+          parts={['The Zyphix app is coming to', { accent: 'iOS & Android.', green: true }]}
+          sub="Groceries in 30 minutes, food from local kitchens and trusted home services in one native app. Leave your email and we will tell you the moment it is live."
+          aside={<PhonePreview />}
+        >
+          {/* Countdown (hidden once the target date has passed) */}
+          {countdown.length > 0 && (
+            <div className="mb-7 grid max-w-[440px] grid-cols-4 gap-2.5">
+              {countdown.map(c => (
+                <div key={c.l} className="rounded-2xl border border-white/15 bg-white/[.08] px-2 py-3.5 text-center backdrop-blur-md">
+                  <p className="text-[26px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-white sm:text-[32px]">{c.v}</p>
+                  <p className="mt-1.5 text-[11px] font-medium uppercase tracking-[.12em] text-white/55">{c.l}</p>
+                </div>
+              ))}
             </div>
+          )}
 
-            <PhonePreview />
+          {/* Notify form */}
+          <div className="max-w-[520px]">
+            {submitted ? (
+              <div className="inline-flex items-center gap-3 rounded-2xl bg-emerald-600 px-4 py-3 text-white">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20"><Check size={15} strokeWidth={3} /></span>
+                <div>
+                  <p className="text-[14px] font-semibold">You're on the launch list!</p>
+                  <p className="text-[12.5px] text-white/85">We'll email you the day the app goes live.</p>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row">
+                <label className="relative flex-1">
+                  <span className="sr-only">Email address</span>
+                  <Mail size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    data-testid="notify-email-input"
+                    type="email"
+                    value={email}
+                    onChange={e => { setEmail(e.target.value); setError(''); }}
+                    placeholder="you@email.com"
+                    className="h-[52px] w-full rounded-full border bg-white pl-11 pr-4 text-[15px] text-gray-900 outline-none transition focus:ring-4 focus:ring-emerald-300/40"
+                    style={{ borderColor: error ? '#EF4444' : '#E5E7EB' }}
+                  />
+                </label>
+                <button
+                  data-testid="notify-submit-button"
+                  type="submit" disabled={loading}
+                  className="inline-flex h-[52px] items-center justify-center gap-2 rounded-full px-7 text-[15.5px] font-semibold text-white shadow-[0_12px_40px_rgba(13,163,102,.45)] transition hover:-translate-y-0.5 disabled:opacity-70"
+                  style={{ background: `linear-gradient(180deg, #19C27C 0%, ${G} 100%)` }}>
+                  {loading ? 'Sending…' : <>Notify me <ArrowRight size={16} /></>}
+                </button>
+              </form>
+            )}
+            {error && <p className="mt-2 text-[13px] font-semibold text-red-300">{error}</p>}
+            <p className="mt-3 text-[13px] text-white/55">No spam. One email when the app launches.</p>
           </div>
-        </section>
+
+          {/* Store badges */}
+          <div className="mt-7 flex flex-wrap gap-3">
+            {[['/images/appstore.webp', 'Coming soon on the', 'App Store'], ['/images/googleplay.webp', 'Coming soon on', 'Google Play']].map(([src, small, big]) => (
+              <span key={big} aria-disabled className="inline-flex h-[52px] items-center gap-3 rounded-xl border border-white/15 bg-white/[.06] px-4 text-white">
+                <img src={src} alt="" className="h-[22px] w-[22px] object-contain" loading="lazy" />
+                <span className="leading-tight"><span className="block text-[10px] font-medium text-white/60">{small}</span><span className="block text-[15px] font-semibold tracking-[-0.01em]">{big}</span></span>
+              </span>
+            ))}
+          </div>
+        </InnerHero>
 
         {/* Until then — use the web app */}
-        <section className="bg-gray-50 border-b border-gray-200">
-          <div className="mx-auto max-w-[1180px] px-5 py-20 md:py-24 grid gap-12 md:grid-cols-[.9fr_1.1fr] items-center">
-            <div>
-              <SectionHead align="left" eyebrow="Until then" title="Use zyphix.in in your browser — today." sub="You don't need to wait for the app. The full Zyphix experience already runs in Safari and Chrome, and you can pin it to your home screen in three taps." />
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/now" className={btnPrimary} style={{ background: G }}>Order groceries <ArrowRight size={16} /></Link>
-                <Link href="/eats" className={btnSecondary}><UtensilsCrossed size={16} className="text-orange-500" /> Order food</Link>
-              </div>
+        <Band tone="soft">
+          <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
+            <div className="lg:col-span-5">
+              <SectionIntro kicker="Until then" title={<>Use zyphix.in in your browser, <Accent green>today</Accent>.</>} sub="You don't need to wait for the app. The full Zyphix experience already runs in Safari and Chrome, and you can pin it to your home screen in three taps." />
+              <Reveal delay={0.15} className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <GlowButton href="/now">Order groceries <ArrowRight size={17} /></GlowButton>
+                <GhostButton href="/eats" light={false}><UtensilsCrossed size={16} className="text-orange-500" /> Order food</GhostButton>
+              </Reveal>
             </div>
-            <ol className="grid gap-4">
+            <ol className="grid gap-4 lg:col-span-7">
               {BROWSER_STEPS.map((s, i) => (
-                <li key={s.t} className="flex gap-5 rounded-3xl border border-gray-200 bg-white p-6">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><s.Icon size={20} /></span>
+                <Reveal as="li" key={s.t} delay={i * 0.06} y={20} className={`${panel} flex gap-5 p-7`}>
+                  <span className={iconChip}><s.Icon size={20} /></span>
                   <div>
-                    <p className="text-[12px] font-bold uppercase tracking-wider text-gray-400">Step {i + 1}</p>
-                    <h3 className="mt-0.5 text-[18px] font-extrabold text-gray-900">{s.t}</h3>
-                    <p className="mt-1.5 text-[14.5px] leading-relaxed text-gray-600">{s.d}</p>
+                    <p className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-gray-400">Step {i + 1}</p>
+                    <h3 className="mt-1 text-[20px] font-semibold tracking-[-0.025em] text-gray-900">{s.t}</h3>
+                    <p className={`mt-2 ${body}`}>{s.d}</p>
                   </div>
-                </li>
+                </Reveal>
               ))}
             </ol>
           </div>
-        </section>
+        </Band>
 
         {/* Features */}
-        <section className="mx-auto max-w-[1180px] px-5 py-20 md:py-24">
-          <SectionHead eyebrow="What's in the app" title="Everything local, built for your phone." sub="The same neighbourhood network as the website — plus the things only a native app can do well." />
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map(f => (
-              <div key={f.t} className="rounded-3xl border border-gray-200 bg-white p-6">
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><f.Icon size={20} /></span>
-                <h3 className="mt-4 text-[16.5px] font-extrabold text-gray-900">{f.t}</h3>
-                <p className="mt-2 text-[14px] leading-relaxed text-gray-600">{f.d}</p>
-              </div>
+        <Band>
+          <SectionIntro kicker="What's in the app" title={<>Everything local, built for <Accent green>your phone</Accent>.</>} sub="The same neighbourhood network as the website, plus the things only a native app does well." />
+          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((f, i) => (
+              <Reveal key={f.t} delay={i * 0.05} y={20} className={`${panel} p-7`}>
+                <span className={iconChip}><f.Icon size={20} /></span>
+                <h3 className={`mt-6 ${h3}`}>{f.t}</h3>
+                <p className={`mt-3 ${body}`}>{f.d}</p>
+              </Reveal>
             ))}
           </div>
-        </section>
+        </Band>
 
         {/* Closing CTA */}
-        <section className="mx-auto max-w-[1180px] px-5 pb-20 md:pb-24">
-          <div className="flex flex-col items-start gap-5 rounded-[32px] border border-emerald-100 p-8 md:flex-row md:items-center md:justify-between md:p-12" style={{ background: 'linear-gradient(135deg, #F0FDF4 0%, #FFFFFF 60%)' }}>
-            <div className="flex items-start gap-4">
-              <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-gray-900 border border-gray-200"><Smartphone size={22} /></span>
+        <Band tone="dark">
+          <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex items-start gap-5">
+              <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/[.06] text-white ring-1 ring-white/10 sm:inline-flex"><Smartphone size={22} /></span>
               <div>
-                <h3 className="text-[20px] font-extrabold text-gray-900" style={{ fontFamily: HEAD_FONT }}>Want to be told the day we launch?</h3>
-                <p className="mt-1 text-[14.5px] leading-relaxed text-gray-600">Scroll up and leave your email — or just start ordering on the web right now.</p>
+                <h2 className="max-w-[18ch] text-balance text-[36px] font-semibold leading-[1.04] tracking-[-0.04em] text-white sm:text-[46px] md:text-[56px]">Want to hear the day <Accent green>we launch</Accent>?</h2>
+                <p className="mt-6 max-w-[52ch] text-[17px] leading-[1.6] text-white/65">Leave your email at the top of this page, or start ordering on the web right now.</p>
               </div>
             </div>
-            <Link href="/" className={btnSecondary}>Back to zyphix.in <ArrowRight size={16} /></Link>
+            <GhostButton href="/" className="shrink-0">Back to zyphix.in <ArrowRight size={17} /></GhostButton>
           </div>
-        </section>
+        </Band>
       </div>
-    </SitePage>
+    </InnerPage>
   );
 }
 

@@ -6,7 +6,7 @@ import { useCategories } from './home/shared';
 import { Hero, IntroMarquee } from './home/Hero';
 import { ProductStory, AislesGallery } from './home/Products';
 import { HowItWorks, LiveProof } from './home/HowItWorks';
-import { CityWall, JammuBand } from './home/City';
+import { CityWall, SuperLocalBand } from './home/City';
 import { AppSection, PartnerBand } from './home/AppSection';
 import { Faq, FinalCta, StickyCta } from './home/Faq';
 
@@ -32,7 +32,7 @@ export function Landing() {
         <LiveProof />
         <AislesGallery categories={categories} />
         <CityWall />
-        <JammuBand />
+        <SuperLocalBand />
         <PartnerBand />
         <AppSection />
         <Faq />

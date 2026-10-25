@@ -3,7 +3,7 @@
  * They never replace shop UI: the grid stays fast and scannable around them.
  *
  *  HeroLiveOrder   floating live order card for the desktop hero
- *  MandiBand       "Fresh from the mandi" ClipWall (vegMarket, fruit, packing, merchant, spices)
+ *  MarketBand      "Fresh from the market" ClipWall (vegMarket, fruit, packing, merchant, spices)
  *  TrackBand       "Track every order live" RouteMap + the 30-minute promise
  *  useRotatingWord rotating search placeholder (milk, atta, bananas…)
  */
@@ -30,18 +30,18 @@ export function useRotatingWord(words: string[], ms = 2200) {
 /** Floating live-order card over the hero (desktop only). */
 export function HeroLiveOrder() {
   return (
-    <div className="pointer-events-none absolute bottom-24 right-10 z-10 hidden w-[320px] lg:block">
+    <div className="pointer-events-none absolute bottom-24 right-10 z-10 hidden w-[300px] xl:block">
       <Reveal delay={0.5} y={20}>
-        <LiveOrder dark className="pointer-events-auto" items={['Amul Taaza Milk 1L', 'Aashirvaad Atta 5kg', 'Bananas · 6 pcs']} />
+        <LiveOrder dark className="pointer-events-auto" items={['Fresh milk 1 L', 'Whole-wheat flour 5 kg', 'Bananas · 6']} />
       </Reveal>
     </div>
   );
 }
 
 /** Dark ClipWall band: the supply side behind the grid. */
-export function MandiBand({ onShopProduce }: { onShopProduce?: () => void }) {
+export function MarketBand({ onShopProduce }: { onShopProduce?: () => void }) {
   return (
-    <section aria-label="Fresh from the mandi" className="relative isolate -mx-4 overflow-hidden bg-[#05080E] px-4 py-12 text-white md:mx-0 md:rounded-3xl md:px-8 md:py-14">
+    <section aria-label="Fresh from the market" className="relative isolate -mx-4 overflow-hidden bg-[#05080E] px-4 py-12 text-white md:mx-0 md:rounded-3xl md:px-8 md:py-14">
       <Glow x="12%" y="0%" size={700} alpha={0.22} />
       <Grain opacity={0.05} />
       <div className="relative">
@@ -49,7 +49,7 @@ export function MandiBand({ onShopProduce }: { onShopProduce?: () => void }) {
           <div className="max-w-[560px]">
             <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-emerald-300">Sourced every morning</p>
             <h2 className={`${DISPLAY} max-w-[18ch] text-[30px] leading-[1.04] md:text-[44px]`}>
-              Fresh from the <Accent green>mandi</Accent>, packed near you.
+              Fresh from the <Accent green>market</Accent>, packed near you.
             </h2>
           </div>
           <div className="max-w-[360px]">
@@ -68,7 +68,7 @@ export function MandiBand({ onShopProduce }: { onShopProduce?: () => void }) {
           {/* 3-col override: the shared 5-tile spans fill a 3×3 grid exactly (4 cols leaves a hole) */}
         <ClipWall
             clips={[VIDEOS.vegMarket, VIDEOS.fruit, VIDEOS.packing, VIDEOS.merchant, VIDEOS.spices]}
-            labels={['Sabzi mandi', 'Seasonal fruit', 'Packed to order', 'Your local store', 'Whole spices']}
+            labels={['Fresh produce', 'Seasonal fruit', 'Packed to order', 'Your local store', 'Whole spices']}
           />
         </Reveal>
       </div>

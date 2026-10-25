@@ -65,7 +65,7 @@ export const PROMISES = [
   'ID & police-verified pros',
   'Price shown before you confirm',
   'Reschedule free',
-  'On-time or ₹100 off',
+  "Credit if we're late",
   '7-day work guarantee',
   'Support Mon–Sat',
 ];
@@ -74,7 +74,7 @@ export const FAQ = [
   { q: 'How are professionals verified?', a: 'Each professional submits a government ID, address proof and a police verification certificate, then completes a skill confirmation call before they can accept bookings on Zyphix Book.' },
   { q: 'When do I see the price?', a: 'The visit charge for the selected service is shown in the booking panel before you confirm. If the job needs extra parts or time, the professional quotes it before starting.' },
   { q: 'Can I reschedule or cancel?', a: 'Yes. You can reschedule for free, and cancel at no charge up to 1 hour before your slot.' },
-  { q: 'What if the professional is late?', a: 'We notify you if they are running behind. If they arrive more than 30 minutes after your slot, ₹100 comes off the visit charge, or you can pick a new slot or cancel without any charge.' },
+  { q: 'What if the professional is late?', a: 'We notify you if they are running behind. If they arrive more than 30 minutes after your slot, you get a credit on the visit charge, or you can pick a new slot or cancel without any charge.' },
   { q: 'Is there a guarantee on the work?', a: 'Yes. Under our 7-day work guarantee, if a completed job has an issue within 7 days we send a professional back to fix it.' },
   { q: 'Which areas do you cover?', a: 'Coverage depends on the professionals registered in your city. The "Pros near you" list shows verified professionals currently available.' },
 ];

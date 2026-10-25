@@ -53,7 +53,7 @@ export function TonightsPicks({ picks, onOpen }: { picks: PickRestaurant[]; onOp
         <div className="min-w-0">
           <p className="mb-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-emerald-700">Tonight's picks</p>
           <h2 className={`${DISPLAY} max-w-[22ch] text-[26px] leading-[1.06] text-gray-900 md:text-[34px]`}>
-            Straight off the <Accent green>tandoor</Accent>, tracked to your gate.
+            Straight from the <Accent green>kitchen</Accent>, tracked to your door.
           </h2>
         </div>
         <p className="max-w-[340px] text-[13.5px] leading-[1.55] text-gray-600">Kitchens start cooking the moment you tap order. Every delivery comes with a live ETA.</p>
@@ -61,8 +61,8 @@ export function TonightsPicks({ picks, onOpen }: { picks: PickRestaurant[]; onOp
       <Reveal y={18} amount={0.15}>
         {/* 3-col override: the shared 5-tile spans fill a 3×3 grid exactly (4 cols leaves a hole) */}
         <ClipWall
-          clips={[VIDEOS.tandoor, VIDEOS.streetFood, VIDEOS.chai, VIDEOS.plating, VIDEOS.chefTeam]}
-          labels={['Fresh off the tandoor', 'Street favourites', 'Chai stalls', 'Plated to order', 'Busy kitchens']}
+          clips={[VIDEOS.plating, VIDEOS.streetFood, VIDEOS.chefTeam, VIDEOS.chai, VIDEOS.foodDelivery]}
+          labels={['Plated to order', 'Street favourites', 'Busy kitchens', 'Tea & snacks', 'Out for delivery']}
         />
       </Reveal>
       <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-12">
@@ -171,8 +171,8 @@ export function RestaurantCta() {
       <Grain />
       <div className="relative px-5 py-14 md:px-12 md:py-20">
         <Reveal y={16} amount={0.3}>
-          <Kicker light>Own a kitchen in Jammu?</Kicker>
-          <h2 className={`${DISPLAY} max-w-[18ch] text-[34px] leading-[1.04] text-white sm:text-[46px] md:text-[56px]`}>Put your kitchen on every <Accent green>phone</Accent> in the city.</h2>
+          <Kicker light>Own a kitchen?</Kicker>
+          <h2 className={`${DISPLAY} max-w-[18ch] text-[34px] leading-[1.04] text-white sm:text-[46px] md:text-[56px]`}>Put your kitchen on every <Accent green>phone</Accent> nearby.</h2>
           <Sub light className="mt-4 max-w-[520px]">No joining fee, commission explained before you go live, a real-time order dashboard, and Zyphix riders at your counter.</Sub>
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Magnetic><GlowButton href="https://partner.zyphix.in">Partner with Zyphix <ArrowRight size={16} /></GlowButton></Magnetic>
@@ -187,9 +187,9 @@ export function RestaurantCta() {
 /* ── Hero live order (desktop) ── */
 export function EatsHeroLiveOrder() {
   return (
-    <div className="pointer-events-none absolute bottom-24 right-10 z-10 hidden w-[320px] lg:block">
+    <div className="pointer-events-none absolute bottom-10 right-10 z-10 hidden w-[300px] xl:block">
       <Reveal delay={0.5} y={20}>
-        <LiveOrder dark className="pointer-events-auto" items={['Chicken Biryani · Half', 'Butter Naan × 4', 'Masala Chai × 2']} />
+        <LiveOrder dark className="pointer-events-auto" items={['Paneer tikka', 'Margherita pizza', 'Iced lemon tea × 2']} />
       </Reveal>
     </div>
   );
@@ -201,7 +201,7 @@ export function HungryBand() {
     <section aria-label="Hungry?" className="relative -mx-4 mt-10 overflow-hidden bg-[#05080E] md:mx-0 md:mt-12 md:rounded-3xl">
       <VideoText clip={VIDEOS.cooking} text="HUNGRY?" size="text-[19vw] md:text-[190px] lg:text-[226px]" className="pt-6 md:pt-8" />
       <div className="relative flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-4 text-white md:px-8">
-        <p className="text-[14px] text-white/70">Cooked to order in kitchens across Jammu.</p>
+        <p className="text-[14px] text-white/70">Cooked to order in kitchens near you.</p>
         <a href="#eats-grid" className="inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-[13.5px] font-semibold text-gray-900 no-underline transition hover:-translate-y-px hover:bg-emerald-50">
           See what's open <ArrowRight size={14} />
         </a>
@@ -214,7 +214,7 @@ export function HungryBand() {
 export function EatsTrackBand() {
   const steps = [
     { icon: <ChefHat size={15} />, t: 'Kitchen accepts', s: 'The restaurant confirms and starts cooking right away.' },
-    { icon: <Flame size={15} />, t: 'Packed hot', s: 'Sealed at the counter the moment it leaves the tawa.' },
+    { icon: <Flame size={15} />, t: 'Packed hot', s: 'Sealed at the counter the moment it leaves the pan.' },
     { icon: <Bike size={15} />, t: 'Rider to your gate', s: 'Follow the rider on the map with a live ETA.' },
   ];
   return (

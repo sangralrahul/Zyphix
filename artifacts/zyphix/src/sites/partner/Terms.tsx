@@ -9,7 +9,8 @@ import { PARTNER_PHOTOS, NUM } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
    "What you get" split (parallax photo + staggered list) · dark terms band with
-   the payout timeline (rules only, no earnings figures) · onboarding steps.
+   the payout timeline (rules only, no earnings figures; the people/terms
+   promises live in "What you get" only) · onboarding steps.
 ──────────────────────────────────────────────────────────────────────────── */
 
 /* ── What you get ───────────────────────────────────────────────────────── */
@@ -83,11 +84,6 @@ const TIMELINE = [
   { icon: Banknote, title: 'Monday', body: 'The amount is sent to the bank account you verified during onboarding.' },
 ];
 
-const COLS = [
-  { icon: UserRound, title: 'Onboarding manager', body: 'A named person walks you from application to go-live. Same contact for documents, setup and your first week.' },
-  { icon: IndianRupee, title: 'Commission explained before go-live', body: 'Rates, settlement cycle and what counts as a deduction are written down and agreed before your listing goes live.' },
-  { icon: Headset, title: 'Support Mon–Sat, 9am–7pm IST', body: 'Partner support on phone and email during working hours. Order-time issues are routed to a live team.' },
-];
 
 function Connector() {
   const stat = isStatic();
@@ -144,15 +140,6 @@ export function TermsBand() {
           </ol>
         </div>
 
-        <Stagger className="mt-20 grid gap-6 border-t border-white/10 pt-12 md:grid-cols-3 md:gap-8" step={0.08}>
-          {COLS.map(c => (
-            <Spotlight key={c.title} className="h-full"><div className="p-6 md:p-7">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/[.06] text-emerald-300 ring-1 ring-white/10"><c.icon size={18} /></span>
-              <h3 className="mt-5 text-[18px] font-semibold tracking-[-0.01em] text-white">{c.title}</h3>
-              <p className="mt-2.5 text-[15px] leading-[1.65] text-white/60">{c.body}</p>
-            </div></Spotlight>
-          ))}
-        </Stagger>
       </Container>
     </Dark>
   );
@@ -194,12 +181,12 @@ export function WhoPartners() {
             <Reveal><Kicker>Who partners</Kicker></Reveal>
             <Reveal delay={0.05}><Headline size="lg" className="max-w-[18ch] text-balance">The people who keep a neighbourhood running.</Headline></Reveal>
           </div>
-          <Reveal delay={0.1} className="lg:col-span-5"><Sub className="max-w-[48ch]">Spice sellers, tandoor kitchens, sabzi stalls, street-food stands and the electrician down the road. If customers nearby rely on you, there is a track for you.</Sub></Reveal>
+          <Reveal delay={0.1} className="lg:col-span-5"><Sub className="max-w-[48ch]">Spice sellers, busy kitchens, produce stalls, street-food stands and the electrician down the road. If customers nearby rely on you, there is a track for you.</Sub></Reveal>
         </div>
         <Reveal delay={0.1} y={32} className="mt-12 md:mt-16">
           <ClipWall
-            clips={[VIDEOS.tandoor, VIDEOS.spices, VIDEOS.vegMarket, VIDEOS.streetFood, VIDEOS.electrician]}
-            labels={['Kitchens & dhabas', 'Spice & kirana stores', 'Sabzi sellers', 'Street food', 'Home-service pros']}
+            clips={[VIDEOS.cooking, VIDEOS.spices, VIDEOS.vegMarket, VIDEOS.streetFood, VIDEOS.electrician]}
+            labels={['Kitchens & cafés', 'Spice & corner stores', 'Produce sellers', 'Street food', 'Home-service pros']}
           />
         </Reveal>
         <Reveal delay={0.1} className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-gray-200 pt-6">

@@ -6,7 +6,7 @@ import { isStatic, EASE, G } from '@/ui/cinema';
 /* ────────────────────────────────────────────────────────────────────────────
    Service version of the live order card: Booked → Pro assigned → On the way
    → Started → Done. Cycles while in view; frozen on "On the way" when static.
-   Clearly labelled illustrative (no real booking data).
+   Obviously a mock status card (no real booking data).
 ──────────────────────────────────────────────────────────────────────────── */
 
 const STAGES = [
@@ -61,7 +61,6 @@ export function LiveJob({ service = 'AC Service', slot = 'Today, 5:00 PM', class
         </div>
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-600"><Check size={14} strokeWidth={2.5} /></span>
       </div>
-      <p className="mt-3 text-right text-[10.5px] font-medium uppercase tracking-[0.12em] text-gray-400">Illustrative</p>
     </div>
   );
 }

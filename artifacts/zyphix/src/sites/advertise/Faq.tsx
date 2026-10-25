@@ -11,7 +11,7 @@ import { PARTNERSHIPS_EMAIL, PARTNER_SITE } from './shared';
 ──────────────────────────────────────────────────────────────────────────── */
 
 const FAQ = [
-  { q: 'Where can I advertise right now?', a: 'Zyphix is launching across India area by area. When you send a brief, partnerships replies with the neighbourhoods that are live today and the ones opening next. Early advertisers get first choice of placements as new areas open.' },
+  { q: 'Where can I advertise right now?', a: 'Zyphix is rolling out neighbourhood by neighbourhood. When you send a brief, partnerships replies with the neighbourhoods that are live today and the ones opening next. Early advertisers get first choice of placements as new areas open.' },
   { q: 'How is pricing decided if there are no auctions?', a: 'Each placement has a flat rate for a period (7, 14 or 30 days) in one delivery area. Your quote is the sum of the placements, areas and periods you pick. It is written down before go-live and does not change mid-campaign.' },
   { q: 'Do I need to be a Zyphix partner to advertise?', a: 'Not for banners, rows, spotlights, search or coupons — those promote products already stocked by partner stores. A Featured placement in Eats or Book needs a live, verified partner listing so customers can actually order. Partner onboarding is free at partner.zyphix.in.' },
   { q: 'What counts as an attributed order?', a: 'An order placed by a customer who tapped your placement and bought the promoted product, dish or service in the same session, or redeemed your coupon. View-through conversions are not counted.' },

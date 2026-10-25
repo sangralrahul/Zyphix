@@ -1,7 +1,7 @@
 /* ────────────────────────────────────────────────────────────────────────────
    support.zyphix.in — help centre content. Typed so pages can filter, search
    and render consistently. Keep answers factual: policies below mirror what
-   the product pages promise (30-min delivery target, ₹0 delivery above ₹199,
+   the product pages promise (30-min delivery target, free delivery on bigger baskets,
    free cancellation windows, 7-day work guarantee on Book).
 ──────────────────────────────────────────────────────────────────────────── */
 
@@ -38,10 +38,10 @@ export type Article = {
 
 export const TOPICS: Topic[] = [
   { id: 'now', title: 'Zyphix Now orders', short: 'Now orders', blurb: 'Groceries and essentials in 30 minutes: tracking, delivery fees, missing items.', photo: 'grocery', product: { label: 'Open my Now orders', href: 'https://now.zyphix.in/account' } },
-  { id: 'eats', title: 'Zyphix Eats', short: 'Eats', blurb: 'Food orders from restaurants near you: late deliveries, wrong items, restaurant hours.', photo: 'indianFood', product: { label: 'Open Zyphix Eats', href: 'https://eats.zyphix.in' } },
+  { id: 'eats', title: 'Zyphix Eats', short: 'Eats', blurb: 'Food orders from restaurants near you: late deliveries, wrong items, restaurant hours.', photo: 'restaurant', product: { label: 'Open Zyphix Eats', href: 'https://eats.zyphix.in' } },
   { id: 'book', title: 'Zyphix Book', short: 'Book', blurb: 'Home services from verified professionals: slots, rescheduling, the work guarantee.', photo: 'cleaning', product: { label: 'Open Zyphix Book', href: 'https://book.zyphix.in' } },
   { id: 'partners', title: 'Partners & payouts', short: 'Partners', blurb: 'Stores, restaurants, professionals and delivery partners: onboarding, verification, payouts.', photo: 'team', product: { label: 'Partner portal', href: 'https://partner.zyphix.in' } },
-  { id: 'account', title: 'Account & payments', short: 'Account', blurb: 'Sign-in codes, addresses, UPI and cash on delivery, coupons, deleting your account.', photo: 'people', product: { label: 'Manage my account', href: 'https://now.zyphix.in/account' } },
+  { id: 'account', title: 'Account & payments', short: 'Account', blurb: 'Sign-in codes, addresses, payment methods, coupons and deleting your account.', photo: 'people', product: { label: 'Manage my account', href: 'https://now.zyphix.in/account' } },
   { id: 'refunds', title: 'Refunds & cancellations', short: 'Refunds', blurb: 'When you can cancel for free, how refunds are issued and how long they take.', photo: 'rider' },
 ];
 
@@ -95,13 +95,13 @@ export const ARTICLES: Article[] = [
     related: ['refund-timeline', 'track-an-order'],
   },
   {
-    slug: 'delivery-fees-and-minimums', topic: 'now', title: 'Delivery fees and the ₹199 free-delivery threshold', updated: '2026-10-15',
-    summary: 'Orders above ₹199 are delivered for ₹0. Below that, the fee is shown at checkout before you pay.',
+    slug: 'delivery-fees-and-minimums', topic: 'now', title: 'Delivery fees and free delivery', updated: '2026-10-15',
+    summary: 'Bigger baskets are delivered free. Below the threshold, the fee is shown at checkout before you pay.',
     keywords: ['delivery fee', 'free delivery', '199', 'charges', 'minimum order'],
     body: [
-      p('There is no minimum order on Zyphix Now. Orders with a cart value of ₹199 or more are delivered for ₹0. Below ₹199 a small delivery fee applies and is shown on the checkout page before you confirm.'),
+      p('There is no minimum order on Zyphix Now. Baskets at or above the free-delivery threshold are delivered free; your cart shows the threshold and how much more you need to add. Below it, a small delivery fee applies and is shown on the checkout page before you confirm.'),
       list('No surge pricing, in rain or at peak hours.', 'No handling or packaging charge.', 'Prices are the store\'s own shelf prices; we do not mark them up.'),
-      p('Coupons are applied before the threshold is checked, so a coupon that drops your cart below ₹199 may add a delivery fee. Checkout always shows the final total before you pay.'),
+      p('Coupons are applied before the threshold is checked, so a coupon that drops your cart below the threshold may add a delivery fee. Checkout always shows the final total before you pay.'),
     ],
     related: ['coupons-and-offers'],
   },
@@ -157,11 +157,11 @@ export const ARTICLES: Article[] = [
   },
   {
     slug: 'book-late-professional', topic: 'book', title: 'The professional is late or has not arrived', updated: '2026-10-21',
-    summary: 'We notify you when a pro is running behind. More than 30 minutes late: ₹100 off, or reschedule or cancel free.',
-    keywords: ['late professional', 'not arrived', 'no show', 'waiting', '100 off'],
+    summary: 'We notify you when a pro is running behind. More than 30 minutes late: a credit on the visit charge, or reschedule or cancel free.',
+    keywords: ['late professional', 'not arrived', 'no show', 'waiting', 'credit'],
     body: [
       p('Professionals share their location once they start towards you, so the booking page shows an arrival estimate. If they are running behind, you get a notification.'),
-      list('Up to 30 minutes late: you can wait, or reschedule free.', 'More than 30 minutes late: ₹100 comes off the visit charge automatically, and you can still reschedule or cancel at no cost.', 'No-show: the booking is cancelled at no charge and support contacts you to rebook with another pro at priority.'),
+      list('Up to 30 minutes late: you can wait, or reschedule free.', 'More than 30 minutes late: a credit comes off the visit charge automatically, and you can still reschedule or cancel at no cost.', 'No-show: the booking is cancelled at no charge and support contacts you to rebook with another pro at priority.'),
     ],
     related: ['book-reschedule-or-cancel'],
   },
@@ -182,7 +182,7 @@ export const ARTICLES: Article[] = [
     keywords: ['price', 'visit charge', 'quote', 'parts', 'cost', 'estimate'],
     body: [
       p('When you select a service, the booking panel shows the visit charge for that service before you confirm. That is the amount for the professional to come, inspect and do the standard scope of the job.'),
-      list('If the job needs parts (a tap, a wire, a gas refill), the professional quotes them before starting and you approve in the app.', 'If the job turns out larger than the scope, the extra time is quoted in the same way.', 'You pay after the job through the app: UPI, card or cash.'),
+      list('If the job needs parts (a tap, a wire, a gas refill), the professional quotes them before starting and you approve in the app.', 'If the job turns out larger than the scope, the extra time is quoted in the same way.', 'You pay after the job through the app: card, UPI, wallet or cash.'),
     ],
     related: ['book-work-guarantee', 'cod-and-upi'],
   },
@@ -219,13 +219,13 @@ export const ARTICLES: Article[] = [
     ],
   },
   {
-    slug: 'cod-and-upi', topic: 'account', title: 'Paying with UPI, cards or cash on delivery', updated: '2026-10-14',
-    summary: 'UPI, cards, net banking and wallets online. Cash on delivery on eligible orders.',
-    keywords: ['upi', 'cash on delivery', 'cod', 'card', 'payment', 'pay', 'gpay', 'phonepe', 'paytm'],
+    slug: 'cod-and-upi', topic: 'account', title: 'Paying by card, UPI, wallet or cash on delivery', updated: '2026-10-14',
+    summary: 'Cards, UPI, net banking and wallets online. Cash on delivery on eligible orders.',
+    keywords: ['upi', 'cash on delivery', 'cod', 'card', 'payment', 'pay', 'wallet', 'net banking'],
     body: [
-      p('At checkout you can pay with any UPI app, debit or credit card, net banking or a popular wallet. Payment is taken when the order is confirmed by the store or restaurant, not before.'),
+      p('At checkout you can pay with a debit or credit card, any UPI app, net banking or a supported wallet. Payment is taken when the order is confirmed by the store or restaurant, not before.'),
       h('Cash on delivery'),
-      list('Available on Now and Eats orders up to ₹2,000, and on Book jobs after the work is done.', 'Keep change ready; riders carry a limited float.', 'Refunds on cash orders go to your Zyphix wallet, which you can use on any Zyphix product.'),
+      list('Available on eligible Now and Eats orders (checkout shows when it is), and on Book jobs after the work is done.', 'Keep change ready; riders carry a limited float.', 'Refunds on cash orders go to your Zyphix wallet, which you can use on any Zyphix product.'),
       h('Payment failed but money was debited'),
       p('This is a bank-side hold. It is reversed automatically, usually within 2 working days and at most 7. If it is not back by then, send the transaction reference to support@zyphix.in.'),
     ],
@@ -248,7 +248,7 @@ export const ARTICLES: Article[] = [
     keywords: ['delete account', 'remove account', 'close account', 'erase data'],
     body: [
       p('You can delete your Zyphix account at any time. Deletion removes your profile, saved addresses, wallet balance and order history from our systems.'),
-      steps('Open your account page and tap "Delete account" at the bottom, or email support@zyphix.in from your registered address with the subject "Delete my account".', 'We confirm the request by email within one working day.', 'Any open orders or bookings must complete first; any wallet balance is refunded to your original payment method before deletion.', 'Deletion completes within 30 days. Invoices are kept for the period required by Indian tax law, with personal details removed.'),
+      steps('Open your account page and tap "Delete account" at the bottom, or email support@zyphix.in from your registered address with the subject "Delete my account".', 'We confirm the request by email within one working day.', 'Any open orders or bookings must complete first; any wallet balance is refunded to your original payment method before deletion.', 'Deletion completes within 30 days. Invoices are kept for the period required by applicable tax law, with personal details removed.'),
       note('Deletion cannot be undone. If you only want to stop notifications, you can turn them off in your account settings instead.'),
     ],
     related: ['privacy-and-data-requests'],
@@ -286,23 +286,23 @@ export const ARTICLES: Article[] = [
   {
     slug: 'restaurant-onboarding', topic: 'partners', title: 'Listing your restaurant on Zyphix Eats', updated: '2026-10-18',
     summary: 'Register free at partner.zyphix.in. An onboarding manager calls within two working days.',
-    keywords: ['restaurant', 'register restaurant', 'list restaurant', 'onboarding', 'fssai'],
+    keywords: ['restaurant', 'register restaurant', 'list restaurant', 'onboarding', 'food licence', 'fssai'],
     body: [
-      steps('Go to partner.zyphix.in and choose "Restaurant".', 'Enter the restaurant name, the owner\'s name, phone, city and locality, and your cuisine types.', 'Submit. Your listing appears in the live directory immediately and an onboarding manager calls within two working days.', 'On the call, share your FSSAI licence number, GST details (if registered), your menu with prices and your opening hours.', 'Once the menu is live you receive orders on the partner app and a weekly settlement to your bank account.'),
+      steps('Go to partner.zyphix.in and choose "Restaurant".', 'Enter the restaurant name, the owner\'s name, phone, city and locality, and your cuisine types.', 'Submit. Your listing appears in the live directory immediately and an onboarding manager calls within two working days.', 'On the call, share your food-safety licence number, tax registration details (if registered), your menu with prices and your opening hours.', 'Once the menu is live you receive orders on the partner app and a weekly settlement to your bank account.'),
       h('What you need'),
-      list('FSSAI licence (mandatory).', 'Bank account for settlements.', 'A menu with prices; a photo of each dish helps but is optional.'),
+      list('A valid food-safety licence (mandatory).', 'Bank account for settlements.', 'A menu with prices; a photo of each dish helps but is optional.'),
       note('Listing is free. Commission is a flat percentage per order, agreed before you go live, and there are no hidden marketing charges.'),
     ],
     related: ['partner-payouts'],
   },
   {
-    slug: 'store-onboarding', topic: 'partners', title: 'Listing your kirana or store on Zyphix Now', updated: '2026-10-18',
+    slug: 'store-onboarding', topic: 'partners', title: 'Listing your corner store on Zyphix Now', updated: '2026-10-18',
     summary: 'Register free at partner.zyphix.in. We import your catalogue and you pack orders from your own shelves.',
-    keywords: ['store', 'kirana', 'shop', 'register store', 'merchant', 'catalogue'],
+    keywords: ['store', 'corner store', 'local store', 'shop', 'register store', 'merchant', 'catalogue'],
     body: [
       p('Zyphix Now runs on the stores already in your neighbourhood, not dark stores. You keep your shelf prices, pack orders from your own stock and a rider from your area delivers.'),
       steps('Go to partner.zyphix.in and choose "Store".', 'Enter the store name, owner, phone, city, locality and the categories you stock.', 'Submit. Your store appears in the live directory immediately.', 'An onboarding manager visits or calls within two working days to set up your catalogue. A printed price list or a photo of your shelves is enough to start.', 'You receive orders on the partner app; the rider collects and delivers.'),
-      note('Orders above ₹199 are delivered to customers for ₹0. That cost is carried by Zyphix, not by your store.'),
+      note('Free delivery on bigger baskets is paid for by Zyphix, not by your store.'),
     ],
     related: ['partner-payouts'],
   },
@@ -312,7 +312,7 @@ export const ARTICLES: Article[] = [
     keywords: ['verification', 'professional', 'police verification', 'id proof', 'electrician register', 'plumber register'],
     body: [
       p('Customers book on Zyphix Book because every professional is verified before their first job. Verification is free and most pros complete it within 3–5 working days.'),
-      steps('Register at partner.zyphix.in under "Professional" with your trade, city and localities you serve.', 'Upload a government photo ID (Aadhaar, voter ID, driving licence or passport) and an address proof.', 'Upload a police verification certificate from your local station, or ask us to initiate one on your behalf (a small fee applies and is deducted from your first payout).', 'Complete a 15-minute skill confirmation call with our onboarding team.', 'Once approved you appear in "Pros near you" on book.zyphix.in and start receiving bookings.'),
+      steps('Register at partner.zyphix.in under "Professional" with your trade, city and localities you serve.', 'Upload a government photo ID (national ID card, driving licence or passport) and an address proof.', 'Upload a police verification certificate from your local station, or ask us to initiate one on your behalf (a small fee applies and is deducted from your first payout).', 'Complete a 15-minute skill confirmation call with our onboarding team.', 'Once approved you appear in "Pros near you" on book.zyphix.in and start receiving bookings.'),
       list('You set your own working days and hours.', 'The visit charge for each service is standard across the platform; parts and extra work are quoted by you and approved by the customer in the app.', 'Payouts are weekly.'),
     ],
     related: ['partner-payouts', 'book-work-guarantee'],
@@ -335,7 +335,7 @@ export const ARTICLES: Article[] = [
     keywords: ['settlement', 'payout', 'commission', 'statement', 'bank account', 'invoice'],
     body: [
       p('All partner earnings are settled weekly. Every Monday you receive the previous week\'s orders or jobs, minus the agreed commission, in the bank account on your partner profile.'),
-      list('An itemised statement for each settlement is available in the partner portal; it lists every order, the customer payment, refunds and the commission.', 'Refunds issued for missing or damaged items are deducted only when the store or restaurant is responsible; rider-caused issues are not charged to you.', 'GST invoices for the commission are issued monthly.'),
+      list('An itemised statement for each settlement is available in the partner portal; it lists every order, the customer payment, refunds and the commission.', 'Refunds issued for missing or damaged items are deducted only when the store or restaurant is responsible; rider-caused issues are not charged to you.', 'Tax invoices for the commission are issued monthly.'),
       p('To change your bank account, update it in the partner portal; changes made before Friday apply to the next Monday\'s settlement.'),
     ],
     related: ['restaurant-onboarding', 'store-onboarding', 'delivery-partner-payouts'],

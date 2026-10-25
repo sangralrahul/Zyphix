@@ -29,7 +29,7 @@ export function Statement() {
       {/* framed clip that grows to full-bleed */}
       <ZoomVideo clip={VIDEOS.merchant}>
         <Container className="w-full pb-14 md:pb-20">
-          <h2 className="max-w-[20ch] text-balance text-[34px] font-semibold leading-[1.04] tracking-[-0.045em] text-white sm:text-[52px] md:text-[68px]">
+          <h2 className="max-w-[20ch] text-balance text-[34px] font-semibold leading-[1.04] tracking-[-0.045em] text-white sm:text-[48px] md:text-[58px]">
             The closer a message sits to the <Accent green>basket</Accent>, the less it has to shout.
           </h2>
           <p className="mt-5 max-w-[52ch] text-[16px] leading-[1.6] text-white/75 md:text-[18px]">Intent at the point of purchase: placements sit right beside the neighbourhood shelf people are already buying from.</p>

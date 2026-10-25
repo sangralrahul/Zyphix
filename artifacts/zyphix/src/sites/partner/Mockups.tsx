@@ -54,7 +54,7 @@ function MiniMap({ tint }: { tint: string }) {
 export function PartnerAppScreen() {
   const t = BLUE;
   const steps = [
-    { icon: Store, done: true, label: 'Pickup · Sharma Kirana', sub: 'Lane 4, Sector 12 · packed' },
+    { icon: Store, done: true, label: 'Pickup · Corner Store', sub: 'Lane 4, Sector 12 · packed' },
     { icon: Bike, active: true, label: 'On the way', sub: '1.6 km via Main Road' },
     { icon: Home, label: 'Drop · Flat 3B, Green Residency', sub: 'Leave at door · paid online' },
   ];

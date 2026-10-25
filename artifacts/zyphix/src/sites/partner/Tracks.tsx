@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ArrowRight, Check, Store, UtensilsCrossed, Wrench, Bike, ClipboardCheck } from 'lucide-react';
-import { Light, Dark, Glow, Grain, Kicker, Headline, Sub, Reveal, Stagger, GlowButton, Counter, Ticker, PhotoTile, BgVideo } from '@/ui/cinema';
+import { Light, Dark, Glow, Grain, Kicker, Headline, Sub, Reveal, GlowButton, Counter, Ticker, PhotoTile, BgVideo } from '@/ui/cinema';
 import { HScrollGallery, Accent, GiantMarquee } from '@/ui/motion2';
 import { Container, Chip } from '@/ui/kit';
 import { PHOTOS, landscape } from '@/data/media';
@@ -87,7 +87,7 @@ export function TrackBento() {
 
 /* ── Listed automatically ───────────────────────────────────────────────── */
 const DESTINATIONS = [
-  { host: 'now.zyphix.in', href: NOW_SITE, who: 'Kirana & store owners', what: 'Your shelves, at shelf prices, 30-minute delivery.' },
+  { host: 'now.zyphix.in', href: NOW_SITE, who: 'Stores & shop owners', what: 'Your shelves, at shelf prices, 30-minute delivery.' },
   { host: 'eats.zyphix.in', href: EATS_SITE, who: 'Restaurants & kitchens', what: 'Your menu, your prices, riders timed to prep.' },
   { host: 'book.zyphix.in', href: BOOK_SITE, who: 'Zyphix Book professionals', what: 'Your slots and rate card, with a verified badge.' },
 ];
@@ -112,23 +112,8 @@ export function ListedAutomatically() {
         <div className="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
           <div className="lg:col-span-5">
             <Reveal><Kicker light>Listed automatically</Kicker></Reveal>
-            <Reveal delay={0.05}><Headline light size="lg" className="text-balance">Register once. Appear where your customers already shop.</Headline></Reveal>
+            <Reveal delay={0.05}><Headline light size="lg" className="text-balance">Register once. Go live where people shop.</Headline></Reveal>
             <Reveal delay={0.1}><Sub light className="mt-6 max-w-[480px]">Your listing is built from your registration and goes live on the Zyphix product for your track. People in your area see you in the app and on the web, with no separate storefront to maintain.</Sub></Reveal>
-            <Stagger className="mt-8 grid gap-3" step={0.08}>
-              {[
-                ['Register', 'A ten-minute form on this portal.'],
-                ['Verify', 'A call within two working days; documents checked.'],
-                ['Go live', 'Your listing appears on now., eats. or book.zyphix.in, and in the rider app for delivery partners.'],
-              ].map(([t, d], i) => (
-                <div key={t} className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[.04] p-4">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-emerald-300/30 text-[12.5px] font-semibold text-emerald-300" style={NUM}>0{i + 1}</span>
-                  <div>
-                    <p className="text-[15px] font-semibold text-white">{t}</p>
-                    <p className="mt-0.5 text-[14px] leading-[1.55] text-white/60">{d}</p>
-                  </div>
-                </div>
-              ))}
-            </Stagger>
           </div>
 
           <div className="lg:col-span-7">

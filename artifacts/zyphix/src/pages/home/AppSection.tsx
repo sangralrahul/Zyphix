@@ -19,8 +19,8 @@ const STORES = [
 
 const PROMISES: { n: number; format: (n: number) => string; label: string }[] = [
   { n: 30, format: n => `${Math.round(n)} min`, label: 'grocery delivery promise' },
-  { n: 199, format: n => `₹${Math.round(n)}`, label: 'and above ships for ₹0' },
-  { n: 3, format: n => `${Math.round(n)} apps` , label: 'one login, one wallet' },
+  { n: 3, format: n => `${Math.round(n)} in 1`, label: 'Now, Eats and Book' },
+  { n: 1, format: n => `${Math.round(n)} wallet`, label: 'for every order' },
 ];
 
 function PhoneScreen() {
@@ -30,7 +30,7 @@ function PhoneScreen() {
       <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.35) 0%, rgba(5,8,14,0) 30%, rgba(5,8,14,.85) 100%)' }} />
       <div aria-hidden className="absolute inset-x-0 top-0 flex h-[44px] items-end justify-between px-6 pb-1 text-[11px] font-semibold text-white"><span>9:41</span><span className="tracking-tight">●●● ◔ ▮</span></div>
       <div className="absolute inset-x-3 top-14 flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-[12px] font-medium text-white backdrop-blur-xl">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Delivering to Gandhi Nagar, Jammu
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Delivering to Home · 1.2 km
       </div>
       <div className="absolute inset-x-3 bottom-3 rounded-2xl border border-white/15 bg-white/10 p-3.5 text-white backdrop-blur-xl">
         <div className="flex items-center gap-3">
@@ -106,7 +106,7 @@ export function AppSection() {
 /* ── Partner / advertise / support split ────────────────────────────────── */
 const BANDS = [
   { href: PARTNER_SITE, photo: landscape('shopOwner', 0), kicker: 'For businesses', title: 'Put your store, kitchen or skill on Zyphix.', body: 'Free to list. An onboarding manager calls within two working days.', cta: 'partner.zyphix.in' },
-  { href: ADVERTISE_SITE, photo: landscape('kirana', 4), kicker: 'For brands', title: 'Reach Jammu at the moment it is buying.', body: 'Sponsored placements inside the Now, Eats and Book apps.', cta: 'advertise.zyphix.in' },
+  { href: ADVERTISE_SITE, photo: landscape('kirana', 4), kicker: 'For brands', title: 'Reach local buyers the moment they shop.', body: 'Sponsored placements inside the Now, Eats and Book apps.', cta: 'advertise.zyphix.in' },
   { href: SUPPORT_SITE, photo: landscape('phone', 0), kicker: 'For customers', title: 'Help with an order, refund or booking.', body: 'Answers in under a minute, or a person by email.', cta: 'support.zyphix.in' },
 ];
 

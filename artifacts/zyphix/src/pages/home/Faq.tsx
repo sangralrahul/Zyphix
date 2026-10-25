@@ -11,10 +11,10 @@ import { NOW_SITE, EATS_SITE, PARTNER_SITE, SUPPORT_SITE, Display } from './shar
 ──────────────────────────────────────────────────────────────────────────── */
 
 const FAQ = [
-  { q: 'Where is Zyphix available?', a: 'We are live in Jammu first and onboarding stores, restaurants and professionals area by area. Set your location in the app to see live partners near you; if we are not on your street yet, join early access and we will email you the day we are.' },
-  { q: 'Are prices the same as in the store?', a: 'Yes. Partners list their own shelf and menu prices and we do not mark them up. There is no surge pricing and no hidden handling charge. Any delivery fee is shown at checkout before you pay, and orders above ₹199 ship for ₹0.' },
+  { q: 'Where is Zyphix available?', a: <>We are rolling out neighbourhood by neighbourhood, onboarding stores, restaurants and professionals one area at a time. Set your location on <a href={NOW_SITE} className="font-semibold text-emerald-700">now.zyphix.in</a> to check if we deliver to you; if we are not on your street yet, join early access and we will email you the day we are.</> },
+  { q: 'Are prices the same as in the store?', a: 'Yes. Partners list their own shelf and menu prices and we do not mark them up. There is no surge pricing and no hidden handling charge. Any delivery fee is shown at checkout before you pay, and bigger baskets ship free.' },
   { q: 'How do you deliver in 30 minutes?', a: 'Every order is fulfilled by a business within a few kilometres of you and carried by a rider from the same area. Short distances and real inventory make the 30-minute target possible without dark stores.' },
-  { q: 'How do I pay?', a: 'UPI, cards, net banking and popular wallets online. Cash on delivery is available on eligible orders and shown at checkout.' },
+  { q: 'How do I pay?', a: 'Cards, UPI, net banking and popular wallets online. Cash on delivery is available on eligible orders and shown at checkout.' },
   { q: 'What if something is missing or wrong?', a: 'Report it from the order screen. Support verifies with the store and rider and refunds the affected items to your original payment method or Zyphix wallet.' },
   { q: 'How can my business join?', a: <>Apply at <a href={PARTNER_SITE} className="font-semibold text-emerald-700" target="_blank" rel="noopener noreferrer">partner.zyphix.in</a>. Listing is free and an onboarding manager calls you within two working days to take you live.</> },
 ];
@@ -47,7 +47,7 @@ export function FinalCta() {
   return (
     <ZoomVideo clip={VIDEOS.nightCity}>
       <Container className="w-full pb-20 md:pb-28">
-        <Kicker light>Jammu · more cities soon</Kicker>
+        <Kicker light>Neighbourhood by neighbourhood</Kicker>
         <Display light size="xl" className="!max-w-[16ch]">Your neighbourhood is <Accent green>already here</Accent>.</Display>
         <Sub light className="mt-6 max-w-[46ch]">Place your first order and see how fast local can be.</Sub>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -66,7 +66,7 @@ export function StickyCta() {
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13.5px] font-semibold tracking-[-0.01em] text-gray-900">Groceries in 30 min</p>
-          <p className="truncate text-[11.5px] text-gray-500">Shelf prices · ₹0 delivery above ₹199</p>
+          <p className="truncate text-[11.5px] text-gray-500">Shelf prices · free delivery on bigger baskets</p>
         </div>
         <Button href={NOW_SITE} sameTab size="sm" className="shrink-0">Order now <ArrowRight size={14} /></Button>
       </div>

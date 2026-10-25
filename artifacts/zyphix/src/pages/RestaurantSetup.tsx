@@ -711,7 +711,7 @@ function FlowerBurst() {
 
 /* ─── Step 4: Success ─── */
 const BENEFITS = [
-  { icon: '📈', title: '3× More Orders', desc: 'Reach customers who can\'t visit physically — online orders add 30–60% revenue on average' },
+  { icon: '📈', title: 'More orders', desc: 'Reach people nearby who would never walk in — delivery and pickup from one listing' },
   { icon: '💰', title: '₹0 Setup Cost', desc: 'No monthly fees, no listing charges. We only earn when you earn — a tiny commission per order' },
   { icon: '⚡', title: 'Live in 24 Hours', desc: 'Once verified, your restaurant goes live on ZyphixEats and starts receiving orders immediately' },
   { icon: '🛵', title: 'Delivery Handled', desc: 'Our local delivery fleet covers your area — you focus on cooking, we handle the last mile' },

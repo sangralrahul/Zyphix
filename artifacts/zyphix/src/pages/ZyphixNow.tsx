@@ -9,8 +9,8 @@ import { COUPONS } from '@/data/coupons';
 import { usePartners, type PartnerListing } from '@/lib/partners';
 import { Button, IconTile, FONT, G } from '@/ui/kit';
 import { BgVideo, Reveal, Kicker, Grain, isStatic } from '@/ui/cinema';
-import { Accent, Magnetic } from '@/ui/motion2';
-import { HeroLiveOrder, MandiBand, TrackBand, useRotatingWord, DISPLAY } from './now/bands';
+import { Magnetic, SplitHeadline } from '@/ui/motion2';
+import { HeroLiveOrder, MarketBand, TrackBand, useRotatingWord, DISPLAY } from './now/bands';
 import { VIDEOS, landscape, type Photo } from '@/data/media';
 import {
   discountOf, buildOffers, dealsOfTheDay, bestsellers as pickBestsellers, underPrice, topBrands, freshProduce,
@@ -352,7 +352,7 @@ export function ZyphixNow() {
                     </section>
                   )}
 
-                  <MandiBand onShopProduce={countByCategory.get(PRODUCE_CATEGORY) ? () => jumpTo(PRODUCE_CATEGORY) : undefined} />
+                  <MarketBand onShopProduce={countByCategory.get(PRODUCE_CATEGORY) ? () => jumpTo(PRODUCE_CATEGORY) : undefined} />
 
                   {(under49.length > 0 || under99.length > 0) && (
                     <section>
@@ -487,9 +487,9 @@ function SectionHead({ title, sub, action }: { title: string; sub?: string; acti
 function Hero({ productCount, onSearch }: { productCount: string; onSearch: (q: string) => void }) {
   const chips: { icon: React.ReactNode; text: string }[] = [
     { icon: <Clock size={13} />, text: 'Delivered in 30 min' },
-    { icon: <Truck size={13} />, text: 'Free delivery above ₹149' },
+    { icon: <Truck size={13} />, text: 'Free delivery on bigger baskets' },
     ...(productCount ? [{ icon: <Package size={13} />, text: `${productCount} products` }] : []),
-    { icon: <MapPin size={13} />, text: 'Live in Jammu' },
+    { icon: <MapPin size={13} />, text: 'Check if we deliver to you' },
   ];
   return (
     <section aria-label="Zyphix Now" className="relative isolate -mx-4 flex min-h-[50svh] items-end overflow-hidden bg-[#05080E] text-white md:mx-0 md:min-h-[60svh] md:rounded-3xl">
@@ -498,12 +498,11 @@ function Hero({ productCount, onSearch }: { productCount: string; onSearch: (q: 
       <Grain opacity={0.05} />
       <HeroLiveOrder />
       <div className="relative z-10 w-full px-4 pb-16 pt-14 md:px-10 md:pb-24 md:pt-16">
-        <Kicker light>Zyphix Now · Jammu</Kicker>
-        <h1 className={`${DISPLAY} max-w-[13ch] text-[38px] leading-[1.0] text-white sm:text-[48px] md:text-[64px]`}>
-          Groceries in <Accent green>30</Accent> minutes
-        </h1>
+        <Kicker light>Zyphix Now</Kicker>
+        <SplitHeadline className={`${DISPLAY} max-w-[13ch] text-[38px] leading-[1.0] text-white sm:text-[48px] md:text-[64px]`}
+          parts={['Groceries in', { accent: '30', green: true }, 'minutes.']} />
         <p className="mt-4 max-w-[520px] text-[15px] leading-[1.55] text-white/75 md:text-[17px]">
-          Fresh produce, dairy, snacks and daily staples from stores near you, at your door before the chai goes cold.
+          Fresh produce, dairy, snacks and daily staples from stores near you, at your door before the kettle boils.
         </p>
         <div className="mt-5 max-w-[640px] md:mt-6">
           <SearchField onSearch={onSearch} />

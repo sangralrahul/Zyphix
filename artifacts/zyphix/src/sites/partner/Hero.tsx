@@ -4,8 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { VideoHero, Kicker, GlowButton, GhostButton, Ticker, Reveal, Light, isStatic, EASE } from '@/ui/cinema';
 import { Container } from '@/ui/kit';
 import { VIDEOS } from '@/data/media';
-import { Magnetic } from '@/ui/motion2';
-import { AccentWords } from '@/pages/book/AccentWords';
+import { Magnetic, SplitHeadline } from '@/ui/motion2';
 import { PARTNERSHIPS_EMAIL, TRACKS } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -19,12 +18,12 @@ export function Hero() {
     <VideoHero clip={VIDEOS.heroCity} height="min-h-[100svh]" dim={0.45} position="center 45%">
       <Container className="pb-8 pt-40 sm:pb-10 md:pt-48">
         <motion.div {...fade(0.1)}>
-          <Kicker light>Partner portal · Jammu first</Kicker>
+          <Kicker light>Partner portal</Kicker>
         </motion.div>
-        <AccentWords
-          parts={["Grow with Jammu's", { accent: 'SuperLocal', green: true }, 'app.']}
+        <SplitHeadline
+          parts={['Grow with the', { accent: 'SuperLocal', green: true }, 'app.']}
           delay={0.25}
-          className="max-w-[14ch] text-balance text-[46px] font-semibold leading-[0.98] tracking-[-0.045em] text-white sm:text-[68px] md:text-[92px]"
+          className="max-w-[14ch] text-balance text-[46px] font-semibold leading-[0.98] tracking-[-0.045em] text-white sm:text-[64px] md:text-[84px]"
         />
         <motion.p {...fade(0.8)} className="mt-6 max-w-[580px] text-[17px] leading-[1.6] text-white/75 sm:text-[19px]">
           Deliver, cook, fix or sell for customers a few streets away. Free to apply, transparent terms, weekly payouts and a real onboarding manager from application to go-live.

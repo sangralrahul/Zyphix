@@ -5,7 +5,7 @@ import { restaurants, menuItems, FOOD_CUISINE_TYPES } from '@/data/mockData';
 import { usePartners, tagList } from '@/lib/partners';
 import { Chip, Card, Button, G, FONT } from '@/ui/kit';
 import { VideoHero, Reveal, Kicker } from '@/ui/cinema';
-import { Accent, Spotlight } from '@/ui/motion2';
+import { Spotlight, SplitHeadline } from '@/ui/motion2';
 import { VIDEOS } from '@/data/media';
 import { TonightsPicks, CuisineTiles, PartnerStrip, RestaurantCta, fallbackPhoto, EatsHeroLiveOrder, HungryBand, EatsTrackBand, DISPLAY } from './eats/picks';
 
@@ -172,14 +172,11 @@ export function ZyphixEats() {
             <VideoHero clip={VIDEOS.food} height="min-h-[50svh] md:min-h-[60svh]" dim={0.4} className="md:rounded-3xl">
               <EatsHeroLiveOrder />
               <div className="px-4 pb-7 pt-14 md:px-10 md:pb-10 md:pt-16">
-                <Kicker light>Zyphix Eats · Jammu</Kicker>
-                <Reveal y={18}>
-                  <h1 className={`${DISPLAY} max-w-[15ch] text-[38px] leading-[1.0] text-white sm:text-[48px] md:text-[64px]`}>
-                    Jammu's kitchens, at your <Accent green>door</Accent>.
-                  </h1>
-                </Reveal>
+                <Kicker light>Zyphix Eats</Kicker>
+                <SplitHeadline className={`${DISPLAY} max-w-[15ch] text-[38px] leading-[1.0] text-white sm:text-[48px] md:text-[64px]`}
+                  parts={["Your city's best kitchens, at your", { accent: 'door.', green: true }]} />
                 <p className="mt-3 max-w-[520px] text-[15px] leading-[1.55] text-white/75 md:text-[17px]">
-                  Dhabas, biryani houses, momo stalls and cafés near you, cooked to order and tracked to your gate.
+                  Biryani houses, pizza ovens, momo stalls and cafés near you, cooked to order and tracked to your door.
                 </p>
                 <form role="search" onSubmit={e => e.preventDefault()}
                   className="relative z-10 mt-5 flex h-12 max-w-[640px] items-center gap-2 rounded-2xl bg-white pl-4 pr-1.5 text-gray-900 shadow-[0_20px_60px_-15px_rgba(0,0,0,.6)] md:mt-6 md:h-14">
@@ -198,7 +195,7 @@ export function ZyphixEats() {
                     {allRestaurants.length} open
                   </span>
                 </form>
-                <div className="mt-4 flex gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
+                <div className="mt-4 flex gap-1.5 overflow-x-auto pb-0.5 no-scrollbar xl:max-w-[calc(100%-340px)]">
                   {FOOD_CUISINE_TYPES.map(c => {
                     const active = activeCuisine === c;
                     return (

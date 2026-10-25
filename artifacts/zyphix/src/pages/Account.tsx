@@ -14,11 +14,13 @@ import {
   myOrders, toLocalOrder, updateProfile, authUrl, type SavedAddress, type AddressInput,
 } from '@/lib/account';
 import { Button, FONT } from '@/ui/kit';
+import { BgVideo } from '@/ui/cinema';
+import { VIDEOS } from '@/data/media';
 
 /* ─── shared classes ─── */
-const card = 'rounded-xl border border-[#E6E8EC] bg-white';
-const label = 'mb-1 block text-[12px] font-medium text-gray-600';
-const inputCls = (err?: string) => `h-9 w-full rounded-lg border bg-white px-3 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 ${err ? 'border-red-300' : 'border-[#E6E8EC]'}`;
+const card = 'rounded-3xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(11,15,25,.04)]';
+const label = 'mb-1.5 block text-[13px] font-medium text-gray-600';
+const inputCls = (err?: string) => `h-11 w-full rounded-xl border bg-white px-3.5 text-[14.5px] text-gray-900 outline-none transition-[border-color,box-shadow] placeholder:text-gray-400 hover:border-gray-300 focus:border-[#0DA366] focus:ring-4 focus:ring-[#0DA366]/15 ${err ? 'border-red-300' : 'border-gray-200'}`;
 const errCls = 'mt-1 flex items-center gap-1 text-[12px] text-red-600';
 
 /* ─── types ─── */
@@ -82,10 +84,10 @@ function fromServer(s: SavedAddress): Address {
 function TabBtn({ active, onClick, icon, label, count }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string; count?: number }) {
   return (
     <button type="button" onClick={onClick} aria-current={active ? 'page' : undefined}
-      className={`flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-lg px-2.5 py-2 text-left text-[13px] transition md:w-full ${active ? 'bg-emerald-50 font-semibold text-gray-900' : 'font-medium text-gray-700 hover:bg-gray-50'}`}>
-      <span className={active ? 'text-emerald-700' : 'text-gray-400'}>{icon}</span>
+      className={`flex h-11 shrink-0 items-center gap-2.5 whitespace-nowrap rounded-full px-4 text-left text-[14px] tracking-[-0.01em] transition md:w-full md:rounded-2xl ${active ? 'bg-[#05080E] font-semibold text-white shadow-[0_8px_24px_-12px_rgba(5,8,14,.6)]' : 'font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
+      <span className={active ? 'text-emerald-300' : 'text-gray-400'}>{icon}</span>
       <span className="min-w-0 flex-1">{label}</span>
-      {count !== undefined && <span className={`text-[11.5px] tabular-nums ${active ? 'text-emerald-700' : 'text-gray-400'}`}>{count}</span>}
+      {count !== undefined && <span className={`rounded-full px-2 py-0.5 text-[11.5px] font-semibold tabular-nums ${active ? 'bg-white/15 text-white' : 'bg-gray-100 text-gray-500'}`}>{count}</span>}
     </button>
   );
 }
@@ -94,12 +96,12 @@ function SectionCard({ title, children, action }: { title?: string; children: Re
   return (
     <div className={card}>
       {title && (
-        <div className="flex items-center justify-between border-b border-[#E6E8EC] px-4 py-3">
-          <p className="text-[14px] font-semibold text-gray-900">{title}</p>
+        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 md:px-6">
+          <p className="text-[15.5px] font-semibold tracking-[-0.02em] text-gray-900">{title}</p>
           {action}
         </div>
       )}
-      <div className="p-4">{children}</div>
+      <div className="p-5 md:p-6">{children}</div>
     </div>
   );
 }
@@ -141,7 +143,7 @@ function AddressForm({ initial, onSave, onCancel }: {
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {/* Type picker */}
       <div>
         <span className={label}>Address type</span>
@@ -151,7 +153,7 @@ function AddressForm({ initial, onSave, onCancel }: {
             const active = form.type === t;
             return (
               <button key={t} type="button" onClick={() => f('type')(t)} aria-pressed={active}
-                className={`flex flex-col items-center gap-1 rounded-lg border px-1 py-2 transition ${active ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500' : 'border-[#E6E8EC] bg-white text-gray-500 hover:border-gray-300'}`}>
+                className={`flex flex-col items-center gap-1 rounded-xl border px-1 py-2.5 transition ${active ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500' : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'}`}>
                 <m.Icon size={15} />
                 <span className={`text-[11.5px] ${active ? 'font-semibold' : 'font-medium'}`}>{m.label}</span>
               </button>
@@ -182,14 +184,14 @@ function AddressForm({ initial, onSave, onCancel }: {
       {/* Area */}
       <label className="block">
         <span className={label}>Area / locality</span>
-        <input value={form.area} onChange={e => f('area')(e.target.value)} placeholder="Gandhi Nagar, Trikuta Nagar" className={inputCls(errors.area)} />
+        <input value={form.area} onChange={e => f('area')(e.target.value)} placeholder="Street, neighbourhood" className={inputCls(errors.area)} />
         {errors.area && <span className={errCls}>{errors.area}</span>}
       </label>
 
       {/* Landmark */}
       <label className="block">
         <span className={label}>Landmark (optional)</span>
-        <input value={form.landmark} onChange={e => f('landmark')(e.target.value)} placeholder="Near petrol pump, opp. hospital" className={inputCls()} />
+        <input value={form.landmark} onChange={e => f('landmark')(e.target.value)} placeholder="Near the park, opposite the school" className={inputCls()} />
       </label>
 
       {/* City & Pincode */}
@@ -202,7 +204,7 @@ function AddressForm({ initial, onSave, onCancel }: {
         </label>
         <label className="block">
           <span className={label}>Pincode</span>
-          <input value={form.pincode} onChange={e => f('pincode')(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="180001" inputMode="numeric" className={inputCls(errors.pincode)} />
+          <input value={form.pincode} onChange={e => f('pincode')(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="6-digit pincode" inputMode="numeric" className={inputCls(errors.pincode)} />
           {errors.pincode && <span className={errCls}>{errors.pincode}</span>}
         </label>
       </div>
@@ -273,7 +275,7 @@ function ProfileTab() {
   );
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {/* Avatar card */}
       <SectionCard>
         <div className="flex items-center gap-3">
@@ -283,7 +285,7 @@ function ProfileTab() {
             </div>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
             <button type="button" onClick={() => fileRef.current?.click()} aria-label="Change photo"
-              className="absolute -bottom-0.5 -right-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full border border-[#E6E8EC] bg-white text-gray-600 transition hover:bg-gray-50">
+              className="absolute -bottom-0.5 -right-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50">
               <Camera size={11} />
             </button>
           </div>
@@ -305,7 +307,7 @@ function ProfileTab() {
             <Check size={14} /> Profile saved
           </motion.div>
         )}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           <div>
             <span className={label}>Full name</span>
             {edit
@@ -323,7 +325,7 @@ function ProfileTab() {
           <div>
             <span className={label}>Phone</span>
             {edit
-              ? <><input value={form.phone} onChange={e => f('phone')(e.target.value)} placeholder="+91 98765 43210" type="tel" className={inputCls(errors.phone)} />{errors.phone && <p className={errCls}><AlertCircle size={11} />{errors.phone}</p>}</>
+              ? <><input value={form.phone} onChange={e => f('phone')(e.target.value)} placeholder="Mobile number" type="tel" className={inputCls(errors.phone)} />{errors.phone && <p className={errCls}><AlertCircle size={11} />{errors.phone}</p>}</>
               : <ReadRow icon={<Phone size={14} />} value={form.phone} />
             }
           </div>
@@ -338,7 +340,7 @@ function ProfileTab() {
       {/* Account */}
       <SectionCard title="Account">
         <button type="button" onClick={async () => { await logout(); setLoc('/'); }}
-          className="inline-flex h-9 items-center gap-2 rounded-full border border-[#E6E8EC] bg-white px-4 text-[13.5px] font-semibold text-red-600 transition hover:border-red-200 hover:bg-red-50">
+          className="inline-flex h-9 items-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-[13.5px] font-semibold text-red-600 transition hover:border-red-200 hover:bg-red-50">
           <LogOut size={14} /> Sign out
         </button>
       </SectionCard>
@@ -423,7 +425,7 @@ function AddressesTab() {
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {error && (
         <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700">
           <AlertCircle size={14} />{error}
@@ -457,7 +459,7 @@ function AddressesTab() {
       {/* Address list */}
       {addresses.length === 0 && !showForm && !loading ? (
         <div className={`${card} px-6 py-12 text-center`}>
-          <span className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E8EC] bg-[#FAFAFA] text-gray-400"><MapPin size={18} /></span>
+          <span className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-[#FAFAFA] text-gray-400"><MapPin size={18} /></span>
           <p className="text-[15px] font-semibold">No saved addresses</p>
           <p className="mt-1 text-[13px] text-gray-500">Save an address to check out faster.</p>
           <div className="mt-4"><Button size="sm" onClick={() => setShowForm(true)}>Add address</Button></div>
@@ -480,7 +482,7 @@ function AddressesTab() {
                   animate={{ opacity: deleted === addr.id ? 0 : 1, x: deleted === addr.id ? 24 : 0 }}
                   className={`${card} p-3 ${addr.isDefault ? 'border-emerald-200' : ''}`}>
                   <div className="flex items-start gap-3">
-                    <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${addr.isDefault ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-[#E6E8EC] bg-[#FAFAFA] text-gray-500'}`}>
+                    <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${addr.isDefault ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-gray-200 bg-[#FAFAFA] text-gray-500'}`}>
                       <meta.Icon size={15} />
                     </span>
                     <div className="min-w-0 flex-1">
@@ -566,7 +568,7 @@ function OrdersTab() {
         ))
       ) : orders.length === 0 ? (
         <div className={`${card} px-6 py-12 text-center`}>
-          <span className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E8EC] bg-[#FAFAFA] text-gray-400"><Package size={18} /></span>
+          <span className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-[#FAFAFA] text-gray-400"><Package size={18} /></span>
           <p className="text-[15px] font-semibold">No orders yet</p>
           <p className="mt-1 text-[13px] text-gray-500">Orders you place will show up here.</p>
           <div className="mt-4"><Button size="sm" href="/now">Start shopping</Button></div>
@@ -577,7 +579,7 @@ function OrdersTab() {
           const count = order.items.reduce((n, i) => n + i.qty, 0);
           return (
             <div key={order.id} className={card}>
-              <div className="flex items-center justify-between gap-3 border-b border-[#E6E8EC] px-4 py-2.5">
+              <div className="flex items-center justify-between gap-3 border-b border-gray-200 px-4 py-2.5">
                 <div className="min-w-0">
                   <p className="truncate text-[13.5px] font-semibold text-gray-900">Zyphix Now · {order.id}</p>
                   <p className="mt-0.5 inline-flex items-center gap-1 text-[12px] text-gray-500"><Clock size={11} /> {fmtDate(order.createdAt)}</p>
@@ -587,7 +589,7 @@ function OrdersTab() {
               <div className="px-4 py-3">
                 <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {order.items.slice(0, 6).map((item, i) => (
-                    <img key={i} src={item.image} alt={item.name} className="h-10 w-10 shrink-0 rounded-lg border border-[#E6E8EC] bg-white object-contain p-0.5" />
+                    <img key={i} src={item.image} alt={item.name} className="h-10 w-10 shrink-0 rounded-lg border border-gray-200 bg-white object-contain p-0.5" />
                   ))}
                   {order.items.length > 6 && <span className="shrink-0 text-[12px] text-gray-500">+{order.items.length - 6}</span>}
                 </div>
@@ -637,7 +639,7 @@ function SettingsTab() {
   );
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <SectionCard title="Notifications">
         <div className="-my-1 divide-y divide-gray-100">
           <Toggle k="orderUpdates" label="Order updates" sub="Status changes for your orders" />
@@ -648,7 +650,7 @@ function SettingsTab() {
       </SectionCard>
 
       {otpMsg && (
-        <div className="flex items-start gap-2.5 rounded-xl border border-[#E6E8EC] bg-white px-3 py-3">
+        <div className="flex items-start gap-2.5 rounded-xl border border-gray-200 bg-white px-3 py-3">
           <Lock size={14} className="mt-0.5 shrink-0 text-gray-500" />
           <div className="min-w-0 flex-1">
             <p className="text-[13.5px] font-semibold text-gray-900">Passwordless account</p>
@@ -668,7 +670,7 @@ function SettingsTab() {
             { icon: <Bell size={14} />, label: 'Notification preferences', sub: 'Manage how we contact you', action: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
           ] as { icon: React.ReactNode; label: string; sub: string; action: () => void }[]).map(({ icon, label, sub, action }) => (
             <button key={label} type="button" onClick={action} className="flex w-full items-center gap-3 py-2.5 text-left transition hover:opacity-80">
-              <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E6E8EC] bg-[#FAFAFA] text-gray-500">{icon}</span>
+              <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-[#FAFAFA] text-gray-500">{icon}</span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[13.5px] font-medium text-gray-900">{label}</span>
                 <span className="block text-[12px] text-gray-500">{sub}</span>
@@ -732,7 +734,7 @@ export function Account() {
   if (!user) {
     if (!ready) {
       return (
-        <div className="mx-auto w-full max-w-[960px] pt-4" style={{ fontFamily: FONT }}>
+        <div className="mx-auto w-full max-w-[1040px] pt-6" style={{ fontFamily: FONT }}>
           <div className={`${card} space-y-2 p-4`}>
             <div className="h-4 w-40 animate-pulse rounded bg-gray-100" />
             <div className="h-3 w-64 animate-pulse rounded bg-gray-100" />
@@ -741,11 +743,11 @@ export function Account() {
       );
     }
     return (
-      <div className="mx-auto w-full max-w-[960px] pt-4 text-gray-900" style={{ fontFamily: FONT }}>
-        <div className={`${card} px-6 py-14 text-center`}>
-          <span className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E8EC] bg-[#FAFAFA] text-gray-400"><User size={18} /></span>
-          <h1 className="text-[17px] font-semibold tracking-[-0.01em]">Sign in to view your account</h1>
-          <p className="mt-1 text-[13px] text-gray-500">Orders, addresses and preferences are saved to your account.</p>
+      <div className="mx-auto w-full max-w-[1040px] pt-6 text-gray-900" style={{ fontFamily: FONT }}>
+        <div className={`${card} px-6 py-16 text-center`}>
+          <span className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"><User size={20} /></span>
+          <h1 className="text-[24px] font-semibold tracking-[-0.03em]">Sign in to view your account</h1>
+          <p className="mt-2 text-[14.5px] text-gray-500">Orders, addresses and preferences are saved to your account.</p>
           <div className="mt-4 flex flex-col items-center gap-2">
             <Button size="sm" sameTab href={authUrl(typeof window !== 'undefined' ? window.location.href : undefined)}>Sign in</Button>
             <button type="button" onClick={openModal} className="text-[13px] font-medium text-gray-500 hover:text-gray-900">or sign in here</button>
@@ -763,15 +765,38 @@ export function Account() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-[960px] pb-24 pt-4 text-gray-900 md:pb-8" style={{ fontFamily: FONT }}>
-      <div className="flex items-baseline gap-3">
-        <h1 className="text-[20px] font-semibold tracking-[-0.01em]">Account</h1>
-        <p className="truncate text-[13px] text-gray-500">{user.email || user.phone || user.name}</p>
+    <div className="mx-auto w-full max-w-[1040px] pb-24 pt-4 text-gray-900 md:pb-12 md:pt-6" style={{ fontFamily: FONT }}>
+      {/* Header band */}
+      <div className="relative isolate overflow-hidden rounded-3xl bg-[#05080E] text-white">
+        <BgVideo clip={VIDEOS.nightCity} dim={0.62} />
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(5,8,14,.9) 0%, rgba(5,8,14,.55) 55%, rgba(5,8,14,.25) 100%), radial-gradient(600px 300px at 0% 100%, rgba(13,163,102,.35), transparent 70%)' }} />
+        <div className="relative flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between md:p-8">
+          <div className="flex min-w-0 items-center gap-4">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-[22px] font-semibold text-white ring-4 ring-white/10" style={{ background: 'linear-gradient(160deg, #19C27C, #0DA366)' }}>
+              {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+            </span>
+            <div className="min-w-0">
+              <p className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-emerald-300">Your account</p>
+              <h1 className="mt-1 truncate text-[26px] font-semibold leading-[1.1] tracking-[-0.035em] md:text-[32px]">{user.name || 'Welcome'}</h1>
+              <p className="mt-1 truncate text-[14px] text-white/60">{user.email || user.phone || 'Member'}</p>
+            </div>
+          </div>
+          <div className="flex shrink-0 gap-2.5">
+            <button type="button" onClick={() => goTab('orders')} className="rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-left backdrop-blur-md transition hover:bg-white/15">
+              <p className="text-[20px] font-semibold tabular-nums leading-none tracking-[-0.02em]">{orderCount}</p>
+              <p className="mt-1 text-[12px] text-white/60">Orders</p>
+            </button>
+            <button type="button" onClick={() => goTab('addresses')} className="rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-left backdrop-blur-md transition hover:bg-white/15">
+              <p className="text-[20px] font-semibold tabular-nums leading-none tracking-[-0.02em]">{addressCount}</p>
+              <p className="mt-1 text-[12px] text-white/60">Addresses</p>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-4 grid items-start gap-4 md:grid-cols-[208px_1fr]">
+      <div className="mt-6 grid items-start gap-5 md:grid-cols-[220px_1fr] md:gap-6">
         {/* Sidebar (desktop) / tab row (mobile) */}
-        <div className={`${card} flex gap-1 overflow-x-auto p-1.5 [scrollbar-width:none] md:sticky md:top-[80px] md:flex-col md:overflow-visible [&::-webkit-scrollbar]:hidden`}>
+        <div className={`${card} flex gap-1 overflow-x-auto p-1.5 [scrollbar-width:none] md:sticky md:top-[88px] md:flex-col md:overflow-visible md:p-2 [&::-webkit-scrollbar]:hidden`}>
           {TABS.map(t => (
             <TabBtn key={t.id} active={tab === t.id} onClick={() => goTab(t.id)} icon={t.icon} label={t.label} count={t.count} />
           ))}

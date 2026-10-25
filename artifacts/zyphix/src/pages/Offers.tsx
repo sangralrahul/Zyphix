@@ -12,10 +12,10 @@ const OFFER_ICONS: Record<string, React.ReactNode> = {
 };
 
 const CATEGORIES = [
-  { label: 'Grocery',  sub: 'Kirana and essentials', icon: <ShoppingBag size={16} />, href: '/now' },
-  { label: 'Food',     sub: 'Restaurants and dhabas', icon: <Utensils size={16} />, href: '/eats' },
+  { label: 'Grocery',  sub: 'Essentials from stores near you', icon: <ShoppingBag size={16} />, href: '/now' },
+  { label: 'Food',     sub: 'Restaurants and local kitchens', icon: <Utensils size={16} />, href: '/eats' },
   { label: 'Services', sub: 'Home and personal', icon: <CalendarCheck size={16} />, href: '/book' },
-  { label: 'Kirana',   sub: 'Stores near you', icon: <Store size={16} />, href: '/kirana-map' },
+  { label: 'Stores',   sub: 'Local stores near you', icon: <Store size={16} />, href: '/kirana-map' },
 ];
 
 export function Offers() {

@@ -4,8 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { VideoHero, Kicker, GlowButton, GhostButton, Ticker, Reveal, Light, isStatic, EASE } from '@/ui/cinema';
 import { Container } from '@/ui/kit';
 import { VIDEOS } from '@/data/media';
-import { Magnetic } from '@/ui/motion2';
-import { AccentWords } from '@/pages/book/AccentWords';
+import { Magnetic, SplitHeadline } from '@/ui/motion2';
 import { SURFACES } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -20,12 +19,12 @@ export function Hero() {
     <VideoHero clip={VIDEOS.groceryShelf} height="min-h-[100svh]" dim={0.5} position="center 50%">
       <Container className="pb-8 pt-36 sm:pb-10 md:pt-48">
         <motion.div {...fade(0.1)}>
-          <Kicker light>Zyphix Ads · Jammu</Kicker>
+          <Kicker light>Zyphix Ads</Kicker>
         </motion.div>
-        <AccentWords
-          parts={['Put your brand in front of Jammu, at the', { accent: 'moment', green: true }, 'they buy.']}
+        <SplitHeadline
+          parts={['Put your brand in front of your neighbourhood, at the', { accent: 'moment', green: true }, 'they buy.']}
           delay={0.25}
-          className="max-w-[20ch] text-balance text-[40px] font-semibold leading-[1] tracking-[-0.045em] text-white sm:text-[64px] md:text-[84px]"
+          className="max-w-[24ch] text-balance text-[40px] font-semibold leading-[1] tracking-[-0.045em] text-white sm:text-[60px] md:text-[76px]"
         />
         <motion.p {...fade(0.85)} className="mt-6 max-w-[600px] text-[17px] leading-[1.6] text-white/75 sm:text-[19px]">
           Placements inside a shopping app, not a feed. Your brand shows on the home screen, in search and in categories, only in the delivery areas you choose, and always labelled Sponsored.

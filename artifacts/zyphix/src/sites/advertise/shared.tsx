@@ -21,7 +21,7 @@ export function SponsoredTag({ dark = false, className = '' }: { dark?: boolean;
 }
 
 /* ── App mock fragments (small, monochrome, no photos) ─────────────────── */
-export function AppHeader({ area = 'Gandhi Nagar, Jammu', product = 'Zyphix Now', accent = G }: { area?: string; product?: string; accent?: string }) {
+export function AppHeader({ area = 'Home', product = 'Zyphix Now', accent = G }: { area?: string; product?: string; accent?: string }) {
   return (
     <div className="flex items-center justify-between px-4 pb-2 pt-1">
       <div>
@@ -36,7 +36,7 @@ export function AppHeader({ area = 'Gandhi Nagar, Jammu', product = 'Zyphix Now'
 export function AppSearch({ value }: { value?: string }) {
   return (
     <div className={`mx-4 flex items-center gap-2 rounded-xl border px-3 py-2 text-[11px] ${value ? 'border-emerald-300 bg-white text-gray-900 ring-2 ring-emerald-100' : 'border-gray-200 bg-[#FAFAFA] text-gray-400'}`}>
-      <Search size={12} className="text-gray-400" /> {value ?? 'Search "atta", "milk", "poha"'}
+      <Search size={12} className="text-gray-400" /> {value ?? 'Search "milk", "bread", "eggs"'}
     </div>
   );
 }
@@ -75,7 +75,7 @@ export function AppRow({ title, sponsored = false, highlight = false, children }
   );
 }
 
-export function AppBanner({ highlight = false, headline = 'Fresh oats, now at your local kirana', brand = 'Your brand' }: { highlight?: boolean; headline?: string; brand?: string }) {
+export function AppBanner({ highlight = false, headline = 'Fresh oats, now at your corner store', brand = 'Your brand' }: { highlight?: boolean; headline?: string; brand?: string }) {
   return (
     <div className={`relative mx-4 mt-3 overflow-hidden rounded-2xl p-3 text-white ${highlight ? 'ring-2 ring-emerald-200 ring-offset-2' : ''}`} style={{ background: `linear-gradient(135deg, ${G}, ${G_DEEP})` }}>
       <div aria-hidden className="absolute -right-5 -top-6 h-20 w-20 rounded-full bg-white/15" />

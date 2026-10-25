@@ -8,7 +8,7 @@ import {
 import { SitePage, PageHero, SectionHead, btnPrimary, btnSecondary, card, G, INK, HEAD_FONT } from '@/components/layout/SiteChrome';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Partner overview — kirana / restaurant / delivery partner types.
+   Partner overview — store / restaurant / delivery partner types.
 ──────────────────────────────────────────────────────────────────────────── */
 
 const fade = (delay = 0) => ({
@@ -20,8 +20,8 @@ const fade = (delay = 0) => ({
 const PARTNERS = [
   {
     icon: <Store size={22} />, tint: '#0DA366', bg: '#ECFDF5',
-    tag: 'Kirana & retail stores', title: 'Sell from your store.',
-    sub: 'Your kirana, supermarket or shop online in days. Accept orders, manage inventory and keep the customers you already have.',
+    tag: 'Local & retail stores', title: 'Sell from your store.',
+    sub: 'Your corner store, supermarket or shop online in days. Accept orders, manage inventory and keep the customers you already have.',
     perks: ['Free onboarding and catalogue setup', 'Hyperlocal delivery network, under-30-minute target', 'Weekly payouts, no hidden fees'],
     cta: 'List your store', href: '/merchant-setup', img: '/images/groceries.png',
   },
@@ -52,7 +52,7 @@ const FAQ = [
   { q: 'Does it cost anything to join?', a: 'No. Onboarding and listing are free for stores and restaurants, and there is no joining fee for delivery partners. Platform fees are explained clearly before you go live.' },
   { q: 'Can I set my own prices?', a: 'Yes. Partners list their own shelf or menu prices. Zyphix does not add surge pricing on top of what you charge.' },
   { q: 'How and when do I get paid?', a: 'Earnings are settled to your bank account on a regular weekly cycle, with a full breakdown of every order in your dashboard.' },
-  { q: 'Which cities are you in?', a: 'We are onboarding partners across India, neighbourhood by neighbourhood. Apply now and we will let you know when customers in your area can order.' },
+  { q: 'Which cities are you in?', a: 'We are rolling out neighbourhood by neighbourhood. Apply now and we will let you know when customers in your area can order.' },
   { q: 'What do I need to become a delivery partner?', a: 'A vehicle, a smartphone, valid ID and (for motor vehicles) a driving licence and registration. Details are on the delivery sign-up page.' },
 ];
 
@@ -62,9 +62,9 @@ export function PartnerLanding() {
   return (
     <SitePage title="Partner with Zyphix">
       <PageHero
-        eyebrow="Now onboarding across India"
+        eyebrow="Now onboarding partners"
         title={<>Grow your business <span style={{ color: G }}>with Zyphix.</span></>}
-        sub="Join as a kirana store, restaurant or delivery partner and reach customers in your neighbourhood — with transparent pricing and tools built for independent businesses."
+        sub="Join as a local store, restaurant or delivery partner and reach customers in your neighbourhood — with transparent pricing and tools built for independent businesses."
       >
         <a href="#partner-types" className={btnPrimary} style={{ background: G }}>Choose your partner type <ArrowRight size={16} /></a>
         <a href="mailto:partnerships@zyphix.in" className={btnSecondary}><Mail size={16} /> partnerships@zyphix.in</a>
