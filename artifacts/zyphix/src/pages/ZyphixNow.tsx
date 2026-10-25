@@ -493,7 +493,7 @@ function Hero({ productCount, onSearch }: { productCount: string; onSearch: (q: 
   ];
   return (
     <section aria-label="Zyphix Now" className="relative isolate -mx-4 flex min-h-[50svh] items-end overflow-hidden bg-[#05080E] text-white md:mx-0 md:min-h-[60svh] md:rounded-3xl">
-      <BgVideo clip={VIDEOS.groceryShelf} dim={0.35} position="center" />
+      <BgVideo clip={VIDEOS.groceryShelf} dim={0.35} position="center" priority />
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.35) 0%, rgba(5,8,14,.05) 30%, rgba(5,8,14,.55) 65%, rgba(5,8,14,.92) 100%)' }} />
       <Grain opacity={0.05} />
       <HeroLiveOrder />

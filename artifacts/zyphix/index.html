@@ -40,7 +40,26 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Instrument+Serif:ital@1&family=Outfit:wght@800;900&display=swap" rel="stylesheet">
+    <!-- Fonts load without blocking the first paint -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Instrument+Serif:ital@1&family=Outfit:wght@800;900&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Instrument+Serif:ital@1&family=Outfit:wght@800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Instrument+Serif:ital@1&family=Outfit:wght@800;900&display=swap" rel="stylesheet"></noscript>
+    <script>
+      /* Start downloading this site's hero image before the app boots. */
+      (function () {
+        var h = location.hostname, P = {
+          '': '7362583/action-adult-appoint-architecture-7362583.jpeg', partner: '7362583/action-adult-appoint-architecture-7362583.jpeg',
+          now: '29376327/pexels-photo-29376327.jpeg', advertise: '29376327/pexels-photo-29376327.jpeg', eats: '4912725/cooking-eastern-cuisine-food-blog-food-blogger-4912725.jpeg',
+          book: '7551100/pexels-photo-7551100.jpeg', support: '6994864/attractive-beautiful-black-black-female-6994864.jpeg', auth: '8938170/pexels-photo-8938170.jpeg'
+        };
+        if (!/(^|\.)zyphix\.in$/.test(h)) return;
+        var sub = h.replace(/\.?zyphix\.in$/, '').replace(/^www$/, '');
+        var f = P[sub]; if (!f) return;
+        var w = innerWidth > 900 ? 1280 : innerWidth > 500 ? 960 : 640;
+        var l = document.createElement('link'); l.rel = 'preload'; l.as = 'image'; l.href = '/media/vp/' + f + '?w=' + w; l.setAttribute('fetchpriority', 'high');
+        document.head.appendChild(l);
+      })();
+    </script>
   </head>
   <body>
     <!-- Google Tag Manager (noscript) -->

@@ -45,7 +45,7 @@ function AuthVisual() {
         <motion.div key={idx} className="absolute inset-0"
           initial={stat ? false : { opacity: 0, scale: 1.06 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
           transition={{ opacity: { duration: 1.2, ease: EASE }, scale: { duration: 7, ease: 'linear' } }}>
-          <BgVideo clip={CLIPS[idx]} dim={0.2} />
+          <BgVideo clip={CLIPS[idx]} dim={0.2} priority />
         </motion.div>
       </AnimatePresence>
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.7) 0%, rgba(5,8,14,.1) 30%, rgba(5,8,14,.35) 60%, rgba(5,8,14,.95) 100%)' }} />
