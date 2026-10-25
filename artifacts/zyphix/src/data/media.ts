@@ -44,6 +44,28 @@ export function posterAt(poster: string, w = 1280): string {
 const vid = (id: number, file: string) =>
   PROXY ? `/media/v/${id}/${file}` : `https://videos.pexels.com/video-files/${id}/${file}`;
 
+/** Direct Pexels URL for a proxied `/media/...` URL — used as an automatic fallback if our proxy fails. */
+export function directUrl(u: string): string | null {
+  let m = /^\/media\/v\/(\d+)\/([^?]+)/.exec(u);
+  if (m) return `https://videos.pexels.com/video-files/${m[1]}/${m[2]}`;
+  m = /^\/media\/vp\/(\d+)\/([^?]+)\?w=(\d+)/.exec(u);
+  if (m) return `https://images.pexels.com/videos/${m[1]}/${m[2]}?auto=compress&cs=tinysrgb&w=${m[3]}`;
+  m = /^\/media\/p\/(\d+)\?w=(\d+)/.exec(u);
+  if (m) return `https://images.pexels.com/photos/${m[1]}/pexels-photo-${m[1]}.jpeg?auto=compress&cs=tinysrgb&w=${m[2]}`;
+  return null;
+}
+
+/** <img onError>: swap a failed proxied image (and its srcset) for the direct Pexels file, once. */
+export function imgFallback(e: { currentTarget: HTMLImageElement }) {
+  const img = e.currentTarget;
+  if (img.dataset.fallback) return;
+  const d = directUrl(img.getAttribute('src') || '');
+  if (!d) return;
+  img.dataset.fallback = '1';
+  img.removeAttribute('srcset');
+  img.src = d;
+}
+
 /** Best rendition for a box of `cssWidth` px (accounts for device pixel ratio, capped for data). */
 export function pickRendition(c: Clip, cssWidth: number): string {
   const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1;

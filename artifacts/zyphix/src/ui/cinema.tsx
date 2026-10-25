@@ -11,7 +11,7 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useInView, useMotionValue, useScroll, useSpring, useTransform, animate as fmAnimate, type MotionProps } from 'framer-motion';
-import { pickRendition, posterAt, photoSrcSet, type Clip, type Photo } from '@/data/media';
+import { pickRendition, posterAt, photoSrcSet, directUrl, imgFallback, type Clip, type Photo } from '@/data/media';
 
 export const EASE = [0.22, 1, 0.36, 1] as const;
 export const G = '#0DA366';
@@ -129,6 +129,7 @@ export function BgVideo({ clip, className = '', dim = 0.45, position = 'center',
   const [near, setNear] = useState(priority);
   const [visible, setVisible] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [direct, setDirect] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -149,14 +150,15 @@ export function BgVideo({ clip, className = '', dim = 0.45, position = 'center',
     else v.pause();
   }, [visible, near, playWhenVisible, ready]);
 
-  const src = useMemo(() => (width ? pickRendition(clip, width) : ''), [clip, width]);
+  const picked = useMemo(() => (width ? pickRendition(clip, width) : ''), [clip, width]);
+  const src = direct ? (directUrl(picked) || picked) : picked;
   const poster = useMemo(() => posterAt(clip.poster, width > 900 ? 1280 : width > 500 ? 960 : 640), [clip.poster, width]);
 
   return (
     <div ref={box} aria-hidden className={`absolute inset-0 ${className}`}>
       {width > 0 && (
         <img src={poster} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: position }}
-          loading={priority ? 'eager' : 'lazy'} decoding="async" {...(priority ? { fetchpriority: 'high' } as any : {})} />
+          onError={imgFallback} loading={priority ? 'eager' : 'lazy'} decoding="async" {...(priority ? { fetchpriority: 'high' } as any : {})} />
       )}
       {!failed && !isStatic() && near && src && (
         <video
@@ -171,7 +173,7 @@ export function BgVideo({ clip, className = '', dim = 0.45, position = 'center',
           preload={priority ? 'auto' : 'metadata'}
           disablePictureInPicture
           onLoadedData={() => setReady(true)}
-          onError={() => setFailed(true)}
+          onError={() => { if (!direct && directUrl(picked)) setDirect(true); else setFailed(true); }}
         />
       )}
       {dim > 0 && <div className="absolute inset-0" style={{ background: `rgba(5,8,14,${dim})` }} />}
@@ -225,6 +227,7 @@ export function ParallaxImage({ photo, className = '', strength = 12, ratio = '4
       <motion.img
         src={photo.src}
         srcSet={photoSrcSet(photo.src)}
+        onError={imgFallback}
         sizes="(max-width: 768px) 100vw, 50vw"
         alt={photo.alt}
         loading="lazy"
@@ -241,7 +244,7 @@ export function ParallaxImage({ photo, className = '', strength = 12, ratio = '4
 export function PhotoTile({ photo, className = '', ratio = '4/3', rounded = 'rounded-2xl', children, sizes }: { photo: Photo; className?: string; ratio?: string; rounded?: string; children?: React.ReactNode; sizes?: string }) {
   return (
     <div className={`group relative overflow-hidden bg-gray-100 ${rounded} ${className}`} style={{ aspectRatio: ratio }}>
-      <img src={photo.src} srcSet={photoSrcSet(photo.src)} alt={photo.alt} loading="lazy" decoding="async" sizes={sizes || '(max-width: 768px) 100vw, 40vw'} className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.06]" />
+      <img src={photo.src} srcSet={photoSrcSet(photo.src)} onError={imgFallback} alt={photo.alt} loading="lazy" decoding="async" sizes={sizes || '(max-width: 768px) 100vw, 40vw'} className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.06]" />
       {children}
     </div>
   );
