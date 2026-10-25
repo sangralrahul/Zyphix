@@ -68,7 +68,7 @@ export default {
     if (isAccountPath(pathname)) {
       const cors = accountCors(request);
       if (request.method === 'OPTIONS') {
-        return new Response(null, { status: 204, headers: { ...cors, 'access-control-allow-headers': 'content-type', 'access-control-allow-methods': 'GET,POST,PATCH,DELETE,OPTIONS', 'access-control-max-age': '86400' } });
+        return new Response(null, { status: 204, headers: { ...cors, 'access-control-allow-headers': 'content-type, authorization', 'access-control-allow-methods': 'GET,POST,PATCH,DELETE,OPTIONS', 'access-control-max-age': '86400' } });
       }
       try {
         const res = await handleAccount(request, env, url);
@@ -647,9 +647,17 @@ function cookieHeader(request: Request, value: string, maxAge: number) {
 
 const toUser = (u: UserRow) => ({ id: u.id, email: u.email, name: u.name ?? '', phone: u.phone ?? '' });
 
-/** Session cookie → user row (null when missing, unknown or expired). */
+/** Session token from the `zsid` cookie (web) or `Authorization: Bearer <token>` (Android/iOS app). */
+function sessionToken(request: Request): string | null {
+  const cookie = readCookie(request, SESSION_COOKIE);
+  if (cookie) return cookie;
+  const m = /^Bearer\s+([A-Za-z0-9_-]{20,})$/.exec(request.headers.get('authorization') ?? '');
+  return m ? m[1] : null;
+}
+
+/** Session → user row (null when missing, unknown or expired). */
 async function getUser(request: Request, env: Env): Promise<UserRow | null> {
-  const token = readCookie(request, SESSION_COOKIE);
+  const token = sessionToken(request);
   if (!token) return null;
   const hash = await sha256Hex(token);
   return await env.DB.prepare(
@@ -657,13 +665,13 @@ async function getUser(request: Request, env: Env): Promise<UserRow | null> {
   ).bind(hash).first<UserRow>();
 }
 
-async function createSession(request: Request, env: Env, userId: string) {
+async function createSession(request: Request, env: Env, userId: string): Promise<{ cookie: string; token: string }> {
   const token = b64url(crypto.getRandomValues(new Uint8Array(32)));
   const hash = await sha256Hex(token);
   const ua = (request.headers.get('user-agent') ?? '').slice(0, 300);
   await env.DB.prepare("INSERT INTO sessions (token_hash, user_id, expires_at, user_agent) VALUES (?, ?, datetime('now', ?), ?)")
     .bind(hash, userId, `+${SESSION_TTL_S} seconds`, ua).run();
-  return cookieHeader(request, token, SESSION_TTL_S);
+  return { cookie: cookieHeader(request, token, SESSION_TTL_S), token };
 }
 
 async function readJson(request: Request): Promise<Record<string, any> | null> {
@@ -677,7 +685,7 @@ async function handleAccount(request: Request, env: Env, url: URL): Promise<Resp
   /* ── auth ── */
   if (p === '/api/auth/verify' && m === 'POST') return await authVerify(request, env);
   if (p === '/api/auth/logout' && m === 'POST') {
-    const token = readCookie(request, SESSION_COOKIE);
+    const token = sessionToken(request);
     if (token) await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(await sha256Hex(token)).run();
     return json({ success: true }, 200, { 'set-cookie': cookieHeader(request, '', 0) });
   }
@@ -793,8 +801,10 @@ async function authVerify(request: Request, env: Env): Promise<Response> {
     await env.DB.prepare("UPDATE users SET name = ?, updated_at = datetime('now') WHERE id = ?").bind(name, user.id).run();
     user = { ...user, name };
   }
-  const cookie = await createSession(request, env, user.id);
-  return json({ user: toUser(user) }, 200, { 'set-cookie': cookie });
+  const session = await createSession(request, env, user.id);
+  // The mobile apps keep the token in the device keychain and send it as a Bearer header.
+  const forApp = body.client === 'app';
+  return json(forApp ? { user: toUser(user), token: session.token } : { user: toUser(user) }, 200, { 'set-cookie': session.cookie });
 }
 
 /* ---- addresses ---- */
