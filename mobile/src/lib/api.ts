@@ -13,13 +13,16 @@ let cachedToken: string | null | undefined;
 export async function getToken(): Promise<string | null> {
   if (cachedToken !== undefined) return cachedToken;
   try {
-    cachedToken = Platform.OS === 'web' ? null : await SecureStore.getItemAsync(TOKEN_KEY);
+    cachedToken = Platform.OS === 'web' ? ((globalThis as any).localStorage?.getItem(TOKEN_KEY) ?? null) : await SecureStore.getItemAsync(TOKEN_KEY);
   } catch { cachedToken = null; }
-  return cachedToken;
+  return cachedToken ?? null;
 }
 export async function setToken(t: string | null) {
   cachedToken = t;
-  if (Platform.OS === 'web') return;
+  if (Platform.OS === 'web') {
+    try { const ls = (globalThis as any).localStorage; if (t) ls?.setItem(TOKEN_KEY, t); else ls?.removeItem(TOKEN_KEY); } catch {}
+    return;
+  }
   try {
     if (t) await SecureStore.setItemAsync(TOKEN_KEY, t);
     else await SecureStore.deleteItemAsync(TOKEN_KEY);

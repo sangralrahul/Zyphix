@@ -12,7 +12,9 @@
       "bundleIdentifier": "in.zyphix.app",
       "buildNumber": "1",
       "supportsTablet": false,
-      "config": { "usesNonExemptEncryption": false },
+      "config": {
+        "usesNonExemptEncryption": false
+      },
       "infoPlist": {
         "CFBundleDisplayName": "Zyphix"
       }
@@ -31,7 +33,11 @@
     },
     "web": {
       "output": "single",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "name": "Zyphix",
+      "shortName": "Zyphix",
+      "themeColor": "#0DA366",
+      "backgroundColor": "#05080E"
     },
     "plugins": [
       "expo-router",
@@ -48,7 +54,8 @@
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": true,
+      "baseUrl": "/mobile"
     }
   }
 }

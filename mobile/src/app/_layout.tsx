@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import WebFrame from '@/components/WebFrame';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { CartProvider } from '@/lib/cart';
 import { C } from '@/lib/theme';
@@ -50,7 +51,9 @@ export default function RootLayout() {
             <CartProvider>
               <ThemeProvider value={theme}>
                 <StatusBar style="auto" />
-                <Root />
+                <WebFrame>
+                  <Root />
+                </WebFrame>
               </ThemeProvider>
             </CartProvider>
           </AuthProvider>

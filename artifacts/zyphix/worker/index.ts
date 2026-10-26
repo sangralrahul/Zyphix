@@ -95,6 +95,9 @@ export default {
       return json({ error: (err as Error).message }, 500);
     }
 
+    // zyphix.in/mobile — browser preview of the Android/iOS app (Expo web build in public/mobile).
+    if (pathname === '/mobile' || pathname.startsWith('/mobile/')) return await serveMobileApp(request, env, url);
+
     return env.ASSETS.fetch(request);
   },
 
@@ -114,6 +117,24 @@ export default {
     })());
   },
 } satisfies ExportedHandler<Env>;
+
+/** Files under /mobile/ are served as-is; every other /mobile path gets the app's index.html (client-side routes). */
+async function serveMobileApp(request: Request, env: Env, url: URL): Promise<Response> {
+  if (/\.[a-z0-9]+$/i.test(url.pathname)) {
+    const res = await env.ASSETS.fetch(request);
+    if (res.status !== 404) {
+      const h = new Headers(res.headers);
+      if (url.pathname.includes('/_expo/') || url.pathname.includes('/assets/')) h.set('cache-control', 'public, max-age=31536000, immutable');
+      return new Response(res.body, { status: res.status, headers: h });
+    }
+    return res;
+  }
+  const index = await env.ASSETS.fetch(new Request(new URL('/mobile/', url).toString(), { headers: request.headers }));
+  const h = new Headers(index.headers);
+  h.set('cache-control', 'no-cache');
+  h.set('content-type', 'text/html; charset=utf-8');
+  return new Response(index.body, { status: 200, headers: h });
+}
 
 /* ───────────────────────── media proxy ─────────────────────────
    Stock videos/photos (Pexels) are served from our own domain:
