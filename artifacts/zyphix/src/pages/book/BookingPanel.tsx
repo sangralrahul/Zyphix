@@ -1,5 +1,5 @@
 import React from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from '@/lib/motion';
 import { Check, MapPin, Receipt, ShieldCheck, CalendarClock } from 'lucide-react';
 import { Chip } from '@/ui/kit';
 import { EASE, G, isStatic } from '@/ui/cinema';

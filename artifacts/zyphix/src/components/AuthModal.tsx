@@ -1,7 +1,7 @@
 import { apiFetch } from '@/lib/api';
 import { verifyOtp as verifyOtpRemote } from '@/lib/account';
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/motion';
 import { X, Mail, User, Phone, Check, AlertCircle, ArrowRight, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { ZyphixLogo } from './ZyphixLogo';

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'wouter';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 import { CheckCircle2, Clock, MapPin, Truck, ShoppingBag, Home, MessageCircle, Share2, Check } from 'lucide-react';
 import { getOrder, type Order } from '@/context/CartContext';
 import { getOrderRemote, toLocalOrder } from '@/lib/account';

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 import { Plus, Minus, ChevronDown, ShoppingBag, ArrowRight, Store, X, Search, Clock, Truck, Package, MapPin } from 'lucide-react';
 import { Link, useSearch, useLocation } from 'wouter';
 import { useCatalog, type Product, type Category } from '@/lib/catalog';
@@ -550,14 +550,16 @@ function SearchSubmit({ compact = false }: { compact?: boolean }) {
 }
 
 function SkeletonCategories() {
+  // Mirrors CategoryGrid's geometry (2 rows on mobile, 8 columns on desktop) so nothing jumps when data lands.
   return (
-    <div className="-mx-3 flex gap-2 overflow-hidden px-3 md:mx-0 md:grid md:grid-cols-8 md:px-0">
-      {Array.from({ length: 8 }, (_, i) => (
-        <div key={i} className="w-[88px] shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-white md:w-auto">
-          <div className="aspect-[4/3] animate-pulse bg-gray-100" />
-          <div className="space-y-1.5 px-2 py-2">
-            <div className="h-3 w-4/5 animate-pulse rounded bg-gray-100" />
-            <div className="h-2.5 w-1/3 animate-pulse rounded bg-gray-100" />
+    <div className="-mx-3 grid grid-flow-col grid-rows-2 gap-2 overflow-hidden px-3 pb-0.5 md:mx-0 md:grid-flow-row md:grid-cols-8 md:grid-rows-1 md:px-0"
+      style={{ gridAutoColumns: '88px' }} aria-hidden>
+      {Array.from({ length: 16 }, (_, i) => (
+        <div key={i} className={`flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white ${i >= 8 ? 'md:hidden' : ''}`}>
+          <div className="aspect-[4/3] w-full animate-pulse bg-gray-100" />
+          <div className="px-2 py-1.5">
+            <div className="h-[18px] py-[3px]"><div className="h-3 w-4/5 animate-pulse rounded bg-gray-100" /></div>
+            <div className="h-[15px] py-[3px]"><div className="h-2.5 w-1/3 animate-pulse rounded bg-gray-100" /></div>
           </div>
         </div>
       ))}

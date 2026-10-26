@@ -1,7 +1,7 @@
 import { apiFetch } from '@/lib/api';
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'wouter';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/motion';
 import {
   Search, MapPin, ChevronDown, ShoppingCart, User, LogOut,
   Plus, Minus, Star, Clock, ChevronRight, ChevronLeft,
@@ -642,12 +642,12 @@ function DualHeroBanners() {
                 ⚡ Now · 30 min delivery
               </span>
               <div style={{ width: 44, height: 44, borderRadius: 13, background: 'linear-gradient(145deg, #10D678 0%, #059E5C 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 18px rgba(16,214,120,.5)' }}>
-                <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: 18, color: '#fff', lineHeight: 1, letterSpacing: '-0.08em', userSelect: 'none', textShadow: '0 1px 4px rgba(0,0,0,.25)' }}>//</span>
+                <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: 18, color: '#fff', lineHeight: 1, letterSpacing: '-0.08em', userSelect: 'none', textShadow: '0 1px 4px rgba(0,0,0,.25)' }}>//</span>
               </div>
             </div>
             <div>
               <p style={{ fontSize: 11.5, fontWeight: 700, color: '#86EFAC', letterSpacing: '.11em', textTransform: 'uppercase', marginBottom: 10 }}>Zyphix Now</p>
-              <h2 className="hero-headline" style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', lineHeight: 1.04, fontSize: 'clamp(1.65rem,3.2vw,2.95rem)', letterSpacing: '-.045em', marginBottom: 13 }}>Groceries<br />in 30 minutes.</h2>
+              <h2 className="hero-headline" style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, color: '#fff', lineHeight: 1.04, fontSize: 'clamp(1.65rem,3.2vw,2.95rem)', letterSpacing: '-.045em', marginBottom: 13 }}>Groceries<br />in 30 minutes.</h2>
               <p style={{ fontSize: 14, color: 'rgba(255,255,255,.6)', marginBottom: 16, lineHeight: 1.6 }}>Fresh produce · Dairy · Pharmacy · Snacks<br />200+ partner stores at kirana prices</p>
               <div className="hero-pills" style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 10 }}>
                 {['Vegetables', 'Dairy', 'Snacks', 'Pharmacy', 'Household'].map(tag => (
@@ -691,12 +691,12 @@ function DualHeroBanners() {
                 🍱 Eats · Local restaurants near you
               </span>
               <div style={{ width: 44, height: 44, borderRadius: 13, background: 'linear-gradient(145deg, #F97316 0%, #EA580C 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 18px rgba(249,115,22,.5)' }}>
-                <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: 18, color: '#fff', lineHeight: 1, letterSpacing: '-0.08em', userSelect: 'none', textShadow: '0 1px 4px rgba(0,0,0,.25)' }}>//</span>
+                <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: 18, color: '#fff', lineHeight: 1, letterSpacing: '-0.08em', userSelect: 'none', textShadow: '0 1px 4px rgba(0,0,0,.25)' }}>//</span>
               </div>
             </div>
             <div>
               <p style={{ fontSize: 11.5, fontWeight: 700, color: '#FDBA74', letterSpacing: '.11em', textTransform: 'uppercase', marginBottom: 10 }}>Zyphix Eats</p>
-              <h2 className="hero-headline" style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', lineHeight: 1.04, fontSize: 'clamp(1.65rem,3.2vw,2.95rem)', letterSpacing: '-.045em', marginBottom: 13 }}>Food from your<br />favourite places.</h2>
+              <h2 className="hero-headline" style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, color: '#fff', lineHeight: 1.04, fontSize: 'clamp(1.65rem,3.2vw,2.95rem)', letterSpacing: '-.045em', marginBottom: 13 }}>Food from your<br />favourite places.</h2>
               <p style={{ fontSize: 14, color: 'rgba(255,255,255,.6)', marginBottom: 20, lineHeight: 1.6 }}>Restaurants · Dhabas · Cloud kitchens<br />Local gems near you, delivered hot</p>
               <div className="hero-pills" style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 26 }}>
                 {['Biryani', 'Pizza', 'Burgers', 'Thali', 'Desserts'].map(tag => (
@@ -874,7 +874,7 @@ function BrandRow({ title, brands, accent }: { title: string; brands: BC[]; acce
                 <span style={{
                   color: b.textColor, fontWeight: 900,
                   fontSize: b.abbr.length > 2 ? 14 : 20,
-                  fontFamily: "'Outfit',sans-serif", letterSpacing: '-0.02em',
+                  fontFamily: "'Geist', 'Geist Fallback', sans-serif", letterSpacing: '-0.02em',
                 }}>{b.abbr}</span>
               </div>
               <span style={{
@@ -914,7 +914,7 @@ function NowTab() {
             <div style={{ position: 'absolute', inset: 0, padding: '24px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <span style={{ display: 'inline-block', background: 'rgba(255,255,255,.14)', backdropFilter: 'blur(6px)', color: '#fff', fontSize: 10.5, fontWeight: 700, padding: '3px 10px', borderRadius: 7, border: '1px solid rgba(255,255,255,.2)', width: 'fit-content' }}>{b.tag}</span>
               <div>
-                <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', fontSize: 'clamp(1.2rem,2.5vw,1.6rem)', lineHeight: 1.15, marginBottom: 5, letterSpacing: '-.03em' }}>{b.h}</p>
+                <p style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, color: '#fff', fontSize: 'clamp(1.2rem,2.5vw,1.6rem)', lineHeight: 1.15, marginBottom: 5, letterSpacing: '-.03em' }}>{b.h}</p>
                 <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,.6)', marginBottom: b.code ? 12 : 0 }}>{b.sub}</p>
                 {b.code && <span style={{ display: 'inline-block', fontWeight: 800, fontSize: 12.5, letterSpacing: '.08em', color: '#fff', background: 'rgba(255,255,255,.12)', border: '1.5px dashed rgba(255,255,255,.4)', padding: '5px 13px', borderRadius: 8 }}>{b.code}</span>}
               </div>
@@ -934,7 +934,7 @@ function NowTab() {
               style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(13,163,102,.15)', border:'1px solid rgba(13,163,102,.35)', color:G, fontSize:12, fontWeight:700, padding:'6px 16px', borderRadius:99, marginBottom:18 }}>
               <span>🚀</span> Now live across India — Be first to shop
             </motion.div>
-            <h2 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, fontSize:'clamp(1.5rem,3vw,2.1rem)', color:'#fff', letterSpacing:'-.04em', lineHeight:1.15, marginBottom:12 }}>
+            <h2 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:900, fontSize:'clamp(1.5rem,3vw,2.1rem)', color:'#fff', letterSpacing:'-.04em', lineHeight:1.15, marginBottom:12 }}>
               Groceries from your<br /><span style={{ color:G }}>local kirana stores</span>
             </h2>
             <p style={{ fontSize:14, color:'rgba(255,255,255,.55)', lineHeight:1.7, marginBottom:24 }}>
@@ -985,7 +985,7 @@ function EatsTab() {
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(100deg,rgba(0,0,0,.88) 40%,rgba(0,0,0,.18))' }} />
         <div style={{ position: 'absolute', inset: 0, padding: '36px 44px', display: 'flex', flexDirection: 'column', justifyContent: 'center', maxWidth: 520 }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: '#FCA5A5', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 12 }}>Zyphix Eats</p>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', lineHeight: 1.08, fontSize: 'clamp(1.6rem,3vw,2.4rem)', letterSpacing: '-.04em', marginBottom: 10 }}>Local food,<br />delivered fast.</h2>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, color: '#fff', lineHeight: 1.08, fontSize: 'clamp(1.6rem,3vw,2.4rem)', letterSpacing: '-.04em', marginBottom: 10 }}>Local food,<br />delivered fast.</h2>
           <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,.6)', marginBottom: 22 }}>Restaurants · Dhabas · Cloud kitchens · Available across India</p>
           <button style={{ background: '#EA580C', color: '#fff', fontSize: 13, fontWeight: 800, padding: '11px 24px', borderRadius: 11, width: 'fit-content', display: 'flex', alignItems: 'center', gap: 7, boxShadow: '0 4px 20px rgba(234,88,12,.4)' }}>
             Explore Restaurants <ArrowRight size={14} />
@@ -1050,7 +1050,7 @@ function MapTab() {
         <div style={{ width: 64, height: 64, borderRadius: 18, background: 'rgba(13,163,102,.08)', border: '1px solid rgba(13,163,102,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
           <MapPin size={28} color={G} />
         </div>
-        <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: T1, fontSize: '1.6rem', letterSpacing: '-.03em', marginBottom: 8 }}>Find Stores Near You</p>
+        <p style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, color: T1, fontSize: '1.6rem', letterSpacing: '-.03em', marginBottom: 8 }}>Find Stores Near You</p>
         <p style={{ fontSize: 14, color: T2, marginBottom: 24 }}>Browse verified kirana stores, pharmacies & restaurants near your address</p>
         <button style={{ background: G, color: '#fff', fontSize: 14, fontWeight: 800, padding: '12px 28px', borderRadius: 12, boxShadow: `0 4px 18px rgba(13,163,102,.3)` }}>Open Map →</button>
       </div>
@@ -1088,7 +1088,7 @@ function OffersTab() {
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(100deg,rgba(0,0,0,.92) 45%,rgba(0,0,0,.15))' }} />
         <div style={{ position: 'absolute', inset: 0, padding: '36px 44px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: '#86EFAC', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 12 }}>New User Offer</p>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', fontSize: 'clamp(1.6rem,3vw,2.5rem)', letterSpacing: '-.04em', lineHeight: 1.08, marginBottom: 8 }}>Flat 50% off<br />your first order.</h2>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, color: '#fff', fontSize: 'clamp(1.6rem,3vw,2.5rem)', letterSpacing: '-.04em', lineHeight: 1.08, marginBottom: 8 }}>Flat 50% off<br />your first order.</h2>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,.58)', marginBottom: 20 }}>Min ₹199 · Max ₹100 off · New users only</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontWeight: 800, fontSize: 14, color: '#fff', background: 'rgba(255,255,255,.12)', border: '1.5px dashed rgba(255,255,255,.38)', padding: '7px 16px', borderRadius: 10, letterSpacing: '.08em' }}>ZYPHIX50</span>
@@ -1558,7 +1558,7 @@ function HowItWorks() {
               <Zap size={12} color={G} fill={G} />
               <span style={{ fontSize: 11, fontWeight: 800, color: G, letterSpacing: '.1em', textTransform: 'uppercase' }}>How it works</span>
             </div>
-            <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(2.1rem,4.2vw,3.2rem)', color: T1, letterSpacing: '-.05em', lineHeight: 1.02, margin: 0 }}>
+            <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(2.1rem,4.2vw,3.2rem)', color: T1, letterSpacing: '-.05em', lineHeight: 1.02, margin: 0 }}>
               Order to doorstep<br />
               <span style={{ background: `linear-gradient(105deg,${G},#059E5C)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>in under 30 minutes.</span>
             </h2>
@@ -1587,14 +1587,14 @@ function HowItWorks() {
                 <div style={{ height: 196, overflow: 'hidden', position: 'relative' }}>
                   <img src={s.img} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .45s ease' }} />
                   <div style={{ position: 'absolute', inset: 0, background: s.highlight ? 'linear-gradient(180deg,rgba(6,95,70,.25),rgba(6,95,70,.55))' : 'linear-gradient(180deg,transparent 45%,rgba(0,0,0,.22) 100%)' }} />
-                  <div style={{ position: 'absolute', top: 18, left: 18, fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: '2.6rem', color: 'rgba(255,255,255,.5)', letterSpacing: '-.05em', lineHeight: 1, textShadow: '0 2px 14px rgba(0,0,0,.3)' }}>{s.n}</div>
+                  <div style={{ position: 'absolute', top: 18, left: 18, fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: '2.6rem', color: 'rgba(255,255,255,.5)', letterSpacing: '-.05em', lineHeight: 1, textShadow: '0 2px 14px rgba(0,0,0,.3)' }}>{s.n}</div>
                   <div style={{ position: 'absolute', bottom: 16, right: 16, width: 44, height: 44, borderRadius: 13, background: s.highlight ? '#fff' : 'rgba(255,255,255,.94)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px rgba(0,0,0,.18)' }}>
                     {s.highlight ? <Zap size={20} color={G} /> : s.icon}
                   </div>
                 </div>
                 {/* Body */}
                 <div style={{ padding: '24px 26px 30px' }}>
-                  <h3 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 17.5, letterSpacing: '-.025em', color: s.highlight ? '#fff' : T1, marginBottom: 11, lineHeight: 1.25 }}>{s.title}</h3>
+                  <h3 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 17.5, letterSpacing: '-.025em', color: s.highlight ? '#fff' : T1, marginBottom: 11, lineHeight: 1.25 }}>{s.title}</h3>
                   <p style={{ fontSize: 13.5, color: s.highlight ? 'rgba(255,255,255,.78)' : T2, lineHeight: 1.7, margin: 0 }}>{s.desc}</p>
                   {s.highlight && (
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 18, background: 'rgba(255,255,255,.14)', borderRadius: 999, padding: '6px 13px', border: '1px solid rgba(255,255,255,.24)' }}>
@@ -1625,7 +1625,7 @@ function HowItWorks() {
                     {icon}
                   </div>
                 </div>
-                <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,2.6vw,1.9rem)', color: accent, letterSpacing: '-.04em', lineHeight: 1, marginBottom: 7 }}>{v}</p>
+                <p style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,2.6vw,1.9rem)', color: accent, letterSpacing: '-.04em', lineHeight: 1, marginBottom: 7 }}>{v}</p>
                 <p style={{ fontSize: 12, color: 'rgba(255,255,255,.5)', fontWeight: 500, lineHeight: 1.4 }}>{l}</p>
               </div>
             </motion.div>
@@ -1646,7 +1646,7 @@ function SocialProof() {
             <Star size={12} color={G} fill={G} />
             <span style={{ fontSize: 11, fontWeight: 800, color: G, letterSpacing: '.1em', textTransform: 'uppercase' }}>Trusted by millions</span>
           </div>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.9rem,3.6vw,2.8rem)', color: T1, letterSpacing: '-.045em', lineHeight: 1.06 }}>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.9rem,3.6vw,2.8rem)', color: T1, letterSpacing: '-.045em', lineHeight: 1.06 }}>
             What our customers say
           </h2>
         </div>
@@ -1666,7 +1666,7 @@ function SocialProof() {
                 </div>
                 <p style={{ fontSize: 14.5, color: T1, lineHeight: 1.75, marginBottom: 22, fontWeight: 400, position: 'relative' }}>{r.text}</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: r.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff', fontSize: 16, fontFamily: "'Outfit',sans-serif", boxShadow: '0 4px 12px rgba(0,0,0,.12)' }}>{r.name[0]}</div>
+                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: r.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff', fontSize: 16, fontFamily: "'Geist', 'Geist Fallback', sans-serif", boxShadow: '0 4px 12px rgba(0,0,0,.12)' }}>{r.name[0]}</div>
                   <div>
                     <p style={{ fontWeight: 800, color: T1, fontSize: 14 }}>{r.name}</p>
                     <p style={{ fontSize: 12, color: T3 }}>{r.city}</p>
@@ -1771,7 +1771,7 @@ function AppDownload() {
           </div>
 
           {/* headline */}
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', lineHeight: .95, fontSize: 'clamp(2.5rem,6vw,5rem)', letterSpacing: '-.055em', margin: '0 0 18px' }}>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, color: '#fff', lineHeight: .95, fontSize: 'clamp(2.5rem,6vw,5rem)', letterSpacing: '-.055em', margin: '0 0 18px' }}>
             {isLive
               ? <>We&rsquo;re <span style={grad}>live.</span></>
               : <>The countdown to<br /><span style={grad}>Zyphix</span> begins.</>}
@@ -1788,9 +1788,9 @@ function AppDownload() {
             <div style={{ animation: 'zPop .6s ease both', display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 22 }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '16px 26px', borderRadius: 18, background: 'linear-gradient(135deg,#0DA366,#00E28A)', boxShadow: '0 20px 50px rgba(0,226,138,.4)' }}>
                 <Rocket size={26} color="#04100B" />
-                <span style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.3rem,3vw,1.9rem)', color: '#04100B', letterSpacing: '-.03em' }}>We&rsquo;re live — welcome to Zyphix!</span>
+                <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.3rem,3vw,1.9rem)', color: '#04100B', letterSpacing: '-.03em' }}>We&rsquo;re live — welcome to Zyphix!</span>
               </div>
-              <Link href="/now" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '15px 30px', borderRadius: 14, background: '#fff', color: '#04100B', fontWeight: 800, fontSize: 15, textDecoration: 'none', fontFamily: "'Outfit',sans-serif", boxShadow: '0 12px 30px rgba(0,0,0,.4)' }}>
+              <Link href="/now" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '15px 30px', borderRadius: 14, background: '#fff', color: '#04100B', fontWeight: 800, fontSize: 15, textDecoration: 'none', fontFamily: "'Geist', 'Geist Fallback', sans-serif", boxShadow: '0 12px 30px rgba(0,0,0,.4)' }}>
                 Open the app <ArrowRight size={16} />
               </Link>
             </div>
@@ -1801,7 +1801,7 @@ function AppDownload() {
                 {cd.map((c, i) => (
                   <div key={c.l} style={{ position: 'relative' }}>
                     <div style={{ width: 'clamp(72px,16vw,128px)', background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.13)', borderRadius: 20, padding: 'clamp(16px,2.6vw,26px) 6px', backdropFilter: 'blur(10px)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.08), 0 24px 55px rgba(0,0,0,.45)' }}>
-                      <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(2rem,5.5vw,4rem)', color: '#fff', lineHeight: 1, letterSpacing: '-.04em', fontVariantNumeric: 'tabular-nums' }}>{String(c.v).padStart(2, '0')}</div>
+                      <div style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(2rem,5.5vw,4rem)', color: '#fff', lineHeight: 1, letterSpacing: '-.04em', fontVariantNumeric: 'tabular-nums' }}>{String(c.v).padStart(2, '0')}</div>
                       <div style={{ fontSize: 'clamp(9px,1.1vw,11px)', fontWeight: 800, color: 'rgba(255,255,255,.42)', letterSpacing: '.18em', textTransform: 'uppercase', marginTop: 12 }}>{c.l}</div>
                     </div>
                     {i < 3 && <span style={{ position: 'absolute', right: 'clamp(-13px,-1.6vw,-11px)', top: '42%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,.28)', fontWeight: 900, fontSize: 'clamp(18px,3vw,30px)' }}>:</span>}
@@ -1824,7 +1824,7 @@ function AppDownload() {
                         style={{ width: '100%', height: 54, paddingLeft: 44, paddingRight: 14, borderRadius: 14, fontSize: 14.5, fontWeight: 500, color: '#fff', background: 'rgba(255,255,255,.06)', border: `1.5px solid ${notifyError ? '#EF4444' : inputFocused ? 'rgba(0,226,138,.7)' : 'rgba(255,255,255,.14)'}`, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', transition: 'border-color .15s' }}
                       />
                     </div>
-                    <button type="submit" disabled={notifyLoading} style={{ height: 54, padding: '0 28px', borderRadius: 14, fontSize: 15, fontWeight: 800, background: notifyLoading ? 'rgba(0,226,138,.5)' : 'linear-gradient(135deg,#0DA366,#00E28A)', color: '#04100B', border: 'none', cursor: notifyLoading ? 'wait' : 'pointer', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: "'Outfit',sans-serif", boxShadow: '0 12px 30px rgba(0,226,138,.35)' }}>
+                    <button type="submit" disabled={notifyLoading} style={{ height: 54, padding: '0 28px', borderRadius: 14, fontSize: 15, fontWeight: 800, background: notifyLoading ? 'rgba(0,226,138,.5)' : 'linear-gradient(135deg,#0DA366,#00E28A)', color: '#04100B', border: 'none', cursor: notifyLoading ? 'wait' : 'pointer', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: "'Geist', 'Geist Fallback', sans-serif", boxShadow: '0 12px 30px rgba(0,226,138,.35)' }}>
                       {notifyLoading ? 'Reserving…' : <>Get Early Access <ArrowRight size={16} /></>}
                     </button>
                     {notifyError && <p style={{ width: '100%', fontSize: 12.5, color: '#F87171', margin: '2px 0 0' }}>{notifyError}</p>}
@@ -1833,7 +1833,7 @@ function AppDownload() {
                   <div style={{ animation: 'zPop .5s ease both', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(0,226,138,.35)', borderRadius: 20, padding: '24px 22px', backdropFilter: 'blur(10px)' }}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                       <Rocket size={17} color="#00E28A" />
-                      <span style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, color: '#fff', fontSize: 15 }}>You&rsquo;re on the launch list!</span>
+                      <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, color: '#fff', fontSize: 15 }}>You&rsquo;re on the launch list!</span>
                     </div>
                     <p style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', margin: '0 0 16px' }}>
                       Your spot: <span style={{ color: '#00E28A', fontWeight: 800 }}>#{referral?.position.toLocaleString()}</span> · Share your link to move up the queue.
@@ -1864,7 +1864,7 @@ function AppDownload() {
                   <img src="/images/appstore.webp" alt="App Store" style={{ width: 30, height: 30, borderRadius: 7, flexShrink: 0 }} />
                   <div style={{ textAlign: 'left', lineHeight: 1 }}>
                     <p style={{ margin: 0, fontSize: 10, color: '#fff', fontWeight: 500, letterSpacing: '.01em' }}>Download on the</p>
-                    <p style={{ margin: '3px 0 0', fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '-.02em', fontFamily: "'Outfit',sans-serif" }}>App Store</p>
+                    <p style={{ margin: '3px 0 0', fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '-.02em', fontFamily: "'Geist', 'Geist Fallback', sans-serif" }}>App Store</p>
                   </div>
                 </div>
                 {/* Google Play */}
@@ -1875,7 +1875,7 @@ function AppDownload() {
                   <img src="/images/googleplay.webp" alt="Google Play" style={{ width: 28, height: 28, flexShrink: 0 }} />
                   <div style={{ textAlign: 'left', lineHeight: 1 }}>
                     <p style={{ margin: 0, fontSize: 10, color: '#fff', fontWeight: 500, letterSpacing: '.06em', textTransform: 'uppercase' }}>Get it on</p>
-                    <p style={{ margin: '3px 0 0', fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '-.02em', fontFamily: "'Outfit',sans-serif" }}>Google Play</p>
+                    <p style={{ margin: '3px 0 0', fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '-.02em', fontFamily: "'Geist', 'Geist Fallback', sans-serif" }}>Google Play</p>
                   </div>
                 </div>
               </div>
@@ -2111,7 +2111,7 @@ function CategoryModal({ open, onClose, type, navigate }: { open: boolean; onClo
         {/* Header */}
         <div style={{ padding: '20px 24px 16px', borderBottom: `1px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <div>
-            <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 18, color: T1, letterSpacing: '-.03em', marginBottom: 3 }}>
+            <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 18, color: T1, letterSpacing: '-.03em', marginBottom: 3 }}>
               <span style={{ color: accent }}>{title}</span>
             </h2>
             <p style={{ fontSize: 12.5, color: T3, fontWeight: 500 }}>{sub}</p>
@@ -2192,7 +2192,7 @@ function QuickBrowse({ setTab }: { setTab?: (t: TabId) => void }) {
             {/* ── Groceries ── */}
             <div style={{ flex: '1 1 400px', minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                <span style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 15, color: T1, display: 'flex', alignItems: 'center', gap: 7 }}>
+                <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 15, color: T1, display: 'flex', alignItems: 'center', gap: 7 }}>
                   <span style={{ width: 9, height: 9, borderRadius: '50%', background: G, display: 'inline-block', boxShadow: `0 0 0 3px ${G}22` }} />
                   Shop Groceries
                   <span style={{ fontSize: 11.5, fontWeight: 600, color: T3, background: BG, padding: '2px 9px', borderRadius: 99, border: `1px solid ${BD}` }}>30 min</span>
@@ -2209,7 +2209,7 @@ function QuickBrowse({ setTab }: { setTab?: (t: TabId) => void }) {
             {/* ── Food ── */}
             <div style={{ flex: '1 1 400px', minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                <span style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 15, color: T1, display: 'flex', alignItems: 'center', gap: 7 }}>
+                <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 15, color: T1, display: 'flex', alignItems: 'center', gap: 7 }}>
                   <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#EA580C', display: 'inline-block', boxShadow: '0 0 0 3px rgba(234,88,12,.14)' }} />
                   Order Food
                 </span>
@@ -2272,7 +2272,7 @@ function WhyZyphixStrip() {
               <Icon size={16} color={color} strokeWidth={2.4} />
             </div>
             <div>
-              <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 13.5, color: '#fff', letterSpacing: '-.02em', lineHeight: 1.2 }}>{title}</p>
+              <p style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 13.5, color: '#fff', letterSpacing: '-.02em', lineHeight: 1.2 }}>{title}</p>
               <p style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', fontWeight: 500, marginTop: 2, letterSpacing: '.01em' }}>{sub}</p>
             </div>
           </div>
@@ -2346,7 +2346,7 @@ function OfferCards() {
                   </div>
                 </div>
                 <div>
-                  <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', fontSize: 'clamp(1.25rem,2.3vw,1.6rem)', lineHeight: 1.1, marginBottom: 7, letterSpacing: '-.035em', textShadow: '0 2px 16px rgba(0,0,0,.4)' }}>{b.h}</p>
+                  <p style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, color: '#fff', fontSize: 'clamp(1.25rem,2.3vw,1.6rem)', lineHeight: 1.1, marginBottom: 7, letterSpacing: '-.035em', textShadow: '0 2px 16px rgba(0,0,0,.4)' }}>{b.h}</p>
                   <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,.85)', marginBottom: b.code ? 14 : 0, textShadow: '0 1px 8px rgba(0,0,0,.4)' }}>{b.sub}</p>
                   {b.code && (
                     <button data-testid="offer-copy-code" onClick={copy} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, fontWeight: 800, fontSize: 13, letterSpacing: '.08em', color: '#fff', background: 'rgba(255,255,255,.18)', border: '1.5px dashed rgba(255,255,255,.55)', padding: '7px 15px', borderRadius: 10, cursor: 'pointer', backdropFilter: 'blur(4px)', transition: 'background .15s' }}
@@ -2391,7 +2391,7 @@ function KiranaCTA() {
               <Rocket size={13} color="#6EE7B7" />
               <span style={{ fontSize: 11.5, fontWeight: 800, color: '#6EE7B7', letterSpacing: '.08em', textTransform: 'uppercase' }}>Now live across India</span>
             </div>
-            <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(2.1rem,4vw,3.2rem)', color: '#fff', letterSpacing: '-.05em', lineHeight: 1.03, marginBottom: 20 }}>
+            <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(2.1rem,4vw,3.2rem)', color: '#fff', letterSpacing: '-.05em', lineHeight: 1.03, marginBottom: 20 }}>
               Groceries from your<br /><span style={{ background: `linear-gradient(105deg,${G2} 0%,#6EE7B7 60%,#a7f3d0 100%)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>local kirana stores</span>
             </h2>
             <p style={{ fontSize: 15.5, color: 'rgba(255,255,255,.6)', lineHeight: 1.75, marginBottom: 28, maxWidth: 460 }}>
@@ -2404,7 +2404,7 @@ function KiranaCTA() {
             </div>
             <motion.button data-testid="kirana-cta-button" whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: .97 }}
               onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: `linear-gradient(135deg,${G},${G2})`, border: 'none', borderRadius: 15, padding: '16px 34px', cursor: 'pointer', fontSize: 15.5, fontWeight: 800, color: '#fff', fontFamily: "'Outfit',sans-serif", boxShadow: `0 16px 36px ${G}55` }}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: `linear-gradient(135deg,${G},${G2})`, border: 'none', borderRadius: 15, padding: '16px 34px', cursor: 'pointer', fontSize: 15.5, fontWeight: 800, color: '#fff', fontFamily: "'Geist', 'Geist Fallback', sans-serif", boxShadow: `0 16px 36px ${G}55` }}>
               <ShoppingCart size={18} /> Join the waitlist <ArrowRight size={17} />
             </motion.button>
           </div>
@@ -2420,7 +2420,7 @@ function KiranaCTA() {
                 <Store size={19} color="#fff" />
               </div>
               <div>
-                <p style={{ margin: 0, fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 20, color: '#fff', lineHeight: 1 }}>200+</p>
+                <p style={{ margin: 0, fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 20, color: '#fff', lineHeight: 1 }}>200+</p>
                 <p style={{ margin: '2px 0 0', fontSize: 10.5, color: 'rgba(255,255,255,.7)', fontWeight: 600 }}>Partner stores</p>
               </div>
             </motion.div>
@@ -2663,7 +2663,7 @@ function WaitlistSection() {
 
             {/* Headline */}
             <motion.h2 initial={{ opacity:0, y:22 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay:.08 }}
-              style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, fontSize:'clamp(2rem,4.5vw,3rem)', color:T1, letterSpacing:'-.045em', lineHeight:1.06, marginBottom:16 }}>
+              style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:900, fontSize:'clamp(2rem,4.5vw,3rem)', color:T1, letterSpacing:'-.045em', lineHeight:1.06, marginBottom:16 }}>
               Zyphix is now live<br /><span style={{ color:G }}>across India</span>
             </motion.h2>
 
@@ -2723,7 +2723,7 @@ function WaitlistSection() {
                   style={{ textAlign:'center', padding:'12px 0 8px' }}>
                   <motion.div animate={{ rotate:[0,14,-14,10,-8,0], scale:[1,1.25,1] }} transition={{ duration:.7 }}
                     style={{ fontSize:56, marginBottom:14 }}>🎉</motion.div>
-                  <h3 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, color:T1, fontSize:'1.4rem', marginBottom:8 }}>
+                  <h3 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:900, color:T1, fontSize:'1.4rem', marginBottom:8 }}>
                     {PARTNER_ROLES.includes(form.role) ? 'Application Received!' : "You're on the list!"}
                   </h3>
                   <p style={{ color:T2, fontSize:14, lineHeight:1.65, marginBottom:22 }}>
@@ -2808,7 +2808,7 @@ function WaitlistSection() {
                   <div style={{ marginBottom:4, paddingBottom:18, borderBottom:`1px solid ${BD}` }}>
                     <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
                       <div style={{ width:4, height:30, borderRadius:3, background:`linear-gradient(to bottom, ${G}, #059669)`, flexShrink:0 }} />
-                      <h3 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, fontSize:'clamp(1.2rem,2vw,1.5rem)', color:T1, letterSpacing:'-.03em', lineHeight:1 }}>Reserve your spot</h3>
+                      <h3 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:900, fontSize:'clamp(1.2rem,2vw,1.5rem)', color:T1, letterSpacing:'-.03em', lineHeight:1 }}>Reserve your spot</h3>
                     </div>
                     <p style={{ fontSize:12.5, color:T3, paddingLeft:14 }}>Takes 30 seconds · Free forever</p>
                   </div>
@@ -2916,7 +2916,7 @@ function WaitlistSection() {
                     </div>
                     <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:10 }}>
                       <div style={{ width:4, height:28, borderRadius:3, background:`linear-gradient(to bottom, ${G}, #059669)`, flexShrink:0 }} />
-                      <h3 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, fontSize:'1.15rem', color:T1, letterSpacing:'-.03em', lineHeight:1 }}>
+                      <h3 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:900, fontSize:'1.15rem', color:T1, letterSpacing:'-.03em', lineHeight:1 }}>
                         {form.role === 'restaurant' ? '🍴 Restaurant Details' : form.role === 'merchant' ? '🏪 Shop Details' : '🚴 Delivery Partner Details'}
                       </h3>
                     </div>

@@ -20,14 +20,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   motion, AnimatePresence, useInView, useMotionTemplate, useMotionValue, useScroll, useSpring,
   useTransform, useVelocity, useAnimationFrame, type MotionValue,
-} from 'framer-motion';
+} from '@/lib/motion';
 import { BgVideo, isStatic, EASE, G } from './cinema';
 import type { Clip } from '@/data/media';
 
 /* ── Accent ──────────────────────────────────────────────────────────────── */
 export function Accent({ children, green = false, className = '' }: { children: React.ReactNode; green?: boolean; className?: string }) {
   return (
-    <span className={`font-serif-accent ${className}`} style={{ color: green ? '#34D399' : undefined, fontFamily: "'Instrument Serif', ui-serif, Georgia, serif", fontStyle: 'italic', fontWeight: 400 }}>
+    <span className={`font-serif-accent ${className}`} style={{ color: green ? '#34D399' : undefined, fontFamily: "'Instrument Serif', 'Instrument Serif Fallback', ui-serif, Georgia, serif", fontStyle: 'italic', fontWeight: 400 }}>
       {children}
     </span>
   );

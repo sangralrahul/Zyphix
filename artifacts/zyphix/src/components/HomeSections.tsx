@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 
 const G   = '#0DA366';
 const T1  = '#111827';
@@ -34,7 +34,7 @@ export function CategoryGrid() {
     <div style={{ background: W, borderTop: `1px solid ${BD}`, borderBottom: `1px solid ${BD}`, padding: '52px 24px' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2.1rem)', color: T1, letterSpacing: '-.035em', lineHeight: 1.1, marginBottom: 10 }}>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2.1rem)', color: T1, letterSpacing: '-.035em', lineHeight: 1.1, marginBottom: 10 }}>
             Everything from your neighbourhood —<br />delivered in 30 minutes
           </h2>
           <p style={{ fontSize: 15, color: T2, maxWidth: 480, margin: '0 auto' }}>
@@ -99,7 +99,7 @@ export function SavingsCalculator() {
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#ECFDF5', border: `1px solid #A7F3D0`, borderRadius: 999, padding: '5px 14px', fontSize: 11.5, fontWeight: 700, color: '#065F46', letterSpacing: '.07em', textTransform: 'uppercase', marginBottom: 16 }}>
             💰 Real Savings
           </span>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.6rem,3vw,2.25rem)', color: T1, letterSpacing: '-.04em', lineHeight: 1.15, marginBottom: 12 }}>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.6rem,3vw,2.25rem)', color: T1, letterSpacing: '-.04em', lineHeight: 1.15, marginBottom: 12 }}>
             See exactly how much you save<br />switching to Zyphix
           </h2>
           <p style={{ fontSize: 15, color: T2, maxWidth: 440, margin: '0 auto', lineHeight: 1.6 }}>
@@ -111,7 +111,7 @@ export function SavingsCalculator() {
         <div style={{ background: W, border: `1.5px solid ${BD}`, borderRadius: 20, padding: '28px 32px', marginBottom: 24, boxShadow: '0 2px 12px rgba(0,0,0,.06)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
             <p style={{ fontSize: 14, fontWeight: 600, color: T2 }}>My monthly food + grocery spend</p>
-            <span style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: '1.6rem', color: G, letterSpacing: '-.03em' }}>{fmt(spend)}</span>
+            <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: '1.6rem', color: G, letterSpacing: '-.03em' }}>{fmt(spend)}</span>
           </div>
           <input type="range" min={500} max={10000} step={100} value={spend}
             onChange={e => setSpend(Number(e.target.value))}
@@ -129,7 +129,7 @@ export function SavingsCalculator() {
               style={{ background: W, border: `1.5px solid ${BD}`, borderRadius: 18, padding: '24px 20px', textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,.05)' }}>
               <p style={{ fontSize: 20, marginBottom: 8 }}>{icon}</p>
               <p style={{ fontSize: 11.5, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>{label}</p>
-              <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: big ? '2.1rem' : '1.75rem', color: accent, letterSpacing: '-.04em', lineHeight: 1, marginBottom: 10 }}>
+              <p style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: big ? '2.1rem' : '1.75rem', color: accent, letterSpacing: '-.04em', lineHeight: 1, marginBottom: 10 }}>
                 {value}
               </p>
               <p style={{ fontSize: 12, color: T2, lineHeight: 1.45 }}>{sub}</p>
@@ -178,7 +178,7 @@ export function ReceiptComparison() {
     <div style={{ background: BG, borderTop: `1px solid ${BD}`, padding: '64px 24px' }}>
       <div style={{ maxWidth: 900, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 44 }}>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2.1rem)', color: T1, letterSpacing: '-.035em', marginBottom: 10 }}>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2.1rem)', color: T1, letterSpacing: '-.035em', marginBottom: 10 }}>
             The same ₹300 food order.<br />Very different total bill.
           </h2>
         </div>
@@ -202,7 +202,7 @@ export function ReceiptComparison() {
               ))}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, marginTop: 4 }}>
                 <span style={{ fontSize: 15, fontWeight: 800, color: T1 }}>TOTAL</span>
-                <span style={{ fontFamily: "'Outfit',sans-serif", fontSize: '1.5rem', fontWeight: 900, color: '#DC2626' }}>₹425</span>
+                <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontSize: '1.5rem', fontWeight: 900, color: '#DC2626' }}>₹425</span>
               </div>
               <p style={{ marginTop: 12, fontSize: 11.5, color: '#B91C1C', fontWeight: 600, textAlign: 'center', background: '#FEF2F2', borderRadius: 8, padding: '8px 12px' }}>Hidden charges added</p>
             </div>
@@ -225,7 +225,7 @@ export function ReceiptComparison() {
               ))}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, marginTop: 4 }}>
                 <span style={{ fontSize: 15, fontWeight: 800, color: T1 }}>TOTAL</span>
-                <span style={{ fontFamily: "'Outfit',sans-serif", fontSize: '1.5rem', fontWeight: 900, color: G }}>₹322</span>
+                <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontSize: '1.5rem', fontWeight: 900, color: G }}>₹322</span>
               </div>
               <p style={{ marginTop: 12, fontSize: 11.5, color: '#065F46', fontWeight: 600, textAlign: 'center', background: '#ECFDF5', borderRadius: 8, padding: '8px 12px' }}>What you see is what you pay</p>
             </div>
@@ -233,7 +233,7 @@ export function ReceiptComparison() {
         </div>
 
         <div style={{ textAlign: 'center' }}>
-          <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.1rem,2.2vw,1.4rem)', color: T1, marginBottom: 20, letterSpacing: '-.02em' }}>
+          <p style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.1rem,2.2vw,1.4rem)', color: T1, marginBottom: 20, letterSpacing: '-.02em' }}>
             You save <span style={{ color: G }}>₹103</span> on every order. That's <span style={{ color: G }}>₹2,060</span> every month. <span style={{ color: '#D97706' }}>₹24,720</span> every year.
           </p>
           <button onClick={scrollToWaitlist}
@@ -263,7 +263,7 @@ export function HowItWorksSimple() {
       <div style={{ maxWidth: 900, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 44 }}>
           <p style={{ fontSize: 12, fontWeight: 700, color: G, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 12 }}>Simple & Fast</p>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2.1rem)', color: T1, letterSpacing: '-.035em' }}>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2.1rem)', color: T1, letterSpacing: '-.035em' }}>
             Order in 3 simple steps
           </h2>
         </div>
@@ -304,7 +304,7 @@ export function WhyKirana() {
     <div style={{ background: BG, borderTop: `1px solid ${BD}`, padding: '64px 24px' }}>
       <div style={{ maxWidth: 900, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 44 }}>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2.1rem)', color: T1, letterSpacing: '-.035em', lineHeight: 1.15, marginBottom: 12 }}>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2.1rem)', color: T1, letterSpacing: '-.035em', lineHeight: 1.15, marginBottom: 12 }}>
             We don't use dark stores.<br />We use your neighbourhood.
           </h2>
           <p style={{ fontSize: 15, color: T2, maxWidth: 520, margin: '0 auto' }}>
@@ -350,7 +350,7 @@ export function WhyKirana() {
           </div>
         </div>
         <div style={{ textAlign: 'center', padding: '20px', background: W, borderRadius: 16, border: `1px solid ${BD}`, boxShadow: SH }}>
-          <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.2rem,2.5vw,1.6rem)', color: T1 }}>
+          <p style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.2rem,2.5vw,1.6rem)', color: T1 }}>
             <span style={{ color: G }}>14,000,000+</span> kirana stores in India.<br />
             <span style={{ color: T2, fontWeight: 600, fontSize: '0.75em' }}>All waiting to go digital.</span>
           </p>
@@ -411,13 +411,13 @@ export function LiveCounter() {
           🔴 Live Counter
         </span>
 
-        <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2.1rem)', color: T1, letterSpacing: '-.04em', lineHeight: 1.15, marginBottom: 24 }}>
+        <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2.1rem)', color: T1, letterSpacing: '-.04em', lineHeight: 1.15, marginBottom: 24 }}>
           Your neighbours are already waiting
         </h2>
 
         {/* Big number */}
         <div style={{ marginBottom: 6 }}>
-          <span style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(3.2rem,9vw,5.5rem)', color: G, letterSpacing: '-.05em', lineHeight: 1 }}>
+          <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(3.2rem,9vw,5.5rem)', color: G, letterSpacing: '-.05em', lineHeight: 1 }}>
             {display.toLocaleString('en-IN')}
           </span>
         </div>
@@ -496,7 +496,7 @@ export function KiranaQuotes() {
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#ECFDF5', border: `1px solid #A7F3D0`, borderRadius: 999, padding: '5px 14px', fontSize: 11.5, fontWeight: 700, color: '#065F46', letterSpacing: '.07em', textTransform: 'uppercase', marginBottom: 16 }}>
             🏪 Real Merchants
           </span>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2.1rem)', color: T1, letterSpacing: '-.04em', lineHeight: 1.15, marginBottom: 10 }}>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2.1rem)', color: T1, letterSpacing: '-.04em', lineHeight: 1.15, marginBottom: 10 }}>
             Kirana stores across India are joining us
           </h2>
           <p style={{ fontSize: 15, color: T2, lineHeight: 1.6 }}>Real shop owners. Real excitement.</p>
@@ -560,7 +560,7 @@ export function AppPreviewMockup() {
       <div style={{ maxWidth: 1000, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 44 }}>
           <p style={{ fontSize: 12, fontWeight: 700, color: G, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 12 }}>Coming Soon</p>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2.1rem)', color: T1, letterSpacing: '-.035em' }}>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2.1rem)', color: T1, letterSpacing: '-.035em' }}>
             Here's a peek at what's coming
           </h2>
         </div>
@@ -637,14 +637,14 @@ export function ReferAndEarn() {
   return (
     <div style={{ background: W, borderTop: `1px solid ${BD}`, padding: '64px 24px' }}>
       <div style={{ maxWidth: 1000, margin: '0 auto' }}>
-        <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2rem)', color: T1, textAlign: 'center', letterSpacing: '-.035em', marginBottom: 28 }}>
+        <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2rem)', color: T1, textAlign: 'center', letterSpacing: '-.035em', marginBottom: 28 }}>
           Invite friends. Both of you earn ₹100.
         </h2>
         <div style={{ background: 'linear-gradient(135deg, #064E3B 0%, #065F46 55%, #047857 100%)', borderRadius: 24, padding: '40px 44px', display: 'flex', gap: 48, flexWrap: 'wrap', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: -60, right: -60, width: 240, height: 240, borderRadius: '50%', background: 'rgba(255,255,255,.04)', pointerEvents: 'none' }} />
           {/* Left */}
           <div style={{ flex: '1 1 300px', minWidth: 0 }}>
-            <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.3rem,2.5vw,1.8rem)', color: '#fff', marginBottom: 12, lineHeight: 1.2 }}>
+            <p style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.3rem,2.5vw,1.8rem)', color: '#fff', marginBottom: 12, lineHeight: 1.2 }}>
               Share Zyphix,<br />earn ₹100 launch credit
             </p>
             <p style={{ fontSize: 14, color: 'rgba(255,255,255,.6)', lineHeight: 1.7, marginBottom: 24 }}>

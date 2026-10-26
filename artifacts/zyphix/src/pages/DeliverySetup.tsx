@@ -1,6 +1,6 @@
 import { apiFetch } from '@/lib/api';
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/motion';
 import { ArrowLeft, ArrowRight, Check, Upload, User, Bike, Calendar, CreditCard, FileDown } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
@@ -149,7 +149,7 @@ function PersonalStep({ onNext }: { onNext:(d:object)=>void }) {
     <motion.div initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}} transition={{type:'spring',stiffness:120,damping:18}}>
       <div style={{ maxWidth:620, margin:'0 auto' }}>
         <div style={{ marginBottom:24 }}>
-          <h2 style={{ fontFamily:"'Outfit',sans-serif",fontWeight:900,fontSize:'1.55rem',color:T1,letterSpacing:'-.03em',marginBottom:6 }}>Personal Information</h2>
+          <h2 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif",fontWeight:900,fontSize:'1.55rem',color:T1,letterSpacing:'-.03em',marginBottom:6 }}>Personal Information</h2>
           <p style={{ color:T2,fontSize:14 }}>Your details for the delivery partner account</p>
         </div>
         <div style={{ display:'flex',flexDirection:'column',gap:14 }}>
@@ -278,7 +278,7 @@ function LicenseStep({ onNext, onBack }: { onNext:(d:object)=>void; onBack:()=>v
     <motion.div initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}} transition={{type:'spring',stiffness:120,damping:18}}>
       <div style={{ maxWidth:620, margin:'0 auto' }}>
         <div style={{ marginBottom:24 }}>
-          <h2 style={{ fontFamily:"'Outfit',sans-serif",fontWeight:900,fontSize:'1.55rem',color:T1,letterSpacing:'-.03em',marginBottom:6 }}>Driving License</h2>
+          <h2 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif",fontWeight:900,fontSize:'1.55rem',color:T1,letterSpacing:'-.03em',marginBottom:6 }}>Driving License</h2>
           <p style={{ color:T2,fontSize:14 }}>A valid license is required to deliver on Zyphix</p>
         </div>
 
@@ -381,7 +381,7 @@ function VehicleStep({ onNext, onBack }: { onNext:(d:object)=>void; onBack:()=>v
     <motion.div initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}} transition={{type:'spring',stiffness:120,damping:18}}>
       <div style={{ maxWidth:620, margin:'0 auto' }}>
         <div style={{ marginBottom:24 }}>
-          <h2 style={{ fontFamily:"'Outfit',sans-serif",fontWeight:900,fontSize:'1.55rem',color:T1,letterSpacing:'-.03em',marginBottom:6 }}>Your Vehicle</h2>
+          <h2 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif",fontWeight:900,fontSize:'1.55rem',color:T1,letterSpacing:'-.03em',marginBottom:6 }}>Your Vehicle</h2>
           <p style={{ color:T2,fontSize:14 }}>Only two-wheelers are currently supported</p>
         </div>
 
@@ -428,7 +428,7 @@ function VehicleStep({ onNext, onBack }: { onNext:(d:object)=>void; onBack:()=>v
                 )}
                 <motion.span animate={{y:type===v?[0,-4,0]:0}} transition={{repeat:type===v?Infinity:0,duration:1.5}} style={{fontSize:44,lineHeight:1}}>{icon}</motion.span>
                 <div>
-                  <p style={{ fontFamily:"'Outfit',sans-serif",fontWeight:900,fontSize:16,color:type===v?tc:T1,marginBottom:4 }}>{title}</p>
+                  <p style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif",fontWeight:900,fontSize:16,color:type===v?tc:T1,marginBottom:4 }}>{title}</p>
                   <p style={{ fontSize:11.5,color:type===v?`${tc}CC`:T3,lineHeight:1.5,whiteSpace:'pre-line' }}>{sub}</p>
                 </div>
                 <span style={{ display:'inline-block',background:type===v?badgeBg:'#F3F4F6',color:type===v?badgeTc:T3,fontSize:11,fontWeight:700,padding:'4px 12px',borderRadius:99 }}>{badge}</span>
@@ -495,7 +495,7 @@ function AvailabilityStep({ onNext, onBack, submitting }: { onNext:()=>void; onB
     <motion.div initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}} transition={{type:'spring',stiffness:120,damping:18}}>
       <div style={{ maxWidth:620, margin:'0 auto' }}>
         <div style={{ marginBottom:24 }}>
-          <h2 style={{ fontFamily:"'Outfit',sans-serif",fontWeight:900,fontSize:'1.55rem',color:T1,letterSpacing:'-.03em',marginBottom:6 }}>Your Availability</h2>
+          <h2 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif",fontWeight:900,fontSize:'1.55rem',color:T1,letterSpacing:'-.03em',marginBottom:6 }}>Your Availability</h2>
           <p style={{ color:T2,fontSize:14 }}>When are you available to deliver?</p>
         </div>
 
@@ -527,7 +527,7 @@ function AvailabilityStep({ onNext, onBack, submitting }: { onNext:()=>void; onB
                   onClick={()=>{setShift(v);setErrors(p=>({...p,shift:''}));}}
                   style={{ padding:'16px 12px',borderRadius:14,background:on?`${G}0E`:W,border:`2px solid ${on?G:BD}`,cursor:'pointer',textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:6,boxShadow:on?`0 4px 16px ${G}25`:SH,transition:'all .15s' }}>
                   <span style={{fontSize:28}}>{e}</span>
-                  <p style={{ fontFamily:"'Outfit',sans-serif",fontWeight:800,fontSize:14,color:on?'#065F46':T1 }}>{l}</p>
+                  <p style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif",fontWeight:800,fontSize:14,color:on?'#065F46':T1 }}>{l}</p>
                   <p style={{ fontSize:11.5,color:on?'#059669':T3,fontWeight:500 }}>{t}</p>
                 </motion.button>
               );
@@ -691,7 +691,7 @@ function SuccessStep({ personal }: { personal: Record<string,string> }) {
     <motion.div initial={{opacity:0,scale:.9}} animate={{opacity:1,scale:1}} transition={{type:'spring',stiffness:180}}
       style={{ maxWidth:540, margin:'0 auto', textAlign:'center', padding:'20px 0' }}>
       <motion.div animate={{y:[0,-8,0]}} transition={{repeat:Infinity,duration:1.8}} style={{fontSize:64,marginBottom:20}}>🛵</motion.div>
-      <h2 style={{ fontFamily:"'Outfit',sans-serif",fontWeight:900,fontSize:'1.8rem',color:T1,letterSpacing:'-.03em',marginBottom:10 }}>Application Submitted!</h2>
+      <h2 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif",fontWeight:900,fontSize:'1.8rem',color:T1,letterSpacing:'-.03em',marginBottom:10 }}>Application Submitted!</h2>
       <p style={{ color:T2,fontSize:14.5,lineHeight:1.7,marginBottom:28 }}>
         Hey <strong>{personal.name}</strong>! We've received your delivery partner application. Our team will verify your documents and call you on <strong>{personal.phone}</strong> within 48 hours.
       </p>
@@ -765,7 +765,7 @@ export function DeliverySetup() {
           </button>
           <ZyphixLogo size={30} />
           <div style={{ height:20,width:1,background:BD }} />
-          <span style={{ fontFamily:"'Outfit',sans-serif",fontWeight:800,fontSize:14.5,color:T1 }}>Delivery Partner Registration</span>
+          <span style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif",fontWeight:800,fontSize:14.5,color:T1 }}>Delivery Partner Registration</span>
           <div style={{ marginLeft:'auto',display:'flex',alignItems:'center',gap:8,background:'#FFF7ED',border:'1px solid #FED7AA',borderRadius:99,padding:'5px 14px' }}>
             <span style={{ width:8,height:8,borderRadius:'50%',background:'#EA580C',display:'inline-block' }} />
             <span style={{ fontSize:12,fontWeight:700,color:'#EA580C' }}>Hiring Open</span>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, type ReactNode, type CSSProperties } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/motion';
 import { Link, useLocation } from 'wouter';
 
 /* ── Design tokens — dark theme ────────────────────────── */
@@ -13,8 +13,8 @@ const GD   = 'linear-gradient(135deg,#0DA366 0%,#065F46 100%)';
 const OR   = '#EA580C';
 const ORD  = 'linear-gradient(135deg,#EA580C 0%,#C2410C 100%)';
 const BD   = 'rgba(255,255,255,0.07)';
-const OFT  = "'Outfit', sans-serif";
-const INT  = "'Inter', sans-serif";
+const OFT  = "'Geist', 'Geist Fallback', sans-serif";
+const INT  = "'Geist', 'Geist Fallback', sans-serif";
 const EASE: [number,number,number,number] = [0.25, 0.46, 0.45, 0.94];
 const DURATIONS = [4200, 5000, 5000, 4800, 6000];
 

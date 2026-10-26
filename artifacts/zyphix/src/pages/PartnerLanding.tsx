@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'wouter';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 import {
   Store, UtensilsCrossed, Bike, ArrowRight, CheckCircle2, ChevronDown,
   FileText, BadgeCheck, Rocket, ClipboardList, Mail,

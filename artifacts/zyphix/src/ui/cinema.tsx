@@ -10,7 +10,7 @@
  *    `playsInline muted loop autoPlay`, and a failed load silently keeps the poster.
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { motion, useInView, useMotionValue, useScroll, useSpring, useTransform, animate as fmAnimate, type MotionProps } from 'framer-motion';
+import { motion, useInView, useMotionValue, useScroll, useSpring, useTransform, animate as fmAnimate, type MotionProps } from '@/lib/motion';
 import { pickRendition, posterAt, photoSrcSet, directUrl, imgFallback, type Clip, type Photo } from '@/data/media';
 
 export const EASE = [0.22, 1, 0.36, 1] as const;

@@ -1,6 +1,6 @@
 import { apiFetch } from '@/lib/api';
 import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/motion';
 import { ArrowLeft, ArrowRight, Check, Store, Clock, FileText, Sparkles, FileDown } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
@@ -341,7 +341,7 @@ function StoreInfoStep({ onNext }: { onNext:(d:object)=>void }) {
     <motion.div initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}} transition={{type:'spring',stiffness:120,damping:18}}>
       <div style={{ maxWidth:640, margin:'0 auto' }}>
         <div style={{ marginBottom:28 }}>
-          <h2 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, fontSize:'1.55rem', color:T1, letterSpacing:'-.03em', marginBottom:6 }}>Tell us about your store</h2>
+          <h2 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:900, fontSize:'1.55rem', color:T1, letterSpacing:'-.03em', marginBottom:6 }}>Tell us about your store</h2>
           <p style={{ color:T2, fontSize:14 }}>We'll use this to set up your listing on Zyphix</p>
         </div>
 
@@ -502,7 +502,7 @@ function CategoriesStep({ onNext, onBack }: { onNext:(s:Set<string>, subs:Record
   return (
     <motion.div initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}} transition={{type:'spring',stiffness:120,damping:18}}>
       <div style={{ marginBottom:20 }}>
-        <h2 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, fontSize:'1.55rem', color:T1, letterSpacing:'-.03em', marginBottom:6 }}>What do you sell?</h2>
+        <h2 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:900, fontSize:'1.55rem', color:T1, letterSpacing:'-.03em', marginBottom:6 }}>What do you sell?</h2>
         <p style={{ color:T2, fontSize:14 }}>Tap a category to pick the exact items — or use "Add All"</p>
         {totalItems>0 && (
           <motion.div initial={{opacity:0,y:-8}} animate={{opacity:1,y:0}}
@@ -549,7 +549,7 @@ function CategoriesStep({ onNext, onBack }: { onNext:(s:Set<string>, subs:Record
               <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                 <img src={expandedCatData.e} alt="" draggable={false} style={{width:28,height:28,objectFit:'contain'}} />
                 <div>
-                  <p style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:14.5, color:T1, marginBottom:1 }}>{expandedCatData.n}</p>
+                  <p style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:800, fontSize:14.5, color:T1, marginBottom:1 }}>{expandedCatData.n}</p>
                   <p style={{ fontSize:11.5, color:T2 }}>{expandedSelSet.size} of {expandedSubs.length} items selected</p>
                 </div>
               </div>
@@ -661,7 +661,7 @@ function BusinessStep({ onNext, onBack, submitting }: { onNext:()=>void; onBack:
     <motion.div initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}} transition={{type:'spring',stiffness:120,damping:18}}>
       <div style={{ maxWidth:640, margin:'0 auto' }}>
         <div style={{ marginBottom:24 }}>
-          <h2 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, fontSize:'1.55rem', color:T1, letterSpacing:'-.03em', marginBottom:6 }}>Business Details</h2>
+          <h2 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:900, fontSize:'1.55rem', color:T1, letterSpacing:'-.03em', marginBottom:6 }}>Business Details</h2>
           <p style={{ color:T2, fontSize:14 }}>Almost done — tell us your working hours and tax info</p>
         </div>
 
@@ -932,7 +932,7 @@ function SuccessStep({ storeData, categories, selectedSubs }: { storeData: Recor
       style={{ maxWidth:540, margin:'0 auto', textAlign:'center', padding:'20px 0' }}>
       <motion.div animate={{rotate:[0,12,-12,8,-6,0],scale:[1,1.3,1]}} transition={{duration:.8}}
         style={{fontSize:64,marginBottom:20}}>🏪</motion.div>
-      <h2 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, fontSize:'1.8rem', color:T1, letterSpacing:'-.03em', marginBottom:10 }}>
+      <h2 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:900, fontSize:'1.8rem', color:T1, letterSpacing:'-.03em', marginBottom:10 }}>
         {storeData.name || 'Your Store'} is registered!
       </h2>
       <p style={{ color:T2, fontSize:14.5, lineHeight:1.7, marginBottom:28 }}>
@@ -1056,7 +1056,7 @@ export function MerchantSetup() {
           </button>
           <ZyphixLogo size={30} />
           <div style={{ height:20, width:1, background:BD }} />
-          <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:14.5, color:T1 }}>Register Your Store</span>
+          <span style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:800, fontSize:14.5, color:T1 }}>Register Your Store</span>
           <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:8, background:`${G}10`, border:`1px solid ${G}30`, borderRadius:99, padding:'5px 14px' }}>
             <span style={{ width:8, height:8, borderRadius:'50%', background:G, display:'inline-block' }} />
             <span style={{ fontSize:12, fontWeight:700, color:G }}>Partner Program Open</span>

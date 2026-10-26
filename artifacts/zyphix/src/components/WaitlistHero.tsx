@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/motion';
 import {
   MapPin, Mail, User, Phone, ArrowRight, Check, Zap, Gift,
   Crown, ShoppingBag, UtensilsCrossed, Store, Bike, ShieldCheck, Star, Clock,
@@ -139,7 +139,7 @@ export function WaitlistHero() {
           </motion.div>
 
           <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .06, duration: .65 }}
-            style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#fff', lineHeight: 0.95, letterSpacing: '-.055em', fontSize: 'clamp(2.7rem,5.8vw,4.7rem)', margin: '0 0 22px' }}>
+            style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, color: '#fff', lineHeight: 0.95, letterSpacing: '-.055em', fontSize: 'clamp(2.7rem,5.8vw,4.7rem)', margin: '0 0 22px' }}>
             Your neighbourhood,<br />
             <span style={{ background: `linear-gradient(105deg,${G2} 0%,${MINT} 55%,#a7f3d0 100%)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>delivered in 30 minutes.</span>
           </motion.h1>
@@ -194,7 +194,7 @@ export function WaitlistHero() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
                     <div style={{ width: 5, height: 26, borderRadius: 3, background: `linear-gradient(${G2},${G})` }} />
-                    <h3 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,2.4vw,1.85rem)', color: '#fff', letterSpacing: '-.03em', margin: 0 }}>Reserve your spot</h3>
+                    <h3 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(1.5rem,2.4vw,1.85rem)', color: '#fff', letterSpacing: '-.03em', margin: 0 }}>Reserve your spot</h3>
                   </div>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10.5, fontWeight: 700, color: MINT, background: `${G}1f`, border: `1px solid ${G}44`, padding: '5px 10px', borderRadius: 99 }}>
                     <Clock size={11} /> 30s
@@ -252,7 +252,7 @@ export function WaitlistHero() {
                   {apiError && <p style={{ color: '#F87171', fontSize: 12.5, margin: 0 }}>{apiError}</p>}
 
                   <motion.button whileHover={loading ? {} : { scale: 1.015, y: -1 }} whileTap={loading ? {} : { scale: .985 }} type="button" data-testid="wl-submit" onClick={submit} disabled={loading}
-                    style={{ marginTop: 4, height: 56, borderRadius: 15, border: 'none', cursor: loading ? 'wait' : 'pointer', background: `linear-gradient(135deg,${G},${G2})`, color: '#fff', fontSize: 15.5, fontWeight: 800, fontFamily: "'Outfit',sans-serif", display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9, boxShadow: `0 16px 36px ${G}55` }}>
+                    style={{ marginTop: 4, height: 56, borderRadius: 15, border: 'none', cursor: loading ? 'wait' : 'pointer', background: `linear-gradient(135deg,${G},${G2})`, color: '#fff', fontSize: 15.5, fontWeight: 800, fontFamily: "'Geist', 'Geist Fallback', sans-serif", display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9, boxShadow: `0 16px 36px ${G}55` }}>
                     {loading ? 'Reserving…' : <>{PARTNER_ROLES.includes(form.role) ? 'Continue' : 'Join the Waitlist'} <ArrowRight size={17} /></>}
                   </motion.button>
 
@@ -267,7 +267,7 @@ export function WaitlistHero() {
                   style={{ width: 72, height: 72, borderRadius: '50%', background: `linear-gradient(135deg,${G},${G2})`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', boxShadow: `0 16px 40px ${G}66` }}>
                   <Check size={34} color="#fff" strokeWidth={3} />
                 </motion.div>
-                <h3 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: '1.7rem', color: '#fff', letterSpacing: '-.03em', margin: '0 0 8px' }}>You're on the list!</h3>
+                <h3 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: '1.7rem', color: '#fff', letterSpacing: '-.03em', margin: '0 0 8px' }}>You're on the list!</h3>
                 <p style={{ fontSize: 14, color: 'rgba(255,255,255,.6)', lineHeight: 1.6, margin: '0 0 18px' }}>
                   Your spot: <span style={{ color: MINT, fontWeight: 800 }}>#{count.toLocaleString()}</span>. We'll email <b style={{ color: '#fff' }}>{form.email}</b> the moment Zyphix goes live in {form.city || 'your city'} — with your launch-day perks.
                 </p>

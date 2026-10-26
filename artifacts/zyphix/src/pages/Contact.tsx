@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'wouter';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 import { Mail, Send, Check, ArrowRight, LifeBuoy, Handshake, Newspaper, Scale, MessageCircle } from 'lucide-react';
 import { btnSecondary, G } from '@/components/layout/SiteChrome';
 import { Reveal } from '@/ui/cinema';

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/motion';
 import { Minus, Plus, Trash2, ChevronRight, Clock, Tag, X, Wallet as WalletIcon } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { usePromo, maxWalletUsable } from '@/context/PromoContext';

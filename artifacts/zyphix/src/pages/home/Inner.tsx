@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 import { SiteHeader, SiteFooter } from '@/components/layout/SiteChrome';
 import { FONT, Container } from '@/ui/kit';
 import { VideoHero, Kicker, Sub, Reveal, isStatic, EASE } from '@/ui/cinema';

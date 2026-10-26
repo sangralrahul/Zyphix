@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'wouter';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -17,8 +17,8 @@ export const TEAL = '#06B6D4';
 export const MINT = '#A7F3D0';
 export const INK = '#0B0F19';
 export const INK_2 = '#111827';
-export const FONT = "'Geist', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
-export const SERIF = "'Instrument Serif', ui-serif, Georgia, serif";
+export const FONT = "'Geist', 'Geist Fallback', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+export const SERIF = "'Instrument Serif', 'Instrument Serif Fallback', ui-serif, Georgia, serif";
 
 export const fade = (delay = 0, y = 14) => ({
   initial: { opacity: 0, y },

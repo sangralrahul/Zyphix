@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/motion';
 
 const TOTAL_MS = 12000;
 const BG_INTERVAL = 3200;
@@ -51,7 +51,7 @@ export function SplashScreen({ onComplete }: Props) {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 1.4, ease: 'easeInOut' }}
-          style={{ position: 'fixed', inset: 0, zIndex: 9999, background: '#000', overflow: 'hidden', fontFamily: "'Outfit', sans-serif" }}
+          style={{ position: 'fixed', inset: 0, zIndex: 9999, background: '#000', overflow: 'hidden', fontFamily: "'Geist', 'Geist Fallback', sans-serif" }}
         >
           {/* ── Ken Burns background ── */}
           <AnimatePresence mode="sync">
@@ -98,7 +98,7 @@ export function SplashScreen({ onComplete }: Props) {
           <motion.button
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.8, duration: 0.5 }}
             onClick={skip}
-            style={{ position: 'absolute', top: 16, right: 20, zIndex: 10, background: 'rgba(255,255,255,0.09)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 50, padding: '7px 18px', color: 'rgba(255,255,255,0.6)', fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: '0.75rem', letterSpacing: '0.1em', cursor: 'pointer' }}>
+            style={{ position: 'absolute', top: 16, right: 20, zIndex: 10, background: 'rgba(255,255,255,0.09)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 50, padding: '7px 18px', color: 'rgba(255,255,255,0.6)', fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 600, fontSize: '0.75rem', letterSpacing: '0.1em', cursor: 'pointer' }}>
             SKIP ›
           </motion.button>
 
@@ -112,7 +112,7 @@ export function SplashScreen({ onComplete }: Props) {
               transition={{ delay: 0.7, duration: 0.75, ease: [0.34, 1.56, 0.64, 1] }}
               style={{ marginBottom: 22 }}>
               <div style={{ width: 84, height: 84, borderRadius: '28%', background: 'linear-gradient(148deg, #1AE082 0%, #0DC268 40%, #09A058 72%, #077A46 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 0 1px rgba(255,255,255,0.12) inset, 0 8px 0 rgba(255,255,255,0.08) inset, 0 12px 50px rgba(13,163,102,0.75)' }}>
-                <span style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: 36, color: '#fff', lineHeight: 1, letterSpacing: '-0.06em' }}>//</span>
+                <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: 36, color: '#fff', lineHeight: 1, letterSpacing: '-0.06em' }}>//</span>
               </div>
             </motion.div>
 
@@ -122,14 +122,14 @@ export function SplashScreen({ onComplete }: Props) {
                 initial={{ y: 90, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 1.4, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-                style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(3.5rem, 8vw, 5.5rem)', letterSpacing: '-0.05em', lineHeight: 1, background: 'linear-gradient(135deg, #18F590 0%, #0DC268 55%, #08924C 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', fontStyle: 'italic', display: 'inline-block' }}>
+                style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(3.5rem, 8vw, 5.5rem)', letterSpacing: '-0.05em', lineHeight: 1, background: 'linear-gradient(135deg, #18F590 0%, #0DC268 55%, #08924C 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', fontStyle: 'italic', display: 'inline-block' }}>
                 ZYPH
               </motion.span>
               <motion.span
                 initial={{ y: 90, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 1.68, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-                style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: 'clamp(3.5rem, 8vw, 5.5rem)', letterSpacing: '-0.05em', lineHeight: 1, color: '#fff', display: 'inline-block' }}>
+                style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(3.5rem, 8vw, 5.5rem)', letterSpacing: '-0.05em', lineHeight: 1, color: '#fff', display: 'inline-block' }}>
                 IX
               </motion.span>
             </div>
@@ -146,7 +146,7 @@ export function SplashScreen({ onComplete }: Props) {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 2.8, duration: 0.6, ease: 'easeOut' }}
-              style={{ fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 'clamp(0.8rem, 2vw, 1rem)', color: 'rgba(255,255,255,0.72)', letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: 10 }}>
+              style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 700, fontSize: 'clamp(0.8rem, 2vw, 1rem)', color: 'rgba(255,255,255,0.72)', letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: 10 }}>
               India's SuperLocal App
             </motion.p>
 
@@ -155,7 +155,7 @@ export function SplashScreen({ onComplete }: Props) {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 3.3, duration: 0.55, ease: 'easeOut' }}
-              style={{ fontFamily: "'Inter',sans-serif", fontSize: 'clamp(0.75rem, 1.5vw, 0.875rem)', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.14em', marginBottom: 44 }}>
+              style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontSize: 'clamp(0.75rem, 1.5vw, 0.875rem)', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.14em', marginBottom: 44 }}>
               Groceries · Food · Services · Jammu, J&K
             </motion.p>
 
@@ -168,7 +168,7 @@ export function SplashScreen({ onComplete }: Props) {
                   transition={{ delay, duration: 0.55, ease: [0.34, 1.56, 0.64, 1] }}
                   style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 50, padding: '10px 20px' }}>
                   <span style={{ fontSize: 20, lineHeight: 1 }}>{icon}</span>
-                  <span style={{ fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: '0.82rem', color: 'rgba(255,255,255,0.88)', whiteSpace: 'nowrap' }}>{label}</span>
+                  <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 600, fontSize: '0.82rem', color: 'rgba(255,255,255,0.88)', whiteSpace: 'nowrap' }}>{label}</span>
                 </motion.div>
               ))}
             </div>
@@ -183,7 +183,7 @@ export function SplashScreen({ onComplete }: Props) {
                 style={{ width: 9, height: 9, borderRadius: '50%', background: '#10D678', flexShrink: 0 }}
                 animate={{ opacity: [1, 0.2, 1], scale: [1, 1.4, 1] }}
                 transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }} />
-              <span style={{ fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: '0.82rem', color: '#10D678', letterSpacing: '0.07em' }}>
+              <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 700, fontSize: '0.82rem', color: '#10D678', letterSpacing: '0.07em' }}>
                 Now Live · Jammu, J&K
               </span>
             </motion.div>
@@ -200,7 +200,7 @@ export function SplashScreen({ onComplete }: Props) {
 
           <motion.p
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 3.8, duration: 0.6 }}
-            style={{ position: 'absolute', bottom: 18, left: 0, right: 0, textAlign: 'center', fontFamily: "'Inter',sans-serif", fontSize: '0.68rem', color: 'rgba(255,255,255,0.18)', letterSpacing: '0.14em' }}>
+            style={{ position: 'absolute', bottom: 18, left: 0, right: 0, textAlign: 'center', fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontSize: '0.68rem', color: 'rgba(255,255,255,0.18)', letterSpacing: '0.14em' }}>
             A ZYPHIX PRODUCT
           </motion.p>
         </motion.div>

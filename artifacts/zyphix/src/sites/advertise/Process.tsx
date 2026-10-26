@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 import { Container, G } from '@/ui/kit';
 import { Light, Kicker, Headline, Sub, Reveal, isStatic, EASE } from '@/ui/cinema';
 

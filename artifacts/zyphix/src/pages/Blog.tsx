@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 import { ArrowRight, Clock, Mail } from 'lucide-react';
 import { Kicker, Reveal, GlowButton } from '@/ui/cinema';
 import { Accent } from '@/ui/motion2';

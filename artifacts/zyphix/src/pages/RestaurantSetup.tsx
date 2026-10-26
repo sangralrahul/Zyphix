@@ -1,6 +1,6 @@
 import { apiFetch } from '@/lib/api';
 import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/motion';
 import { ArrowLeft, ArrowRight, Check, Utensils, Clock, FileText, Star, FileDown } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
@@ -243,7 +243,7 @@ function RestaurantInfoStep({ onNext }: { onNext: (d: object) => void }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
           <div style={{ width: 44, height: 44, borderRadius: 13, background: `${RA}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>🍽️</div>
           <div>
-            <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: '1.3rem', color: T1 }}>Restaurant Information</h2>
+            <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: '1.3rem', color: T1 }}>Restaurant Information</h2>
             <p style={{ fontSize: 13, color: T3 }}>Tell us about your restaurant</p>
           </div>
         </div>
@@ -341,7 +341,7 @@ function MenuStep({ onNext, onBack }: { onNext: (cuisines: Set<string>, items: R
       <div style={{ background: W, borderRadius: 20, padding: '32px 28px', boxShadow: SH2, border: `1px solid ${BD}` }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <div>
-            <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: '1.3rem', color: T1 }}>Menu & Cuisine Types</h2>
+            <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: '1.3rem', color: T1 }}>Menu & Cuisine Types</h2>
             <p style={{ fontSize: 13, color: T3, marginTop: 2 }}>Select all cuisines you serve and your menu items</p>
           </div>
           {(selected.size > 0 || totalItems > 0) && (
@@ -458,7 +458,7 @@ function OperationsStep({ onNext, onBack, submitting }: { onNext: () => void; on
     <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
       <div style={{ background: W, borderRadius: 20, padding: '32px 28px', boxShadow: SH2, border: `1px solid ${BD}` }}>
         <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: '1.3rem', color: T1 }}>Operations & Timing</h2>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: '1.3rem', color: T1 }}>Operations & Timing</h2>
           <p style={{ fontSize: 13, color: T3, marginTop: 2 }}>Set your operating hours and order preferences</p>
         </div>
 
@@ -727,7 +727,7 @@ function SuccessStep({ restData, cuisines }: { restData: Record<string, string>;
         <motion.div animate={{ rotate: [0, 14, -14, 10, -8, 0], scale: [1, 1.3, 1] }} transition={{ duration: 0.8 }}
           style={{ fontSize: 64, marginBottom: 20 }}>🍽️</motion.div>
 
-        <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: '1.8rem', color: T1, letterSpacing: '-.03em', marginBottom: 10 }}>
+        <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: '1.8rem', color: T1, letterSpacing: '-.03em', marginBottom: 10 }}>
           {restData.name || 'Your Restaurant'} is registered!
         </h2>
         <p style={{ color: T2, fontSize: 14.5, lineHeight: 1.7, marginBottom: 28 }}>
@@ -841,7 +841,7 @@ export function RestaurantSetup() {
           </button>
           <ZyphixLogo size={30} />
           <div style={{ height: 20, width: 1, background: BD }} />
-          <span style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: 14.5, color: T1 }}>Register Your Restaurant</span>
+          <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 14.5, color: T1 }}>Register Your Restaurant</span>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, background: `${RA}10`, border: `1px solid ${RA}30`, borderRadius: 99, padding: '5px 14px' }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: RA, display: 'inline-block' }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: RA }}>ZyphixEats Partner Program Open</span>

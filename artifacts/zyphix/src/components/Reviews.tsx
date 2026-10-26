@@ -24,7 +24,7 @@ export function Reviews({ productId }: { productId: string }) {
   return (
     <div style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: 14, padding: 16, marginTop: 14 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <div style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, color: '#111827', fontSize: 16 }}>
+        <div style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, color: '#111827', fontSize: 16 }}>
           Ratings & Reviews
         </div>
         {count > 0 && (

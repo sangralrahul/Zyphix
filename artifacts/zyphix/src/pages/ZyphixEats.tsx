@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 import { Search, Star, X, Plus, Minus, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { restaurants, menuItems, FOOD_CUISINE_TYPES } from '@/data/mockData';
 import { usePartners, tagList } from '@/lib/partners';

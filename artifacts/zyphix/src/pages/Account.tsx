@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/motion';
 import { useLocation, useSearch } from 'wouter';
 import {
   User, MapPin, ShoppingBag, Settings, Plus, Edit2, Trash2,

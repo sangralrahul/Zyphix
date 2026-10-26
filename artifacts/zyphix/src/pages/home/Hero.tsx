@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/motion';
 import { ArrowRight, ShoppingBasket, UtensilsCrossed, Wrench, ChevronDown } from 'lucide-react';
 import { VideoHero, Kicker, GlowButton, GhostButton, Reveal, Light, Sub, isStatic, EASE } from '@/ui/cinema';
 import { Accent, Magnetic, LiveOrder, GiantMarquee, SplitHeadline } from '@/ui/motion2';

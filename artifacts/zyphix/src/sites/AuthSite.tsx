@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/motion';
 import { ArrowRight, Mail, ChevronLeft, Check, AlertCircle, Lock, LogOut, MapPin, ShoppingBag, UtensilsCrossed, Wrench, Loader2 } from 'lucide-react';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
 import { FONT, G } from '@/ui/kit';
@@ -243,10 +243,10 @@ export default function AuthSite() {
         </div>
 
         <main className="flex flex-1 items-start justify-center px-5 pb-10 pt-4 sm:px-8 lg:items-center lg:pb-16 lg:pt-0">
-          <div className="w-full max-w-[400px]">
+          <div className="flex w-full max-w-[400px] min-h-[480px] flex-col lg:min-h-[520px]">
             <AnimatePresence mode="wait" initial={false}>
               {step === 'checking' && (
-                <motion.div key="checking" {...slide} className="flex flex-col items-center gap-4 py-16 text-gray-500">
+                <motion.div key="checking" className="flex flex-col items-center gap-4 py-16 text-gray-500">
                   <div className="h-9 w-9 animate-spin rounded-full border-[3px] border-emerald-500/20" style={{ borderTopColor: G }} />
                   <p className="text-[14px]">Checking your session…</p>
                 </motion.div>
@@ -341,8 +341,9 @@ export default function AuthSite() {
               )}
             </AnimatePresence>
 
+            <div aria-hidden className="h-10 shrink-0" />
             {(step === 'email' || step === 'otp' || step === 'name') && (
-              <div className="mt-10 flex items-center gap-3 border-t border-gray-100 pt-6 text-[13px] text-gray-500">
+              <div className="mt-auto flex items-center gap-3 border-t border-gray-100 pt-6 text-[13px] text-gray-500">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-600"><Lock size={14} /></span>
                 <p><span className="font-medium text-gray-800">Encrypted</span> · OTP sign-in, no passwords. One account for Now, Eats and Book.</p>
               </div>

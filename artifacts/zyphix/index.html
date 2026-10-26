@@ -38,12 +38,9 @@
     <meta name="twitter:title" content="Zyphix — The SuperLocal App" />
     <meta name="twitter:description" content="Groceries in minutes, food from local kitchens and verified home services — from the businesses already in your neighbourhood." />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Fonts load without blocking the first paint -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Instrument+Serif:ital@1&family=Outfit:wght@800;900&display=swap">
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Instrument+Serif:ital@1&family=Outfit:wght@800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Instrument+Serif:ital@1&family=Outfit:wght@800;900&display=swap" rel="stylesheet"></noscript>
+    <!-- Self-hosted fonts (no third-party round trip). Geist is preloaded; a metric-matched fallback avoids layout shift. -->
+    <link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin>
     <script>
       /* Start downloading this site's hero image before the app boots. */
       (function () {

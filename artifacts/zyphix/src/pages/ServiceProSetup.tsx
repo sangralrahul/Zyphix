@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/motion';
 import { useLocation } from 'wouter';
 import {
   ArrowLeft, ArrowRight, Check, User, Briefcase, ShieldCheck, Sparkles, Zap, Wrench, Snowflake,
@@ -506,7 +506,7 @@ export function ServiceProSetup() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-gray-900" style={{ fontFamily: "'Inter', 'Outfit', sans-serif" }}>
+    <div className="min-h-screen bg-[#F8F9FA] text-gray-900" style={{ fontFamily: "'Geist', 'Geist', 'Geist Fallback', sans-serif" }}>
       <div className="sticky top-0 z-50 border-b border-gray-200 bg-white px-5">
         <div className="mx-auto flex h-[60px] max-w-[1100px] items-center gap-3">
           <button type="button" onClick={() => setLoc('/')} className="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-[13px] font-semibold text-gray-600 hover:bg-gray-100">

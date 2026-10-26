@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/motion';
 import {
   ArrowRight, Check, MapPin, Phone, Instagram, Twitter, Linkedin,
   ChevronRight, Moon, Star, Menu, X, Search, Clock, ShieldCheck, Leaf, Zap
@@ -91,9 +91,9 @@ function Nav() {
         <a href="/" style={{ textDecoration: 'none', flexShrink: 0 }} onClick={e => { e.preventDefault(); nav('/'); }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
             <div style={{ width: 32, height: 32, borderRadius: 9, background: G, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: '#fff', fontWeight: 900, fontSize: 14, fontFamily: "'Outfit', sans-serif" }}>Z</span>
+              <span style={{ color: '#fff', fontWeight: 900, fontSize: 14, fontFamily: "'Geist', 'Geist Fallback', sans-serif" }}>Z</span>
             </div>
-            <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 17, color: T1, letterSpacing: '-0.03em' }}>ZYPHIX</span>
+            <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 17, color: T1, letterSpacing: '-0.03em' }}>ZYPHIX</span>
           </div>
         </a>
 
@@ -200,7 +200,7 @@ function Hero() {
 
           {/* Headline */}
           <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.52, delay: 0.08 }}
-            style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 'clamp(2.4rem, 4.2vw, 3.7rem)', color: T1, lineHeight: 1.1, letterSpacing: '-0.04em', marginBottom: 20 }}>
+            style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 'clamp(2.4rem, 4.2vw, 3.7rem)', color: T1, lineHeight: 1.1, letterSpacing: '-0.04em', marginBottom: 20 }}>
             Groceries & food<br />
             <span style={{ color: G }}>in 30 minutes,</span><br />
             from your neighbourhood.
@@ -257,7 +257,7 @@ function Hero() {
             <div style={{ background: G, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontWeight: 900, fontSize: 12, color: '#fff', fontFamily: "'Outfit',sans-serif" }}>Z</span>
+                  <span style={{ fontWeight: 900, fontSize: 12, color: '#fff', fontFamily: "'Geist', 'Geist Fallback', sans-serif" }}>Z</span>
                 </div>
                 <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>ZYPHIX</span>
               </div>
@@ -360,7 +360,7 @@ function Services() {
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ marginBottom: 48 }}>
           <p style={{ fontSize: 12, fontWeight: 700, color: G, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>Two services, one app</p>
-          <h2 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: T1, letterSpacing: '-0.04em', lineHeight: 1.12 }}>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: T1, letterSpacing: '-0.04em', lineHeight: 1.12 }}>
             Everything you need,<br />from your neighbourhood.
           </h2>
         </div>
@@ -374,7 +374,7 @@ function Services() {
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: c.bg, border: `1px solid ${c.bd}`, borderRadius: 99, padding: '6px 14px', alignSelf: 'flex-start', marginBottom: 24 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: c.textColor }}>{c.badge}</span>
                 </div>
-                <h3 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 'clamp(1.4rem, 2vw, 1.85rem)', color: T1, letterSpacing: '-0.03em', lineHeight: 1.18, marginBottom: 14, whiteSpace: 'pre-line' }}>{c.title}</h3>
+                <h3 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 'clamp(1.4rem, 2vw, 1.85rem)', color: T1, letterSpacing: '-0.03em', lineHeight: 1.18, marginBottom: 14, whiteSpace: 'pre-line' }}>{c.title}</h3>
                 <p style={{ fontSize: 14.5, color: T2, lineHeight: 1.72, marginBottom: 24 }}>{c.desc}</p>
                 <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 28 }}>
                   {c.tags.map(t => (
@@ -383,7 +383,7 @@ function Services() {
                 </div>
                 <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{ background: c.bg, border: `1px solid ${c.bd}`, borderRadius: 11, padding: '12px 18px' }}>
-                    <p style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.5rem', color: c.textColor, lineHeight: 1 }}>{c.stat}</p>
+                    <p style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: '1.5rem', color: c.textColor, lineHeight: 1 }}>{c.stat}</p>
                     <p style={{ fontSize: 11, color: T3, marginTop: 3, fontWeight: 500 }}>{c.statSub}</p>
                   </div>
                   <button onClick={scroll} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: c.color, color: '#fff', fontSize: 13, fontWeight: 700, padding: '11px 20px', borderRadius: 10, border: 'none', cursor: 'pointer', transition: 'opacity 0.15s', boxShadow: `0 4px 12px ${c.color}30` }}
@@ -417,7 +417,7 @@ function StatsRow() {
         {stats.map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}
             style={{ textAlign: 'center' }}>
-            <p style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 'clamp(1.7rem, 2.8vw, 2.3rem)', color: '#fff', lineHeight: 1, letterSpacing: '-0.04em', marginBottom: 6 }}>{s.v}</p>
+            <p style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 'clamp(1.7rem, 2.8vw, 2.3rem)', color: '#fff', lineHeight: 1, letterSpacing: '-0.04em', marginBottom: 6 }}>{s.v}</p>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.72)', fontWeight: 500 }}>{s.l}</p>
           </motion.div>
         ))}
@@ -440,7 +440,7 @@ function HowItWorks() {
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ marginBottom: 56, textAlign: 'center' }}>
           <p style={{ fontSize: 12, fontWeight: 700, color: G, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>Simple by design</p>
-          <h2 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: T1, letterSpacing: '-0.04em', lineHeight: 1.12 }}>How Zyphix works</h2>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: T1, letterSpacing: '-0.04em', lineHeight: 1.12 }}>How Zyphix works</h2>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 24 }}>
           {steps.map((s, i) => (
@@ -450,7 +450,7 @@ function HowItWorks() {
                   <div style={{ width: 46, height: 46, borderRadius: 13, background: G_BG, border: `1px solid ${G_BD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {s.icon}
                   </div>
-                  <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.4rem', color: SURF, letterSpacing: '-0.04em', lineHeight: 1 }}>{s.n}</span>
+                  <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: '1.4rem', color: SURF, letterSpacing: '-0.04em', lineHeight: 1 }}>{s.n}</span>
                 </div>
                 <h3 style={{ fontSize: 17, fontWeight: 700, color: T1, marginBottom: 10, letterSpacing: '-0.02em' }}>{s.title}</h3>
                 <p style={{ fontSize: 14, color: T2, lineHeight: 1.72 }}>{s.desc}</p>
@@ -509,7 +509,7 @@ function WaitlistSection() {
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: G, display: 'inline-block' }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: G2, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Early access open</span>
           </div>
-          <h2 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)', color: T1, letterSpacing: '-0.04em', lineHeight: 1.12, marginBottom: 10 }}>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)', color: T1, letterSpacing: '-0.04em', lineHeight: 1.12, marginBottom: 10 }}>
             Reserve your spot.<br />It's completely free.
           </h2>
           <p style={{ fontSize: 15, color: T2, lineHeight: 1.68 }}>
@@ -521,7 +521,7 @@ function WaitlistSection() {
           <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
             style={{ background: CARD, border: `1px solid ${G_BD}`, borderRadius: 20, padding: '40px 32px', textAlign: 'center', boxShadow: SH2 }}>
             <div style={{ width: 56, height: 56, borderRadius: 16, background: G_BG, border: `1px solid ${G_BD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px', fontSize: 26, color: G }}>✓</div>
-            <h3 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.5rem', color: T1, marginBottom: 8 }}>You're on the list!</h3>
+            <h3 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: '1.5rem', color: T1, marginBottom: 8 }}>You're on the list!</h3>
             <p style={{ fontSize: 14, color: T2, lineHeight: 1.65, marginBottom: 28 }}>
               You're <strong style={{ color: G }}>#{pos}</strong> on the waitlist. We'll notify you the moment Zyphix launches.
             </p>
@@ -588,7 +588,7 @@ function Testimonials() {
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ marginBottom: 48 }}>
           <p style={{ fontSize: 12, fontWeight: 700, color: G, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>Early community</p>
-          <h2 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: T1, letterSpacing: '-0.04em', lineHeight: 1.12 }}>What early members say</h2>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: T1, letterSpacing: '-0.04em', lineHeight: 1.12 }}>What early members say</h2>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
           {reviews.map((r, i) => (
@@ -638,7 +638,7 @@ function TrustSection() {
       <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, alignItems: 'center' }}>
         <motion.div initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
           <p style={{ fontSize: 12, fontWeight: 700, color: G, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>Our philosophy</p>
-          <h2 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: T1, letterSpacing: '-0.04em', lineHeight: 1.12, marginBottom: 18 }}>
+          <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: T1, letterSpacing: '-0.04em', lineHeight: 1.12, marginBottom: 18 }}>
             Built in India.<br />Built for India.
           </h2>
           <p style={{ fontSize: 15, color: T2, lineHeight: 1.72, maxWidth: 420, marginBottom: 32 }}>
@@ -683,7 +683,7 @@ function CtaBanner() {
           <div style={{ position: 'absolute', top: -80, right: -80, width: 340, height: 340, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', pointerEvents: 'none' }} />
           <div style={{ maxWidth: 460, position: 'relative' }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>Launching soon</p>
-            <h2 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: '#fff', letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: 12 }}>Don't miss the launch.</h2>
+            <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: '#fff', letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: 12 }}>Don't miss the launch.</h2>
             <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.72)', lineHeight: 1.65 }}>Join now for ₹125 launch credit, 10 free deliveries, and priority access in your city.</p>
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', position: 'relative' }}>
@@ -715,9 +715,9 @@ function Footer() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 16 }}>
               <div style={{ width: 30, height: 30, borderRadius: 8, background: G, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ color: '#fff', fontWeight: 900, fontSize: 13, fontFamily: "'Outfit', sans-serif" }}>Z</span>
+                <span style={{ color: '#fff', fontWeight: 900, fontSize: 13, fontFamily: "'Geist', 'Geist Fallback', sans-serif" }}>Z</span>
               </div>
-              <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 16, color: '#fff', letterSpacing: '-0.03em' }}>ZYPHIX</span>
+              <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 16, color: '#fff', letterSpacing: '-0.03em' }}>ZYPHIX</span>
             </div>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', lineHeight: 1.72, maxWidth: 250, marginBottom: 20 }}>India's SuperLocal App — groceries & food from kirana stores near you. Now live across India.</p>
             <div style={{ display: 'flex', gap: 8 }}>
@@ -783,7 +783,7 @@ function WAFloat() {
 ───────────────────────────────────────────── */
 export function HomeLight() {
   return (
-    <div style={{ fontFamily: "'Outfit', 'Inter', sans-serif", background: BG, minHeight: '100vh' }}>
+    <div style={{ fontFamily: "'Outfit', 'Geist', 'Geist Fallback', sans-serif", background: BG, minHeight: '100vh' }}>
       <AnnoBar />
       <Nav />
       <Hero />

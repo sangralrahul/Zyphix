@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useInView } from 'framer-motion';
+import { AnimatePresence, motion, useInView } from '@/lib/motion';
 import { BadgeCheck, Check } from 'lucide-react';
 import { isStatic, EASE, G } from '@/ui/cinema';
 

@@ -1,22 +1,20 @@
 import React, { Suspense, lazy } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
+import { LazyMotion, domAnimation } from "@/lib/motion";
 
 
 import { Landing } from "@/pages/Landing";
 const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { PromoProvider } from "@/context/PromoContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { ReviewsProvider } from "@/context/ReviewsContext";
 import { NotificationsProvider } from "@/context/NotificationsContext";
-import { AuthModal } from "@/components/AuthModal";
+const AuthModal = lazy(() => import("@/components/AuthModal").then(m => ({ default: m.AuthModal })));
 import { Navbar } from "@/components/layout/Navbar";
-import { BottomNav } from "@/components/layout/BottomNav";
+const BottomNav = lazy(() => import("@/components/layout/BottomNav").then(m => ({ default: m.BottomNav })));
 
 
 const PartnerSite = lazy(() => import("@/sites/PartnerSite"));
@@ -84,7 +82,14 @@ function RouteFallback() {
   );
 }
 
-const queryClient = new QueryClient();
+/** The sign-in modal is only downloaded the first time someone opens it. */
+function LazyAuthModal() {
+  const { showModal } = useAuth();
+  const [wanted, setWanted] = React.useState(false);
+  React.useEffect(() => { if (showModal) setWanted(true); }, [showModal]);
+  if (!wanted) return null;
+  return <Suspense fallback={null}><AuthModal /></Suspense>;
+}
 
 function LightLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -93,7 +98,7 @@ function LightLayout({ children }: { children: React.ReactNode }) {
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 16px 96px', boxSizing: 'border-box' as const }}>
         {children}
       </div>
-      <BottomNav />
+      <Suspense fallback={null}><BottomNav /></Suspense>
     </div>
   );
 }
@@ -192,8 +197,7 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
+    <LazyMotion features={domAnimation}>
         <AuthProvider>
           <NotificationsProvider>
             <WishlistProvider>
@@ -204,7 +208,7 @@ function App() {
                       <Suspense fallback={<RouteFallback />}>
                         <Router />
                       </Suspense>
-                      <AuthModal />
+                      <LazyAuthModal />
                     </WouterRouter>
                   </PromoProvider>
                 </CartProvider>
@@ -212,9 +216,7 @@ function App() {
             </WishlistProvider>
           </NotificationsProvider>
         </AuthProvider>
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+    </LazyMotion>
   );
 }
 
