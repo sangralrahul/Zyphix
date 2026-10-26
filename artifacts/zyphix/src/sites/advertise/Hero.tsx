@@ -14,7 +14,7 @@ import { SURFACES } from './shared';
 
 export function Hero() {
   const stat = isStatic();
-  const fade = (d: number) => stat ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.8, ease: EASE, delay: d } };
+  const fade = (d: number) => stat ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, ease: EASE, delay: d } };
   return (
     <VideoHero clip={VIDEOS.groceryShelf} height="min-h-[100svh]" dim={0.5} position="center 50%">
       <Container className="pb-8 pt-36 sm:pb-10 md:pt-48">
@@ -23,19 +23,19 @@ export function Hero() {
         </motion.div>
         <SplitHeadline
           parts={['Put your brand in front of your neighbourhood, at the', { accent: 'moment', green: true }, 'they buy.']}
-          delay={0.25}
+          delay={0.1}
           className="max-w-[24ch] text-balance text-[40px] font-semibold leading-[1] tracking-[-0.045em] text-white sm:text-[60px] md:text-[76px]"
         />
-        <motion.p {...fade(0.85)} className="mt-6 max-w-[600px] text-[17px] leading-[1.6] text-white/75 sm:text-[19px]">
+        <motion.p {...fade(0.42)} className="mt-6 max-w-[600px] text-[17px] leading-[1.6] text-white/75 sm:text-[19px]">
           Placements inside a shopping app, not a feed. Your brand shows on the home screen, in search and in categories, only in the delivery areas you choose, and always labelled Sponsored.
         </motion.p>
-        <motion.div {...fade(1)} className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <motion.div {...fade(0.5)} className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
           <Magnetic className="w-full sm:w-auto"><GlowButton href="#contact" className="w-full sm:w-auto">Talk to partnerships <ArrowRight size={17} /></GlowButton></Magnetic>
           <GhostButton href="#formats">See the formats</GhostButton>
         </motion.div>
 
         {/* glass strip: where placements run */}
-        <motion.div {...fade(1.15)} className="mt-14 rounded-2xl border border-white/15 bg-white/[.08] p-2 backdrop-blur-xl sm:mt-20">
+        <motion.div {...fade(0.57)} className="mt-14 rounded-2xl border border-white/15 bg-white/[.08] p-2 backdrop-blur-xl sm:mt-20">
           <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50 sm:hidden">Where your placement runs</p>
           <ul className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-5">
             {SURFACES.map((s, i) => (

@@ -40,7 +40,7 @@ const HERO_ITEMS = ['Fresh milk 1 L', 'Whole-wheat flour 5 kg', 'Bananas · 6'];
 
 export function Hero() {
   const stat = isStatic();
-  const fade = (d: number) => stat ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.8, ease: EASE, delay: d } };
+  const fade = (d: number) => stat ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, ease: EASE, delay: d } };
   return (
     <VideoHero clip={VIDEOS.heroCity} height="min-h-[100svh]" dim={0.42} position="center 40%">
       <Container className="pb-8 pt-36 sm:pb-10 md:pt-40">
@@ -49,26 +49,26 @@ export function Hero() {
         </motion.div>
         <SplitHeadline
           parts={['Your neighbourhood,', { accent: 'delivered', green: true }, 'in 30 minutes.']}
-          delay={0.25}
+          delay={0.1}
           className="max-w-[16ch] text-balance text-[46px] font-semibold leading-[0.98] tracking-[-0.045em] text-white sm:text-[64px] md:max-w-none md:text-[78px]"
         />
         <div className="mt-8 grid items-end gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
           <div>
-            <motion.p {...fade(0.8)} className="max-w-[52ch] text-[17px] leading-[1.6] text-white/75 sm:text-[19px]">
+            <motion.p {...fade(0.4)} className="max-w-[52ch] text-[17px] leading-[1.6] text-white/75 sm:text-[19px]">
               Groceries from the corner store, dinner from your favourite kitchen, an electrician for the weekend. One app, one account, every shop near you.
             </motion.p>
-            <motion.div {...fade(0.95)} className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <motion.div {...fade(0.47)} className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Magnetic><GlowButton href={NOW_SITE} sameTab className="w-full sm:w-auto">Order on Zyphix Now <ArrowRight size={17} /></GlowButton></Magnetic>
               <GhostButton href="/app">Get the app</GhostButton>
             </motion.div>
           </div>
-          <motion.div {...fade(1.2)} className="hidden justify-self-end lg:block">
+          <motion.div {...fade(0.6)} className="hidden justify-self-end lg:block">
             <LiveOrder dark items={HERO_ITEMS} className="!max-w-[320px]" />
           </motion.div>
         </div>
 
         {/* glass strip: product pills + scroll cue */}
-        <motion.div {...fade(1.1)} className="mt-12 flex flex-col gap-4 rounded-3xl border border-white/15 bg-white/[.08] p-3 backdrop-blur-xl sm:mt-14 sm:flex-row sm:items-center sm:justify-between sm:rounded-full sm:py-2.5 sm:pl-3 sm:pr-6">
+        <motion.div {...fade(0.55)} className="mt-12 flex flex-col gap-4 rounded-3xl border border-white/15 bg-white/[.08] p-3 backdrop-blur-xl sm:mt-14 sm:flex-row sm:items-center sm:justify-between sm:rounded-full sm:py-2.5 sm:pl-3 sm:pr-6">
           <div className="flex flex-col gap-2 sm:flex-row sm:gap-1.5">
             {PRODUCTS.map(p => (
               <a key={p.name} href={p.href} className="group flex min-h-[44px] items-center gap-3 rounded-full px-4 py-2 transition hover:bg-white/10 sm:gap-2.5">

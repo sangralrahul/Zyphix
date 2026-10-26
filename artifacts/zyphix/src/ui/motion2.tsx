@@ -56,14 +56,19 @@ function ChapterVideo({ c, i, n, progress }: { c: Chapter; i: number; n: number;
   const pad = 0.05;
   const opacity = useTransform(progress, [start - pad, start + pad, end - pad, end + pad], i === 0 ? [1, 1, 1, 0] : i === n - 1 ? [0, 1, 1, 1] : [0, 1, 1, 0]);
   const scale = useTransform(progress, [start, end], [1.08, 1]);
-  const [state, setState] = useState<'off' | 'near' | 'on'>(i === 0 ? 'on' : 'off');
+  // Mount a chapter's video when it gets close, then keep it mounted for good:
+  // scrolling back up must never re-download or restart a clip.
+  const [mounted, setMounted] = useState(i === 0);
+  const [on, setOn] = useState(i === 0);
   useEffect(() => progress.on('change', p => {
-    const next = p >= start - pad && p <= end + pad ? 'on' : p >= start - 1 / n && p <= end + 1 / n ? 'near' : 'off';
-    setState(prev => (prev === next ? prev : (prev !== 'off' && next === 'off' ? 'near' : next)));
+    const isOn = p >= start - pad && p <= end + pad;
+    const isNear = p >= start - 1.5 / n && p <= end + 1.5 / n;
+    setOn(isOn);
+    if (isNear) setMounted(true);
   }), [progress, start, end, n, pad]);
   return (
     <motion.div className="absolute inset-0" style={{ opacity, scale }}>
-      {state !== 'off' && <BgVideo clip={c.clip} dim={0.15} playWhenVisible={state === 'on'} />}
+      {mounted && <BgVideo clip={c.clip} dim={0.15} playWhenVisible={on} />}
     </motion.div>
   );
 }
@@ -427,7 +432,7 @@ export function SplitHeadline({ parts, className = '', delay = 0, as: Tag = 'h1'
         <React.Fragment key={i}>
           <span aria-hidden className="inline-block overflow-hidden pb-[0.06em] align-bottom">
             <motion.span className="inline-block" initial={{ y: '110%', opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.75, ease: EASE, delay: delay + i * 0.05 }}>
+              transition={{ duration: 0.6, ease: EASE, delay: delay + i * 0.035 }}>
               {render(t)}
             </motion.span>
           </span>

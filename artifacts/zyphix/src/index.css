@@ -52,6 +52,8 @@
 }
 
 @layer base {
+  /* A slow or failed image never shows its alt text over a card — the dark placeholder stays clean. */
+  img { color: transparent; }
   *, *::before, *::after { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {

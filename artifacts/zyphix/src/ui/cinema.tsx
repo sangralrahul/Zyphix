@@ -55,8 +55,8 @@ export function Reveal({ children, delay = 0, y = 24, x = 0, scale = 1, blur = f
       style={style}
       initial={{ opacity: 0, y, x, scale, filter: blur ? 'blur(10px)' : 'none' }}
       whileInView={{ opacity: 1, y: 0, x: 0, scale: 1, filter: 'blur(0px)' }}
-      viewport={{ once, amount, margin: '0px 0px -8% 0px' }}
-      transition={{ duration: 0.8, ease: EASE, delay: Math.min(delay, 0.8) }}
+      viewport={{ once, amount: Math.min(amount, 0.12), margin: '0px 0px 8% 0px' }}
+      transition={{ duration: 0.6, ease: EASE, delay: Math.min(delay, 0.35) }}
     >
       {children}
     </Tag>
@@ -90,7 +90,7 @@ export function Words({ text, className = '', delay = 0, as: Tag = 'h1', style }
               className="inline-block"
               initial={{ y: '110%', opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.7, ease: EASE, delay: delay + i * 0.05 }}
+              transition={{ duration: 0.6, ease: EASE, delay: delay + i * 0.035 }}
             >
               {w}
             </motion.span>
@@ -170,7 +170,8 @@ export function BgVideo({ clip, className = '', dim = 0.45, position = 'center',
           loop
           playsInline
           autoPlay={priority}
-          preload={priority ? 'auto' : 'metadata'}
+          preload="auto"
+          poster={poster}
           disablePictureInPicture
           onLoadedData={() => setReady(true)}
           onError={() => { if (!direct && directUrl(picked)) setDirect(true); else setFailed(true); }}

@@ -13,7 +13,7 @@ import { PARTNERSHIPS_EMAIL, TRACKS } from './shared';
 
 export function Hero() {
   const stat = isStatic();
-  const fade = (d: number) => stat ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.8, ease: EASE, delay: d } };
+  const fade = (d: number) => stat ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, ease: EASE, delay: d } };
   return (
     <VideoHero clip={VIDEOS.heroCity} height="min-h-[100svh]" dim={0.45} position="center 45%">
       <Container className="pb-8 pt-40 sm:pb-10 md:pt-48">
@@ -22,19 +22,19 @@ export function Hero() {
         </motion.div>
         <SplitHeadline
           parts={['Grow with the', { accent: 'SuperLocal', green: true }, 'app.']}
-          delay={0.25}
+          delay={0.1}
           className="max-w-[14ch] text-balance text-[46px] font-semibold leading-[0.98] tracking-[-0.045em] text-white sm:text-[64px] md:text-[84px]"
         />
-        <motion.p {...fade(0.8)} className="mt-6 max-w-[580px] text-[17px] leading-[1.6] text-white/75 sm:text-[19px]">
+        <motion.p {...fade(0.4)} className="mt-6 max-w-[580px] text-[17px] leading-[1.6] text-white/75 sm:text-[19px]">
           Deliver, cook, fix or sell for customers a few streets away. Free to apply, transparent terms, weekly payouts and a real onboarding manager from application to go-live.
         </motion.p>
-        <motion.div {...fade(0.95)} className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <motion.div {...fade(0.47)} className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
           <Magnetic className="w-full sm:w-auto"><GlowButton href="#tracks" className="w-full sm:w-auto">Choose your track <ArrowRight size={17} /></GlowButton></Magnetic>
           <GhostButton href={`mailto:${PARTNERSHIPS_EMAIL}`}>Talk to us</GhostButton>
         </motion.div>
 
         {/* glass strip: the four tracks */}
-        <motion.div {...fade(1.1)} className="mt-14 grid gap-1 rounded-2xl border border-white/15 bg-white/[.08] p-2 backdrop-blur-xl sm:mt-20 sm:grid-cols-2 lg:grid-cols-4">
+        <motion.div {...fade(0.55)} className="mt-14 grid gap-1 rounded-2xl border border-white/15 bg-white/[.08] p-2 backdrop-blur-xl sm:mt-20 sm:grid-cols-2 lg:grid-cols-4">
           {TRACKS.map(t => (
             <a key={t.id} href={t.href} className="group flex min-h-[52px] items-center gap-3 rounded-xl px-3.5 py-2.5 transition hover:bg-white/10">
               <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-400/20 text-emerald-200 ring-1 ring-emerald-300/30"><t.icon size={15} /></span>

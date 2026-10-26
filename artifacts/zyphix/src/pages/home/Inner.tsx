@@ -45,17 +45,17 @@ export function InnerHero({ clip, photo, kicker, parts, sub, children, aside, he
   clip?: Clip; photo?: Photo; kicker: string; parts: Part[]; sub?: React.ReactNode; children?: React.ReactNode; aside?: React.ReactNode; height?: string; position?: string;
 }) {
   const stat = isStatic();
-  const fade = (d: number) => (stat ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.8, ease: EASE, delay: d } });
+  const fade = (d: number) => (stat ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, ease: EASE, delay: d } });
   const body = (
     <Container className="pb-16 pt-36 md:pb-24 md:pt-44">
       <div className={aside ? 'grid items-end gap-12 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-16' : ''}>
         <div>
           <motion.div {...fade(0.1)}><Kicker light>{kicker}</Kicker></motion.div>
           <SplitHeadline parts={parts} delay={0.2} className={HERO_H1} />
-          {sub && <motion.div {...fade(0.6)}><Sub light className="mt-6 max-w-[54ch]">{sub}</Sub></motion.div>}
-          {children && <motion.div {...fade(0.75)} className="mt-9">{children}</motion.div>}
+          {sub && <motion.div {...fade(0.3)}><Sub light className="mt-6 max-w-[54ch]">{sub}</Sub></motion.div>}
+          {children && <motion.div {...fade(0.38)} className="mt-9">{children}</motion.div>}
         </div>
-        {aside && <motion.div {...fade(0.9)} className="hidden lg:block">{aside}</motion.div>}
+        {aside && <motion.div {...fade(0.45)} className="hidden lg:block">{aside}</motion.div>}
       </div>
     </Container>
   );

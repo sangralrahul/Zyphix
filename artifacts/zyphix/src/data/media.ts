@@ -68,12 +68,13 @@ export function imgFallback(e: { currentTarget: HTMLImageElement }) {
 
 /** Best rendition for a box of `cssWidth` px (accounts for device pixel ratio, capped for data). */
 export function pickRendition(c: Clip, cssWidth: number): string {
-  const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+  // Background clips sit under a dark overlay, so 1080p is wasted bytes (≈3–4× the 720p file).
+  // Cap device-pixel-ratio at 1.5 and never go above 720p.
+  const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 1.5) : 1;
   const px = cssWidth * dpr;
-  if (px <= 700 && c.src360) return c.src360;
-  if (px <= 1100 && c.src540) return c.src540;
-  if (px <= 1600) return c.src720;
-  return c.src;
+  if (px <= 640 && c.src360) return c.src360;
+  if (px <= 1080 && c.src540) return c.src540;
+  return c.src720 || c.src;
 }
 
 const CREDIT = "Pexels";
