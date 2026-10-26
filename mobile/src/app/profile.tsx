@@ -1,14 +1,22 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Avatar, Field } from '@/components/account/kit';
-import { Button, Empty } from '@/components/ui';
+import { EmptyState, Field } from '@/components/account/kit';
+import { Ico, K } from '@/components/kit';
+import { Button } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
-import { C, S, T } from '@/lib/theme';
+import { C } from '@/lib/theme';
 
 export default function Profile() {
+  const { user } = useAuth();
+  // Keyed on the user so the form starts from the loaded profile (also after a cold start / refresh).
+  return <ProfileForm key={user?.id ?? 'guest'} />;
+}
+
+function ProfileForm() {
   const { user, updateProfile } = useAuth();
   const insets = useSafeAreaInsets();
   const [name, setName] = useState(user?.name ?? '');
@@ -19,8 +27,8 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        <Empty title="Sign in to edit your profile" action="Sign in" onAction={() => router.push('/sign-in')} />
+      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: K.page }}>
+        <EmptyState icon="person-outline" title="Sign in to edit your profile" action="Sign in" onAction={() => router.push('/sign-in')} />
       </View>
     );
   }
@@ -38,22 +46,46 @@ export default function Profile() {
     finally { setBusy(false); }
   }
 
+  const initial = (name || user.email).trim().charAt(0).toUpperCase();
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: C.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: S.xl, gap: S.lg, paddingBottom: insets.bottom + S.xl }}>
-        <View style={{ alignItems: 'center', marginBottom: S.md }}>
-          <Avatar name={name || user.email} size={84} />
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: K.page }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: insets.bottom + 110 }}>
+        <View style={st.head}>
+          <LinearGradient colors={['#0B9A5F', '#34D399']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={st.avatar}>
+            <Text style={{ color: '#fff', fontSize: 34, fontWeight: '900' }}>{initial}</Text>
+          </LinearGradient>
+          <Text style={{ fontSize: 19, fontWeight: '900', color: K.ink, marginTop: 10 }} numberOfLines={1}>{name.trim() || 'Your name'}</Text>
+          <Text style={{ fontSize: 13, color: K.meta }} numberOfLines={1}>{user.email}</Text>
         </View>
-        <Field label="Name" value={name} onChangeText={t => { setName(t); setSaved(false); setErrs({}); }} error={errs.name} autoComplete="name" textContentType="name" />
-        <Field label="Phone" value={phone} onChangeText={t => { setPhone(t); setSaved(false); setErrs({}); }} error={errs.phone} keyboardType="phone-pad" autoComplete="tel" textContentType="telephoneNumber" placeholder="For delivery updates" />
-        <View>
-          <Field label="Email" value={user.email} editable={false} />
-          <Text style={[T.small, { color: C.text3, marginTop: 6 }]}>Your email is how you sign in, so it can’t be changed here.</Text>
+        <View style={[st.card, { gap: 14 }]}>
+          <Text style={st.h}>Personal details</Text>
+          <Field label="Name" value={name} onChangeText={t => { setName(t); setSaved(false); setErrs({}); }} error={errs.name} autoComplete="name" textContentType="name" />
+          <Field label="Phone" value={phone} onChangeText={t => { setPhone(t); setSaved(false); setErrs({}); }} error={errs.phone} keyboardType="phone-pad" autoComplete="tel" textContentType="telephoneNumber" placeholder="For delivery updates" />
+          <View>
+            <Field label="Email" value={user.email} editable={false} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 6 }}>
+              <Ico name="lock-closed" size={12} color="#9CA3AF" />
+              <Text style={{ fontSize: 12, color: '#9CA3AF' }}>Your email is how you sign in, so it can’t be changed here.</Text>
+            </View>
+          </View>
         </View>
-        {errs.form ? <Text style={{ color: C.red }}>{errs.form}</Text> : null}
-        {saved && !dirty ? <Text style={[T.small, { color: C.greenDeep, fontWeight: '600' }]}>Saved ✓</Text> : null}
-        <Button title="Save changes" onPress={save} loading={busy} disabled={!dirty} />
+        {errs.form ? <Text style={{ color: C.red, fontWeight: '600' }}>{errs.form}</Text> : null}
+        {saved && !dirty ? (
+          <View style={st.saved}><Ico name="checkmark-circle" size={16} color={C.greenDeep} /><Text style={{ color: C.greenDeep, fontWeight: '800', fontSize: 13.5 }}>Profile saved</Text></View>
+        ) : null}
       </ScrollView>
+      <View style={[st.footer, { paddingBottom: insets.bottom + 12 }]}>
+        <Button title="Save changes" onPress={save} loading={busy} disabled={!dirty} style={{ height: 52, borderRadius: 14 }} />
+      </View>
     </KeyboardAvoidingView>
   );
 }
+
+const st = StyleSheet.create({
+  head: { alignItems: 'center', backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: K.line, paddingVertical: 20 },
+  avatar: { width: 84, height: 84, borderRadius: 42, alignItems: 'center', justifyContent: 'center' },
+  card: { backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: K.line, padding: 14 },
+  h: { fontSize: 15, fontWeight: '900', color: K.ink },
+  saved: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'center', backgroundColor: '#E7F7EF', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+  footer: { position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: '#fff', paddingHorizontal: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: K.line },
+});

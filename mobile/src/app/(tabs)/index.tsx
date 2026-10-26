@@ -1,127 +1,131 @@
+import Constants from 'expo-constants';
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
-import React from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import React, { useMemo } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
-import { ServiceCards } from '@/components/home/ServiceCards';
-import { CategoryGrid, Icon, ProductRail, SearchPill, useTabCartBottom, type MaterialName } from '@/components/now/shared';
-import { discountPct, useCategories, useCategoryRails, useRefresh } from '@/components/now/useCatalog';
-import { CartBar, HeroVideo, SectionHeader, Tap } from '@/components/ui';
-import { CLIPS } from '@/data/media';
+import { ServiceSwitcher } from '@/components/home/ServiceSwitcher';
+import { AppHeader, FloatingCart, Ico, K, OfferCarousel, RatingPill, SectionTitle, useFloatBottom } from '@/components/kit';
+import { CatGrid, hasPhoto, norm, pct, photosFirst, Rail, useCategoryThumbs } from '@/components/now/blocks';
+import { useCategories, useRefresh } from '@/components/now/useCatalog';
+import { Tap } from '@/components/ui';
+import { SERVICES } from '@/data/book';
+import { MENU, RESTAURANTS } from '@/data/eats';
+import { photo } from '@/data/media';
 import type { Product } from '@/lib/api';
-import { useAuth } from '@/lib/auth';
-import { C, R, S, T } from '@/lib/theme';
-import type { SFSymbol } from 'expo-symbols';
+import { C } from '@/lib/theme';
 
 const REFRESH_KEYS = [['categories'], ['products']] as const;
 
-const LINKS: { title: string; sub: string; url: string; ios: SFSymbol; md: MaterialName }[] = [
-  { title: 'Partner with Zyphix', sub: 'List your store, kitchen or service', url: 'https://partner.zyphix.in', ios: 'storefront', md: 'storefront' },
-  { title: 'Advertise on Zyphix', sub: 'Reach shoppers in your neighbourhood', url: 'https://advertise.zyphix.in', ios: 'megaphone', md: 'campaign' },
-  { title: 'Help & support', sub: 'Orders, payments and account help', url: 'https://support.zyphix.in', ios: 'questionmark.circle', md: 'help' },
-];
-
 export default function Home() {
-  const { user } = useAuth();
-  const cartBottom = useTabCartBottom();
+  const { width } = useWindowDimensions();
+  const w = Math.min(width, 520);
+  const floatBottom = useFloatBottom();
   const cats = useCategories();
-  const railCats = (cats.data ?? []).slice(0, 8);
-  const rails = useCategoryRails(railCats);
+  const all = cats.data ?? [];
+  const gridCats = all.slice(0, 8);
+  const fresh = all.find(c => norm(c.name) === norm('Fruits & Veg'));
+  const railCats = useMemo(() => (fresh && !gridCats.includes(fresh) ? [...gridCats, fresh] : gridCats), [all]); // eslint-disable-line react-hooks/exhaustive-deps
+  const thumbs = useCategoryThumbs(railCats);
   const { refreshing, onRefresh } = useRefresh(REFRESH_KEYS);
 
-  const railsLoading = cats.isLoading || (railCats.length > 0 && rails.every(r => r.isLoading));
-  const all = rails.map(r => r.data ?? []);
-  const deals = all.flat().filter(p => discountPct(p) > 0).sort((a, b) => discountPct(b) - discountPct(a)).slice(0, 12);
-  // Round-robin across categories so "Popular" isn't all one aisle.
-  const dealIds = new Set(deals.map(d => d.id));
-  const popular: Product[] = [];
-  for (let i = 0; i < 10 && popular.length < 12; i++) for (const list of all) { const p = list[i]; if (p && !dealIds.has(p.id) && popular.length < 12) popular.push(p); }
+  const lists = railCats.map(c => thumbs[c.name]?.products ?? []);
+  const loading = cats.isLoading || (railCats.length > 0 && railCats.every(c => thumbs[c.name]?.loading));
+  const flat = lists.flat();
 
-  const firstName = user?.name?.split(' ')[0];
+  // Bestsellers: round-robin across aisles, real photos only. Deals: biggest discounts.
+  const best: Product[] = [];
+  for (let i = 0; i < 10 && best.length < 12; i++) for (const l of lists) { const p = l.filter(hasPhoto)[i]; if (p && best.length < 12) best.push(p); }
+  const bestIds = new Set(best.map(p => p.id));
+  const deals = photosFirst(flat.filter(p => pct(p) > 0 && !bestIds.has(p.id))).sort((a, b) => Number(hasPhoto(b)) - Number(hasPhoto(a)) || pct(b) - pct(a)).slice(0, 12);
+  const freshList = fresh ? (thumbs[fresh.name]?.products ?? []).slice(0, 12) : [];
+
+  const groceryPic = flat.find(hasPhoto)?.image;
+  const dish = MENU.find(m => /biryani/i.test(m.name))?.image ?? MENU[0]?.image;
+  const svc = SERVICES.find(s => /clean/i.test(s.title)) ?? SERVICES[0];
 
   return (
-    <View collapsable={false} style={{ flex: 1, backgroundColor: C.bg }}>
+    <View collapsable={false} style={{ flex: 1, backgroundColor: K.page }}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: cartBottom + 96 }}
+        contentContainerStyle={{ paddingBottom: floatBottom + 120 }}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="never"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.white} colors={[C.green]} />}>
-        <HeroVideo clip={CLIPS.heroCity} height={350}>
-          <View style={{ flex: 1 }}>
-            <View style={s.brandRow}>
-              <Text style={s.wordmark}>zyphix</Text>
-              <Tap onPress={() => router.push('/account')} style={s.avatar} accessibilityLabel="Account">
-                {firstName ? <Text style={{ color: C.white, fontWeight: '700', fontSize: 15 }}>{firstName[0]!.toUpperCase()}</Text>
-                  : <Icon ios="person.fill" md="person" size={18} color={C.white} />}
-              </Tap>
-            </View>
-          </View>
-          <Animated.View entering={FadeInDown.duration(500)}>
-            <Text style={s.kicker}>{firstName ? `HI ${firstName.toUpperCase()} · ` : ''}THE SUPERLOCAL APP</Text>
-            <Text style={s.title}>Your neighbourhood, <Text style={[T.accent, { color: C.mint }]}>delivered</Text>.</Text>
-            <SearchPill dark placeholder="Search milk, bread, snacks…" style={{ marginTop: S.lg }} />
-          </Animated.View>
-        </HeroVideo>
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" colors={[C.green]} />}>
+        <AppHeader bottomPad={18}>
+          <ServiceSwitcher grocery={groceryPic} dish={dish} service={svc ? photo(svc.photo, 240) : undefined} />
+        </AppHeader>
 
-        <ServiceCards />
+        <OfferCarousel products={flat} />
 
-        <SectionHeader title="Shop by category" action="See all" onAction={() => router.push('/now')} />
-        <CategoryGrid cats={railCats} loading={cats.isLoading} />
-        {cats.isError && <Text style={s.error}>Couldn’t load the catalogue. Pull down to retry.</Text>}
+        <SectionTitle title="Shop by category" onAction={() => router.navigate('/now')} />
+        <CatGrid cats={gridCats} thumbs={thumbs} width={w} loading={cats.isLoading} />
+        {cats.isError ? <Text style={st.error}>Couldn’t load the store. Pull down to retry.</Text> : null}
 
-        <ProductRail title="Deals for you" products={deals} loading={railsLoading} />
-        <ProductRail title="Popular near you" products={popular} loading={railsLoading} />
+        <Rail title="Bestsellers" sub="Most loved in your neighbourhood" products={best} loading={loading} onSeeAll={() => router.navigate('/now')} />
+        <Rail title="Deals of the day" sub="Biggest price drops right now" products={deals} loading={loading} />
+        {fresh ? (
+          <Rail title="Fresh fruits & vegetables" products={freshList} loading={loading}
+            onSeeAll={() => router.push({ pathname: '/category/[name]', params: { name: fresh.name } })} />
+        ) : null}
 
-        <Animated.View entering={FadeInDown.duration(400)} style={{ paddingHorizontal: S.xl, marginTop: S.x3 }}>
-          <Tap onPress={() => router.push('/orders')} style={s.track} accessibilityRole="button" accessibilityLabel="Track your orders">
-            <Image source={CLIPS.rider.poster} style={StyleSheet.absoluteFill} contentFit="cover" />
-            <LinearGradient colors={['rgba(5,8,14,.92)', 'rgba(5,8,14,.55)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
-            <View style={{ padding: S.xl, gap: 6, maxWidth: 260 }}>
-              <View style={s.liveDot}><View style={s.liveInner} /><Text style={[T.tiny, { color: C.mint }]}>LIVE</Text></View>
-              <Text style={[T.h2, { color: C.white }]}>Track every order <Text style={[T.accent, { color: C.mint }]}>live</Text></Text>
-              <Text style={[T.small, { color: 'rgba(255,255,255,.8)' }]}>Follow each step from packing to your door.</Text>
-              <View style={s.trackBtn}><Text style={[T.small, { fontWeight: '700', color: C.ink }]}>Your orders</Text><Icon ios="chevron.right" md="chevron_right" size={14} color={C.ink} /></View>
-            </View>
-          </Tap>
-        </Animated.View>
-
-        <SectionHeader title="More from Zyphix" />
-        <View style={s.links}>
-          {LINKS.map((l, i) => (
-            <Tap key={l.url} onPress={() => WebBrowser.openBrowserAsync(l.url).catch(() => {})} scale={0.99}
-              style={[s.linkRow, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.line }]} accessibilityRole="link">
-              <View style={s.linkIcon}><Icon ios={l.ios} md={l.md} size={20} color={C.greenDeep} /></View>
-              <View style={{ flex: 1 }}>
-                <Text style={T.bodyStrong}>{l.title}</Text>
-                <Text style={[T.small, { color: C.text2 }]}>{l.sub}</Text>
+        <SectionTitle title="Order food" sub="From kitchens near you" onAction={() => router.navigate('/eats')} />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}>
+          {RESTAURANTS.slice(0, 8).map(r => (
+            <Tap key={r.id} onPress={() => router.push({ pathname: '/restaurant/[id]', params: { id: r.id } })} style={st.rest} scale={0.97}>
+              <View style={st.restImg}>
+                <Image source={r.image} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} recyclingKey={r.id} />
+                {r.deliveryFee === 0 ? <View style={st.restTag}><Text style={st.restTagTxt}>FREE DELIVERY</Text></View> : null}
               </View>
-              <Icon ios="arrow.up.right" md="north_east" size={16} color={C.text3} />
+              <View style={{ padding: 9, gap: 3 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={st.restName} numberOfLines={1}>{r.name}</Text>
+                  <RatingPill rating={r.rating} size="sm" />
+                </View>
+                <Text style={st.meta} numberOfLines={1}>{r.cuisineType}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                  <Ico name="time-outline" size={12} color={K.meta} />
+                  <Text style={st.meta}>{r.eta}s</Text>
+                </View>
+              </View>
             </Tap>
           ))}
+        </ScrollView>
+
+        <SectionTitle title="Book a pro" sub="Verified professionals, price confirmed upfront" onAction={() => router.navigate('/book')} />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 14 }}>
+          {SERVICES.slice(0, 8).map(s => (
+            <Tap key={s.id} onPress={() => router.push({ pathname: '/service/[id]', params: { id: s.id } })} style={{ width: 72, alignItems: 'center' }} scale={0.94}>
+              <View style={st.proRing}>
+                <Image source={photo(s.photo, 200)} style={st.proImg} contentFit="cover" transition={150} recyclingKey={s.id} />
+              </View>
+              <Text style={st.proName} numberOfLines={2}>{s.title}</Text>
+            </Tap>
+          ))}
+        </ScrollView>
+
+        <View style={st.footer}>
+          <Text style={st.footBig}>zyphix</Text>
+          <Text style={st.footTxt}>Zyphix · The SuperLocal app</Text>
+          <Text style={[st.footTxt, { fontSize: 11 }]}>v{Constants.expoConfig?.version ?? '1.0.0'}</Text>
         </View>
-        <Text style={s.footer}>Zyphix · The SuperLocal app</Text>
       </ScrollView>
-      <CartBar kind="now" bottom={cartBottom} />
+      <FloatingCart kind="now" bottom={floatBottom} />
     </View>
   );
 }
 
-const s = StyleSheet.create({
-  brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  wordmark: { color: C.white, fontSize: 24, fontWeight: '800', letterSpacing: -0.8 },
-  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,.16)', borderWidth: 1, borderColor: 'rgba(255,255,255,.25)', alignItems: 'center', justifyContent: 'center' },
-  kicker: { ...T.tiny, color: C.mint, letterSpacing: 1.4, marginBottom: 8 },
-  title: { ...T.display, fontSize: 38, lineHeight: 42, color: C.white },
-  error: { ...T.small, color: C.text2, textAlign: 'center', marginTop: S.md },
-  track: { borderRadius: R.lg, overflow: 'hidden', backgroundColor: C.ink, minHeight: 190, justifyContent: 'center' },
-  liveDot: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  liveInner: { width: 8, height: 8, borderRadius: 4, backgroundColor: C.mint },
-  trackBtn: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 4, backgroundColor: C.white, borderRadius: R.pill, paddingHorizontal: 14, height: 36, marginTop: 8 },
-  links: { marginHorizontal: S.xl, borderRadius: R.lg, borderWidth: 1, borderColor: C.line, overflow: 'hidden' },
-  linkRow: { flexDirection: 'row', alignItems: 'center', gap: S.md, padding: S.lg, minHeight: 64, backgroundColor: C.bg },
-  linkIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: C.greenSoft, alignItems: 'center', justifyContent: 'center' },
-  footer: { ...T.small, color: C.text3, textAlign: 'center', marginTop: S.x3 },
+const st = StyleSheet.create({
+  error: { fontSize: 13, color: K.meta, textAlign: 'center', marginTop: 12 },
+  rest: { width: 176, backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: K.line, overflow: 'hidden' },
+  restImg: { width: '100%', aspectRatio: 16 / 10, backgroundColor: '#EEF1F5' },
+  restTag: { position: 'absolute', left: 0, bottom: 8, backgroundColor: C.green, borderTopRightRadius: 6, borderBottomRightRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
+  restTagTxt: { color: '#fff', fontSize: 9, fontWeight: '900', letterSpacing: 0.3 },
+  restName: { flex: 1, fontSize: 14, fontWeight: '800', color: K.ink },
+  meta: { fontSize: 12, color: K.meta, fontWeight: '500' },
+  proRing: { width: 66, height: 66, borderRadius: 33, backgroundColor: '#fff', borderWidth: 1, borderColor: K.line, padding: 3 },
+  proImg: { width: '100%', height: '100%', borderRadius: 30 },
+  proName: { fontSize: 11.5, fontWeight: '600', color: K.ink, textAlign: 'center', marginTop: 6, lineHeight: 14 },
+  footer: { alignItems: 'center', marginTop: 36, gap: 2, paddingHorizontal: 16 },
+  footBig: { fontSize: 44, fontWeight: '900', color: '#D5DAE1', letterSpacing: -2 },
+  footTxt: { fontSize: 12.5, color: '#9AA3AF', fontWeight: '600' },
 });

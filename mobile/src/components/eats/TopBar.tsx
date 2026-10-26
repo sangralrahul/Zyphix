@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { Extrapolation, interpolate, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Ico } from '@/components/kit';
 import { C, S, T, shadow } from '@/lib/theme';
 
 /**
@@ -23,7 +24,7 @@ export function CollapsingTopBar({ y, title, fadeAt, right }: { y: SharedValue<n
       </Animated.View>
       <View style={{ position: 'absolute', top: insets.top + 6, left: S.md, right: S.md, flexDirection: 'row', justifyContent: 'space-between' }} pointerEvents="box-none">
         <Pressable onPress={back} accessibilityRole="button" accessibilityLabel="Back" hitSlop={6} style={st.btn}>
-          <Text style={st.chev}>‹</Text>
+          <Ico name="chevron-back" size={22} color={C.text} />
         </Pressable>
         {right}
       </View>
@@ -44,5 +45,4 @@ export function ParallaxImage({ y, height, children }: { y: SharedValue<number>;
 
 const st = StyleSheet.create({
   btn: { width: 40, height: 40, borderRadius: 20, backgroundColor: C.bg, alignItems: 'center', justifyContent: 'center', ...shadow },
-  chev: { fontSize: 30, lineHeight: 32, color: C.text, marginTop: -3, marginLeft: -2, fontWeight: '400' },
 });

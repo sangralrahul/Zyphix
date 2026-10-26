@@ -2,18 +2,20 @@ import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { priceCart } from '@/components/now/checkoutMath';
-import { BillSummary, Icon } from '@/components/now/shared';
-import { Button, Empty, Tap } from '@/components/ui';
+import { Ico, K, type IconName } from '@/components/kit';
+import { BillCard } from '@/components/now/BillCard';
+import { EmptyState } from '@/components/now/blocks';
+import { priceCart, useHasOrders, withCoupon } from '@/components/now/checkoutMath';
+import { Tap } from '@/components/ui';
 import { Api, ApiError, type Address, type Order, type OrderLine } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useCart, type Kind } from '@/lib/cart';
 import { saveLocalOrder } from '@/lib/orderCache';
-import { C, R, S, T, inr } from '@/lib/theme';
+import { C, inr } from '@/lib/theme';
 
 type Form = { name: string; phone: string; email: string; line1: string; city: string; pincode: string; notes: string };
 type Errors = Partial<Record<keyof Form | 'address' | 'submit', string>>;
@@ -36,13 +38,15 @@ function validate(f: Form, needEmail: boolean): Errors {
 }
 
 export default function Checkout() {
-  const params = useLocalSearchParams<{ kind?: string }>();
+  const params = useLocalSearchParams<{ kind?: string; coupon?: string }>();
   const kind: Kind = params.kind === 'eats' ? 'eats' : 'now';
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const cart = useCart();
   const lines = cart[kind];
   const m = priceCart(kind, lines, kind === 'eats' ? cart.eatsRestaurant?.id : null);
+  const hasOrders = useHasOrders();
+  const cp = withCoupon(m, params.coupon ? String(params.coupon) : null, hasOrders);
 
   const addresses = useQuery({ queryKey: ['addresses', user?.id], queryFn: Api.addresses, enabled: !!user });
   // Pick up an address added on /address-edit when we come back.
@@ -77,7 +81,8 @@ export default function Checkout() {
     const id = `${prefix}${Date.now().toString(36).toUpperCase()}`;
     const items: OrderLine[] = lines.map(l => ({ id: l.id, name: l.name, brand: l.brand, price: l.price, origPrice: l.origPrice ?? null, image: l.image, weight: l.weight, qty: l.qty }));
     const payload = {
-      id, items, subtotal: m.subtotal, deliveryFee: m.delivery, couponDiscount: 0, walletUsed: 0, total: m.bill.total,
+      id, items, subtotal: m.subtotal, deliveryFee: cp.delivery, couponDiscount: cp.couponDiscount, walletUsed: 0, total: cp.total,
+      ...(cp.ok && cp.coupon ? { couponCode: cp.coupon.code } : {}),
       address, paymentMode: 'COD', status: 'placed', etaMinutes: m.etaMinutes,
       ...(!user ? { email: form.email.trim().toLowerCase() } : {}),
     };
@@ -85,7 +90,7 @@ export default function Checkout() {
     setErrors({});
     try {
       const res = await Api.createOrder(payload);
-      const order: Order = { id: res.id, createdAt: res.createdAt ?? new Date().toISOString(), status: 'placed', items, subtotal: m.subtotal, deliveryFee: m.delivery, discount: 0, total: m.bill.total, paymentMode: 'COD', address, etaMinutes: m.etaMinutes };
+      const order: Order = { id: res.id, createdAt: res.createdAt ?? new Date().toISOString(), status: 'placed', items, subtotal: m.subtotal, deliveryFee: cp.delivery, discount: cp.couponDiscount, total: cp.total, paymentMode: 'COD', address, etaMinutes: m.etaMinutes };
       await saveLocalOrder(order);
       if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       cart.clear(kind);
@@ -99,110 +104,146 @@ export default function Checkout() {
   if (lines.length === 0 && !placing) {
     return (
       <View style={[st.fill, { justifyContent: 'center' }]}>
-        <Empty title="Nothing to check out" body="Your cart is empty." action="Back to shopping" onAction={() => router.back()} />
+        <EmptyState icon="cart-outline" title="Nothing to check out" body="Your cart is empty." action="Back to shopping" onAction={() => router.back()} />
       </View>
     );
   }
 
+  const count = lines.reduce((a, l) => a + l.qty, 0);
+  const fieldErrors = Object.keys(errors).some(k => k !== 'submit' && errors[k as keyof Errors]);
+
   return (
     <KeyboardAvoidingView style={st.fill} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
-      <Stack.Screen options={{ title: 'Checkout' }} />
-      <ScrollView contentContainerStyle={{ padding: S.xl, paddingBottom: insets.bottom + 130, gap: S.lg }} keyboardShouldPersistTaps="handled">
+      <Stack.Screen options={{ title: 'Checkout', headerTitleStyle: { fontWeight: '800' } }} />
+      <ScrollView contentContainerStyle={{ padding: 12, paddingBottom: insets.bottom + 140, gap: 12 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        {/* Delivery summary */}
+        <View style={st.eta}>
+          <View style={st.etaIco}><Ico name={kind === 'eats' ? 'restaurant' : 'flash'} size={18} color="#fff" /></View>
+          <View style={{ flex: 1 }}>
+            <Text style={st.etaT}>Delivery in {m.etaMinutes} minutes</Text>
+            <Text style={st.etaS}>{count} item{count === 1 ? '' : 's'}{kind === 'eats' && cart.eatsRestaurant ? ` from ${cart.eatsRestaurant.name}` : ' · packed by a store near you'}</Text>
+          </View>
+        </View>
+
         {/* Address */}
         <View style={st.card}>
-          <View style={st.cardHead}>
-            <Icon ios="mappin.circle.fill" md="location_on" size={20} color={C.green} />
-            <Text style={[T.h3, { flex: 1 }]}>Delivery address</Text>
-          </View>
-
+          <CardHead icon="location" title="Delivery address" />
           {useSaved ? (
-            <View style={{ gap: S.sm }}>
+            <View style={{ gap: 8 }}>
               {saved.map(a => {
                 const on = selected?.id === a.id;
                 return (
-                  <Tap key={a.id} onPress={() => setSelectedId(a.id)} scale={0.99} style={[st.addr, on && st.addrOn]} accessibilityRole="radio" accessibilityState={{ checked: on }}>
-                    <Icon ios={on ? 'largecircle.fill.circle' : 'circle'} md={on ? 'radio_button_checked' : 'radio_button_unchecked'} size={20} color={on ? C.green : C.text3} />
+                  <Tap key={a.id} onPress={() => setSelectedId(a.id)} scale={0.99} style={[st.opt, on && st.optOn]} accessibilityRole="radio" accessibilityState={{ checked: on }}>
+                    <Ico name={on ? 'radio-button-on' : 'radio-button-off'} size={20} color={on ? C.green : '#9CA3AF'} />
                     <View style={{ flex: 1 }}>
-                      <Text style={T.bodyStrong}>{a.label || 'Address'}{a.isDefault ? <Text style={st.defTag}>  DEFAULT</Text> : null}</Text>
-                      <Text style={[T.small, { color: C.text2 }]} numberOfLines={2}>{[a.line1, a.line2, a.city, a.pincode].filter(Boolean).join(', ')}</Text>
-                      <Text style={[T.small, { color: C.text3 }]}>{a.name} · {a.phone}</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={st.optT}>{a.label || 'Address'}</Text>
+                        {a.isDefault ? <View style={st.def}><Text style={st.defTxt}>DEFAULT</Text></View> : null}
+                      </View>
+                      <Text style={st.optS} numberOfLines={2}>{[a.line1, a.line2, a.city, a.pincode].filter(Boolean).join(', ')}</Text>
+                      <Text style={[st.optS, { color: '#9CA3AF' }]}>{a.name} · {a.phone}</Text>
                     </View>
                   </Tap>
                 );
               })}
               <Pressable onPress={() => router.push('/address-edit')} style={st.addNew} accessibilityRole="button">
-                <Icon ios="plus" md="add" size={18} color={C.green} />
-                <Text style={[T.bodyStrong, { color: C.green }]}>Add new address</Text>
+                <Ico name="add" size={18} color={C.green} />
+                <Text style={st.addNewTxt}>Add new address</Text>
               </Pressable>
-              {errors.address && <Text style={st.err}>{errors.address}</Text>}
+              {errors.address ? <Text style={st.err}>{errors.address}</Text> : null}
             </View>
           ) : user && addresses.isLoading ? (
-            <Text style={[T.small, { color: C.text2 }]}>Loading your saved addresses…</Text>
+            <Text style={st.optS}>Loading your saved addresses…</Text>
           ) : (
-            <Animated.View entering={FadeIn} style={{ gap: S.md }}>
-              {!user && (
+            <Animated.View entering={FadeIn} style={{ gap: 12 }}>
+              {!user ? (
                 <Pressable onPress={() => router.push('/sign-in')} style={st.signIn} accessibilityRole="link">
-                  <Icon ios="person.crop.circle" md="account_circle" size={20} color={C.greenDeep} />
-                  <Text style={[T.small, { flex: 1, color: C.text }]}><Text style={{ fontWeight: '700', color: C.greenDeep }}>Sign in for faster checkout</Text> — saved addresses and order history.</Text>
-                  <Icon ios="chevron.right" md="chevron_right" size={14} color={C.text3} />
+                  <Ico name="person-circle" size={22} color={C.greenDeep} />
+                  <Text style={[st.optS, { flex: 1, color: K.ink }]}><Text style={{ fontWeight: '800', color: C.greenDeep }}>Sign in for faster checkout</Text> — saved addresses and order history.</Text>
+                  <Ico name="chevron-forward" size={16} color={K.meta} />
                 </Pressable>
-              )}
+              ) : null}
               <Field label="Full name" value={form.name} onChangeText={set('name')} error={errors.name} autoComplete="name" textContentType="name" />
               <Field label="Mobile number" value={form.phone} onChangeText={set('phone')} error={errors.phone} keyboardType="phone-pad" autoComplete="tel" textContentType="telephoneNumber" maxLength={14} />
-              {!user && <Field label="Email (for order updates)" value={form.email} onChangeText={set('email')} error={errors.email} keyboardType="email-address" autoCapitalize="none" autoComplete="email" textContentType="emailAddress" />}
+              {!user ? <Field label="Email (for order updates)" value={form.email} onChangeText={set('email')} error={errors.email} keyboardType="email-address" autoCapitalize="none" autoComplete="email" textContentType="emailAddress" /> : null}
               <Field label="House / flat, street, area" value={form.line1} onChangeText={set('line1')} error={errors.line1} autoComplete="street-address" textContentType="fullStreetAddress" />
-              <View style={{ flexDirection: 'row', gap: S.md }}>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
                 <View style={{ flex: 1 }}><Field label="City" value={form.city} onChangeText={set('city')} error={errors.city} textContentType="addressCity" /></View>
                 <View style={{ width: 130 }}><Field label="Pincode" value={form.pincode} onChangeText={v => set('pincode')(digits(v))} error={errors.pincode} keyboardType="number-pad" maxLength={6} textContentType="postalCode" autoComplete="postal-code" /></View>
               </View>
-              {user && (
+              {user ? (
                 <Pressable onPress={() => router.push('/address-edit')} style={st.addNew}>
-                  <Icon ios="plus" md="add" size={18} color={C.green} />
-                  <Text style={[T.bodyStrong, { color: C.green }]}>Save an address to your account</Text>
+                  <Ico name="add" size={18} color={C.green} />
+                  <Text style={st.addNewTxt}>Save an address to your account</Text>
                 </Pressable>
-              )}
+              ) : null}
             </Animated.View>
           )}
-          <View style={{ marginTop: S.md }}>
-            <Field label="Delivery instructions (optional)" value={form.notes} onChangeText={set('notes')} maxLength={200} />
+          <View style={{ marginTop: 12 }}>
+            <Field label="Delivery instructions (optional)" placeholder="e.g. Ring the bell, leave at the door" value={form.notes} onChangeText={set('notes')} maxLength={200} />
           </View>
         </View>
 
         {/* Payment */}
         <View style={st.card}>
-          <View style={st.cardHead}>
-            <Icon ios="creditcard.fill" md="payments" size={20} color={C.green} />
-            <Text style={T.h3}>Payment</Text>
-          </View>
-          <View style={[st.addr, st.addrOn]} accessibilityRole="radio" accessibilityState={{ checked: true }}>
-            <Icon ios="largecircle.fill.circle" md="radio_button_checked" size={20} color={C.green} />
+          <CardHead icon="wallet" title="Payment method" />
+          <View style={[st.opt, st.optOn]} accessibilityRole="radio" accessibilityState={{ checked: true }}>
+            <View style={st.payIco}><Ico name="cash-outline" size={18} color={C.greenDeep} /></View>
             <View style={{ flex: 1 }}>
-              <Text style={T.bodyStrong}>Cash on delivery</Text>
-              <Text style={[T.small, { color: C.text2 }]}>Pay by cash or UPI when your order arrives</Text>
+              <Text style={st.optT}>Cash on delivery</Text>
+              <Text style={st.optS}>Pay by cash or UPI when your order arrives</Text>
             </View>
+            <Ico name="radio-button-on" size={20} color={C.green} />
           </View>
-          <View style={[st.addr, { opacity: 0.5, marginTop: S.sm }]} accessibilityRole="radio" accessibilityState={{ checked: false, disabled: true }}>
-            <Icon ios="circle" md="radio_button_unchecked" size={20} color={C.text3} />
+          <View style={[st.opt, { opacity: 0.55, marginTop: 8 }]} accessibilityRole="radio" accessibilityState={{ checked: false, disabled: true }}>
+            <View style={[st.payIco, { backgroundColor: '#F1F3F6' }]}><Ico name="card-outline" size={18} color={K.meta} /></View>
             <View style={{ flex: 1 }}>
-              <Text style={T.bodyStrong}>Pay online</Text>
-              <Text style={[T.small, { color: C.text2 }]}>Cards, UPI and wallets</Text>
+              <Text style={st.optT}>Pay online</Text>
+              <Text style={st.optS}>Cards, UPI and wallets</Text>
             </View>
             <View style={st.soon}><Text style={st.soonTxt}>COMING SOON</Text></View>
           </View>
         </View>
 
-        <BillSummary bill={m.bill} freeDeliveryHint={m.freeHint} />
-        {m.belowMin && <Text style={st.err}>Minimum order for {m.restaurant?.name ?? 'this restaurant'} is {inr(m.minOrder)}.</Text>}
+        {cp.ok && cp.coupon ? (
+          <View style={st.couponOk}>
+            <Ico name="ticket" size={16} color={K.blue} />
+            <Text style={st.couponOkTxt}><Text style={{ fontWeight: '900' }}>{cp.coupon.code}</Text> applied · you save {cp.couponDiscount ? inr(cp.couponDiscount) : 'the delivery fee'}</Text>
+          </View>
+        ) : null}
+
+        <BillCard subtotal={m.subtotal} savings={m.savings} delivery={cp.delivery} deliveryBase={m.delivery || (kind === 'now' ? 25 : 0)}
+          couponCode={cp.ok ? cp.coupon?.code : null} couponDiscount={cp.couponDiscount} total={cp.total} hint={m.freeHint && !cp.deliveryWaived ? m.freeHint : undefined} />
+        {m.belowMin ? <Text style={st.err}>Minimum order for {m.restaurant?.name ?? 'this restaurant'} is {inr(m.minOrder)}.</Text> : null}
+        <Text style={st.fine}>By placing this order you agree to Zyphix’s terms. Prices include taxes.</Text>
       </ScrollView>
 
-      <View style={[st.bottom, { paddingBottom: insets.bottom + 12 }]}>
-        {errors.submit && <Text style={[st.err, { marginBottom: S.sm }]}>{errors.submit}</Text>}
-        {Object.keys(errors).some(k => k !== 'submit' && errors[k as keyof Errors]) && !errors.submit && (
-          <Text style={[st.err, { marginBottom: S.sm }]}>Please fix the highlighted fields.</Text>
-        )}
-        <Button title={`Place order · ${inr(m.bill.total)}`} loading={placing} disabled={m.belowMin} onPress={place} />
+      <View style={[st.bottom, { paddingBottom: insets.bottom + 10 }]}>
+        {errors.submit ? <Text style={[st.err, { marginBottom: 8 }]}>{errors.submit}</Text> : null}
+        {fieldErrors && !errors.submit ? <Text style={[st.err, { marginBottom: 8 }]}>Please fix the highlighted fields.</Text> : null}
+        <Tap onPress={placing || m.belowMin ? undefined : place} style={[st.place, (m.belowMin || placing) && { opacity: 0.6 }]} scale={0.98} accessibilityRole="button" accessibilityState={{ disabled: m.belowMin, busy: placing }}>
+          <View>
+            <Text style={st.placeAmt}>{inr(cp.total)}</Text>
+            <Text style={st.placeTot}>TOTAL · CASH</Text>
+          </View>
+          {placing ? <ActivityIndicator color="#fff" /> : (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Text style={st.placeCta}>Place order</Text>
+              <Ico name="chevron-forward" size={18} color="#fff" />
+            </View>
+          )}
+        </Tap>
       </View>
     </KeyboardAvoidingView>
+  );
+}
+
+function CardHead({ icon, title }: { icon: IconName; title: string }) {
+  return (
+    <View style={st.head}>
+      <Ico name={icon} size={18} color={C.green} />
+      <Text style={st.headT}>{title}</Text>
+    </View>
   );
 }
 
@@ -212,26 +253,43 @@ function Field({ label, error, ...rest }: TextInputProps & { label: string; erro
     <View>
       <Text style={st.label}>{label}</Text>
       <TextInput {...rest} onFocus={e => { setFocus(true); rest.onFocus?.(e); }} onBlur={e => { setFocus(false); rest.onBlur?.(e); }}
-        placeholderTextColor={C.text3} accessibilityLabel={label}
+        placeholderTextColor="#9CA3AF" accessibilityLabel={label}
         style={[st.input, focus && { borderColor: C.green }, !!error && { borderColor: C.red }]} />
-      {!!error && <Text style={st.err}>{error}</Text>}
+      {error ? <Text style={st.err}>{error}</Text> : null}
     </View>
   );
 }
 
 const st = StyleSheet.create({
-  fill: { flex: 1, backgroundColor: C.bgSoft },
-  card: { backgroundColor: C.bg, borderRadius: R.lg, borderWidth: 1, borderColor: C.line, padding: S.lg },
-  cardHead: { flexDirection: 'row', alignItems: 'center', gap: S.sm, marginBottom: S.md },
-  addr: { flexDirection: 'row', alignItems: 'center', gap: S.md, padding: S.md, borderRadius: R.md, borderWidth: 1, borderColor: C.line, minHeight: 56 },
-  addrOn: { borderColor: C.green, backgroundColor: '#F4FBF7' },
-  defTag: { fontSize: 10, fontWeight: '800', color: C.greenDeep, letterSpacing: 0.6 },
-  addNew: { flexDirection: 'row', alignItems: 'center', gap: S.sm, minHeight: 44, paddingHorizontal: 4 },
-  signIn: { flexDirection: 'row', alignItems: 'center', gap: S.sm, backgroundColor: C.greenSoft, borderRadius: R.md, padding: S.md },
-  label: { ...T.small, fontWeight: '600', color: C.text2, marginBottom: 6 },
-  input: { height: 48, borderRadius: R.sm, borderWidth: 1, borderColor: C.line, paddingHorizontal: S.md, ...T.body, color: C.text, backgroundColor: C.bg, ...noOutline },
-  err: { ...T.small, color: C.red, marginTop: 4 },
-  soon: { backgroundColor: C.bgSoft, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 3 },
-  soonTxt: { fontSize: 9, fontWeight: '800', color: C.text2, letterSpacing: 0.5 },
-  bottom: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: S.xl, paddingTop: S.md, backgroundColor: C.bg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.line },
+  fill: { flex: 1, backgroundColor: K.page },
+  eta: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: K.line, padding: 14 },
+  etaIco: { width: 38, height: 38, borderRadius: 12, backgroundColor: C.green, alignItems: 'center', justifyContent: 'center' },
+  etaT: { fontSize: 16, fontWeight: '800', color: K.ink },
+  etaS: { fontSize: 12, color: K.meta, marginTop: 1 },
+  card: { backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: K.line, padding: 14 },
+  head: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
+  headT: { fontSize: 15, fontWeight: '800', color: K.ink },
+  opt: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: K.line, minHeight: 56 },
+  optOn: { borderColor: C.green, backgroundColor: '#F3FBF7' },
+  optT: { fontSize: 14, fontWeight: '800', color: K.ink },
+  optS: { fontSize: 12.5, color: K.meta, lineHeight: 17 },
+  def: { backgroundColor: '#E9F8F1', borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1 },
+  defTxt: { fontSize: 9.5, fontWeight: '900', color: C.greenDeep, letterSpacing: 0.5 },
+  addNew: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: 2 },
+  addNewTxt: { fontSize: 13.5, fontWeight: '800', color: C.green },
+  signIn: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#E9F8F1', borderRadius: 12, padding: 12 },
+  payIco: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#E9F8F1', alignItems: 'center', justifyContent: 'center' },
+  soon: { backgroundColor: '#F1F3F6', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 3 },
+  soonTxt: { fontSize: 9, fontWeight: '900', color: K.meta, letterSpacing: 0.5 },
+  couponOk: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#E8F0FE', borderRadius: 12, padding: 12 },
+  couponOkTxt: { flex: 1, fontSize: 13, color: '#1D4ED8', fontWeight: '600' },
+  label: { fontSize: 12.5, fontWeight: '700', color: '#374151', marginBottom: 6 },
+  input: { height: 48, borderRadius: 12, borderWidth: 1, borderColor: K.line, paddingHorizontal: 12, fontSize: 15, color: K.ink, backgroundColor: '#fff', ...noOutline },
+  err: { fontSize: 12.5, color: C.red, marginTop: 4, fontWeight: '600' },
+  fine: { fontSize: 11.5, color: '#9CA3AF', textAlign: 'center' },
+  bottom: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 12, paddingTop: 10, backgroundColor: '#fff', borderTopLeftRadius: 18, borderTopRightRadius: 18, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 12, shadowOffset: { width: 0, height: -3 }, elevation: 8 },
+  place: { height: 56, borderRadius: 14, backgroundColor: C.green, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16 },
+  placeAmt: { color: '#fff', fontSize: 16, fontWeight: '900' },
+  placeTot: { color: 'rgba(255,255,255,.85)', fontSize: 10, fontWeight: '800', letterSpacing: 0.8 },
+  placeCta: { color: '#fff', fontSize: 16, fontWeight: '900' },
 });

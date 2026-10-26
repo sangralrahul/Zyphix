@@ -1,26 +1,32 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { CATEGORY_TINTS, categoryImage, useStackBottom } from '@/components/now/shared';
+import { FloatingCart, Ico, K } from '@/components/kit';
+import { CardSkeleton, EmptyState, sortProducts, SortChips, tint, useCategoryThumbs, type SortKey } from '@/components/now/blocks';
 import { useCategories } from '@/components/now/useCatalog';
-import { CartBar, Empty, ProductCard, ProductSkeleton } from '@/components/ui';
-import { Api, type Product } from '@/lib/api';
-import { C, S, T } from '@/lib/theme';
+import { ProductCard } from '@/components/ui';
+import { API_BASE, Api, type Product } from '@/lib/api';
+import { C } from '@/lib/theme';
 
 const PAGE = 40;
-const RAIL = 88;
-const GAP = 10;
+const RAIL = 84;
+const ITEM_H = 96;
+const GAP = 8;
 
 export default function CategoryScreen() {
   const { name: raw } = useLocalSearchParams<{ name: string }>();
   const name = String(raw ?? '');
   const { width } = useWindowDimensions();
-  const bottom = useStackBottom();
+  const insets = useSafeAreaInsets();
   const cats = useCategories();
+  const catList = useMemo(() => cats.data ?? [], [cats.data]);
+  const thumbs = useCategoryThumbs(catList);
   const railRef = useRef<FlatList>(null);
+  const [sort, setSort] = useState<SortKey>('relevance');
 
   const q = useInfiniteQuery({
     queryKey: ['products', { category: name, page: 'infinite' }],
@@ -29,88 +35,96 @@ export default function CategoryScreen() {
     getNextPageParam: (last: Product[], pages) => (last.length < PAGE ? undefined : pages.length * PAGE),
     enabled: !!name,
   });
-  const items = q.data?.pages.flat() ?? [];
-  const cardW = Math.floor((width - RAIL - S.md * 2 - GAP) / 2);
+  const items = useMemo(() => sortProducts(q.data?.pages.flat() ?? [], sort), [q.data, sort]);
+  const cardW = Math.floor((Math.min(width, 520) - RAIL - GAP * 3) / 2);
 
-  const catList = cats.data ?? [];
   const selectedIndex = catList.findIndex(c => c.name === name);
   useEffect(() => {
-    if (selectedIndex > 2) railRef.current?.scrollToIndex({ index: selectedIndex, viewPosition: 0.4, animated: true });
+    if (selectedIndex > 3) railRef.current?.scrollToIndex({ index: selectedIndex, viewPosition: 0.35, animated: true });
   }, [selectedIndex]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.bg }}>
-      <Stack.Screen options={{ title: name }} />
-      <View style={{ flex: 1, flexDirection: 'row' }}>
-        {/* Left category rail */}
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+      <Stack.Screen options={{
+        title: name,
+        headerTitleStyle: { fontWeight: '800', fontSize: 17 },
+        headerRight: () => (
+          <Pressable onPress={() => router.push('/search')} hitSlop={10} accessibilityLabel="Search" style={{ paddingHorizontal: 6 }}>
+            <Ico name="search" size={22} />
+          </Pressable>
+        ),
+      }} />
+      <View style={{ flex: 1, flexDirection: 'row', borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: K.line }}>
         <FlatList
           ref={railRef}
           data={catList}
           keyExtractor={c => c.name}
           style={st.rail}
-          contentContainerStyle={{ paddingBottom: bottom + 80 }}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 90 }}
           showsVerticalScrollIndicator={false}
-          getItemLayout={(_, i) => ({ length: 96, offset: 96 * i, index: i })}
+          getItemLayout={(_, i) => ({ length: ITEM_H, offset: ITEM_H * i, index: i })}
           onScrollToIndexFailed={() => {}}
-          renderItem={({ item, index }) => {
-            const active = item.name === name;
+          renderItem={({ item }) => {
+            const on = item.name === name;
+            const pic = thumbs[item.name]?.pics[0];
+            const img = pic ?? (item.image ? (item.image.startsWith('/') ? API_BASE + item.image : item.image) : undefined);
             return (
-              <Pressable onPress={() => router.setParams({ name: item.name })} style={[st.railItem, active && st.railItemActive]}
-                accessibilityRole="tab" accessibilityState={{ selected: active }} accessibilityLabel={item.name}>
-                {active && <View style={st.railBar} />}
-                <View style={[st.railImg, { backgroundColor: CATEGORY_TINTS[index % CATEGORY_TINTS.length] }, active && { borderColor: C.green }]}>
-                  <Image source={categoryImage(item)} style={StyleSheet.absoluteFill} contentFit="cover" recyclingKey={item.name} cachePolicy="memory-disk" />
+              <Pressable onPress={() => { setSort('relevance'); router.setParams({ name: item.name }); }} style={[st.railItem, on && st.railOn]}
+                accessibilityRole="tab" accessibilityState={{ selected: on }} accessibilityLabel={item.name}>
+                {on ? <View style={st.railBar} /> : null}
+                <View style={[st.railImg, { backgroundColor: tint(item.color, on ? '2E' : '1F') }]}>
+                  {img ? <Image source={img} style={pic ? { width: 44, height: 44 } : StyleSheet.absoluteFill} contentFit={pic ? 'contain' : 'cover'} recyclingKey={item.name} />
+                    : <Text style={{ fontSize: 26 }}>{item.icon || '🛒'}</Text>}
                 </View>
-                <Text style={[st.railLabel, active && { color: C.greenDeep, fontWeight: '700' }]} numberOfLines={2}>{item.name}</Text>
+                <Text style={[st.railLabel, on && { color: K.ink, fontWeight: '800' }]} numberOfLines={2}>{item.name}</Text>
               </Pressable>
             );
           }}
         />
 
-        {/* Product grid */}
-        {q.isLoading ? (
-          <View style={st.gridPad}>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: GAP }}>
-              {Array.from({ length: 6 }, (_, i) => <ProductSkeleton key={i} width={cardW} />)}
-            </View>
+        <View style={{ flex: 1, backgroundColor: K.page }}>
+          <View style={st.sortBar}>
+            <SortChips value={sort} onChange={k => setSort(k === sort ? 'relevance' : k)} inset={GAP} />
           </View>
-        ) : (
-          <FlatList
-            key={name}
-            data={items}
-            numColumns={2}
-            keyExtractor={p => p.id}
-            style={{ flex: 1 }}
-            contentContainerStyle={[st.gridPad, { paddingBottom: bottom + 96 }]}
-            columnWrapperStyle={{ gap: GAP }}
-            ItemSeparatorComponent={() => <View style={{ height: GAP }} />}
-            renderItem={({ item }) => <ProductCard p={item} width={cardW} />}
-            onEndReached={() => { if (q.hasNextPage && !q.isFetchingNextPage) q.fetchNextPage(); }}
-            onEndReachedThreshold={0.6}
-            initialNumToRender={8}
-            windowSize={7}
-            removeClippedSubviews
-            refreshControl={<RefreshControl refreshing={q.isRefetching && !q.isFetchingNextPage} onRefresh={() => { q.refetch(); }} colors={[C.green]} />}
-            ListHeaderComponent={items.length > 0 ? <Text style={[T.small, { color: C.text2, marginBottom: S.sm }]}>{name}</Text> : undefined}
-            ListFooterComponent={q.isFetchingNextPage ? <ActivityIndicator color={C.green} style={{ marginVertical: S.xl }} /> : undefined}
-            ListEmptyComponent={q.isError
-              ? <Empty title="Couldn’t load products" body="Check your connection and try again." action="Retry" onAction={() => q.refetch()} />
-              : <Empty title="Nothing here yet" body="This aisle is being restocked. Try another category." />}
-          />
-        )}
+          {q.isLoading ? (
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: GAP, padding: GAP }}>
+              {Array.from({ length: 6 }, (_, i) => <CardSkeleton key={i} width={cardW} />)}
+            </View>
+          ) : (
+            <FlatList
+              key={name}
+              data={items}
+              numColumns={2}
+              keyExtractor={p => p.id}
+              contentContainerStyle={{ padding: GAP, paddingBottom: insets.bottom + 100 }}
+              columnWrapperStyle={{ gap: GAP }}
+              ItemSeparatorComponent={() => <View style={{ height: GAP }} />}
+              renderItem={({ item }) => <ProductCard p={item} width={cardW} />}
+              onEndReached={() => { if (q.hasNextPage && !q.isFetchingNextPage) q.fetchNextPage(); }}
+              onEndReachedThreshold={0.6}
+              initialNumToRender={6}
+              windowSize={7}
+              removeClippedSubviews
+              refreshControl={<RefreshControl refreshing={q.isRefetching && !q.isFetchingNextPage} onRefresh={() => { q.refetch(); }} colors={[C.green]} />}
+              ListFooterComponent={q.isFetchingNextPage ? <ActivityIndicator color={C.green} style={{ marginVertical: 20 }} /> : undefined}
+              ListEmptyComponent={q.isError
+                ? <EmptyState icon="cloud-offline-outline" title="Couldn’t load products" body="Check your connection and try again." action="Retry" onAction={() => q.refetch()} />
+                : <EmptyState icon="basket-outline" title="Restocking this aisle" body="Try another category in the meantime." />}
+            />
+          )}
+        </View>
       </View>
-      <CartBar kind="now" bottom={bottom} />
+      <FloatingCart kind="now" bottom={insets.bottom + 14} />
     </View>
   );
 }
 
 const st = StyleSheet.create({
-  rail: { width: RAIL, flexGrow: 0, backgroundColor: C.bgSoft, borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: C.line },
-  railItem: { height: 96, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6, gap: 4 },
-  railItemActive: { backgroundColor: C.bg },
-  railBar: { position: 'absolute', right: 0, top: 14, bottom: 14, width: 4, borderTopLeftRadius: 4, borderBottomLeftRadius: 4, backgroundColor: C.green },
-  railImg: { width: 52, height: 52, borderRadius: 26, overflow: 'hidden', borderWidth: 2, borderColor: 'transparent' },
-  railLabel: { fontSize: 11, lineHeight: 13, fontWeight: '500', color: C.text2, textAlign: 'center' },
-  gridPad: { padding: S.md },
+  rail: { width: RAIL, flexGrow: 0, backgroundColor: K.page },
+  railItem: { height: ITEM_H, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4, gap: 5 },
+  railOn: { backgroundColor: '#fff' },
+  railBar: { position: 'absolute', left: 0, top: 12, bottom: 12, width: 4, borderTopRightRadius: 4, borderBottomRightRadius: 4, backgroundColor: C.green },
+  railImg: { width: 56, height: 56, borderRadius: 28, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+  railLabel: { fontSize: 11, lineHeight: 13, fontWeight: '600', color: K.meta, textAlign: 'center' },
+  sortBar: { paddingVertical: 8, backgroundColor: '#fff', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: K.line },
 });
-

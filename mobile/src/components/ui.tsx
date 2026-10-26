@@ -74,23 +74,27 @@ export function AddButton({ kind, item, restaurant, compact, large }: { kind: Ki
   );
 }
 
-/* ── Product card (2 or 3 per row) ── */
+/* ── Product card — Blinkit style: image tile, ADD overlapping the image, timer chip, price ── */
 export function ProductCard({ p, width }: { p: Product; width: number }) {
   const off = p.origPrice && p.origPrice > p.price ? Math.round((1 - p.price / p.origPrice) * 100) : 0;
   return (
     <Tap onPress={() => router.push({ pathname: '/product/[id]', params: { id: p.id } })} style={[styles.card, { width }]} scale={0.98}>
       <View style={styles.cardImg}>
-        <Image source={p.image} style={StyleSheet.absoluteFill} contentFit="contain" transition={200} recyclingKey={p.id} cachePolicy="memory-disk" />
-        {off > 0 && <View style={styles.offTag}><Text style={styles.offText}>{off}% OFF</Text></View>}
+        <Image source={p.image} style={{ position: 'absolute', top: 8, left: 8, right: 8, bottom: 8 }} contentFit="contain" transition={180} recyclingKey={p.id} cachePolicy="memory-disk" />
+        {off > 0 && (
+          <View style={styles.offTag}>
+            <Text style={styles.offText}>{off}%</Text>
+            <Text style={styles.offText}>OFF</Text>
+          </View>
+        )}
+        <View style={styles.addAnchor}><AddButton kind="now" item={p} compact /></View>
       </View>
-      <Text style={[T.tiny, { color: C.text3, marginTop: 8 }]} numberOfLines={1}>{p.weight || p.brand}</Text>
-      <Text style={[T.small, { fontWeight: '600', color: C.text, minHeight: 36 }]} numberOfLines={2}>{p.name}</Text>
-      <View style={[styles.rowBetween, { marginTop: 6 }]}>
-        <View>
-          <Text style={[T.bodyStrong]}>{inr(p.price)}</Text>
-          {off > 0 && <Text style={[T.tiny, { color: C.text3, textDecorationLine: 'line-through', fontWeight: '400' }]}>{inr(p.origPrice!)}</Text>}
-        </View>
-        <AddButton kind="now" item={p} compact />
+      <View style={styles.timer}><Text style={styles.timerTxt}>⏱ 30 MINS</Text></View>
+      <Text style={styles.pName} numberOfLines={2}>{p.name}</Text>
+      <Text style={styles.pWeight} numberOfLines={1}>{p.weight || p.brand}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 5, marginTop: 4 }}>
+        <Text style={styles.pPrice}>{inr(p.price)}</Text>
+        {off > 0 && <Text style={styles.pMrp}>{inr(p.origPrice!)}</Text>}
       </View>
     </Tap>
   );
@@ -99,9 +103,10 @@ export function ProductCard({ p, width }: { p: Product; width: number }) {
 export function ProductSkeleton({ width }: { width: number }) {
   return (
     <View style={[styles.card, { width }]}>
-      <View style={[styles.cardImg, { backgroundColor: C.bgSoft }]} />
-      <View style={{ height: 12, width: '50%', backgroundColor: C.bgSoft, borderRadius: 6, marginTop: 10 }} />
-      <View style={{ height: 14, width: '90%', backgroundColor: C.bgSoft, borderRadius: 6, marginTop: 8 }} />
+      <View style={[styles.cardImg, { backgroundColor: '#EEF1F5' }]} />
+      <View style={{ height: 10, width: '40%', backgroundColor: '#EEF1F5', borderRadius: 5, marginTop: 10 }} />
+      <View style={{ height: 12, width: '90%', backgroundColor: '#EEF1F5', borderRadius: 6, marginTop: 8 }} />
+      <View style={{ height: 12, width: '50%', backgroundColor: '#EEF1F5', borderRadius: 6, marginTop: 6 }} />
     </View>
   );
 }
@@ -167,15 +172,22 @@ export const styles = StyleSheet.create({
   btnOutline: { borderWidth: 1, borderColor: C.line },
   sectionHead: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: S.xl, marginTop: S.x3, marginBottom: S.md },
   chip: { paddingHorizontal: 14, height: 36, borderRadius: R.pill, borderWidth: 1, borderColor: C.line, backgroundColor: C.bg, alignItems: 'center', justifyContent: 'center' },
-  add: { height: 36, minWidth: 72, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1.5, borderColor: C.green, backgroundColor: C.greenSoft, alignItems: 'center', justifyContent: 'center' },
-  addText: { color: C.greenDeep, fontWeight: '800', fontSize: 13, letterSpacing: 0.5 },
+  add: { height: 36, minWidth: 72, paddingHorizontal: 12, borderRadius: 9, borderWidth: 1.5, borderColor: C.green, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
+  addText: { color: C.green, fontWeight: '900', fontSize: 13, letterSpacing: 0.5 },
   addLarge: { height: 50, minWidth: 148, borderRadius: R.md, paddingHorizontal: 18 },
   stepper: { height: 36, minWidth: 92, borderRadius: 10, backgroundColor: C.green, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12 },
   stepTxt: { color: C.white, fontWeight: '800', fontSize: 18 },
-  card: { backgroundColor: C.bg, borderRadius: R.md, borderWidth: 1, borderColor: C.line, padding: 10 },
-  cardImg: { aspectRatio: 1, borderRadius: 10, backgroundColor: '#FAFAFA', overflow: 'hidden' },
-  offTag: { position: 'absolute', top: 6, left: 6, backgroundColor: '#2563EB', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
-  offText: { color: C.white, fontSize: 10, fontWeight: '800' },
+  card: { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: '#E8EBF0', padding: 8 },
+  cardImg: { aspectRatio: 1, borderRadius: 10, backgroundColor: '#F7F8FA' },
+  addAnchor: { position: 'absolute', right: -2, bottom: -10 },
+  timer: { alignSelf: 'flex-start', backgroundColor: '#F1F3F6', borderRadius: 5, paddingHorizontal: 5, paddingVertical: 2, marginTop: 16 },
+  timerTxt: { fontSize: 9.5, fontWeight: '800', color: '#374151', letterSpacing: 0.2 },
+  pName: { fontSize: 13, lineHeight: 17, fontWeight: '600', color: '#0B0F19', minHeight: 34, marginTop: 6 },
+  pWeight: { fontSize: 12, color: '#6B7280', marginTop: 2 },
+  pPrice: { fontSize: 14, fontWeight: '800', color: '#0B0F19' },
+  pMrp: { fontSize: 11.5, color: '#9CA3AF', textDecorationLine: 'line-through' },
+  offTag: { position: 'absolute', top: -1, left: 6, backgroundColor: '#2563EB', borderBottomLeftRadius: 6, borderBottomRightRadius: 6, paddingHorizontal: 5, paddingTop: 3, paddingBottom: 4, alignItems: 'center', zIndex: 2 },
+  offText: { color: C.white, fontSize: 9.5, lineHeight: 11, fontWeight: '900' },
   cartBar: { position: 'absolute', left: S.lg, right: S.lg, ...shadow },
   cartBarInner: { backgroundColor: C.green, borderRadius: R.lg, paddingHorizontal: S.xl, paddingVertical: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
 });
