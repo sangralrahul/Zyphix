@@ -8,7 +8,9 @@ import {
 import { apiFetch } from '@/lib/api';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
 import { RegisterShell } from '@/components/register/RegisterShell';
-import { StepIntro, Section, Field as KitField, TextInput, Actions, isPhone, isEmail, digits10 } from '@/components/register/FormKit';
+import { exportApplicationPDF } from '@/components/register/applicationPdf';
+import { FileDown } from 'lucide-react';
+import { StepIntro, Section, Field as KitField, TextInput, Actions, StateCityFields, isPhone, isEmail, digits10 } from '@/components/register/FormKit';
 import { Mail, Building2 } from 'lucide-react';
 import { RegisterSuccess, SuccessButton } from '@/components/register/RegisterSuccess';
 import { G, HEAD_FONT } from '@/components/layout/SiteChrome';
@@ -51,7 +53,7 @@ const STEPS = [
   { label: 'Done',         icon: <Check size={14} /> },
 ];
 
-type Personal = { name: string; phone: string; email: string; city: string; locality: string };
+type Personal = { name: string; phone: string; email: string; state: string; city: string; locality: string };
 type Profession = {
   primaryCategory: string; additionalSkills: string[]; experience: string;
   workMode: 'solo' | 'team' | ''; teamSize: string; serviceRadiusKm: string;
@@ -119,7 +121,8 @@ function PersonalStep({ initial, onNext }: { initial: Personal; onNext: (d: Pers
     if (!form.name.trim()) e.name = 'Full name is required';
     if (!/^[0-9]{10}$/.test(form.phone)) e.phone = 'Enter a valid 10-digit mobile number';
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Enter a valid email address';
-    if (!form.city.trim()) e.city = 'City is required';
+    if (!form.state) e.state = 'Choose your state';
+    if (!form.city.trim()) e.city = 'Choose or type your city';
     if (!form.locality.trim()) e.locality = 'Area / locality is required';
     if (Object.keys(e).length) { setErrors(e); return; }
     onNext({ ...form, name: form.name.trim(), email: form.email.trim(), city: form.city.trim(), locality: form.locality.trim() });
@@ -140,10 +143,8 @@ function PersonalStep({ initial, onNext }: { initial: Personal; onNext: (d: Pers
         </KitField>
       </Section>
       <Section n={2} title="Where you work" desc="Customers near this area will see your profile.">
-        <KitField label="City" error={errors.city}>
-          <TextInput icon={<Building2 size={18} />} value={form.city} onValue={v => f('city', v)} placeholder="e.g. Dehradun" invalid={!!errors.city} valid={form.city.trim().length > 1} />
-        </KitField>
-        <KitField label="Area / locality" error={errors.locality}>
+        <StateCityFields state={form.state} city={form.city} onState={v => f('state', v)} onCity={v => f('city', v)} errors={{ state: errors.state, city: errors.city }} />
+        <KitField label="Area / locality" error={errors.locality} full>
           <TextInput icon={<MapPin size={18} />} value={form.locality} onValue={v => f('locality', v)} placeholder="e.g. Rajpur Road" invalid={!!errors.locality} valid={form.locality.trim().length > 1} />
         </KitField>
       </Section>
@@ -418,7 +419,20 @@ function SuccessStep({ personal, profession }: { personal: Personal; profession:
       name={personal.name}
       message={<>We have your application to join Zyphix Book as a {cat?.label.toLowerCase() ?? 'service'} professional{personal.city ? ` in ${personal.city}` : ''}. Our onboarding team will call <strong className="text-white">{personal.phone}</strong> within 2 working days.</>}
       nextSteps={['A call from our onboarding team to confirm your details', 'Identity and background verification', 'A short briefing on bookings and payouts', 'Your profile goes live for customers in your area']}
-      actions={<SuccessButton primary accent={V} onClick={() => setLoc('/')}>Back to partner home</SuccessButton>}
+      actions={<>
+        <SuccessButton onClick={() => exportApplicationPDF({
+          track: 'service',
+          title: personal.name || 'Service professional',
+          sections: [
+            { heading: 'About you', rows: [['Full name', personal.name], ['City', [personal.city, personal.state].filter(Boolean).join(', ')], ['Area / locality', personal.locality]] },
+            { heading: 'Contact', rows: [['Mobile', personal.phone ? `+91 ${personal.phone}` : undefined], ['Email', personal.email]] },
+            { heading: 'Work', rows: [['Main service', cat?.label], ['Experience', profession.experience], ['Works', profession.workMode === 'team' ? `With a team${profession.teamSize ? ` of ${profession.teamSize}` : ''}` : profession.workMode ? 'Solo' : undefined], ['Travels up to', profession.serviceRadiusKm ? `${profession.serviceRadiusKm} km` : undefined], ['Days', profession.days.join(', ')], ['Time slots', profession.slots.join(', ')]] },
+          ],
+          tags: { heading: 'Other skills', items: profession.additionalSkills.map(id => SERVICE_CATEGORIES.find(c => c.id === id)?.label || id) },
+          nextSteps: ['A call from our onboarding team to confirm your details', 'Identity and background verification', 'A short briefing on bookings and payouts', 'Your profile goes live for customers in your area'],
+        })}><FileDown size={17} /> Save as PDF</SuccessButton>
+        <SuccessButton primary accent={V} onClick={() => setLoc('/')}>Back to partner home</SuccessButton>
+      </>}
     />
   );
 }
@@ -429,7 +443,7 @@ export function ServiceProSetup() {
   const [step, setStep] = useState(0);
   const [personal, setPersonal] = useState<Personal>(() => {
     const q = new URLSearchParams(window.location.search);
-    return { name: q.get('name') || '', email: q.get('email') || '', phone: q.get('phone') || '', city: q.get('city') || '', locality: '' };
+    return { name: q.get('name') || '', email: q.get('email') || '', phone: q.get('phone') || '', state: '', city: q.get('city') || '', locality: '' };
   });
   const [profession, setProfession] = useState<Profession>({ primaryCategory: '', additionalSkills: [], experience: '', workMode: '', teamSize: '', serviceRadiusKm: '', days: [...DAYS], slots: [] });
   const [verification, setVerification] = useState<Verification>({ idType: '', idLast4: '', bgConsent: false, terms: false });
@@ -455,6 +469,7 @@ export function ServiceProSetup() {
             serviceRadiusKm: profession.serviceRadiusKm,
             availability: `${profession.days.join(', ')} | ${profession.slots.join(', ')}`,
             locality: personal.locality,
+            state: personal.state,
             idType: v.idType,
             idLast4: v.idLast4,
             backgroundCheckConsent: 'yes',

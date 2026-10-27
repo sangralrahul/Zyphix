@@ -5,7 +5,9 @@ import { ArrowLeft, ArrowRight, Check, Store, Clock, FileText, Sparkles, FileDow
 import { useLocation } from 'wouter';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
 import { RegisterShell } from '@/components/register/RegisterShell';
-import { StepIntro, Section, Field, TextInput, SelectInput, ChoiceTiles, Actions, isPhone, isEmail, digits10 } from '@/components/register/FormKit';
+import { exportApplicationPDF } from '@/components/register/applicationPdf';
+import { IconBadge, STORE_TYPE_ICONS, GROCERY_CAT_ICONS } from '@/components/register/icons';
+import { StepIntro, Section, Field, TextInput, SelectInput, ChoiceTiles, Actions, StateCityFields, isPhone, isEmail, digits10 } from '@/components/register/FormKit';
 import { Store as StoreIcon, MapPin, Home, User, Mail } from 'lucide-react';
 import { RegisterSuccess, SuccessButton } from '@/components/register/RegisterSuccess';
 
@@ -320,14 +322,15 @@ function StepBar({ step }: { step: number }) {
 /* ─── Step 1: Store Info ─── */
 function StoreInfoStep({ onNext }: { onNext:(d:object)=>void }) {
   const q = new URLSearchParams(window.location.search);
-  const [form, setForm] = useState({ name:'', area:'', address:'', ownerName: q.get('name') || '', phone: q.get('phone') || '', email: q.get('email') || '', type:'' });
+  const [form, setForm] = useState({ name:'', area:'', state:'', city:'', address:'', ownerName: q.get('name') || '', phone: q.get('phone') || '', email: q.get('email') || '', type:'' });
   const [errors, setErrors] = useState<Record<string,string>>({});
   const f = (k:string, v:string) => { setForm(p=>({...p,[k]:v})); setErrors(p=>({...p,[k]:''})); };
 
   const validate = () => {
     const e:Record<string,string>={};
     if (!form.name.trim()) e.name='Store name required';
-    if (!form.area) e.area='Select your area';
+    if (!form.state) e.state='Choose your state';
+    if (!form.city.trim()) e.city='Choose or type your city';
     if (!form.address.trim()) e.address='Address required';
     if (!form.ownerName.trim()) e.ownerName='Owner name required';
     if (!/^[0-9]{10}$/.test(form.phone)) e.phone='Enter valid 10-digit number';
@@ -338,7 +341,7 @@ function StoreInfoStep({ onNext }: { onNext:(d:object)=>void }) {
 
   const next = () => {
     const e = validate(); if (Object.keys(e).length){setErrors(e);return;}
-    onNext(form);
+    onNext({ ...form, area: `${form.city.trim()}, ${form.state}` });
   };
 
   return (
@@ -347,7 +350,7 @@ function StoreInfoStep({ onNext }: { onNext:(d:object)=>void }) {
 
       <Section n={1} first title="What kind of store is it?" desc="Pick the one that fits best. You can sell across categories later.">
         <div className="sm:col-span-2">
-          <ChoiceTiles options={STORE_TYPES.map(t => ({ v: t.v, label: t.l, img: t.e }))} value={form.type} onChange={v => f('type', v)} invalid={!!errors.type} />
+          <ChoiceTiles options={STORE_TYPES.map(t => ({ v: t.v, label: t.l, icon: <IconBadge icon={STORE_TYPE_ICONS[t.v]} /> }))} value={form.type} onChange={v => f('type', v)} invalid={!!errors.type} />
           {errors.type && <p className="mt-2 text-[12.5px] font-medium text-red-600">{errors.type}</p>}
         </div>
       </Section>
@@ -356,14 +359,8 @@ function StoreInfoStep({ onNext }: { onNext:(d:object)=>void }) {
         <Field label="Store name" error={errors.name} full>
           <TextInput icon={<StoreIcon size={18} />} value={form.name} onValue={v => f('name', v)} placeholder="e.g. Sharma Kirana Store" invalid={!!errors.name} valid={form.name.trim().length > 2} />
         </Field>
-        <Field label="Area / colony" error={errors.area}>
-          <SelectInput icon={<MapPin size={18} />} value={form.area} onValue={v => f('area', v)} placeholder="Select your locality" invalid={!!errors.area} valid={!!form.area}>
-            {AREAS_BY_DISTRICT.map(d => (
-              <optgroup key={d.d} label={d.d}>{d.areas.map(a => <option key={a} value={a}>{a}</option>)}</optgroup>
-            ))}
-          </SelectInput>
-        </Field>
-        <Field label="Full address" error={errors.address}>
+        <StateCityFields state={form.state} city={form.city} onState={v => f('state', v)} onCity={v => f('city', v)} errors={{ state: errors.state, city: errors.city }} />
+        <Field label="Full address" error={errors.address} full>
           <TextInput icon={<Home size={18} />} value={form.address} onValue={v => f('address', v)} placeholder="Shop no., street, landmark" invalid={!!errors.address} valid={form.address.trim().length > 5} />
         </Field>
       </Section>
@@ -477,7 +474,7 @@ function CategoriesStep({ onNext, onBack }: { onNext:(s:Set<string>, subs:Record
                   {subCount}
                 </div>
               )}
-              <img src={e} alt={n} draggable={false} style={{width:34,height:34,objectFit:'contain'}} />
+              <IconBadge icon={GROCERY_CAT_ICONS[id]} color={c} size={40} active={isExpanded||hasItems} />
               <span style={{fontSize:10.5,fontWeight:700,color:isExpanded||hasItems?c:T2,lineHeight:1.3}}>{n}</span>
             </motion.button>
           );
@@ -495,7 +492,7 @@ function CategoriesStep({ onNext, onBack }: { onNext:(s:Set<string>, subs:Record
             {/* Panel header */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
               <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                <img src={expandedCatData.e} alt="" draggable={false} style={{width:28,height:28,objectFit:'contain'}} />
+                <IconBadge icon={GROCERY_CAT_ICONS[expandedCatData.id]} color={expandedCatData.c} size={34} />
                 <div>
                   <p style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:800, fontSize:14.5, color:T1, marginBottom:1 }}>{expandedCatData.n}</p>
                   <p style={{ fontSize:11.5, color:T2 }}>{expandedSelSet.size} of {expandedSubs.length} items selected</p>
@@ -533,8 +530,7 @@ function CategoriesStep({ onNext, onBack }: { onNext:(s:Set<string>, subs:Record
                         <Check size={10} color="#fff" strokeWidth={3.5}/>
                       </div>
                     )}
-                    <img src={icon} alt={item} draggable={false} style={{width:30,height:30,objectFit:'contain'}} />
-                    <span style={{fontSize:10,fontWeight:700,color:on?'#fff':T2,lineHeight:1.25,wordBreak:'break-word'}}>{item}</span>
+                    <span style={{fontSize:12,fontWeight:600,color:on?'#fff':T2,lineHeight:1.25,wordBreak:'break-word'}}>{item}</span>
                   </motion.button>
                 );
               })}
@@ -749,125 +745,21 @@ function escHtml(s: unknown): string {
 }
 
 function exportMerchantPDF(storeData: Record<string,string>, categories: Set<string>, selectedSubs: Record<string,Set<string>>) {
-  const ref = 'ZYX-M-' + Date.now().toString(36).toUpperCase();
-  const date = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'long', year:'numeric' });
-
-  const catRows = [...categories].map(id => {
-    const cat = CATS.find(c => c.id === id);
-    if (!cat) return '';
-    const items = [...(selectedSubs[id] ?? [])];
-    return `
-      <tr>
-        <td style="padding:10px 14px;border-bottom:1px solid #E5E7EB;font-weight:700;color:#111827;vertical-align:top;">${escHtml(cat.n)}</td>
-        <td style="padding:10px 14px;border-bottom:1px solid #E5E7EB;color:#6B7280;font-size:12px;">${items.length > 0 ? escHtml(items.join(', ')) : '<em>All items</em>'}</td>
-      </tr>`;
-  }).join('');
-
-  const logoSVG = `<svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg"><rect width="44" height="44" rx="10" fill="#0DA366"/><text x="22" y="30" text-anchor="middle" font-size="19" font-weight="900" font-style="italic" fill="white" letter-spacing="-1" font-family="Arial,sans-serif">//</text></svg>`;
-
-  const storeRows = [
-    ['Store Name',   storeData.name  || '—'],
-    ['Owner Name',   storeData.owner || '—'],
-    ['Mobile',       storeData.phone || '—'],
-    ['Area / Colony',storeData.area  || '—'],
-    ['Full Address', storeData.address || '—'],
-    ['Store Type',   storeData.type  || '—'],
-  ].map(([label, val], i) =>
-    `<tr style="background:${i%2===0?'#fff':'#F9FAFB'}">
-      <td style="padding:11px 16px;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.05em;width:38%;border-right:1px solid #F3F4F6;">${escHtml(label)}</td>
-      <td style="padding:11px 16px;font-size:13.5px;font-weight:600;color:#111827;">${escHtml(val)}</td>
-    </tr>`
-  ).join('');
-
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/>
-<title>Store Registration – ZYPHIX</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
-  body{background:#fff;color:#111827;max-width:820px;margin:0 auto;}
-  .banner{background:linear-gradient(135deg,#0A0E1A 0%,#101828 100%);padding:26px 36px;display:flex;align-items:center;justify-content:space-between;}
-  .logo-row{display:flex;align-items:center;gap:12px;}
-  .wordmark{font-size:28px;font-weight:900;letter-spacing:-.05em;line-height:1;}
-  .wordmark .g{color:#0DA366;font-style:italic;}
-  .wordmark .w{color:#ffffff;}
-  .doc-label{font-size:10.5px;color:rgba(255,255,255,.45);margin-top:4px;letter-spacing:.04em;text-transform:uppercase;}
-  .status-pill{background:#0DA366;color:#fff;font-size:11px;font-weight:800;padding:7px 18px;border-radius:99px;letter-spacing:.04em;}
-  .body{padding:32px 36px 28px;}
-  .doc-title{font-size:24px;font-weight:900;color:#111827;letter-spacing:-.03em;margin-bottom:4px;}
-  .submitted{font-size:12.5px;color:#6B7280;margin-bottom:18px;}
-  .ref-box{display:inline-flex;align-items:center;gap:10px;background:#ECFDF5;border:1.5px solid #6EE7B7;border-radius:10px;padding:10px 18px;margin-bottom:28px;}
-  .ref-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9CA3AF;}
-  .ref-value{font-size:14px;font-weight:900;color:#0DA366;letter-spacing:.02em;}
-  .sec-head{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:#9CA3AF;border-top:1px solid #E5E7EB;padding-top:18px;margin-bottom:12px;}
-  .info-table{width:100%;border-collapse:collapse;border:1px solid #E5E7EB;overflow:hidden;margin-bottom:24px;}
-  .cat-table{width:100%;border-collapse:collapse;border:1px solid #E5E7EB;overflow:hidden;margin-bottom:24px;}
-  .cat-table th{background:#F9FAFB;text-align:left;padding:10px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6B7280;border-bottom:1px solid #E5E7EB;}
-  .cat-table td{padding:10px 16px;border-bottom:1px solid #F3F4F6;font-size:12.5px;vertical-align:top;}
-  .cat-table td:first-child{font-weight:700;color:#111827;width:32%;background:#FAFAFA;}
-  .cat-table td:last-child{color:#4B5563;}
-  .next-box{background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border:1.5px solid #6EE7B7;border-radius:12px;padding:18px 20px;margin-bottom:24px;}
-  .next-title{font-size:12px;font-weight:800;color:#065F46;margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em;}
-  .step{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;}
-  .step-num{width:22px;height:22px;border-radius:50%;background:#0DA366;color:#fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
-  .step-text{font-size:12.5px;color:#065F46;font-weight:600;line-height:1.5;}
-  .footer{border-top:1px solid #E5E7EB;padding:16px 36px;display:flex;align-items:center;justify-content:space-between;}
-  .footer-left{font-size:10.5px;color:#9CA3AF;line-height:1.65;}
-  .footer-right{font-size:10px;color:#D1D5DB;text-align:right;}
-  @media print{body{max-width:100%;}@page{margin:10mm 12mm;}}
-</style></head><body>
-
-<div class="banner">
-  <div class="logo-row">
-    ${logoSVG}
-    <div>
-      <div class="wordmark"><span class="g">ZYPH</span><span class="w">IX</span></div>
-      <div class="doc-label">Merchant Partner Document</div>
-    </div>
-  </div>
-  <div class="status-pill">✓ Registration Received</div>
-</div>
-
-<div class="body">
-  <div class="doc-title">Store Registration</div>
-  <div class="submitted">Submitted on ${date} &nbsp;·&nbsp; Zyphix, India</div>
-
-  <div class="ref-box">
-    <div>
-      <div class="ref-label">Reference Number</div>
-      <div class="ref-value">${ref}</div>
-    </div>
-  </div>
-
-  <div class="sec-head">Store Details</div>
-  <table class="info-table">${storeRows}</table>
-
-  ${categories.size > 0 ? `
-  <div class="sec-head">Categories &amp; Items (${categories.size} categories)</div>
-  <table class="cat-table">
-    <tr><th>Category</th><th>Selected Items</th></tr>
-    ${catRows}
-  </table>` : ''}
-
-  <div class="next-box">
-    <div class="next-title">What Happens Next</div>
-    <div class="step"><div class="step-num">1</div><div class="step-text">Our team verifies your store and calls you on <strong>${storeData.phone || 'your number'}</strong> within 24-48 hours</div></div>
-    <div class="step"><div class="step-num">2</div><div class="step-text">We help you set up your product catalogue with photos and pricing</div></div>
-    <div class="step"><div class="step-num">3</div><div class="step-text">Your store goes live on ZyphixNow and starts receiving delivery orders!</div></div>
-  </div>
-</div>
-
-<div class="footer">
-  <div class="footer-left">
-    This is an auto-generated registration confirmation. Keep it for your records.<br/>
-    Zyphix · India
-  </div>
-  <div class="footer-right">ZyphixNow Merchant Program<br/>${date}</div>
-</div>
-
-<script>window.onload=()=>{window.print();}</script>
-</body></html>`;
-
-  const win = window.open('', '_blank');
-  if (win) { win.document.write(html); win.document.close(); }
+  const typeLabel = STORE_TYPES.find(t => t.v === storeData.type)?.l || storeData.type;
+  exportApplicationPDF({
+    track: 'store',
+    title: storeData.name || 'Your store',
+    sections: [
+      { heading: 'Store', rows: [['Store name', storeData.name], ['Store type', typeLabel], ['City', storeData.area], ['Address', storeData.address]] },
+      { heading: 'Owner and contact', rows: [['Owner', storeData.ownerName || storeData.owner], ['Mobile', storeData.phone ? `+91 ${storeData.phone}` : undefined], ['Email', storeData.email]] },
+    ],
+    tags: { heading: 'Categories', items: [...categories].map(id => {
+      const cat = CATS.find(c => c.id === id); if (!cat) return '';
+      const n = selectedSubs[id]?.size || 0;
+      return n ? `${cat.n} · ${n} item${n > 1 ? 's' : ''}` : cat.n;
+    }).filter(Boolean) },
+    nextSteps: ['Verification call from our partner team', 'Catalogue, prices and stock set up with your onboarding manager', 'Your store goes live on Zyphix Now'],
+  });
 }
 
 /* ─── Step 4: Success ─── */

@@ -5,7 +5,14 @@ import { ArrowLeft, ArrowRight, Check, Utensils, Clock, FileText, Star, FileDown
 import { useLocation } from 'wouter';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
 import { RegisterShell } from '@/components/register/RegisterShell';
-import { StepIntro, Section, Field, TextInput, SelectInput, TextArea, ChoiceTiles, Actions, isPhone, isEmail, digits10 } from '@/components/register/FormKit';
+import { exportApplicationPDF } from '@/components/register/applicationPdf';
+import { IconBadge, CUISINE_ICONS, PAYMENT_ICONS, ORDER_ICONS } from '@/components/register/icons';
+import { Coffee as CoffeeIcon, CookingPot, Flame, Hamburger, Candy, Truck, Home as HomeIcon, Utensils as UtensilsIcon } from 'lucide-react';
+const KITCHEN_ICONS: Record<string, any> = {
+  'Dine-in Restaurant': UtensilsIcon, 'Cloud Kitchen / Dark Kitchen': CookingPot, 'Dhaba': Flame, 'Cafe': CoffeeIcon,
+  'Fast Food Outlet': Hamburger, 'Sweet Shop / Mithai': Candy, 'Food Truck': Truck, 'Home Kitchen': HomeIcon,
+};
+import { StepIntro, Section, Field, TextInput, SelectInput, TextArea, ChoiceTiles, Actions, StateCityFields, isPhone, isEmail, digits10 } from '@/components/register/FormKit';
 import { MapPin, User, Users, Mail } from 'lucide-react';
 import { RegisterSuccess, SuccessButton } from '@/components/register/RegisterSuccess';
 
@@ -223,7 +230,7 @@ function StepBar({ step }: { step: number }) {
 /* ─── Step 1: Restaurant Info ─── */
 function RestaurantInfoStep({ onNext }: { onNext: (d: object) => void }) {
   const q = new URLSearchParams(window.location.search);
-  const [form, setForm] = useState({ name: '', owner: q.get('name') || '', phone: q.get('phone') || '', email: q.get('email') || '', area: '', address: '', type: '', seating: '' });
+  const [form, setForm] = useState({ name: '', owner: q.get('name') || '', phone: q.get('phone') || '', email: q.get('email') || '', area: '', state: '', city: '', address: '', type: '', seating: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const f = (k: string, v: string) => { setForm(p => ({ ...p, [k]: v })); setErrors(p => ({ ...p, [k]: '' })); };
 
@@ -233,14 +240,15 @@ function RestaurantInfoStep({ onNext }: { onNext: (d: object) => void }) {
     if (!form.owner.trim()) e.owner = 'Owner/manager name is required';
     if (!/^[0-9]{10}$/.test(form.phone)) e.phone = 'Enter a valid 10-digit number';
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Enter a valid email address';
-    if (!form.area) e.area = 'Please select an area';
+    if (!form.state) e.state = 'Choose your state';
+    if (!form.city.trim()) e.city = 'Choose or type your city';
     if (!form.address.trim()) e.address = 'Full address is required';
     if (!form.type) e.type = 'Please select restaurant type';
     return e;
   };
 
   const TYPES = ['Dine-in Restaurant', 'Cloud Kitchen / Dark Kitchen', 'Dhaba', 'Cafe', 'Fast Food Outlet', 'Sweet Shop / Mithai', 'Food Truck', 'Home Kitchen'];
-  const next = () => { const e = validate(); if (Object.keys(e).length) { setErrors(e); return; } onNext(form); };
+  const next = () => { const e = validate(); if (Object.keys(e).length) { setErrors(e); return; } onNext({ ...form, area: `${form.city.trim()}, ${form.state}` }); };
 
   return (
     <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
@@ -248,7 +256,7 @@ function RestaurantInfoStep({ onNext }: { onNext: (d: object) => void }) {
 
       <Section n={1} first title="What kind of kitchen is it?" desc="Choose the closest match.">
         <div className="sm:col-span-2">
-          <ChoiceTiles cols={4} options={TYPES.map(t => ({ v: t, label: t }))} value={form.type} onChange={v => f('type', v)} invalid={!!errors.type} />
+          <ChoiceTiles cols={4} options={TYPES.map(t => ({ v: t, label: t, icon: <IconBadge icon={KITCHEN_ICONS[t]} size={36} /> }))} value={form.type} onChange={v => f('type', v)} invalid={!!errors.type} />
           {errors.type && <p className="mt-2 text-[12.5px] font-medium text-red-600">{errors.type}</p>}
         </div>
       </Section>
@@ -260,13 +268,7 @@ function RestaurantInfoStep({ onNext }: { onNext: (d: object) => void }) {
         <Field label="Seating capacity" optional error={errors.seating}>
           <TextInput icon={<Users size={18} />} value={form.seating} onValue={v => f('seating', v.replace(/\D/g, '').slice(0, 4))} inputMode="numeric" placeholder="e.g. 30 seats" valid={!!form.seating} />
         </Field>
-        <Field label="Area / colony" error={errors.area} full>
-          <SelectInput icon={<MapPin size={18} />} value={form.area} onValue={v => f('area', v)} placeholder="Select your locality" invalid={!!errors.area} valid={!!form.area}>
-            {AREAS_BY_DISTRICT.map(d => (
-              <optgroup key={d.d} label={d.d}>{d.areas.map(a => <option key={a} value={a}>{a}</option>)}</optgroup>
-            ))}
-          </SelectInput>
-        </Field>
+        <StateCityFields state={form.state} city={form.city} onState={v => f('state', v)} onCity={v => f('city', v)} errors={{ state: errors.state, city: errors.city }} />
         <Field label="Full address" error={errors.address} full>
           <TextArea value={form.address} onValue={v => f('address', v)} placeholder="Shop no., street, landmark" rows={2} invalid={!!errors.address} />
         </Field>
@@ -314,90 +316,87 @@ function MenuStep({ onNext, onBack }: { onNext: (cuisines: Set<string>, items: R
 
   const totalItems = Object.values(selectedItems).reduce((a, s) => a + s.size, 0);
 
+  const exp = expanded && selected.has(expanded) ? CUISINES.find(c => c.id === expanded) : null;
   return (
     <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
-      <div style={{ background: W, borderRadius: 20, padding: '32px 28px', boxShadow: SH2, border: `1px solid ${BD}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <div>
-            <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: '1.3rem', color: T1 }}>Menu & Cuisine Types</h2>
-            <p style={{ fontSize: 13, color: T3, marginTop: 2 }}>Select all cuisines you serve and your menu items</p>
-          </div>
-          {(selected.size > 0 || totalItems > 0) && (
-            <div style={{ background: `${RA}12`, border: `1px solid ${RA}30`, borderRadius: 99, padding: '5px 14px' }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: RA }}>{selected.size} cuisines · {totalItems} items</span>
-            </div>
-          )}
-        </div>
+      <StepIntro title="What do you cook?" sub="Pick every cuisine you serve. Tap one again to add its popular dishes to your menu." />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10, marginBottom: 20, marginTop: 20 }}>
-          {CUISINES.map(({ id, img, n, c, bg }) => {
-            const isSel = selected.has(id);
-            const itemCount = selectedItems[id]?.size || 0;
-            return (
-              <motion.button key={id} onClick={() => toggleCuisine(id)} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                style={{ padding: '14px 8px 12px', borderRadius: 14, background: isSel ? bg : W, border: `2px solid ${isSel ? c : BD}`, cursor: 'pointer', textAlign: 'center', position: 'relative', transition: 'all .15s' }}>
-                {isSel && itemCount > 0 && (
-                  <span style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: c, color: '#fff', fontSize: 9, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{itemCount}</span>
-                )}
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 7 }}>
-                  <img src={img} alt={n} width={36} height={36} style={{ objectFit: 'contain', display: 'block' }} />
-                </div>
-                <div style={{ fontSize: 10.5, fontWeight: 700, color: isSel ? c : T2, lineHeight: 1.3 }}>{n}</div>
-              </motion.button>
-            );
-          })}
-        </div>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <p className="text-[13.5px] font-medium text-gray-800">Cuisines</p>
+        <AnimatePresence mode="wait">
+          <motion.span key={`${selected.size}-${totalItems}`} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+            className="rounded-full px-3 py-1 text-[12.5px] font-semibold tabular-nums"
+            style={selected.size ? { background: 'color-mix(in srgb, var(--acc) 10%, white)', color: 'var(--acc)' } : { background: '#F3F4F6', color: '#6B7280' }}>
+            {selected.size ? `${selected.size} selected · ${totalItems} dishes` : 'None selected'}
+          </motion.span>
+        </AnimatePresence>
+      </div>
 
-        {/* Sub-items drill down */}
-        <AnimatePresence>
-          {expanded && selected.has(expanded) && (
-            <motion.div key={expanded} initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
-              <div style={{ background: BG, borderRadius: 14, padding: '16px', border: `1px solid ${BD}`, marginBottom: 12 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <p style={{ fontWeight: 700, color: T1, fontSize: 13 }}>
-                    {CUISINES.find(c => c.id === expanded)?.n} — Select menu items
-                  </p>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => setSelectedItems(si => ({ ...si, [expanded!]: new Set(MENU_ITEMS[expanded!] || []) }))}
-                      style={{ fontSize: 11, fontWeight: 700, color: RA, background: `${RA}10`, border: `1px solid ${RA}30`, borderRadius: 99, padding: '4px 10px', cursor: 'pointer' }}>Add All</button>
-                    <button onClick={() => setSelectedItems(si => ({ ...si, [expanded!]: new Set() }))}
-                      style={{ fontSize: 11, fontWeight: 700, color: T3, background: BG, border: `1px solid ${BD}`, borderRadius: 99, padding: '4px 10px', cursor: 'pointer' }}>Clear</button>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {CUISINES.map(({ id, n, c }, i) => {
+          const on = selected.has(id);
+          const count = selectedItems[id]?.size || 0;
+          const isOpen = expanded === id && on;
+          return (
+            <motion.button key={id} type="button" aria-pressed={on}
+              onClick={() => (on && expanded !== id ? setExpanded(id) : toggleCuisine(id))}
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.02 * i }}
+              whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}
+              className={`relative flex flex-col items-start gap-3 rounded-2xl border-[1.5px] p-3.5 text-left transition-[border-color,background-color,box-shadow] duration-200 ${on ? 'shadow-[0_12px_30px_-16px_rgba(16,24,40,.35)]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+              style={on ? { borderColor: c, background: `color-mix(in srgb, ${c} 6%, white)` } : undefined}>
+              <IconBadge icon={CUISINE_ICONS[id]} color={c} size={40} active={on} />
+              <span className="text-[13.5px] font-semibold leading-tight text-gray-900">{n}</span>
+              <span className={`text-[12px] ${on ? '' : 'text-gray-400'}`} style={on ? { color: c } : undefined}>
+                {on ? (count ? `${count} dish${count > 1 ? 'es' : ''}` : isOpen ? 'Pick dishes below' : 'Tap to add dishes') : 'Add'}
+              </span>
+              <span className={`absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full border-[1.5px] ${on ? 'border-transparent' : 'border-gray-300'}`} style={on ? { background: c } : undefined}>
+                <AnimatePresence>{on && <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="text-white"><Check size={12} strokeWidth={3.2} /></motion.span>}</AnimatePresence>
+              </span>
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* Dish drill-down for the open cuisine */}
+      <AnimatePresence mode="wait">
+        {exp && (
+          <motion.div key={exp.id} initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }} className="overflow-hidden">
+            <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50/70 p-5">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <IconBadge icon={CUISINE_ICONS[exp.id]} color={exp.c} size={34} />
+                  <div>
+                    <p className="text-[14.5px] font-semibold text-gray-900">{exp.n} dishes</p>
+                    <p className="text-[12.5px] text-gray-500">Optional. Helps us set up your menu faster.</p>
                   </div>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {(MENU_ITEMS[expanded] || []).map(item => {
-                    const isSel = selectedItems[expanded!]?.has(item);
-                    const { c, bg } = CUISINES.find(x => x.id === expanded) || { c: T2, bg: BG };
-                    const emoji = DISH_EMOJIS[item] ?? '🍽️';
-                    return (
-                      <button key={item} onClick={() => toggleItem(expanded!, item)}
-                        style={{ padding: '6px 10px 6px 8px', borderRadius: 99, border: `1.5px solid ${isSel ? c : BD}`, background: isSel ? bg : W, color: isSel ? c : T2, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all .12s', display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <img src={tw(emoji)} alt="" draggable={false} style={{ width: 18, height: 18, objectFit: 'contain', flexShrink: 0 }} />
-                        {item}
-                      </button>
-                    );
-                  })}
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setSelectedItems(si => ({ ...si, [exp.id]: new Set(MENU_ITEMS[exp.id] || []) }))}
+                    className="h-8 rounded-full px-3.5 text-[12.5px] font-semibold text-white" style={{ background: exp.c }}>Select all</button>
+                  <button type="button" onClick={() => setSelectedItems(si => ({ ...si, [exp.id]: new Set() }))}
+                    className="h-8 rounded-full border border-gray-200 bg-white px-3.5 text-[12.5px] font-semibold text-gray-600 hover:text-gray-900">Clear</button>
                 </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {selected.size === 0 && (
-          <p style={{ fontSize: 13, color: T3, textAlign: 'center', padding: '12px 0' }}>Select at least one cuisine type to continue</p>
+              <div className="flex flex-wrap gap-2">
+                {(MENU_ITEMS[exp.id] || []).map(item => {
+                  const on = !!selectedItems[exp.id]?.has(item);
+                  return (
+                    <motion.button key={item} type="button" onClick={() => toggleItem(exp.id, item)} whileTap={{ scale: 0.95 }}
+                      className={`inline-flex h-9 items-center gap-1.5 rounded-full border-[1.5px] px-3.5 text-[13px] font-medium transition-colors ${on ? 'text-white' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'}`}
+                      style={on ? { background: exp.c, borderColor: exp.c } : undefined}>
+                      {on && <Check size={13} strokeWidth={3} />}{item}
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
-          <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '12px 22px', borderRadius: 11, border: `1.5px solid ${BD}`, background: W, color: T2, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
-            <ArrowLeft size={15} /> Back
-          </button>
-          <motion.button onClick={() => { if (selected.size === 0) return; onNext(selected, selectedItems); }}
-            whileHover={{ scale: selected.size > 0 ? 1.02 : 1 }} whileTap={{ scale: 0.97 }}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '13px 28px', borderRadius: 12, background: selected.size > 0 ? RA : BD, color: '#fff', fontSize: 14, fontWeight: 800, border: 'none', cursor: selected.size > 0 ? 'pointer' : 'not-allowed', transition: 'background .2s' }}>
-            Continue <ArrowRight size={16} />
-          </motion.button>
-        </div>
-      </div>
+      {selected.size === 0 && <p className="mt-5 text-[13px] text-gray-500">Select at least one cuisine to continue.</p>}
+
+      <Actions onBack={onBack} onNext={() => { if (selected.size === 0) return; onNext(selected, selectedItems); }} label="Continue to operations" />
     </motion.div>
   );
 }
@@ -471,7 +470,7 @@ function OperationsStep({ onNext, onBack, submitting }: { onNext: () => void; on
               {PAYMENTS.map(({ v, l, e }) => (
                 <button key={v} onClick={() => f('payment', v)}
                   style={{ flex: 1, padding: '10px 6px', borderRadius: 10, border: `1.5px solid ${form.payment === v ? RA : BD}`, background: form.payment === v ? `${RA}08` : W, cursor: 'pointer', textAlign: 'center', transition: 'all .12s' }}>
-                  <div style={{ fontSize: 18, marginBottom: 4 }}>{e}</div>
+                  <div className="mb-2 flex justify-center"><IconBadge icon={PAYMENT_ICONS[v]} color={RA} size={34} active={form.payment === v} /></div>
                   <div style={{ fontSize: 10.5, fontWeight: 700, color: form.payment === v ? RA : T2 }}>{l}</div>
                 </button>
               ))}
@@ -486,7 +485,7 @@ function OperationsStep({ onNext, onBack, submitting }: { onNext: () => void; on
             {ORDERS.map(({ v, l, e }) => (
               <button key={v} onClick={() => f('delivery', v)}
                 style={{ flex: 1, padding: '12px 8px', borderRadius: 12, border: `1.5px solid ${form.delivery === v ? RA : BD}`, background: form.delivery === v ? `${RA}08` : W, cursor: 'pointer', textAlign: 'center', transition: 'all .15s' }}>
-                <div style={{ fontSize: 22, marginBottom: 5 }}>{e}</div>
+                <div className="mb-2 flex justify-center"><IconBadge icon={ORDER_ICONS[v]} color={RA} size={36} active={form.delivery === v} /></div>
                 <div style={{ fontSize: 11.5, fontWeight: 700, color: form.delivery === v ? RA : T2 }}>{l}</div>
               </button>
             ))}
@@ -514,122 +513,16 @@ function escHtml(s: unknown): string {
 }
 
 function exportRestaurantPDF(restData: Record<string, string>, cuisines: Set<string>) {
-  const ref = `ZYX-R-${Date.now()}`;
-  const date = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
-  const cuisineList = [...cuisines].map(id => CUISINES.find(c => c.id === id)?.n).filter(Boolean);
-
-  const logoSVG = `<svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg"><rect width="44" height="44" rx="10" fill="#0DA366"/><text x="22" y="30" text-anchor="middle" font-size="19" font-weight="900" font-style="italic" fill="white" letter-spacing="-1" font-family="Arial,sans-serif">//</text></svg>`;
-
-  const rows = [
-    ['Restaurant Name', restData.name || '—'],
-    ['Owner / Manager', restData.owner || '—'],
-    ['Mobile Number', restData.phone || '—'],
-    ['Area / Colony', restData.area || '—'],
-    ['Full Address', restData.address || '—'],
-    ['Restaurant Type', restData.type || '—'],
-    ...(restData.seating ? [['Seating Capacity', `${restData.seating} seats`]] : []),
-  ];
-
-  const tableRows = rows.map(([ label, val ], i) =>
-    `<tr style="background:${i%2===0?'#fff':'#F9FAFB'}">
-      <td style="padding:11px 16px;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.05em;width:38%;border-right:1px solid #F3F4F6;">${escHtml(label)}</td>
-      <td style="padding:11px 16px;font-size:13.5px;font-weight:600;color:#111827;">${escHtml(val)}</td>
-    </tr>`
-  ).join('');
-
-  const cuisineTags = cuisineList.map(n =>
-    `<span style="display:inline-block;background:#FFF1F2;border:1.5px solid #FECDD3;color:#9F1239;font-size:11px;font-weight:700;padding:4px 12px;border-radius:99px;margin:3px 4px 3px 0;">${escHtml(n)}</span>`
-  ).join('');
-
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/>
-<title>Restaurant Registration – ZYPHIX</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
-  body{background:#fff;color:#111827;max-width:820px;margin:0 auto;}
-  .banner{background:linear-gradient(135deg,#0A0E1A 0%,#101828 100%);padding:26px 36px;display:flex;align-items:center;justify-content:space-between;}
-  .logo-row{display:flex;align-items:center;gap:12px;}
-  .wordmark{font-size:28px;font-weight:900;letter-spacing:-.05em;line-height:1;}
-  .wordmark .g{color:#0DA366;font-style:italic;}
-  .wordmark .w{color:#ffffff;}
-  .doc-label{font-size:10.5px;color:rgba(255,255,255,.45);margin-top:4px;letter-spacing:.04em;text-transform:uppercase;}
-  .status-pill{background:#E11D48;color:#fff;font-size:11px;font-weight:800;padding:7px 18px;border-radius:99px;letter-spacing:.04em;}
-  .body{padding:32px 36px 28px;}
-  .title-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;}
-  .doc-title{font-size:24px;font-weight:900;color:#111827;letter-spacing:-.03em;}
-  .submitted{font-size:12.5px;color:#6B7280;margin-bottom:18px;}
-  .ref-box{display:inline-flex;align-items:center;gap:10px;background:#FFF1F2;border:1.5px solid #FECDD3;border-radius:10px;padding:10px 18px;margin-bottom:28px;}
-  .ref-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9CA3AF;}
-  .ref-value{font-size:14px;font-weight:900;color:#E11D48;letter-spacing:.02em;}
-  .sec-head{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:#9CA3AF;border-top:1px solid #E5E7EB;padding-top:18px;margin-bottom:12px;}
-  .info-table{width:100%;border-collapse:collapse;border:1px solid #E5E7EB;border-radius:10px;overflow:hidden;margin-bottom:24px;}
-  .cuisine-wrap{margin-bottom:24px;padding:16px;background:#FAFAFA;border:1px solid #F3F4F6;border-radius:12px;}
-  .next-box{background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border:1.5px solid #6EE7B7;border-radius:12px;padding:18px 20px;margin-bottom:24px;}
-  .next-title{font-size:12px;font-weight:800;color:#065F46;margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em;}
-  .step{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;}
-  .step-num{width:22px;height:22px;border-radius:50%;background:#0DA366;color:#fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
-  .step-text{font-size:12.5px;color:#065F46;font-weight:600;line-height:1.5;}
-  .footer{border-top:1px solid #E5E7EB;padding:16px 36px;display:flex;align-items:center;justify-content:space-between;}
-  .footer-left{font-size:10.5px;color:#9CA3AF;line-height:1.65;}
-  .footer-right{font-size:10px;color:#D1D5DB;text-align:right;}
-  @media print{body{max-width:100%;}@page{margin:10mm 12mm;}}
-</style></head><body>
-
-<div class="banner">
-  <div class="logo-row">
-    ${logoSVG}
-    <div>
-      <div class="wordmark"><span class="g">ZYPH</span><span class="w">IX</span></div>
-      <div class="doc-label">Restaurant Partner Document</div>
-    </div>
-  </div>
-  <div class="status-pill">✓ Registration Received</div>
-</div>
-
-<div class="body">
-  <div class="title-row">
-    <div>
-      <div class="doc-title">Restaurant Registration</div>
-      <div class="submitted">Submitted on ${date} &nbsp;·&nbsp; Zyphix, India</div>
-    </div>
-  </div>
-
-  <div class="ref-box">
-    <div>
-      <div class="ref-label">Reference Number</div>
-      <div class="ref-value">${ref}</div>
-    </div>
-  </div>
-
-  <div class="sec-head">Restaurant Details</div>
-  <table class="info-table">
-    ${tableRows}
-  </table>
-
-  ${cuisineList.length > 0 ? `
-  <div class="sec-head">Cuisine Types &amp; Menu (${cuisineList.length} selected)</div>
-  <div class="cuisine-wrap">${cuisineTags}</div>` : ''}
-
-  <div class="next-box">
-    <div class="next-title">What Happens Next</div>
-    <div class="step"><div class="step-num">1</div><div class="step-text">Our team will call you on <strong>${escHtml(restData.phone || 'your number')}</strong> within 24 hours to verify your restaurant</div></div>
-    <div class="step"><div class="step-num">2</div><div class="step-text">We'll help you upload your menu, photos, and pricing on ZyphixEats</div></div>
-    <div class="step"><div class="step-num">3</div><div class="step-text">Your restaurant goes live and starts receiving orders from customers near you!</div></div>
-  </div>
-</div>
-
-<div class="footer">
-  <div class="footer-left">
-    This is an auto-generated registration confirmation. Keep it for your records.<br/>
-    Zyphix · India
-  </div>
-  <div class="footer-right">ZyphixEats Partner Program<br/>${date}</div>
-</div>
-
-<script>window.onload=()=>{window.print();}</script>
-</body></html>`;
-
-  const win = window.open('', '_blank');
-  if (win) { win.document.write(html); win.document.close(); }
+  exportApplicationPDF({
+    track: 'restaurant',
+    title: restData.name || 'Your restaurant',
+    sections: [
+      { heading: 'Restaurant', rows: [['Restaurant name', restData.name], ['Type', restData.type], ['City', restData.area], ['Seating', restData.seating ? `${restData.seating} seats` : undefined], ['Address', restData.address]] },
+      { heading: 'Owner and contact', rows: [['Owner / manager', restData.owner], ['Mobile', restData.phone ? `+91 ${restData.phone}` : undefined], ['Email', restData.email]] },
+    ],
+    tags: { heading: 'Cuisines', items: [...cuisines].map(id => CUISINES.find(c => c.id === id)?.n).filter(Boolean) as string[] },
+    nextSteps: ['Verification call from our partner team', 'Menu, photos and prices uploaded with your onboarding manager', 'Your restaurant goes live on Zyphix Eats'],
+  });
 }
 
 /* ─── Confetti Celebration ─── */

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from '@/lib/motion';
-import { AlertCircle, ArrowLeft, ArrowRight, Check, ChevronDown, Loader2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, Building2, Check, ChevronDown, Loader2, Map as MapIcon } from 'lucide-react';
+import { INDIA_PLACES, STATE_NAMES, citiesOf } from '@/data/indiaPlaces';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Form kit for partner registrations. Accent comes from the --acc CSS variable
@@ -131,11 +132,11 @@ export function ChoiceTiles<T extends string>({ options, value, onChange, invali
             whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}
             className={`relative flex min-h-[64px] flex-col items-start gap-2.5 rounded-2xl border-[1.5px] p-3.5 pr-9 text-left sm:flex-row sm:items-center sm:gap-3 sm:py-3 transition-[border-color,background-color,box-shadow] duration-200 ${on ? 'border-[var(--acc)] shadow-[0_10px_30px_-14px_color-mix(in_srgb,var(--acc)_70%,transparent)]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
             style={on ? { background: 'color-mix(in srgb, var(--acc) 6%, white)' } : undefined}>
-            {(o.img || o.icon) && (
+            {o.img ? (
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50" style={on ? { background: '#fff' } : undefined}>
-                {o.img ? <img src={o.img} alt="" draggable={false} className="h-7 w-7 object-contain" /> : o.icon}
+                <img src={o.img} alt="" draggable={false} className="h-7 w-7 object-contain" />
               </span>
-            )}
+            ) : o.icon}
             <span className="min-w-0 flex-1">
               <span className={`block text-[13.5px] font-semibold leading-tight ${on ? 'text-gray-900' : 'text-gray-700'}`}>{o.label}</span>
               {o.desc && <span className="mt-0.5 block text-[12px] leading-snug text-gray-500">{o.desc}</span>}
@@ -172,3 +173,111 @@ export function Actions({ onBack, onNext, label, busy, note }: { onBack?: () => 
 export const isPhone = (v: string) => /^[0-9]{10}$/.test(v);
 export const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 export const digits10 = (v: string) => v.replace(/\D/g, '').slice(0, 10);
+
+/* ── Searchable picker ─────────────────────────────────────────────────────── */
+/** Type-to-filter dropdown with keyboard support. `allowCustom` lets people use a value that is not listed. */
+export function Combobox({ icon, value, onChange, options, placeholder, invalid, valid, allowCustom, disabled, disabledHint, groups }: {
+  icon?: React.ReactNode; value: string; onChange: (v: string) => void; options: string[]; placeholder: string;
+  invalid?: boolean; valid?: boolean; allowCustom?: boolean; disabled?: boolean; disabledHint?: string;
+  /** optional section label per option (e.g. "Union territories") */
+  groups?: Record<string, string>;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [q, setQ] = React.useState('');
+  const [hi, setHi] = React.useState(0);
+  const box = React.useRef<HTMLDivElement>(null);
+  const list = React.useRef<HTMLUListElement>(null);
+  const input = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => { if (box.current && !box.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [open]);
+
+  const query = q.trim().toLowerCase();
+  const shown = query ? options.filter(o => o.toLowerCase().includes(query)) : options;
+  const exact = options.some(o => o.toLowerCase() === query);
+  const custom = allowCustom && query && !exact ? q.trim() : '';
+  const items = custom ? [...shown, `__custom__${custom}`] : shown;
+
+  React.useEffect(() => { setHi(0); }, [q, open]);
+  React.useEffect(() => { list.current?.querySelector<HTMLElement>(`[data-i="${hi}"]`)?.scrollIntoView({ block: 'nearest' }); }, [hi]);
+
+  const pick = (v: string) => { onChange(v.startsWith('__custom__') ? v.slice(10) : v); setOpen(false); setQ(''); input.current?.blur(); };
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); setOpen(true); setHi(h => Math.min(h + 1, items.length - 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setHi(h => Math.max(h - 1, 0)); }
+    else if (e.key === 'Enter') { if (open && items[hi]) { e.preventDefault(); pick(items[hi]); } }
+    else if (e.key === 'Escape') { setOpen(false); }
+  };
+  const mark = (o: string) => {
+    if (!query) return o;
+    const i = o.toLowerCase().indexOf(query);
+    if (i < 0) return o;
+    return <>{o.slice(0, i)}<span className="font-semibold text-gray-900">{o.slice(i, i + query.length)}</span>{o.slice(i + query.length)}</>;
+  };
+
+  return (
+    <div ref={box} className="relative">
+      <div className={`${shell(invalid)} ${disabled ? 'cursor-not-allowed bg-gray-50 opacity-70' : 'cursor-text'}`} onClick={() => { if (!disabled) { setOpen(true); input.current?.focus(); } }}>
+        {icon && <span className="pointer-events-none ml-4 shrink-0 text-gray-400 transition-colors group-focus-within:text-[var(--acc)]">{icon}</span>}
+        <input ref={input} disabled={disabled} value={open ? q : value} onChange={e => { setQ(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)} onKeyDown={onKey} role="combobox" aria-expanded={open} aria-invalid={invalid || undefined}
+          placeholder={disabled ? (disabledHint || placeholder) : (open && value ? value : placeholder)}
+          className={`zx-kit h-full min-w-0 flex-1 bg-transparent px-3.5 text-[15px] text-gray-900 outline-none ${open && value ? 'placeholder:text-gray-500' : 'placeholder:text-gray-400'}`} />
+        {valid && !open ? <ValidTick show /> : (
+          <motion.span animate={{ rotate: open ? 180 : 0 }} className="pointer-events-none mr-4 shrink-0 text-gray-400"><ChevronDown size={17} /></motion.span>
+        )}
+      </div>
+      <AnimatePresence>
+        {open && !disabled && (
+          <motion.div initial={{ opacity: 0, y: -6, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -6, scale: 0.98 }}
+            transition={{ duration: 0.16, ease: 'easeOut' }}
+            className="absolute inset-x-0 top-[calc(100%+8px)] z-30 origin-top overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_24px_60px_-20px_rgba(16,24,40,.35)]">
+            <ul ref={list} role="listbox" className="max-h-[288px] overflow-y-auto overscroll-contain p-1.5">
+              {items.length === 0 && <li className="px-3.5 py-6 text-center text-[13.5px] text-gray-500">No matches for “{q}”</li>}
+              {items.map((o, i) => {
+                const isCustom = o.startsWith('__custom__');
+                const label = isCustom ? o.slice(10) : o;
+                const prev = i > 0 ? items[i - 1] : '';
+                const head = groups && !isCustom && groups[o] && groups[o] !== (groups[prev] ?? '') ? groups[o] : '';
+                return (
+                  <React.Fragment key={o}>
+                    {head && <li className="px-3.5 pb-1 pt-3 text-[11.5px] font-semibold uppercase tracking-[0.12em] text-gray-400">{head}</li>}
+                    <li data-i={i} role="option" aria-selected={value === label}
+                      onMouseEnter={() => setHi(i)} onMouseDown={e => { e.preventDefault(); pick(o); }}
+                      className={`flex cursor-pointer items-center gap-2 rounded-xl px-3.5 py-2.5 text-[14.5px] text-gray-700 ${hi === i ? 'bg-gray-100' : ''}`}>
+                      {isCustom ? <span>Use “<span className="font-semibold text-gray-900">{label}</span>”</span> : <span className="flex-1">{mark(o)}</span>}
+                      {value === label && <Check size={16} style={{ color: 'var(--acc)' }} />}
+                    </li>
+                  </React.Fragment>
+                );
+              })}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/** State → City pickers (city list follows the state; any city can be typed). */
+export function StateCityFields({ state, city, onState, onCity, errors }: {
+  state: string; city: string; onState: (v: string) => void; onCity: (v: string) => void; errors?: { state?: string; city?: string };
+}) {
+  const groups = React.useMemo(() => Object.fromEntries(INDIA_PLACES.map(p => [p.state, p.ut ? 'Union territories' : 'States'])), []);
+  return (
+    <>
+      <Field label="State / union territory" error={errors?.state}>
+        <Combobox icon={<MapIcon size={18} />} value={state} onChange={v => { onState(v); if (v !== state) onCity(''); }} options={STATE_NAMES}
+          groups={groups} placeholder="Search your state" invalid={!!errors?.state} valid={!!state} />
+      </Field>
+      <Field label="City" error={errors?.city}>
+        <Combobox icon={<Building2 size={18} />} value={city} onChange={onCity} options={citiesOf(state)} allowCustom
+          disabled={!state} disabledHint="Choose a state first" placeholder="Search or type your city" invalid={!!errors?.city} valid={!!city} />
+      </Field>
+    </>
+  );
+}

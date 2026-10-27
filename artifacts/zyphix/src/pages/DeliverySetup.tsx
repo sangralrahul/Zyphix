@@ -5,7 +5,8 @@ import { ArrowLeft, ArrowRight, Check, Upload, User, Bike, Calendar, CreditCard,
 import { useLocation } from 'wouter';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
 import { RegisterShell } from '@/components/register/RegisterShell';
-import { StepIntro, Section, Field, TextInput, SelectInput, Actions, isPhone, isEmail, digits10 } from '@/components/register/FormKit';
+import { exportApplicationPDF } from '@/components/register/applicationPdf';
+import { StepIntro, Section, Field, TextInput, SelectInput, Actions, StateCityFields, isPhone, isEmail, digits10 } from '@/components/register/FormKit';
 import { MapPin, Mail } from 'lucide-react';
 import { RegisterSuccess, SuccessButton } from '@/components/register/RegisterSuccess';
 
@@ -131,7 +132,7 @@ function StepBar({ step }: { step: number }) {
 /* ─── Step 1: Personal Details ─── */
 function PersonalStep({ onNext }: { onNext:(d:object)=>void }) {
   const q = new URLSearchParams(window.location.search);
-  const [form, setForm] = useState({ name: q.get('name') || '', phone: q.get('phone') || '', email: q.get('email') || '', age:'', area:'', emergency:'' });
+  const [form, setForm] = useState({ name: q.get('name') || '', phone: q.get('phone') || '', email: q.get('email') || '', age:'', area:'', state:'', city:'', locality:'', emergency:'' });
   const [errors, setErrors] = useState<Record<string,string>>({});
   const f = (k:string,v:string) => { setForm(p=>({...p,[k]:v}));setErrors(p=>({...p,[k]:''})); };
 
@@ -142,12 +143,14 @@ function PersonalStep({ onNext }: { onNext:(d:object)=>void }) {
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email='Enter a valid email address';
     const age=parseInt(form.age);
     if (!form.age||isNaN(age)||age<18||age>55) e.age='Age must be 18–55';
-    if (!form.area) e.area='Select your area';
+    if (!form.state) e.state='Choose your state';
+    if (!form.city.trim()) e.city='Choose or type your city';
+    if (!form.locality.trim()) e.locality='Tell us the area you want to ride in';
     if (!/^[0-9]{10}$/.test(form.emergency)) e.emergency='Enter valid 10-digit number';
     return e;
   };
 
-  const next = () => { const e=validate();if(Object.keys(e).length){setErrors(e);return;} onNext(form); };
+  const next = () => { const e=validate();if(Object.keys(e).length){setErrors(e);return;} onNext({ ...form, area: `${form.locality.trim()}, ${form.city.trim()}, ${form.state}` }); };
 
   return (
     <motion.div initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}} transition={{type:'spring',stiffness:120,damping:18}}>
@@ -160,12 +163,9 @@ function PersonalStep({ onNext }: { onNext:(d:object)=>void }) {
         <Field label="Age" hint="18 to 55" error={errors.age}>
           <TextInput icon={<Calendar size={18} />} value={form.age} onValue={v => f('age', v.replace(/\D/g, '').slice(0, 2))} inputMode="numeric" placeholder="e.g. 24" invalid={!!errors.age} valid={+form.age >= 18 && +form.age <= 55} />
         </Field>
-        <Field label="Area you want to ride in" error={errors.area} full>
-          <SelectInput icon={<MapPin size={18} />} value={form.area} onValue={v => f('area', v)} placeholder="Select your locality" invalid={!!errors.area} valid={!!form.area}>
-            {AREAS_BY_DISTRICT.map(d => (
-              <optgroup key={d.d} label={d.d}>{d.areas.map(a => <option key={a} value={a}>{a}</option>)}</optgroup>
-            ))}
-          </SelectInput>
+        <StateCityFields state={form.state} city={form.city} onState={v => f('state', v)} onCity={v => f('city', v)} errors={{ state: errors.state, city: errors.city }} />
+        <Field label="Area you want to ride in" hint="Locality or neighbourhood" error={errors.locality} full>
+          <TextInput icon={<MapPin size={18} />} value={form.locality} onValue={v => f('locality', v)} placeholder="e.g. Rajpur Road, Sector 21" invalid={!!errors.locality} valid={form.locality.trim().length > 2} />
         </Field>
       </Section>
 
@@ -528,75 +528,15 @@ function escHtml(s: unknown): string {
 }
 
 function exportDeliveryPDF(personal: Record<string,string>) {
-  const ref = 'ZYX-D-' + Date.now().toString(36).toUpperCase();
-  const date = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'long', year:'numeric' });
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/>
-  <title>Delivery Partner Application – ZYPHIX</title>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;}
-    body{background:#fff;color:#111827;padding:40px;max-width:800px;margin:0 auto;}
-    .header{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #0DA366;padding-bottom:18px;margin-bottom:28px;}
-    .logo{font-size:26px;font-weight:900;letter-spacing:-.04em;color:#111827;}
-    .logo span{color:#0DA366;}
-    .badge{background:#FFF7ED;border:1.5px solid #FED7AA;color:#9A3412;font-size:12px;font-weight:700;padding:5px 14px;border-radius:99px;}
-    h1{font-size:22px;font-weight:900;color:#111827;margin-bottom:6px;}
-    .meta{font-size:13px;color:#6B7280;margin-bottom:28px;}
-    .ref{font-size:12px;font-weight:700;color:#0DA366;background:#ECFDF5;border:1px solid #A7F3D0;padding:8px 16px;border-radius:8px;display:inline-block;margin-bottom:28px;}
-    .section{margin-bottom:26px;}
-    .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9CA3AF;margin-bottom:12px;}
-    table{width:100%;border-collapse:collapse;border:1px solid #E5E7EB;border-radius:10px;overflow:hidden;}
-    th{background:#F9FAFB;text-align:left;padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6B7280;border-bottom:1px solid #E5E7EB;}
-    td{padding:10px 14px;border-bottom:1px solid #E5E7EB;}
-    tr:last-child td{border-bottom:none;}
-    .steps{list-style:none;padding:0;margin:0;}
-    .steps li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F3F4F6;font-size:13px;color:#374151;}
-    .steps li:last-child{border-bottom:none;}
-    .step-num{width:22px;height:22px;border-radius:50%;background:#0DA366;color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .earn{background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:12px;padding:14px 18px;font-size:13px;color:#78350F;font-weight:600;margin-top:24px;}
-    .footer{margin-top:40px;border-top:1px solid #E5E7EB;padding-top:16px;font-size:11px;color:#9CA3AF;text-align:center;line-height:1.6;}
-    @media print{body{padding:20px;}@page{margin:15mm;}}
-  </style></head><body>
-  <div class="header">
-    <div class="logo">ZYPH<span style="font-weight:300;opacity:.75;">/</span><span>X</span></div>
-    <span class="badge">Delivery Partner Application</span>
-  </div>
-  <h1>Application Submitted</h1>
-  <p class="meta">Submitted on ${date} &nbsp;·&nbsp; Zyphix, India</p>
-  <div class="ref">Reference: ${ref}</div>
-
-  <div class="section">
-    <div class="section-title">Applicant Details</div>
-    <table>
-      <tr><th>Field</th><th>Details</th></tr>
-      <tr><td style="font-weight:600;">Full Name</td><td>${escHtml(personal.name || '—')}</td></tr>
-      <tr><td style="font-weight:600;">Mobile Number</td><td>${escHtml(personal.phone || '—')}</td></tr>
-      <tr><td style="font-weight:600;">Age</td><td>${escHtml(personal.age || '—')} years</td></tr>
-      <tr><td style="font-weight:600;">Area / Colony</td><td>${escHtml(personal.area || '—')}</td></tr>
-      <tr><td style="font-weight:600;">Emergency Contact</td><td>${escHtml(personal.emergency || '—')}</td></tr>
-    </table>
-  </div>
-
-  <div class="section">
-    <div class="section-title">What Happens Next</div>
-    <ul class="steps">
-      <li><span class="step-num">1</span>Document verification by our team</li>
-      <li><span class="step-num">2</span>Background check (24–48 hours)</li>
-      <li><span class="step-num">3</span>App onboarding &amp; training session</li>
-      <li><span class="step-num">4</span>Start delivering and earn!</li>
-    </ul>
-  </div>
-
-  <div class="earn">💰 Earn ₹18–₹25 per delivery + daily bonuses + fuel allowance (EV gets extra incentive!)</div>
-
-  <div class="footer">
-    This is an auto-generated application confirmation. Keep it for your records.<br/>
-    Zyphix · India
-  </div>
-  <script>window.onload=()=>{window.print();}</script>
-  </body></html>`;
-
-  const win = window.open('', '_blank');
-  if (win) { win.document.write(html); win.document.close(); }
+  exportApplicationPDF({
+    track: 'delivery',
+    title: personal.name || 'Delivery partner',
+    sections: [
+      { heading: 'About you', rows: [['Full name', personal.name], ['Age', personal.age], ['Riding area', personal.area]] },
+      { heading: 'Contact', rows: [['Mobile', personal.phone ? `+91 ${personal.phone}` : undefined], ['Emergency contact', personal.emergency ? `+91 ${personal.emergency}` : undefined], ['Email', personal.email]] },
+    ],
+    nextSteps: ['Document verification by our team', 'Background check (24–48 hours)', 'App onboarding and a short training session', 'Start delivering in your area'],
+  });
 }
 
 /* ─── Confetti Celebration ─── */
