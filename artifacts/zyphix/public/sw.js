@@ -1,10 +1,10 @@
 /* Zyphix service worker — makes return visits open instantly.
- *  - Pages (HTML): served from the device cache straight away, refreshed in the background
- *    (stale-while-revalidate), so the next visit always has the latest deploy.
+ *  - Pages (HTML): network first so every visit gets the latest deploy; the saved copy is
+ *    used only when the network is slow (>2.5 s) or offline.
  *  - /assets/* and /fonts/*: content-hashed / versioned files, cache-first.
  *  - API, media, admin and the /mobile preview are never touched (always network).
  */
-const HTML = 'zx-html-v1';
+const HTML = 'zx-html-v2';
 const ASSETS = 'zx-assets-v1';
 const KEEP = [HTML, ASSETS];
 const MAX_ASSETS = 400;
@@ -38,15 +38,17 @@ self.addEventListener('fetch', (event) => {
 async function page(event, req) {
   const cache = await caches.open(HTML);
   const key = new Request(new URL(req.url).pathname + new URL(req.url).search);
-  const cached = await cache.match(key);
   const network = fetch(req).then(async (res) => {
     if (res.ok && (res.headers.get('content-type') || '').includes('text/html')) await cache.put(key, res.clone());
     return res;
   });
-  if (cached) {
-    event.waitUntil(network.catch(() => {}));
-    return cached;
-  }
+  const slow = new Promise((resolve) => setTimeout(resolve, 2500, null));
+  try {
+    const first = await Promise.race([network, slow]);
+    if (first) return first;
+  } catch { /* offline: fall back to the saved copy */ }
+  const cached = await cache.match(key);
+  if (cached) { event.waitUntil(network.catch(() => {})); return cached; }
   return network;
 }
 
