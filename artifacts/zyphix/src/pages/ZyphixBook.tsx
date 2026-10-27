@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, ArrowUpRight, BadgeCheck, CalendarClock, Clock, MapPin, Search, ShieldCheck, X } from 'lucide-react';
-import { services } from '@/data/mockData';
+import { services } from '@/data/localData';
 import { usePartners, tagList, type PartnerListing } from '@/lib/partners';
 import { PHOTOS, VIDEOS, type Photo } from '@/data/media';
 import { Chip, Accordion, Button, FONT } from '@/ui/kit';

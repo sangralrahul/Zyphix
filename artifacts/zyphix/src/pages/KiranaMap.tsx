@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MapPin, Navigation, Star, Clock, Store } from 'lucide-react';
-import { stores } from '@/data/mockData';
+import { stores } from '@/data/localData';
 import { Button, FONT, IconTile } from '@/ui/kit';
 
 const card = 'rounded-xl border border-[#E6E8EC] bg-white';

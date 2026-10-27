@@ -1,5 +1,5 @@
 import { Wrench, Zap, Sparkles, Paintbrush, Snowflake, Droplets, Hammer, ChefHat, Truck, type LucideIcon } from 'lucide-react';
-import { services } from '@/data/mockData';
+import { services } from '@/data/localData';
 import { PHOTOS, VIDEOS, type Clip, type Photo } from '@/data/media';
 import { tagList, type PartnerListing } from '@/lib/partners';
 

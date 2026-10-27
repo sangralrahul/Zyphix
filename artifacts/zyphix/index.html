@@ -4,12 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <meta name="google-site-verification" content="SvbrtTiVZIZRK2Gd4vljvO_nHDSFvquWvr_89GJ04O8" />
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-M6DWFCKW');</script>
+    <!-- Google Tag Manager — loaded after the page is up so it never competes with first paint -->
+    <script>(function(w,d,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+    function go(){if(w.__gtm)return;w.__gtm=1;var j=d.createElement('script');j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i;d.head.appendChild(j);}
+    function later(){(w.requestIdleCallback||function(f){setTimeout(f,1200)})(go,{timeout:3000});}
+    if(d.readyState==='complete')later();else w.addEventListener('load',later);
+    ['pointerdown','keydown','scroll'].forEach(function(e){w.addEventListener(e,go,{once:true,passive:true});});
+    })(window,document,'dataLayer','GTM-M6DWFCKW');</script>
     <!-- End Google Tag Manager -->
     <title>Zyphix — The SuperLocal App</title>
     <meta name="description" content="Zyphix is the SuperLocal app: groceries in minutes, food from local kitchens and verified home services, from the businesses already in your neighbourhood." />
@@ -39,24 +40,38 @@
     <meta name="twitter:description" content="Groceries in minutes, food from local kitchens and verified home services — from the businesses already in your neighbourhood." />
 
     <!-- Self-hosted fonts (no third-party round trip). Geist is preloaded; a metric-matched fallback avoids layout shift. -->
-    <link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin>
     <script>
-      /* Start downloading this site's hero image before the app boots. */
+      /* Pick this site's hero image now (before the app boots): preload it, and remember it for the boot screen. */
       (function () {
-        var h = location.hostname, P = {
-          '': '7362583/action-adult-appoint-architecture-7362583.jpeg', partner: '7362583/action-adult-appoint-architecture-7362583.jpeg',
+        var P = {
+          main: '7362583/action-adult-appoint-architecture-7362583.jpeg', partner: '7362583/action-adult-appoint-architecture-7362583.jpeg',
           now: '29376327/pexels-photo-29376327.jpeg', advertise: '29376327/pexels-photo-29376327.jpeg', eats: '4912725/cooking-eastern-cuisine-food-blog-food-blogger-4912725.jpeg',
           book: '7551100/pexels-photo-7551100.jpeg', support: '6994864/attractive-beautiful-black-black-female-6994864.jpeg', auth: '8938170/pexels-photo-8938170.jpeg'
         };
-        if (!/(^|\.)zyphix\.in$/.test(h)) return;
-        var sub = h.replace(/\.?zyphix\.in$/, '').replace(/^www$/, '');
-        var f = P[sub]; if (!f) return;
+        var A = { www: 'main', zyphix: 'main', localhost: 'main', account: 'auth', help: 'support', partners: 'partner', ads: 'advertise', shop: 'now', food: 'eats', services: 'book' };
+        var h = location.hostname.toLowerCase(), q = new URLSearchParams(location.search).get('site');
+        var s = q || h.split('.')[0]; s = A[s] || s;
+        var f = P[s]; if (!f) return;
         var w = innerWidth > 900 ? 1280 : innerWidth > 500 ? 960 : 640;
-        var l = document.createElement('link'); l.rel = 'preload'; l.as = 'image'; l.href = '/media/vp/' + f + '?w=' + w; l.setAttribute('fetchpriority', 'high');
+        var proxy = /(^|\.)zyphix\.in$/.test(h);
+        var id = f.split('/')[0], name = f.split('/')[1];
+        var url = proxy ? '/media/vp/' + f + '?w=' + w : 'https://images.pexels.com/videos/' + id + '/' + name + '?auto=compress&cs=tinysrgb&w=' + w;
+        var l = document.createElement('link'); l.rel = 'preload'; l.as = 'image'; l.href = url; l.setAttribute('fetchpriority', 'high');
         document.head.appendChild(l);
+        if (location.pathname === '/' && !/noanim/.test(location.search)) window.__zxBoot = url;
       })();
     </script>
+    <style>
+      #zx-boot { position: fixed; inset: 0; z-index: 9999; background: #05080E; transition: opacity .35s ease; }
+      #zx-boot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; color: transparent; }
+      #zx-boot::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(5,8,14,.85), rgba(5,8,14,.35) 55%, rgba(5,8,14,.45)); }
+      #zx-boot::before { content: ''; position: absolute; z-index: 1; top: 0; left: 0; height: 2px; width: 100%; background: linear-gradient(90deg, transparent, #0DA366 40%, #34D399 60%, transparent); transform-origin: left; animation: zx-load 1.6s cubic-bezier(.22,1,.36,1) infinite; }
+      @keyframes zx-load { 0% { transform: translateX(-100%) scaleX(.4); } 100% { transform: translateX(100%) scaleX(.4); } }
+      @media (prefers-reduced-motion: reduce) { #zx-boot::before { animation: none; } }
+      #zx-boot.out { opacity: 0; pointer-events: none; }
+    </style>
   </head>
   <body>
     <!-- Google Tag Manager (noscript) -->
@@ -64,6 +79,17 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <div id="root"></div>
+    <script>
+      /* Boot screen: the hero image paints straight from the HTML while the app downloads; the app fades it out. */
+      (function () {
+        var u = window.__zxBoot; if (!u) return;
+        var d = document.createElement('div'); d.id = 'zx-boot'; d.setAttribute('aria-hidden', 'true');
+        var i = new Image(); i.alt = ''; i.decoding = 'async'; i.setAttribute('fetchpriority', 'high'); i.src = u;
+        i.onerror = function () { i.remove(); };
+        d.appendChild(i); document.body.appendChild(d);
+        setTimeout(function () { d.classList.add('out'); setTimeout(function () { d.remove(); }, 400); }, 9000);
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

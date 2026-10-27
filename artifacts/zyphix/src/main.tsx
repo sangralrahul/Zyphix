@@ -16,3 +16,22 @@ window.addEventListener(
 );
 
 createRoot(document.getElementById("root")!).render(<App />);
+
+// Fade out the HTML boot screen (index.html) as soon as the real page has its headline on screen.
+const boot = document.getElementById("zx-boot");
+if (boot) {
+  const root = document.getElementById("root")!;
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    obs.disconnect();
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      boot.classList.add("out");
+      setTimeout(() => boot.remove(), 400);
+    }));
+  };
+  const obs = new MutationObserver(() => { if (root.querySelector("h1")) finish(); });
+  obs.observe(root, { childList: true, subtree: true });
+  if (root.querySelector("h1")) finish();
+}

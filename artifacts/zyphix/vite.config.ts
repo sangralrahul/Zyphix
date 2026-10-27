@@ -51,12 +51,54 @@ function directRouteEntries() {
   };
 }
 
+
+/**
+ * Each subdomain renders one lazily-loaded page. Without help the browser only discovers that chunk
+ * after the main bundle has downloaded and run — a second round trip on every first visit.
+ * This injects a tiny inline script that modulepreloads the right page chunk (and its imports)
+ * for the current hostname, so both download in parallel.
+ */
+const SITE_PAGES: Record<string, string> = {
+  now: "src/pages/ZyphixNow.tsx", eats: "src/pages/ZyphixEats.tsx", book: "src/pages/ZyphixBook.tsx",
+  partner: "src/sites/PartnerSite.tsx", advertise: "src/sites/AdvertiseSite.tsx",
+  auth: "src/sites/AuthSite.tsx", support: "src/sites/SupportSite.tsx",
+};
+function sitePreload() {
+  return {
+    name: "site-chunk-preload",
+    apply: "build" as const,
+    transformIndexHtml: {
+      order: "post" as const,
+      handler(html: string, ctx: any) {
+        const bundle = ctx.bundle;
+        if (!bundle || !html.includes('id="root"')) return html;
+        const chunks = Object.values(bundle).filter((c: any) => c.type === "chunk") as any[];
+        const entry = chunks.find(c => c.isEntry && c.name === "main");
+        const already = new Set<string>(entry ? [entry.fileName, ...entry.imports] : []);
+        const map: Record<string, string[]> = {};
+        for (const [site, file] of Object.entries(SITE_PAGES)) {
+          const abs = path.resolve(import.meta.dirname, file);
+          const chunk = chunks.find(c => c.facadeModuleId === abs);
+          if (!chunk) continue;
+          const files = new Set<string>();
+          const walk = (c: any) => { if (already.has(c.fileName) || files.has(c.fileName)) return; files.add(c.fileName); for (const i of c.imports) { const d = bundle[i]; if (d) walk(d); } };
+          walk(chunk);
+          map[site] = [...files];
+        }
+        const script = `<script>(function(M){var h=location.hostname.toLowerCase(),q=new URLSearchParams(location.search).get('site'),A={account:'auth',help:'support',partners:'partner',ads:'advertise',shop:'now',food:'eats',services:'book'},s=q||h.split('.')[0];s=A[s]||s;(M[s]||[]).forEach(function(f){var l=document.createElement('link');l.rel='modulepreload';l.crossOrigin='';l.href='${basePath}'+f;document.head.appendChild(l);});})(${JSON.stringify(map)});</script>`;
+        return html.replace("</head>", `    ${script}\n  </head>`);
+      },
+    },
+  };
+}
+
 export default defineConfig({
   base: basePath,
   plugins: [
     react(),
     tailwindcss(),
     directRouteEntries(),
+    sitePreload(),
     runtimeErrorOverlay(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
