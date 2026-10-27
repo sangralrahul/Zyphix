@@ -35,3 +35,58 @@ if (boot) {
   obs.observe(root, { childList: true, subtree: true });
   if (root.querySelector("h1")) finish();
 }
+
+/* ── Image warm-up ─────────────────────────────────────────────────────────
+   Native lazy-loading waits until an image is about to scroll into view, so fast scrolling
+   (and the sideways galleries, whose cards move in via transforms) shows empty boxes.
+   Once the first screen is done we quietly load every remaining image on the page, a few at a
+   time at low priority, so by the time anyone scrolls to it, it is already there.
+   Skipped for Data Saver / 2G users. */
+function warmImages() {
+  const conn = (navigator as any).connection;
+  if (conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ""))) return;
+  const queue: HTMLImageElement[] = [];
+  const seen = new WeakSet<HTMLImageElement>();
+  let active = 0;
+  const MAX = 4;
+  // Only warm images within ~9 screens of where the visitor is (long product grids stay lazy further down).
+  const near = (img: HTMLImageElement) => {
+    const r = img.getBoundingClientRect();
+    return r.top < innerHeight * 9 && r.bottom > -innerHeight * 4;
+  };
+  const pump = () => {
+    let i = 0;
+    while (active < MAX && i < queue.length) {
+      const img = queue[i];
+      if (!img.isConnected || img.complete) { queue.splice(i, 1); continue; }
+      if (!near(img)) { i++; continue; }
+      queue.splice(i, 1);
+      active++;
+      const done = () => { active--; pump(); };
+      img.addEventListener("load", done, { once: true });
+      img.addEventListener("error", done, { once: true });
+      img.setAttribute("fetchpriority", "low");
+      img.loading = "eager";
+    }
+  };
+  let t = 0;
+  window.addEventListener("scroll", () => { clearTimeout(t); t = window.setTimeout(pump, 150); }, { passive: true });
+  const collect = (rootEl: ParentNode) => {
+    rootEl.querySelectorAll<HTMLImageElement>('img[loading="lazy"]').forEach(img => {
+      if (seen.has(img) || img.complete) return;
+      seen.add(img);
+      queue.push(img);
+    });
+    pump();
+  };
+  collect(document);
+  new MutationObserver(muts => {
+    for (const m of muts) m.addedNodes.forEach(n => { if (n.nodeType === 1) collect(n as Element); });
+  }).observe(document.body, { childList: true, subtree: true });
+}
+const startWarm = () => {
+  const idle = (window as any).requestIdleCallback || ((f: () => void) => setTimeout(f, 800));
+  setTimeout(() => idle(warmImages, { timeout: 2500 }), 1200);
+};
+if (document.readyState === "complete") startWarm();
+else window.addEventListener("load", startWarm, { once: true });

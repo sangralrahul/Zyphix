@@ -55,7 +55,7 @@ export function AislesGallery({ categories }: { categories: Category[] }) {
     const name = aisleName(a, categories);
     return (
       <a key={a.name} href={NOW_SITE} className="group block" aria-label={`Shop ${name} on Zyphix Now`}>
-        <PhotoTile photo={a.photo} ratio="4/5" rounded="rounded-3xl" className="!bg-[#0B1220] ring-1 ring-white/10">
+        <PhotoTile photo={a.photo} ratio="4/5" rounded="rounded-3xl" sizes="(max-width: 640px) 74vw, 280px" className="!bg-[#0B1220] ring-1 ring-white/10">
           <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#05080E]/90 via-[#05080E]/10 to-transparent" />
           <span className="absolute left-5 top-5 rounded-full border border-white/20 bg-black/30 px-3 py-1 text-[12px] font-medium tabular-nums text-white/80 backdrop-blur-md">{String(i + 1).padStart(2, '0')}</span>
           <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-3">
