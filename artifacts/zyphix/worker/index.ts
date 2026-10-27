@@ -321,7 +321,7 @@ async function handleAdmin(request: Request, env: Env, url: URL): Promise<Respon
   const pm = p.match(/^\/admin\/partners\/([^/]+)\/status$/);
   if (pm && request.method === 'POST') {
     const status = url.searchParams.get('status');
-    if (!status || !['live', 'hidden', 'pending'].includes(status)) return json({ error: 'status must be live | hidden | pending' }, 400);
+    if (!status || !['live', 'hidden', 'pending', 'rejected'].includes(status)) return json({ error: 'status must be live | hidden | pending | rejected' }, 400);
     const r = await env.DB.prepare("UPDATE partners SET status = ?, updated_at = datetime('now') WHERE id = ?").bind(status, decodeURIComponent(pm[1])).run();
     return json({ updated: r.meta.changes });
   }
@@ -599,7 +599,7 @@ async function createPartner(request: Request, env: Env): Promise<Response> {
     ? await env.DB.prepare('SELECT id FROM partners WHERE type = ? AND email = ?').bind(type, email).first<{ id: string }>()
     : await env.DB.prepare('SELECT id FROM partners WHERE type = ? AND phone = ?').bind(type, phone).first<{ id: string }>();
   if (existing) {
-    await env.DB.prepare("UPDATE partners SET name=?, business_name=?, phone=?, city=?, locality=?, category=?, tags=?, details=?, updated_at=datetime('now') WHERE id=?")
+    await env.DB.prepare("UPDATE partners SET name=?, business_name=?, phone=?, city=?, locality=?, category=?, tags=?, details=?, status=CASE WHEN status='rejected' THEN 'pending' ELSE status END, updated_at=datetime('now') WHERE id=?")
       .bind(name, businessName, phone, city, locality, category, tags, JSON.stringify(d).slice(0, 8000), existing.id).run();
     return json({ success: true, id: existing.id, updated: true });
   }
