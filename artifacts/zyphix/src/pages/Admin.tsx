@@ -1,11 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Bell, Bike, Check, ChevronRight, Clock, Eye, EyeOff, Inbox, LayoutDashboard, Loader2, LogOut, Mail, MapPin, MessageCircle,
+  ArrowRight, Bell, Bike, Check, ChevronRight, Clock, Eye, EyeOff, Inbox, LayoutDashboard, Loader2, LogOut, Mail, MapPin, MessageCircle,
   Package, Phone, RefreshCw, Search, ShieldCheck, ShoppingBag, Store, Undo2, Users, UtensilsCrossed, Wrench, X, XCircle,
 } from 'lucide-react';
 import { motion, AnimatePresence, animate, useMotionValue, useTransform } from '@/lib/motion';
 import { FONT } from '@/ui/kit';
 import { useNoIndex } from '@/lib/seo';
+import { ZyphixLogo } from '@/components/ZyphixLogo';
+import { BgVideo } from '@/ui/cinema';
+import { VIDEOS } from '@/data/media';
 
 /* ────────────────────────────────────────────────────────────────────────────
    zyphix.in/admin — Zyphix operations console.
@@ -33,10 +36,10 @@ const TYPES: Record<string, { label: string; icon: React.ElementType; color: str
   delivery: { label: 'Delivery', icon: Bike, color: '#EA580C' },
 };
 const STATUS: Record<Status, { label: string; cls: string }> = {
-  pending: { label: 'Waiting for review', cls: 'bg-amber-50 text-amber-700 ring-amber-200' },
-  live: { label: 'Approved', cls: 'bg-emerald-50 text-emerald-700 ring-emerald-200' },
-  rejected: { label: 'Rejected', cls: 'bg-rose-50 text-rose-700 ring-rose-200' },
-  hidden: { label: 'Hidden', cls: 'bg-gray-100 text-gray-600 ring-gray-200' },
+  pending: { label: 'Waiting for review', cls: 'bg-amber-400/15 text-amber-300 ring-amber-400/30' },
+  live: { label: 'Approved', cls: 'bg-emerald-400/15 text-emerald-300 ring-emerald-400/30' },
+  rejected: { label: 'Rejected', cls: 'bg-rose-400/15 text-rose-300 ring-rose-400/30' },
+  hidden: { label: 'Hidden', cls: 'bg-white/10 text-white/60 ring-white/15' },
 };
 const PAY: Record<string, string> = { COD: 'Cash on delivery', CALL_TO_CONFIRM: 'Confirm by call', ONLINE: 'Online' };
 const product = (id: string) => id.startsWith('ZET') ? { k: 'Eats', c: '#E11D48' } : id.startsWith('ZBK') ? { k: 'Book', c: '#7C3AED' } : { k: 'Now', c: G };
@@ -60,25 +63,24 @@ async function api<T>(path: string, token: string, init?: RequestInit): Promise<
   return r.json() as Promise<T>;
 }
 
-/* ── Animated backdrop (login + sidebar) ────────────────────────────────── */
-function Aurora({ dim = false }: { dim?: boolean }) {
+/* ── Cinematic backdrop: vegetable market footage ───────────────────────── */
+function MarketVideo({ dim = 0.4, priority = true }: { dim?: number; priority?: boolean }) {
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="zx-aurora zx-a1" /><div className="zx-aurora zx-a2" /><div className="zx-aurora zx-a3" />
-      <div className="zx-grid" />
-      {!dim && Array.from({ length: 22 }, (_, i) => <span key={i} className="zx-spark" style={{ left: `${(i * 47) % 100}%`, top: `${(i * 31) % 100}%`, animationDelay: `${(i * 0.6) % 7}s` }} />)}
-      <style>{`
-        .zx-aurora{position:absolute;border-radius:50%;filter:blur(90px);opacity:${dim ? .35 : .55};animation:zxFloat 18s ease-in-out infinite alternate}
-        .zx-a1{width:55vmax;height:55vmax;left:-15vmax;top:-20vmax;background:#0DA366}
-        .zx-a2{width:40vmax;height:40vmax;right:-10vmax;top:0;background:#2563EB;opacity:${dim ? .2 : .32};animation-duration:24s;animation-delay:-8s}
-        .zx-a3{width:38vmax;height:38vmax;left:25vmax;bottom:-22vmax;background:#7C3AED;opacity:${dim ? .18 : .28};animation-duration:28s;animation-delay:-14s}
-        .zx-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at 50% 35%,#000 25%,transparent 75%);animation:zxPan 40s linear infinite}
-        .zx-spark{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:0;animation:zxSpark 7s ease-in-out infinite}
-        @keyframes zxFloat{0%{transform:translate(0,0) scale(1)}50%{transform:translate(5vmax,4vmax) scale(1.08)}100%{transform:translate(-4vmax,7vmax) scale(.94)}}
-        @keyframes zxPan{to{background-position:48px 48px,48px 48px}}
-        @keyframes zxSpark{0%,100%{opacity:0;transform:translateY(0)}40%{opacity:.9}80%{opacity:0;transform:translateY(-70px)}}
-        @media (prefers-reduced-motion:reduce){.zx-aurora,.zx-grid,.zx-spark{animation:none}}
-      `}</style>
+    <div aria-hidden className="absolute inset-0 overflow-hidden" style={{ background: 'radial-gradient(60% 70% at 85% 30%, rgba(13,163,102,.35), transparent 70%), radial-gradient(40% 50% at 60% 80%, rgba(132,204,22,.18), transparent 70%), #06080A' }}>
+      <motion.div className="absolute inset-0" initial={{ scale: 1.08 }} animate={{ scale: 1 }} transition={{ duration: 2.4, ease: EASE }}>
+        <BgVideo clip={VIDEOS.vegMarket} dim={dim} priority={priority} />
+      </motion.div>
+    </div>
+  );
+}
+
+/* soft moving light for pages without video */
+function Glow() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[420px] overflow-hidden">
+      <div className="zx-glow absolute -left-40 -top-56 h-[520px] w-[520px] rounded-full bg-emerald-500/25 blur-[120px]" />
+      <div className="zx-glow absolute -right-40 -top-64 h-[460px] w-[460px] rounded-full bg-lime-400/10 blur-[120px] [animation-delay:-9s]" />
+      <style>{`.zx-glow{animation:zxDrift 22s ease-in-out infinite alternate}@keyframes zxDrift{to{transform:translate(8vw,6vh) scale(1.1)}}@media (prefers-reduced-motion:reduce){.zx-glow{animation:none}}`}</style>
     </div>
   );
 }
@@ -103,32 +105,40 @@ function Login({ onOk }: { onOk: (t: string) => void }) {
     setBusy(false);
   };
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#05080E] px-5" style={{ fontFamily: FONT }}>
-      <Aurora />
-      <motion.form key={shake} onSubmit={submit}
-        initial={shake ? { x: 0 } : { opacity: 0, y: 30, scale: 0.98 }} animate={shake ? { x: [0, -10, 10, -6, 6, 0] } : { opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: shake ? 0.4 : 0.8, ease: EASE }}
-        className="relative w-full max-w-[420px] rounded-[28px] border border-white/10 bg-white/[.06] p-8 text-white shadow-[0_40px_120px_-30px_rgba(0,0,0,.8)] backdrop-blur-2xl sm:p-10">
-        <motion.span initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.25, type: 'spring', stiffness: 260, damping: 18 }}
-          className="flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-[0_14px_40px_-10px_rgba(13,163,102,.9)]" style={{ background: 'linear-gradient(160deg,#19C27C,#0DA366)' }}>
-          <ShieldCheck size={26} />
-        </motion.span>
-        <p className="mt-7 text-[12px] font-semibold uppercase tracking-[0.16em] text-emerald-300">Zyphix operations</p>
-        <h1 className="mt-2 text-[30px] font-semibold leading-[1.08] tracking-[-0.035em]">Admin <span className="font-serif-accent text-emerald-300">console</span></h1>
-        <p className="mt-2 text-[14.5px] leading-[1.6] text-white/60">Review partner applications, orders and requests. Sign in with your admin key.</p>
-        <label className="mt-7 flex h-[52px] items-center rounded-2xl border border-white/15 bg-white/[.06] transition focus-within:border-emerald-400 focus-within:shadow-[0_0_0_4px_rgba(52,211,153,.15)]">
-          <input type={show ? 'text' : 'password'} value={t} onChange={e => setT(e.target.value)} autoFocus placeholder="Admin key" autoComplete="off" aria-label="Admin key"
-            className="h-full min-w-0 flex-1 bg-transparent px-4 text-[15px] text-white outline-none placeholder:text-white/35" />
-          <button type="button" onClick={() => setShow(s => !s)} aria-label={show ? 'Hide key' : 'Show key'} className="mr-3 text-white/50 hover:text-white">{show ? <EyeOff size={18} /> : <Eye size={18} />}</button>
-        </label>
-        <AnimatePresence>{err && <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="pt-2.5 text-[13px] font-medium text-rose-300">{err}</motion.p>}</AnimatePresence>
-        <button disabled={!t.trim() || busy} className="group relative mt-6 inline-flex h-[52px] w-full items-center justify-center gap-2 overflow-hidden rounded-2xl text-[15px] font-semibold text-white disabled:opacity-60"
-          style={{ background: 'linear-gradient(180deg,#19C27C,#0DA366)' }}>
-          <span aria-hidden className="absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-white/25 blur-md transition-transform duration-700 group-hover:translate-x-[420%]" />
-          {busy ? <Loader2 size={18} className="animate-spin" /> : <ShieldCheck size={18} />} Sign in
-        </button>
-        <p className="mt-5 text-center text-[12px] text-white/40">Your key stays in this browser tab only.</p>
-      </motion.form>
+    <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-[#06080A] text-white" style={{ fontFamily: FONT }}>
+      <MarketVideo dim={0.3} />
+      <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(6,8,10,.92) 0%, rgba(6,8,10,.55) 45%, rgba(6,8,10,.25) 100%), linear-gradient(0deg, rgba(6,8,10,.9) 0%, transparent 40%)' }} />
+      <header className="relative flex items-center justify-between px-6 py-6 sm:px-10">
+        <ZyphixLogo size={30} ixColor="#FFFFFF" />
+        <span className="rounded-full bg-white/10 px-3 py-1.5 text-[12px] font-medium text-white/80 ring-1 ring-white/15 backdrop-blur-md">Operations</span>
+      </header>
+      <div className="relative mx-auto grid w-full max-w-[1280px] flex-1 items-center gap-10 px-6 pb-14 sm:px-10 lg:grid-cols-[1fr_440px]">
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: EASE }} className="hidden lg:block">
+          <p className="text-[12.5px] font-semibold uppercase tracking-[0.2em] text-emerald-300">Zyphix admin</p>
+          <h1 className="mt-4 max-w-[13ch] text-[64px] font-semibold leading-[0.98] tracking-[-0.045em]">Every partner, <span className="font-serif-accent text-emerald-300">fresh</span> from the market.</h1>
+          <p className="mt-5 max-w-[46ch] text-[16px] leading-[1.65] text-white/70">Approve stores, restaurants, riders and service pros. Call back Eats and Book requests. All in one place, updated live.</p>
+        </motion.div>
+        <motion.form key={shake} onSubmit={submit}
+          initial={shake ? { x: 0 } : { opacity: 0, y: 30 }} animate={shake ? { x: [0, -10, 10, -6, 6, 0] } : { opacity: 1, y: 0 }}
+          transition={{ duration: shake ? 0.4 : 0.8, delay: shake ? 0 : 0.15, ease: EASE }}
+          className="w-full rounded-[30px] border border-white/15 bg-[#0B0F12]/60 p-8 shadow-[0_50px_120px_-30px_rgba(0,0,0,.9)] backdrop-blur-2xl sm:p-10">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-[0_14px_40px_-10px_rgba(13,163,102,.9)]" style={{ background: 'linear-gradient(160deg,#22D38A,#0DA366)' }}><ShieldCheck size={22} /></span>
+          <h2 className="mt-6 text-[28px] font-semibold tracking-[-0.03em]">Sign in</h2>
+          <p className="mt-1.5 text-[14px] leading-[1.6] text-white/60">Use your admin key to open the console.</p>
+          <label className="mt-7 flex h-[54px] items-center rounded-2xl border border-white/15 bg-black/30 transition focus-within:border-emerald-400 focus-within:shadow-[0_0_0_4px_rgba(52,211,153,.15)]">
+            <input type={show ? 'text' : 'password'} value={t} onChange={e => setT(e.target.value)} autoFocus placeholder="Admin key" autoComplete="off" aria-label="Admin key"
+              className="h-full min-w-0 flex-1 bg-transparent px-4 text-[15px] text-white outline-none placeholder:text-white/35" />
+            <button type="button" onClick={() => setShow(s => !s)} aria-label={show ? 'Hide key' : 'Show key'} className="mr-3 text-white/50 hover:text-white">{show ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+          </label>
+          <AnimatePresence>{err && <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="pt-2.5 text-[13px] font-medium text-rose-300">{err}</motion.p>}</AnimatePresence>
+          <button disabled={!t.trim() || busy} className="group relative mt-6 inline-flex h-[54px] w-full items-center justify-center gap-2 overflow-hidden rounded-2xl text-[15px] font-semibold text-white disabled:opacity-60"
+            style={{ background: 'linear-gradient(180deg,#19C27C,#0DA366)' }}>
+            <span aria-hidden className="absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-white/25 blur-md transition-transform duration-700 group-hover:translate-x-[420%]" />
+            {busy ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} />} Open console
+          </button>
+          <p className="mt-5 text-center text-[12px] text-white/40">Your key stays in this browser tab only.</p>
+        </motion.form>
+      </div>
     </div>
   );
 }
@@ -136,24 +146,24 @@ function Login({ onOk }: { onOk: (t: string) => void }) {
 /* ── Small UI ───────────────────────────────────────────────────────────── */
 function Pill({ status }: { status: Status }) {
   return <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold ring-1 ${STATUS[status].cls}`}>
-    {status === 'pending' && <span className="relative flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-60" /><span className="relative h-1.5 w-1.5 rounded-full bg-amber-500" /></span>}
+    {status === 'pending' && <span className="relative flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" /><span className="relative h-1.5 w-1.5 rounded-full bg-amber-400" /></span>}
     {STATUS[status].label}
   </span>;
 }
 function TypeIcon({ type, size = 40 }: { type: string; size?: number }) {
-  const t = TYPES[type] ?? { icon: Package, color: '#6B7280' };
+  const t = TYPES[type] ?? { icon: Package, color: '#9CA3AF' };
   const I = t.icon;
-  return <span className="flex shrink-0 items-center justify-center rounded-xl" style={{ width: size, height: size, color: t.color, background: `color-mix(in srgb, ${t.color} 11%, white)` }}><I size={Math.round(size * 0.45)} strokeWidth={1.9} /></span>;
+  return <span className="flex shrink-0 items-center justify-center rounded-xl ring-1 ring-white/10" style={{ width: size, height: size, color: t.color, background: `color-mix(in srgb, ${t.color} 16%, transparent)` }}><I size={Math.round(size * 0.45)} strokeWidth={1.9} /></span>;
 }
 function Empty({ icon: I, title, body }: { icon: React.ElementType; title: string; body: string }) {
   return (
     <div className="flex flex-col items-center px-6 py-12 text-center">
-      <motion.span initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 text-gray-500"><I size={22} /></motion.span>
-      <p className="mt-4 text-[15px] font-semibold">{title}</p><p className="mt-1 max-w-[34ch] text-[13.5px] text-gray-500">{body}</p>
+      <motion.span initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[.06] text-white/60 ring-1 ring-white/10"><I size={22} /></motion.span>
+      <p className="mt-4 text-[15px] font-semibold text-white">{title}</p><p className="mt-1 max-w-[34ch] text-[13.5px] text-white/50">{body}</p>
     </div>
   );
 }
-
+const PANEL = 'rounded-[26px] border border-white/[.08] bg-white/[.035] backdrop-blur-xl';
 type Toast = { id: number; text: string; tone: 'ok' | 'info' | 'err' };
 
 /* ── Console ─────────────────────────────────────────────────────────────── */
@@ -171,6 +181,8 @@ export function Admin() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [fresh, setFresh] = useState<Set<string>>(new Set());
   const seen = useRef<Set<string> | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => { const f = () => setScrolled(window.scrollY > 40); f(); window.addEventListener('scroll', f, { passive: true }); return () => window.removeEventListener('scroll', f); }, []);
 
   const toast = useCallback((text: string, tone: Toast['tone'] = 'ok') => {
     const id = Date.now() + Math.random();
@@ -244,75 +256,63 @@ export function Admin() {
     { k: 'waitlist', label: 'Waitlist', icon: Bell },
   ];
   const hour = new Date().getHours();
+  const greeting = `Good ${hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening'}`;
 
   return (
-    <div className="min-h-screen bg-[#F4F5F7] text-gray-900 lg:grid lg:grid-cols-[260px_1fr]" style={{ fontFamily: FONT }}>
-      {/* ── Sidebar ── */}
-      <aside className="relative isolate overflow-hidden bg-[#05080E] text-white lg:sticky lg:top-0 lg:h-screen">
-        <Aurora dim />
-        <div className="relative flex h-full flex-col px-4 py-4 lg:px-5 lg:py-7">
-          <div className="flex items-center gap-2.5 px-1">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(160deg,#19C27C,#0DA366)' }}><ShieldCheck size={18} /></span>
-            <div><p className="text-[15px] font-semibold leading-tight">Zyphix</p><p className="text-[12px] text-white/50">Operations console</p></div>
-            <button onClick={signOut} className="ml-auto rounded-lg p-2 text-white/60 hover:bg-white/10 hover:text-white lg:hidden" aria-label="Sign out"><LogOut size={17} /></button>
-          </div>
-          <nav className="mt-4 flex gap-1 overflow-x-auto lg:mt-10 lg:flex-col [scrollbar-width:none]">
-            {NAV.map(n => {
-              const on = view === n.k; const I = n.icon;
-              return (
-                <button key={n.k} onClick={() => setView(n.k)} className={`relative flex shrink-0 items-center gap-3 rounded-xl px-3.5 py-2.5 text-[14px] font-medium transition-colors ${on ? 'text-white' : 'text-white/60 hover:text-white'}`}>
-                  {on && <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-xl bg-white/10 ring-1 ring-white/15" transition={{ type: 'spring', stiffness: 400, damping: 34 }} />}
-                  <I size={17} className="relative" /><span className="relative whitespace-nowrap">{n.label}</span>
-                  {!!n.badge && <span className="relative ml-auto rounded-full bg-amber-400 px-2 text-[11.5px] font-bold text-gray-900">{n.badge}</span>}
-                </button>
-              );
-            })}
-          </nav>
-          <div className="mt-auto hidden space-y-3 lg:block">
-            <div className="rounded-2xl bg-white/[.06] p-4 ring-1 ring-white/10">
-              <p className="flex items-center gap-2 text-[13px] font-medium"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" /><span className="relative h-2 w-2 rounded-full bg-emerald-400" /></span>Live</p>
-              <p className="mt-1 text-[12px] leading-[1.5] text-white/50">Refreshes every 20 seconds.{synced && <><br />Updated {synced.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</>}</p>
-            </div>
-            <button onClick={signOut} className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-[14px] text-white/60 hover:bg-white/10 hover:text-white"><LogOut size={17} /> Sign out</button>
-          </div>
-        </div>
-      </aside>
-
-      {/* ── Main ── */}
-      <main className="min-w-0 px-4 pb-24 pt-6 sm:px-8 lg:px-10 lg:pt-9">
-        <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-emerald-700">{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
-            <AnimatePresence mode="wait">
-              <motion.h1 key={view} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.3, ease: EASE }}
-                className="mt-1 text-[30px] font-semibold tracking-[-0.035em] sm:text-[34px]">
-                {view === 'overview' ? <>Good {hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening'}<span className="text-emerald-600">.</span></> : NAV.find(n => n.k === view)?.label}
-              </motion.h1>
-            </AnimatePresence>
-          </div>
-          <button onClick={() => load()} className="inline-flex h-10 items-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-[13.5px] font-medium text-gray-700 shadow-sm transition hover:border-gray-300">
-            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh
+    <div className="relative min-h-screen bg-[#06080A] text-white [color-scheme:dark]" style={{ fontFamily: FONT }}>
+      {/* ── Top bar ── */}
+      <header className={`fixed inset-x-0 top-0 z-50 transition-[background,border-color] duration-300 ${view === 'overview' && !scrolled ? 'border-b border-transparent bg-gradient-to-b from-black/60 to-transparent' : 'border-b border-white/[.06] bg-[#06080A]/80 backdrop-blur-xl'}`}>
+        <div className="mx-auto flex max-w-[1400px] items-center gap-4 px-4 py-3.5 sm:px-8">
+          <button onClick={() => setView('overview')} className="flex shrink-0 items-center gap-2.5" aria-label="Overview">
+            <ZyphixLogo size={26} ixColor="#FFFFFF" />
+            <span className="hidden rounded-md bg-white/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75 ring-1 ring-white/15 sm:inline">Admin</span>
           </button>
+          <nav className="mx-auto hidden items-center gap-1 rounded-full bg-black/30 p-1 ring-1 ring-white/10 backdrop-blur-xl md:flex">
+            {NAV.map(n => <NavBtn key={n.k} n={n} on={view === n.k} onClick={() => setView(n.k)} />)}
+          </nav>
+          <div className="ml-auto flex items-center gap-2 md:ml-0">
+            <span className="hidden items-center gap-2 rounded-full bg-black/30 px-3 py-1.5 text-[12px] text-white/70 ring-1 ring-white/10 backdrop-blur-xl lg:inline-flex" title="Refreshes every 20 seconds">
+              <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" /><span className="relative h-2 w-2 rounded-full bg-emerald-400" /></span>
+              Live{synced && <span className="tabular-nums text-white/45">· {synced.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>}
+            </span>
+            <button onClick={() => load()} aria-label="Refresh" className="flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white/80 ring-1 ring-white/10 backdrop-blur-xl hover:text-white"><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /></button>
+            <button onClick={signOut} aria-label="Sign out" className="flex h-9 items-center gap-2 rounded-full bg-black/30 px-3 text-[13px] text-white/80 ring-1 ring-white/10 backdrop-blur-xl hover:text-white"><LogOut size={15} /><span className="hidden sm:inline">Sign out</span></button>
+          </div>
         </div>
+        <nav className="flex gap-1 overflow-x-auto px-4 pb-3 md:hidden [scrollbar-width:none]">
+          {NAV.map(n => <NavBtn key={n.k} n={n} on={view === n.k} onClick={() => setView(n.k)} />)}
+        </nav>
+      </header>
 
-        <AnimatePresence mode="wait">
-          <motion.div key={view} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35, ease: EASE }}>
-            {view === 'overview' && <Overview kpis={kpis} pending={pending} orders={orders} onGo={setView} onOpen={setOpen} onStatus={setStatus} fresh={fresh} />}
-            {view === 'partners' && <Partners partners={partners} onOpen={setOpen} onStatus={setStatus} fresh={fresh} loading={loading} />}
-            {view === 'orders' && <Orders orders={orders} loading={loading} />}
-            {view === 'waitlist' && <Waitlist rows={waitlist} loading={loading} />}
-          </motion.div>
-        </AnimatePresence>
-      </main>
+      <AnimatePresence mode="wait">
+        <motion.main key={view} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: EASE }} className="min-w-0">
+          {view === 'overview' ? (
+            <Overview greeting={greeting} kpis={kpis} pending={pending} orders={orders} onGo={setView} onOpen={setOpen} onStatus={setStatus} fresh={fresh} />
+          ) : (
+            <div className="relative">
+              <Glow />
+              <div className="relative mx-auto max-w-[1400px] px-4 pb-24 pt-36 sm:px-8 md:pt-28">
+                <p className="text-[12.5px] font-semibold uppercase tracking-[0.18em] text-emerald-300">{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                <motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE }} className="mb-8 mt-2 text-[34px] font-semibold tracking-[-0.04em] sm:text-[44px]">
+                  {NAV.find(n => n.k === view)?.label}
+                </motion.h1>
+                {view === 'partners' && <Partners partners={partners} onOpen={setOpen} onStatus={setStatus} fresh={fresh} loading={loading} />}
+                {view === 'orders' && <Orders orders={orders} loading={loading} />}
+                {view === 'waitlist' && <Waitlist rows={waitlist} loading={loading} />}
+              </div>
+            </div>
+          )}
+        </motion.main>
+      </AnimatePresence>
 
       <Drawer partner={open} onClose={() => setOpen(null)} onStatus={setStatus} />
 
       {/* ── Toasts ── */}
-      <div className="pointer-events-none fixed bottom-5 left-1/2 z-[80] -translate-x-1/2 flex w-[min(380px,calc(100vw-40px))] flex-col gap-2">
+      <div className="pointer-events-none fixed bottom-5 left-1/2 z-[80] flex w-[min(380px,calc(100vw-40px))] -translate-x-1/2 flex-col gap-2">
         <AnimatePresence>
           {toasts.map(t => (
-            <motion.div key={t.id} layout initial={{ opacity: 0, y: 20, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, x: 40 }}
-              className="pointer-events-auto flex items-start gap-3 rounded-2xl bg-gray-900 px-4 py-3.5 text-[13.5px] leading-[1.45] text-white shadow-[0_20px_50px_-15px_rgba(0,0,0,.5)]">
+            <motion.div key={t.id} layout initial={{ opacity: 0, y: 20, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10 }}
+              className="pointer-events-auto flex items-start gap-3 rounded-2xl bg-[#11161A]/95 px-4 py-3.5 text-[13.5px] leading-[1.45] text-white shadow-[0_20px_50px_-15px_rgba(0,0,0,.8)] ring-1 ring-white/10 backdrop-blur-xl">
               <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${t.tone === 'err' ? 'bg-rose-500' : t.tone === 'info' ? 'bg-amber-400 text-gray-900' : 'bg-emerald-500'}`}>
                 {t.tone === 'err' ? <X size={12} strokeWidth={3} /> : t.tone === 'info' ? <Bell size={11} strokeWidth={2.6} /> : <Check size={12} strokeWidth={3} />}
               </span>
@@ -325,74 +325,118 @@ export function Admin() {
   );
 }
 
+function NavBtn({ n, on, onClick }: { n: { k: View; label: string; icon: React.ElementType; badge?: number }; on: boolean; onClick: () => void }) {
+  const I = n.icon;
+  return (
+    <button onClick={onClick} className={`relative flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-[13.5px] font-medium transition-colors ${on ? 'text-gray-950' : 'text-white/70 hover:text-white'}`}>
+      {on && <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full bg-white" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
+      <I size={15} className="relative" /><span className="relative whitespace-nowrap">{n.label}</span>
+      {!!n.badge && <span className="relative rounded-full bg-amber-400 px-1.5 text-[11px] font-bold leading-[18px] text-gray-950">{n.badge}</span>}
+    </button>
+  );
+}
+
 /* ── Overview ───────────────────────────────────────────────────────────── */
-function Overview({ kpis, pending, orders, onGo, onOpen, onStatus, fresh }: {
-  kpis: { label: string; value: number; icon: React.ElementType; color: string; go: View }[]; pending: Partner[]; orders: Order[];
+function Overview({ greeting, kpis, pending, orders, onGo, onOpen, onStatus, fresh }: {
+  greeting: string; kpis: { label: string; value: number; icon: React.ElementType; color: string; go: View }[]; pending: Partner[]; orders: Order[];
   onGo: (v: View) => void; onOpen: (p: Partner) => void; onStatus: (p: Partner, s: Status) => void; fresh: Set<string>;
 }) {
+  const waiting = pending.length;
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 [&>*]:min-w-0 md:grid-cols-3 xl:grid-cols-5">
-        {kpis.map((k, i) => {
-          const I = k.icon;
-          return (
-            <motion.button key={k.label} onClick={() => onGo(k.go)} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i, duration: 0.5, ease: EASE }}
-              whileHover={{ y: -3 }} className="group relative overflow-hidden rounded-3xl border border-gray-200/80 bg-white p-5 text-left shadow-[0_1px_2px_rgba(16,24,40,.04)] transition-shadow hover:shadow-[0_20px_40px_-24px_rgba(16,24,40,.35)]">
-              <span aria-hidden className="absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-[.08] transition-transform duration-500 group-hover:scale-125" style={{ background: k.color }} />
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ color: k.color, background: `color-mix(in srgb, ${k.color} 11%, white)` }}><I size={19} /></span>
-              <p className="mt-5 text-[32px] font-semibold leading-none tracking-[-0.03em]"><CountUp value={k.value} /></p>
-              <p className="mt-2 text-[13px] text-gray-500">{k.label}</p>
+      {/* Hero: live vegetable-market footage */}
+      <section className="relative isolate overflow-hidden">
+        <MarketVideo dim={0.25} />
+        <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(6,8,10,.85) 0%, rgba(6,8,10,.35) 55%, rgba(6,8,10,.1) 100%), linear-gradient(0deg, #06080A 0%, rgba(6,8,10,.6) 22%, transparent 55%)' }} />
+        <div className="relative mx-auto flex min-h-[540px] max-w-[1400px] flex-col justify-end px-4 pb-36 pt-36 sm:min-h-[600px] sm:px-8 sm:pb-40">
+          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: EASE }} className="text-[12.5px] font-semibold uppercase tracking-[0.2em] text-emerald-300">
+            {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
+          </motion.p>
+          <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.08, ease: EASE }} className="mt-3 text-[46px] font-semibold leading-[0.98] tracking-[-0.05em] sm:text-[76px]">
+            {greeting}<span className="text-emerald-400">.</span>
+          </motion.h1>
+          <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2, ease: EASE }} className="mt-4 max-w-[48ch] text-[16px] leading-[1.6] text-white/75 sm:text-[18px]">
+            {waiting ? <><span className="font-semibold text-white">{waiting} partner application{waiting > 1 ? 's are' : ' is'}</span> waiting for your review.</> : 'Everything is reviewed. New partner applications appear here the moment they arrive.'}
+          </motion.p>
+          {waiting > 0 && (
+            <motion.button initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, ease: EASE }} onClick={() => onGo('partners')}
+              className="group mt-7 inline-flex h-12 w-fit items-center gap-2 rounded-full bg-white px-6 text-[14.5px] font-semibold text-gray-950 shadow-[0_20px_50px_-15px_rgba(0,0,0,.6)]">
+              Review applications <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5" />
             </motion.button>
-          );
-        })}
-      </div>
-
-      <div className="mt-6 grid gap-6 [&>*]:min-w-0 xl:grid-cols-[1.25fr_1fr]">
-        <section className="rounded-3xl border border-gray-200/80 bg-white p-5 sm:p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <div><h2 className="text-[17px] font-semibold tracking-[-0.01em]">Needs your review</h2><p className="text-[13px] text-gray-500">New partner applications, oldest first.</p></div>
-            <button onClick={() => onGo('partners')} className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-emerald-700">All partners <ChevronRight size={15} /></button>
-          </div>
-          {pending.length === 0 ? <Empty icon={Check} title="You're all caught up" body="New applications will appear here automatically." /> : (
-            <ul className="divide-y divide-gray-100">
-              <AnimatePresence initial={false}>
-                {[...pending].reverse().slice(0, 6).map(p => (
-                  <motion.li key={p.id} layout initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 30, height: 0 }} transition={{ duration: 0.35, ease: EASE }}
-                    className={`flex items-center gap-3 py-3 ${fresh.has(p.id) ? 'rounded-xl bg-amber-50/70 px-2' : ''}`}>
-                    <TypeIcon type={p.type} size={38} />
-                    <button onClick={() => onOpen(p)} className="min-w-0 flex-1 text-left">
-                      <p className="truncate text-[14.5px] font-semibold">{p.business_name || p.name}</p>
-                      <p className="truncate text-[12.5px] text-gray-500">{TYPES[p.type]?.label ?? p.type} · {p.city || 'City not given'} · {ago(p.created_at)}</p>
-                    </button>
-                    <button onClick={() => onStatus(p, 'rejected')} className="hidden h-9 items-center rounded-lg px-3 text-[13px] font-medium text-gray-600 hover:bg-rose-50 hover:text-rose-700 sm:inline-flex">Reject</button>
-                    <button onClick={() => onStatus(p, 'live')} className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-[13px] font-semibold text-white" style={{ background: G }}><Check size={15} /> Approve</button>
-                  </motion.li>
-                ))}
-              </AnimatePresence>
-            </ul>
           )}
-        </section>
+        </div>
+      </section>
 
-        <section className="rounded-3xl border border-gray-200/80 bg-white p-5 sm:p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <div><h2 className="text-[17px] font-semibold tracking-[-0.01em]">Latest orders</h2><p className="text-[13px] text-gray-500">Now orders and Eats / Book requests.</p></div>
-            <button onClick={() => onGo('orders')} className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-emerald-700">All <ChevronRight size={15} /></button>
-          </div>
-          {orders.length === 0 ? <Empty icon={ShoppingBag} title="No orders yet" body="Orders and requests show up here the moment they're placed." /> : (
-            <ul className="divide-y divide-gray-100">
-              {orders.slice(0, 6).map(o => { const pr = product(o.id); return (
-                <li key={o.id} className="flex items-center gap-3 py-3">
-                  <span className="rounded-full px-2.5 py-1 text-[12px] font-semibold" style={{ color: pr.c, background: `color-mix(in srgb, ${pr.c} 10%, white)` }}>{pr.k}</span>
-                  <div className="min-w-0 flex-1"><p className="truncate text-[14px] font-medium">{o.address?.name || 'Customer'}</p><p className="truncate text-[12.5px] text-gray-500">{o.items.map(i => i.name).join(', ')}</p></div>
-                  <div className="text-right"><p className="text-[13.5px] font-semibold tabular-nums">{o.total ? `₹${o.total}` : 'Call'}</p><p className="text-[12px] text-gray-400">{ago(o.createdAt)}</p></div>
-                </li>
-              ); })}
-            </ul>
-          )}
-        </section>
+      <div className="relative mx-auto -mt-28 max-w-[1400px] px-4 pb-24 sm:px-8">
+        {/* KPIs */}
+        <div className="grid grid-cols-2 gap-3 [&>*]:min-w-0 [&>*:last-child]:col-span-2 md:grid-cols-3 md:[&>*:last-child]:col-span-1 xl:grid-cols-5">
+          {kpis.map((k, i) => {
+            const I = k.icon;
+            return (
+              <motion.button key={k.label} onClick={() => onGo(k.go)} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 + 0.06 * i, duration: 0.6, ease: EASE }}
+                whileHover={{ y: -4 }} className="group relative overflow-hidden rounded-[24px] border border-white/10 bg-[#0D1215]/70 p-5 text-left shadow-[0_30px_60px_-30px_rgba(0,0,0,.9)] backdrop-blur-2xl">
+                <span aria-hidden className="absolute -right-10 -top-10 h-28 w-28 rounded-full opacity-25 blur-2xl transition-opacity duration-500 group-hover:opacity-60" style={{ background: k.color }} />
+                <span className="relative flex h-10 w-10 items-center justify-center rounded-xl ring-1 ring-white/10" style={{ color: k.color, background: `color-mix(in srgb, ${k.color} 18%, transparent)` }}><I size={19} /></span>
+                <p className="relative mt-6 text-[36px] font-semibold leading-none tracking-[-0.04em]"><CountUp value={k.value} /></p>
+                <p className="relative mt-2 flex items-center justify-between text-[13px] text-white/55">{k.label}<ChevronRight size={15} className="opacity-0 transition-opacity group-hover:opacity-100" /></p>
+              </motion.button>
+            );
+          })}
+        </div>
+
+        <div className="mt-6 grid gap-6 [&>*]:min-w-0 xl:grid-cols-[1.25fr_1fr]">
+          <section className={`${PANEL} p-5 sm:p-6`}>
+            <PanelHead title="Needs your review" sub="New partner applications, oldest first." cta="All partners" onCta={() => onGo('partners')} />
+            {pending.length === 0 ? <Empty icon={Check} title="You're all caught up" body="New applications will appear here automatically." /> : (
+              <ul className="divide-y divide-white/[.06]">
+                <AnimatePresence initial={false}>
+                  {[...pending].reverse().slice(0, 6).map(p => (
+                    <motion.li key={p.id} layout initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 30, height: 0 }} transition={{ duration: 0.35, ease: EASE }}
+                      className={`flex items-center gap-3 py-3 ${fresh.has(p.id) ? 'rounded-xl bg-amber-400/10 px-2' : ''}`}>
+                      <TypeIcon type={p.type} size={40} />
+                      <button onClick={() => onOpen(p)} className="min-w-0 flex-1 text-left">
+                        <p className="truncate text-[14.5px] font-semibold">{p.business_name || p.name}</p>
+                        <p className="truncate text-[12.5px] text-white/50">{TYPES[p.type]?.label ?? p.type} · {p.city || 'City not given'} · {ago(p.created_at)}</p>
+                      </button>
+                      <button onClick={() => onStatus(p, 'rejected')} className="hidden h-9 items-center rounded-full px-3.5 text-[13px] font-medium text-white/60 hover:bg-rose-500/15 hover:text-rose-300 sm:inline-flex">Reject</button>
+                      <button onClick={() => onStatus(p, 'live')} className="inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-[13px] font-semibold text-white" style={{ background: G }}><Check size={15} /> Approve</button>
+                    </motion.li>
+                  ))}
+                </AnimatePresence>
+              </ul>
+            )}
+          </section>
+
+          <section className={`${PANEL} p-5 sm:p-6`}>
+            <PanelHead title="Latest orders" sub="Now orders and Eats / Book requests." cta="All" onCta={() => onGo('orders')} />
+            {orders.length === 0 ? <Empty icon={ShoppingBag} title="No orders yet" body="Orders and requests show up here the moment they're placed." /> : (
+              <ul className="divide-y divide-white/[.06]">
+                {orders.slice(0, 6).map(o => { const pr = product(o.id); return (
+                  <li key={o.id} className="flex items-center gap-3 py-3">
+                    <ProductTag pr={pr} />
+                    <div className="min-w-0 flex-1"><p className="truncate text-[14px] font-medium">{o.address?.name || 'Customer'}</p><p className="truncate text-[12.5px] text-white/50">{o.items.map(i => i.name).join(', ')}</p></div>
+                    <div className="text-right"><p className="text-[13.5px] font-semibold tabular-nums">{o.total ? `₹${o.total}` : 'Call'}</p><p className="text-[12px] text-white/40">{ago(o.createdAt)}</p></div>
+                  </li>
+                ); })}
+              </ul>
+            )}
+          </section>
+        </div>
       </div>
     </>
   );
+}
+
+function PanelHead({ title, sub, cta, onCta }: { title: string; sub: string; cta: string; onCta: () => void }) {
+  return (
+    <div className="mb-4 flex items-center justify-between gap-3">
+      <div><h2 className="text-[17px] font-semibold tracking-[-0.01em]">{title}</h2><p className="text-[13px] text-white/50">{sub}</p></div>
+      <button onClick={onCta} className="inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[13px] font-semibold text-emerald-300 ring-1 ring-white/10 hover:bg-white/5">{cta} <ChevronRight size={15} /></button>
+    </div>
+  );
+}
+function ProductTag({ pr }: { pr: { k: string; c: string } }) {
+  return <span className="shrink-0 rounded-full px-2.5 py-1 text-[12px] font-semibold ring-1 ring-white/10" style={{ color: `color-mix(in srgb, ${pr.c} 55%, white)`, background: `color-mix(in srgb, ${pr.c} 18%, transparent)` }}>{pr.k}</span>;
 }
 
 /* ── Partners ───────────────────────────────────────────────────────────── */
@@ -411,52 +455,52 @@ function Partners({ partners, onOpen, onStatus, fresh, loading }: { partners: Pa
   return (
     <>
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap gap-1 rounded-2xl border border-gray-200 bg-white p-1">
+        <div className="flex flex-wrap gap-1 rounded-full border border-white/10 bg-white/[.04] p-1">
           {(['pending', 'live', 'rejected', 'hidden', 'all'] as const).map(s => (
-            <button key={s} onClick={() => setStatus(s)} className={`relative h-9 rounded-xl px-3.5 text-[13.5px] font-medium transition-colors ${status === s ? 'text-white' : 'text-gray-600 hover:text-gray-900'}`}>
-              {status === s && <motion.span layoutId="status-pill" className="absolute inset-0 rounded-xl bg-gray-900" transition={{ type: 'spring', stiffness: 400, damping: 34 }} />}
+            <button key={s} onClick={() => setStatus(s)} className={`relative h-9 rounded-full px-3.5 text-[13.5px] font-medium transition-colors ${status === s ? 'text-gray-950' : 'text-white/60 hover:text-white'}`}>
+              {status === s && <motion.span layoutId="status-pill" className="absolute inset-0 rounded-full bg-white" transition={{ type: 'spring', stiffness: 400, damping: 34 }} />}
               <span className="relative">{s === 'all' ? 'All' : s === 'live' ? 'Approved' : s === 'pending' ? 'To review' : STATUS[s].label} <span className="opacity-60">{counts[s] || 0}</span></span>
             </button>
           ))}
         </div>
-        <select value={type} onChange={e => setType(e.target.value)} className="h-11 rounded-2xl border border-gray-200 bg-white px-3.5 text-[13.5px] outline-none" aria-label="Partner type">
+        <select value={type} onChange={e => setType(e.target.value)} className="h-11 rounded-full border border-white/10 bg-white/[.04] px-4 text-[13.5px] text-white outline-none" aria-label="Partner type">
           <option value="all">All types</option>{Object.entries(TYPES).map(([k, t]) => <option key={k} value={k}>{t.label}</option>)}
         </select>
-        <label className="flex h-11 min-w-[220px] flex-1 items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3.5 focus-within:border-emerald-600">
-          <Search size={16} className="text-gray-400" /><input value={q} onChange={e => setQ(e.target.value)} placeholder="Search name, phone, city…" aria-label="Search partners" className="h-full min-w-0 flex-1 bg-transparent text-[14px] outline-none" />
+        <label className="flex h-11 min-w-[220px] flex-1 items-center gap-2 rounded-full border border-white/10 bg-white/[.04] px-4 focus-within:border-emerald-400">
+          <Search size={16} className="text-white/40" /><input value={q} onChange={e => setQ(e.target.value)} placeholder="Search name, phone, city…" aria-label="Search partners" className="h-full min-w-0 flex-1 bg-transparent text-[14px] text-white outline-none placeholder:text-white/35" />
         </label>
       </div>
 
       <div className="mt-5">
         {shown.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-gray-300 bg-white"><Empty icon={status === 'pending' ? Check : Users} title={loading ? 'Loading…' : status === 'pending' ? 'Nothing to review' : 'No partners here'} body={status === 'pending' ? 'When someone applies on partner.zyphix.in, they appear here automatically.' : 'Try another filter.'} /></div>
+          <div className="rounded-[26px] border border-dashed border-white/15 bg-white/[.02]"><Empty icon={status === 'pending' ? Check : Users} title={loading ? 'Loading…' : status === 'pending' ? 'Nothing to review' : 'No partners here'} body={status === 'pending' ? 'When someone applies on partner.zyphix.in, they appear here automatically.' : 'Try another filter.'} /></div>
         ) : (
           <motion.div layout className="grid gap-3 [&>*]:min-w-0 md:grid-cols-2 2xl:grid-cols-3">
             <AnimatePresence initial={false}>
               {shown.map((p, i) => (
                 <motion.article key={p.id} layout initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }}
                   transition={{ duration: 0.35, delay: Math.min(i, 8) * 0.03, ease: EASE }}
-                  className={`group relative flex flex-col rounded-3xl border bg-white p-5 transition-shadow hover:shadow-[0_24px_50px_-28px_rgba(16,24,40,.35)] ${fresh.has(p.id) ? 'border-amber-300 ring-4 ring-amber-100' : 'border-gray-200/80'}`}>
+                  className={`group relative flex flex-col rounded-[26px] border bg-white/[.035] p-5 backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white/[.055] hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,.9)] ${fresh.has(p.id) ? 'border-amber-400/60 ring-4 ring-amber-400/15' : 'border-white/[.08]'}`}>
                   {fresh.has(p.id) && <span className="absolute -top-2.5 left-5 rounded-full bg-amber-400 px-2.5 py-0.5 text-[11px] font-bold text-gray-900">NEW</span>}
                   <button onClick={() => onOpen(p)} className="flex items-start gap-3.5 text-left">
                     <TypeIcon type={p.type} />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[16px] font-semibold tracking-[-0.01em]">{p.business_name || p.name}</p>
-                      <p className="mt-0.5 truncate text-[13px] text-gray-500">{TYPES[p.type]?.label ?? p.type}{p.category ? ` · ${p.category}` : ''}</p>
+                      <p className="mt-0.5 truncate text-[13px] text-white/50">{TYPES[p.type]?.label ?? p.type}{p.category ? ` · ${p.category}` : ''}</p>
                     </div>
                     <Pill status={p.status} />
                   </button>
-                  <div className="mt-4 space-y-1.5 text-[13px] text-gray-600">
-                    <p className="flex items-center gap-2"><Users size={14} className="text-gray-400" />{p.name}</p>
-                    <p className="flex items-center gap-2"><Phone size={14} className="text-gray-400" />+91 {p.phone}</p>
-                    <p className="flex items-center gap-2"><MapPin size={14} className="text-gray-400" /><span className="truncate">{[p.locality, p.city].filter(Boolean).join(', ') || '—'}</span></p>
-                    <p className="flex items-center gap-2"><Clock size={14} className="text-gray-400" />Applied {ago(p.created_at)}</p>
+                  <div className="mt-4 space-y-1.5 text-[13px] text-white/65">
+                    <p className="flex items-center gap-2"><Users size={14} className="text-white/35" />{p.name}</p>
+                    <p className="flex items-center gap-2"><Phone size={14} className="text-white/35" />+91 {p.phone}</p>
+                    <p className="flex items-center gap-2"><MapPin size={14} className="text-white/35" /><span className="truncate">{[p.locality, p.city].filter(Boolean).join(', ') || '—'}</span></p>
+                    <p className="flex items-center gap-2"><Clock size={14} className="text-white/35" />Applied {ago(p.created_at)}</p>
                   </div>
-                  <div className="mt-5 flex items-center gap-2 border-t border-gray-100 pt-4">
-                    <button onClick={() => onOpen(p)} className="h-9 rounded-lg px-3 text-[13px] font-medium text-gray-600 hover:bg-gray-100">Details</button>
+                  <div className="mt-5 flex items-center gap-2 border-t border-white/[.06] pt-4">
+                    <button onClick={() => onOpen(p)} className="h-9 rounded-full px-3 text-[13px] font-medium text-white/60 hover:bg-white/10 hover:text-white">Details</button>
                     <div className="ml-auto flex gap-2">
-                      {p.status !== 'rejected' && p.status !== 'hidden' && <button onClick={() => onStatus(p, p.status === 'live' ? 'hidden' : 'rejected')} className="h-9 rounded-lg border border-gray-200 px-3.5 text-[13px] font-medium text-gray-700 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700">{p.status === 'live' ? 'Hide' : 'Reject'}</button>}
-                      {p.status !== 'live' && <button onClick={() => onStatus(p, 'live')} className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-[13px] font-semibold text-white" style={{ background: G }}><Check size={15} /> Approve</button>}
+                      {p.status !== 'rejected' && p.status !== 'hidden' && <button onClick={() => onStatus(p, p.status === 'live' ? 'hidden' : 'rejected')} className="h-9 rounded-full border border-white/15 px-3.5 text-[13px] font-medium text-white/75 hover:border-rose-400/40 hover:bg-rose-500/15 hover:text-rose-300">{p.status === 'live' ? 'Hide' : 'Reject'}</button>}
+                      {p.status !== 'live' && <button onClick={() => onStatus(p, 'live')} className="inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-[13px] font-semibold text-white" style={{ background: G }}><Check size={15} /> Approve</button>}
                     </div>
                   </div>
                 </motion.article>
@@ -484,10 +528,10 @@ function Drawer({ partner: p, onClose, onStatus }: { partner: Partner | null; on
     <AnimatePresence>
       {p && (
         <>
-          <motion.div key="scrim" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 z-[60] bg-gray-950/40 backdrop-blur-[2px]" />
+          <motion.div key="scrim" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm" />
           <motion.aside key="drawer" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', stiffness: 320, damping: 36 }}
-            className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-[520px] flex-col bg-white shadow-[-30px_0_80px_-30px_rgba(0,0,0,.4)]" role="dialog" aria-label="Partner details">
-            <div className="relative isolate overflow-hidden bg-[#05080E] px-6 pb-6 pt-5 text-white">
+            className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-[520px] flex-col bg-[#0B0F12] text-white shadow-[-30px_0_80px_-30px_rgba(0,0,0,.9)] ring-1 ring-white/10" role="dialog" aria-label="Partner details">
+            <div className="relative isolate overflow-hidden border-b border-white/[.06] bg-[#06080A] px-6 pb-6 pt-5 text-white">
               <div aria-hidden className="absolute -right-16 -top-20 h-60 w-60 rounded-full opacity-50 blur-[70px]" style={{ background: t?.color ?? G }} />
               <div className="relative flex items-center justify-between">
                 <Pill status={p.status} />
@@ -512,29 +556,29 @@ function Drawer({ partner: p, onClose, onStatus }: { partner: Partner | null; on
               <Block title="Contact" rows={[['Name', p.name], ['Mobile', `+91 ${p.phone}`], ['Email', p.email || 'Not given'], ['City', p.city], ['Area', p.locality]]} />
               <Block title="Business" rows={[['Business name', p.business_name], ['Category', p.category], ['Tags', p.tags]]} />
               {Object.keys(d).length > 0 && <Block title="Everything they submitted" rows={Object.entries(d).filter(([, v]) => v !== '' && v != null).map(([k, v]) => [pretty(k), Array.isArray(v) ? v.join(', ') : typeof v === 'object' ? JSON.stringify(v) : String(v)] as [string, string])} />}
-              <p className="mt-2 text-[12px] text-gray-400">Reference {p.id}</p>
+              <p className="mt-2 text-[12px] text-white/35">Reference {p.id}</p>
             </div>
 
-            <div className="border-t border-gray-100 bg-white px-6 py-4">
+            <div className="border-t border-white/[.06] bg-[#0B0F12] px-6 py-4">
               <AnimatePresence mode="wait">
                 {confirm ? (
                   <motion.div key="c" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
-                    <p className="mr-auto text-[13.5px] text-gray-700">Reject this application?</p>
-                    <button onClick={() => setConfirm(false)} className="h-11 rounded-xl px-4 text-[14px] font-medium text-gray-600 hover:bg-gray-100">Cancel</button>
+                    <p className="mr-auto text-[13.5px] text-white/75">Reject this application?</p>
+                    <button onClick={() => setConfirm(false)} className="h-11 rounded-xl px-4 text-[14px] font-medium text-white/60 hover:bg-white/10">Cancel</button>
                     <button onClick={() => { onStatus(p, 'rejected'); setConfirm(false); }} className="inline-flex h-11 items-center gap-1.5 rounded-xl bg-rose-600 px-4 text-[14px] font-semibold text-white"><XCircle size={16} /> Reject</button>
                   </motion.div>
                 ) : (
                   <motion.div key="a" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-wrap items-center gap-2">
-                    {p.status === 'pending' && <button onClick={() => setConfirm(true)} className="h-11 rounded-xl border border-gray-200 px-4 text-[14px] font-medium text-gray-700 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700">Reject</button>}
-                    {p.status === 'live' && <button onClick={() => onStatus(p, 'hidden')} className="inline-flex h-11 items-center gap-1.5 rounded-xl border border-gray-200 px-4 text-[14px] font-medium text-gray-700"><EyeOff size={16} /> Hide from sites</button>}
-                    {(p.status === 'rejected' || p.status === 'hidden') && <button onClick={() => onStatus(p, 'pending')} className="inline-flex h-11 items-center gap-1.5 rounded-xl border border-gray-200 px-4 text-[14px] font-medium text-gray-700"><Undo2 size={16} /> Back to review</button>}
+                    {p.status === 'pending' && <button onClick={() => setConfirm(true)} className="h-11 rounded-xl border border-white/15 px-4 text-[14px] font-medium text-white/80 hover:border-rose-400/40 hover:bg-rose-500/15 hover:text-rose-300">Reject</button>}
+                    {p.status === 'live' && <button onClick={() => onStatus(p, 'hidden')} className="inline-flex h-11 items-center gap-1.5 rounded-xl border border-white/15 px-4 text-[14px] font-medium text-white/80 hover:bg-white/5"><EyeOff size={16} /> Hide from sites</button>}
+                    {(p.status === 'rejected' || p.status === 'hidden') && <button onClick={() => onStatus(p, 'pending')} className="inline-flex h-11 items-center gap-1.5 rounded-xl border border-white/15 px-4 text-[14px] font-medium text-white/80 hover:bg-white/5"><Undo2 size={16} /> Back to review</button>}
                     {p.status !== 'live' && (
                       <button onClick={() => onStatus(p, 'live')} className="group relative ml-auto inline-flex h-11 items-center gap-1.5 overflow-hidden rounded-xl px-5 text-[14px] font-semibold text-white shadow-[0_12px_30px_-12px_rgba(13,163,102,.8)]" style={{ background: 'linear-gradient(180deg,#19C27C,#0DA366)' }}>
                         <span aria-hidden className="absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-white/25 blur-md transition-transform duration-700 group-hover:translate-x-[420%]" />
                         <Check size={16} /> Approve and publish
                       </button>
                     )}
-                    {p.status === 'live' && <p className="ml-auto text-[13px] text-emerald-700">Visible on Zyphix</p>}
+                    {p.status === 'live' && <p className="ml-auto text-[13px] text-emerald-300">Visible on Zyphix</p>}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -551,9 +595,9 @@ function Block({ title, rows }: { title: string; rows: [string, string | undefin
   if (!r.length) return null;
   return (
     <section className="mb-6">
-      <h3 className="mb-3 border-b border-gray-100 pb-2 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-gray-500">{title}</h3>
+      <h3 className="mb-3 border-b border-white/[.06] pb-2 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-white/45">{title}</h3>
       <dl className="grid grid-cols-2 gap-x-5 gap-y-3">
-        {r.map(([k, v]) => <div key={k} className="min-w-0"><dt className="text-[12px] text-gray-500">{k}</dt><dd className="break-words text-[14px] font-medium text-gray-900">{v}</dd></div>)}
+        {r.map(([k, v]) => <div key={k} className="min-w-0"><dt className="text-[12px] text-white/45">{k}</dt><dd className="break-words text-[14px] font-medium text-white">{v}</dd></div>)}
       </dl>
     </section>
   );
@@ -565,28 +609,28 @@ function Orders({ orders, loading }: { orders: Order[]; loading: boolean }) {
   const shown = orders.filter(o => f === 'all' || (f === 'call' ? o.status === 'requested' : product(o.id).k === f));
   return (
     <>
-      <div className="mb-5 flex flex-wrap gap-1 rounded-2xl border border-gray-200 bg-white p-1 sm:w-fit">
+      <div className="mb-5 flex w-fit flex-wrap gap-1 rounded-full border border-white/10 bg-white/[.04] p-1">
         {(['all', 'Now', 'Eats', 'Book', 'call'] as const).map(k => (
-          <button key={k} onClick={() => setF(k)} className={`relative h-9 rounded-xl px-3.5 text-[13.5px] font-medium ${f === k ? 'text-white' : 'text-gray-600'}`}>
-            {f === k && <motion.span layoutId="order-pill" className="absolute inset-0 rounded-xl bg-gray-900" transition={{ type: 'spring', stiffness: 400, damping: 34 }} />}
+          <button key={k} onClick={() => setF(k)} className={`relative h-9 rounded-full px-3.5 text-[13.5px] font-medium ${f === k ? 'text-gray-950' : 'text-white/60 hover:text-white'}`}>
+            {f === k && <motion.span layoutId="order-pill" className="absolute inset-0 rounded-full bg-white" transition={{ type: 'spring', stiffness: 400, damping: 34 }} />}
             <span className="relative">{k === 'all' ? 'All' : k === 'call' ? 'To call' : k}</span>
           </button>
         ))}
       </div>
-      {shown.length === 0 ? <div className="rounded-3xl border border-dashed border-gray-300 bg-white"><Empty icon={ShoppingBag} title={loading ? 'Loading…' : 'No orders here'} body="New orders and requests appear automatically." /></div> : (
+      {shown.length === 0 ? <div className="rounded-[26px] border border-dashed border-white/15 bg-white/[.02]"><Empty icon={ShoppingBag} title={loading ? 'Loading…' : 'No orders here'} body="New orders and requests appear automatically." /></div> : (
         <div className="grid gap-3">
           {shown.map((o, i) => { const pr = product(o.id); const a = o.address || {}; return (
             <motion.article key={o.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i, 10) * 0.025 }}
-              className="grid gap-4 rounded-3xl border border-gray-200/80 bg-white p-5 md:grid-cols-[150px_1fr_1fr_auto] md:items-center">
-              <div><span className="rounded-full px-2.5 py-1 text-[12px] font-semibold" style={{ color: pr.c, background: `color-mix(in srgb, ${pr.c} 10%, white)` }}>{pr.k}</span>
-                <p className="mt-2 font-mono text-[12px] text-gray-500">{o.id}</p><p className="text-[12px] text-gray-400">{ago(o.createdAt)}</p></div>
+              className="grid gap-4 rounded-[26px] border border-white/[.08] bg-white/[.035] p-5 backdrop-blur-xl md:grid-cols-[150px_1fr_1fr_auto] md:items-center">
+              <div><ProductTag pr={pr} />
+                <p className="mt-2 font-mono text-[12px] text-white/45">{o.id}</p><p className="text-[12px] text-white/35">{ago(o.createdAt)}</p></div>
               <div className="min-w-0"><p className="text-[14.5px] font-semibold">{a.name || 'Customer'}</p>
-                <p className="text-[13px] text-gray-600">+91 {a.phone}</p><p className="truncate text-[12.5px] text-gray-500">{[a.line1, a.city, a.pincode].filter(Boolean).join(', ')}</p></div>
-              <p className="text-[13.5px] text-gray-700">{o.items.map(it => `${it.name ?? 'Item'}${(it.qty ?? 1) > 1 ? ` × ${it.qty}` : ''}${it.note ? ` (${it.note})` : ''}`).join(', ')}</p>
+                <p className="text-[13px] text-white/65">+91 {a.phone}</p><p className="truncate text-[12.5px] text-white/45">{[a.line1, a.city, a.pincode].filter(Boolean).join(', ')}</p></div>
+              <p className="text-[13.5px] text-white/75">{o.items.map(it => `${it.name ?? 'Item'}${(it.qty ?? 1) > 1 ? ` × ${it.qty}` : ''}${it.note ? ` (${it.note})` : ''}`).join(', ')}</p>
               <div className="flex items-center gap-3 md:flex-col md:items-end">
                 <p className="text-[15px] font-semibold tabular-nums">{o.total ? `₹${o.total}` : 'Quote by call'}</p>
-                <p className="text-[12px] text-gray-500">{PAY[o.paymentMode] ?? o.paymentMode}</p>
-                {a.phone && <a href={`tel:+91${a.phone}`} className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[12.5px] font-semibold text-white" style={{ background: o.status === 'requested' ? '#7C3AED' : G }}><Phone size={13} /> Call</a>}
+                <p className="text-[12px] text-white/45">{PAY[o.paymentMode] ?? o.paymentMode}</p>
+                {a.phone && <a href={`tel:+91${a.phone}`} className="inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[12.5px] font-semibold text-white" style={{ background: o.status === 'requested' ? '#7C3AED' : G }}><Phone size={13} /> Call</a>}
               </div>
             </motion.article>
           ); })}
@@ -602,18 +646,18 @@ function Waitlist({ rows, loading }: { rows: Waiter[]; loading: boolean }) {
   return (
     <>
       <div className="mb-5 grid grid-cols-3 gap-3 sm:max-w-[560px]">
-        {by.map(b => <div key={b.k} className="rounded-2xl border border-gray-200/80 bg-white p-4"><p className="text-[26px] font-semibold"><CountUp value={b.n} /></p><p className="text-[12.5px] capitalize text-gray-500">Waiting for {b.k}</p></div>)}
+        {by.map(b => <div key={b.k} className="rounded-[22px] border border-white/[.08] bg-white/[.035] p-4"><p className="text-[30px] font-semibold tracking-[-0.03em]"><CountUp value={b.n} /></p><p className="text-[12.5px] capitalize text-white/50">Waiting for {b.k}</p></div>)}
       </div>
-      {rows.length === 0 ? <div className="rounded-3xl border border-dashed border-gray-300 bg-white"><Empty icon={Bell} title={loading ? 'Loading…' : 'Nobody yet'} body="People who ask to be told when Eats or Book opens near them appear here." /></div> : (
-        <div className="overflow-x-auto rounded-3xl border border-gray-200/80 bg-white">
+      {rows.length === 0 ? <div className="rounded-[26px] border border-dashed border-white/15 bg-white/[.02]"><Empty icon={Bell} title={loading ? 'Loading…' : 'Nobody yet'} body="People who ask to be told when Eats or Book opens near them appear here." /></div> : (
+        <div className="overflow-x-auto rounded-[26px] border border-white/[.08] bg-white/[.035]">
           <table className="w-full min-w-[620px] text-left text-[13.5px]">
-            <thead className="border-b border-gray-100 text-[11.5px] uppercase tracking-[0.1em] text-gray-500"><tr><th className="px-5 py-3.5">Product</th><th className="px-5 py-3.5">Name</th><th className="px-5 py-3.5">Phone</th><th className="px-5 py-3.5">City / area</th><th className="px-5 py-3.5">Joined</th></tr></thead>
-            <tbody className="divide-y divide-gray-100">
+            <thead className="border-b border-white/[.06] text-[11.5px] uppercase tracking-[0.1em] text-white/45"><tr><th className="px-5 py-3.5">Product</th><th className="px-5 py-3.5">Name</th><th className="px-5 py-3.5">Phone</th><th className="px-5 py-3.5">City / area</th><th className="px-5 py-3.5">Joined</th></tr></thead>
+            <tbody className="divide-y divide-white/[.06]">
               {rows.map(w => (
-                <tr key={w.id} className="hover:bg-gray-50/70">
+                <tr key={w.id} className="hover:bg-white/[.03]">
                   <td className="px-5 py-3.5 capitalize">{w.product}</td><td className="px-5 py-3.5 font-medium">{w.name || '—'}</td>
-                  <td className="px-5 py-3.5"><a href={`tel:+91${w.phone}`} className="tabular-nums text-emerald-700 hover:underline">+91 {w.phone}</a></td>
-                  <td className="px-5 py-3.5">{w.city || '—'}</td><td className="px-5 py-3.5 text-gray-500">{ago(w.created_at)}</td>
+                  <td className="px-5 py-3.5"><a href={`tel:+91${w.phone}`} className="tabular-nums text-emerald-300 hover:underline">+91 {w.phone}</a></td>
+                  <td className="px-5 py-3.5">{w.city || '—'}</td><td className="px-5 py-3.5 text-white/45">{ago(w.created_at)}</td>
                 </tr>
               ))}
             </tbody>
