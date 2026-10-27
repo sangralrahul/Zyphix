@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
+import { RegisterShell } from '@/components/register/RegisterShell';
+import { RegisterSuccess, SuccessButton } from '@/components/register/RegisterSuccess';
 import { G, HEAD_FONT } from '@/components/layout/SiteChrome';
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -432,30 +434,14 @@ function VerificationStep({ personal, profession, initial, onSubmit, onBack, sub
 function SuccessStep({ personal, profession }: { personal: Personal; profession: Profession }) {
   const [, setLoc] = useLocation();
   const cat = SERVICE_CATEGORIES.find(c => c.id === profession.primaryCategory);
-  const Icon = cat?.icon ?? Wrench;
   return (
-    <motion.div initial={{ opacity: 0, scale: .96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .35 }} className="mx-auto max-w-[540px] py-4 text-center">
-      <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl" style={{ background: '#F5F3FF', color: V }}><Icon size={30} /></div>
-      <h2 className="text-[1.8rem] font-black tracking-[-0.03em] text-gray-900" style={{ fontFamily: HEAD_FONT }}>Application received</h2>
-      <p className="mt-3 text-[14.5px] leading-relaxed text-gray-600">
-        Thanks, <strong className="text-gray-900">{personal.name}</strong>. We have your application to join Zyphix Book as a {cat?.label.toLowerCase() ?? 'service'} professional in {personal.city}.
-        Our onboarding team will call you on <strong className="text-gray-900">{personal.phone}</strong> within 2 working days.
-      </p>
-      <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-left">
-        <p className="text-[13px] font-bold text-emerald-800">What happens next</p>
-        <ol className="mt-3 space-y-2">
-          {['A call from our onboarding team to confirm your details', 'Identity and background verification', 'A short briefing on how bookings and payouts work', 'Your profile goes live for customers in your area'].map((s, i) => (
-            <li key={s} className="flex items-start gap-2.5 text-[13.5px] text-gray-700">
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10.5px] font-black text-white" style={{ background: G }}>{i + 1}</span>{s}
-            </li>
-          ))}
-        </ol>
-      </div>
-      <p className="mt-4 text-[13px] text-gray-500">Questions? Write to <a href="mailto:partnerships@zyphix.in" className="font-semibold text-gray-800">partnerships@zyphix.in</a>.</p>
-      <button type="button" onClick={() => setLoc('/')} className="mt-6 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-[14px] font-extrabold text-white hover:opacity-95" style={{ background: G }}>
-        Back to partner home
-      </button>
-    </motion.div>
+    <RegisterSuccess
+      track="service"
+      name={personal.name}
+      message={<>We have your application to join Zyphix Book as a {cat?.label.toLowerCase() ?? 'service'} professional{personal.city ? ` in ${personal.city}` : ''}. Our onboarding team will call <strong className="text-white">{personal.phone}</strong> within 2 working days.</>}
+      nextSteps={['A call from our onboarding team to confirm your details', 'Identity and background verification', 'A short briefing on bookings and payouts', 'Your profile goes live for customers in your area']}
+      actions={<SuccessButton primary accent={V} onClick={() => setLoc('/')}>Back to partner home</SuccessButton>}
+    />
   );
 }
 
@@ -506,24 +492,8 @@ export function ServiceProSetup() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-gray-900" style={{ fontFamily: "'Geist', 'Geist', 'Geist Fallback', sans-serif" }}>
-      <div className="sticky top-0 z-50 border-b border-gray-200 bg-white px-5">
-        <div className="mx-auto flex h-[60px] max-w-[1100px] items-center gap-3">
-          <button type="button" onClick={() => setLoc('/')} className="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-[13px] font-semibold text-gray-600 hover:bg-gray-100">
-            <ArrowLeft size={14} /> Home
-          </button>
-          <ZyphixLogo size={30} />
-          <div className="hidden h-5 w-px bg-gray-200 sm:block" />
-          <span className="hidden text-[14.5px] font-extrabold text-gray-900 sm:block" style={{ fontFamily: HEAD_FONT }}>Zyphix Book professional</span>
-          <span className="ml-auto inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[12px] font-bold" style={{ borderColor: '#DDD6FE', background: '#F5F3FF', color: V }}>
-            <span className="h-2 w-2 rounded-full" style={{ background: V }} /> Onboarding open
-          </span>
-        </div>
-      </div>
-
-      <StepBar step={step} />
-
-      <div className="mx-auto max-w-[760px] px-5 pb-20 pt-8">
+    <RegisterShell track="service" steps={['Personal', 'Profession', 'Verification']} step={step} done={step === 3}>
+      <div>
         <div className={step < 3 ? 'rounded-3xl border border-gray-200 bg-white p-5 sm:p-8' : ''}>
           <AnimatePresence mode="wait">
             {step === 0 && <PersonalStep key="s0" initial={personal} onNext={d => { setPersonal(d); go(1); }} />}
@@ -533,7 +503,7 @@ export function ServiceProSetup() {
           </AnimatePresence>
         </div>
       </div>
-    </div>
+    </RegisterShell>
   );
 }
 

@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from '@/lib/motion';
 import { ArrowLeft, ArrowRight, Check, Utensils, Clock, FileText, Star, FileDown } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
+import { RegisterShell } from '@/components/register/RegisterShell';
+import { RegisterSuccess, SuccessButton } from '@/components/register/RegisterSuccess';
 
 const G = '#0DA366'; const T1 = '#111827'; const T2 = '#6B7280';
 const T3 = '#9CA3AF'; const BD = '#E5E7EB'; const W = '#FFFFFF'; const BG = '#F8F9FA';
@@ -720,81 +722,33 @@ const BENEFITS = [
 function SuccessStep({ restData, cuisines }: { restData: Record<string, string>; cuisines: Set<string> }) {
   const [, setLoc] = useLocation();
   return (
-    <>
-    <FlowerBurst />
-    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', stiffness: 180 }}>
-      <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center', padding: '20px 0' }}>
-        <motion.div animate={{ rotate: [0, 14, -14, 10, -8, 0], scale: [1, 1.3, 1] }} transition={{ duration: 0.8 }}
-          style={{ fontSize: 64, marginBottom: 20 }}>🍽️</motion.div>
-
-        <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: '1.8rem', color: T1, letterSpacing: '-.03em', marginBottom: 10 }}>
-          {restData.name || 'Your Restaurant'} is registered!
-        </h2>
-        <p style={{ color: T2, fontSize: 14.5, lineHeight: 1.7, marginBottom: 28 }}>
-          Our team will contact you on <strong>{restData.phone}</strong> within 24 hours to verify your listing and get you live on ZyphixEats.
-        </p>
-
-        {/* Cuisines summary */}
-        {cuisines.size > 0 && (
-          <div style={{ background: W, borderRadius: 16, padding: '16px 20px', border: `1px solid ${BD}`, boxShadow: SH, marginBottom: 20, textAlign: 'left' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: T3, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 10 }}>Cuisines registered ({cuisines.size})</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {[...cuisines].map(id => {
-                const c = CUISINES.find(x => x.id === id);
-                if (!c) return null;
-                return (
-                  <span key={id} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: c.bg, border: `1px solid ${c.c}30`, color: c.c, fontSize: 12, fontWeight: 700, padding: '5px 11px', borderRadius: 99 }}>
-                    <img src={c.img} alt={c.n} width={16} height={16} style={{ objectFit: 'contain' }} /> {c.n}
-                  </span>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* How Zyphix helps grow */}
-        <div style={{ background: 'linear-gradient(135deg,#0A0E1A,#0D1520)', borderRadius: 20, padding: '24px 24px', marginBottom: 24, textAlign: 'left' }}>
-          <p style={{ fontSize: 13, fontWeight: 800, color: '#fff', marginBottom: 16, textAlign: 'center' }}>
-            🚀 How ZyphixEats grows your restaurant business
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            {BENEFITS.map(({ icon, title, desc }) => (
-              <motion.div key={title} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 14, padding: '14px 14px' }}>
-                <div style={{ fontSize: 24, marginBottom: 7 }}>{icon}</div>
-                <p style={{ fontWeight: 800, color: '#fff', fontSize: 13, marginBottom: 5 }}>{title}</p>
-                <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,.5)', lineHeight: 1.55 }}>{desc}</p>
-              </motion.div>
-            ))}
+    <RegisterSuccess
+      track="restaurant"
+      name={restData.owner}
+      headline={restData.name ? `Thank you! ${restData.name} is registered.` : undefined}
+      message={<>Our partner team will call <strong className="text-white">{restData.phone}</strong> within 24 hours to verify your restaurant and set up your Zyphix Eats listing.</>}
+      nextSteps={['Verification call from our partner team', 'Menu, photos and prices uploaded with your onboarding manager', 'Your restaurant goes live on Zyphix Eats']}
+      summary={cuisines.size > 0 ? (
+        <div className="rounded-[24px] border border-gray-200 bg-white p-6">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-gray-500">Cuisines registered · {cuisines.size}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {[...cuisines].map(id => {
+              const c = CUISINES.find(x => x.id === id);
+              if (!c) return null;
+              return (
+                <span key={id} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold" style={{ background: c.bg, color: c.c, boxShadow: `inset 0 0 0 1px ${c.c}30` }}>
+                  <img src={c.img} alt="" width={16} height={16} style={{ objectFit: 'contain' }} /> {c.n}
+                </span>
+              );
+            })}
           </div>
         </div>
-
-        {/* What's next */}
-        <div style={{ background: `${RA}0C`, border: `1.5px solid ${RA}30`, borderRadius: 14, padding: '16px 20px', marginBottom: 24 }}>
-          <p style={{ fontSize: 13, color: RA, fontWeight: 700, marginBottom: 8 }}>⏱ What happens next?</p>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {['Our team verifies your restaurant (within 24 hrs)', 'We help you upload your menu with photos', 'Your restaurant goes live on ZyphixEats!'].map((s, i) => (
-              <li key={i} style={{ fontSize: 13, color: T2, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ width: 18, height: 18, borderRadius: '50%', background: RA, color: '#fff', fontSize: 10, fontWeight: 900, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</span>
-                {s}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-          <motion.button onClick={() => exportRestaurantPDF(restData, cuisines)} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-            style={{ padding: '13px 24px', borderRadius: 12, background: W, border: `2px solid ${RA}`, color: RA, fontSize: 14, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: SH }}>
-            <FileDown size={17} /> Export to PDF
-          </motion.button>
-          <motion.button onClick={() => setLoc('/')} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-            style={{ padding: '13px 24px', borderRadius: 12, background: RA, color: '#fff', fontSize: 14, fontWeight: 800, border: 'none', cursor: 'pointer', boxShadow: `0 4px 20px ${RA}40` }}>
-            Back to Home
-          </motion.button>
-        </div>
-      </div>
-    </motion.div>
-    </>
+      ) : undefined}
+      actions={<>
+        <SuccessButton onClick={() => exportRestaurantPDF(restData, cuisines)}><FileDown size={17} /> Save as PDF</SuccessButton>
+        <SuccessButton primary accent={RA} onClick={() => setLoc('/')}>Back to partner home</SuccessButton>
+      </>}
+    />
   );
 }
 
@@ -832,26 +786,8 @@ export function RestaurantSetup() {
   };
 
   return (
-    <div style={{ background: BG, minHeight: '100vh' }}>
-      {/* Header */}
-      <div style={{ background: W, borderBottom: `1px solid ${BD}`, padding: '0 24px', position: 'sticky', top: 0, zIndex: 50, boxShadow: SH }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', height: 60, display: 'flex', alignItems: 'center', gap: 14 }}>
-          <button onClick={() => setLoc('/')} style={{ background: BG, border: `1px solid ${BD}`, borderRadius: 8, padding: '6px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, color: T2, fontSize: 13, fontWeight: 600 }}>
-            <ArrowLeft size={14} /> Home
-          </button>
-          <ZyphixLogo size={30} />
-          <div style={{ height: 20, width: 1, background: BD }} />
-          <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 14.5, color: T1 }}>Register Your Restaurant</span>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, background: `${RA}10`, border: `1px solid ${RA}30`, borderRadius: 99, padding: '5px 14px' }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: RA, display: 'inline-block' }} />
-            <span style={{ fontSize: 12, fontWeight: 700, color: RA }}>ZyphixEats Partner Program Open</span>
-          </div>
-        </div>
-      </div>
-
-      <StepBar step={step} />
-
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '36px 24px 80px' }}>
+    <RegisterShell track="restaurant" steps={['Restaurant info', 'Menu & cuisine', 'Operations']} step={step} done={step === 3}>
+      <div>
         <AnimatePresence mode="wait">
           {step === 0 && <RestaurantInfoStep key="r0" onNext={d => { setRestData(d as Record<string, string>); setStep(1); window.scrollTo(0, 0); }} />}
           {step === 1 && <MenuStep key="r1" onNext={(c, _) => { setCuisines(c); setStep(2); window.scrollTo(0, 0); }} onBack={() => { setStep(0); window.scrollTo(0, 0); }} />}
@@ -859,6 +795,6 @@ export function RestaurantSetup() {
           {step === 3 && <SuccessStep key="r3" restData={restData} cuisines={cuisines} />}
         </AnimatePresence>
       </div>
-    </div>
+    </RegisterShell>
   );
 }

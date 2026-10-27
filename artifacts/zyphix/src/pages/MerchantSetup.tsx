@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from '@/lib/motion';
 import { ArrowLeft, ArrowRight, Check, Store, Clock, FileText, Sparkles, FileDown } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
+import { RegisterShell } from '@/components/register/RegisterShell';
+import { RegisterSuccess, SuccessButton } from '@/components/register/RegisterSuccess';
 
 const G = '#0DA366'; const T1 = '#111827'; const T2 = '#6B7280';
 const T3 = '#9CA3AF'; const BD = '#E5E7EB'; const W = '#FFFFFF'; const BG = '#F8F9FA';
@@ -926,82 +928,29 @@ function exportMerchantPDF(storeData: Record<string,string>, categories: Set<str
 function SuccessStep({ storeData, categories, selectedSubs }: { storeData: Record<string,string>; categories: Set<string>; selectedSubs: Record<string,Set<string>> }) {
   const [, setLoc] = useLocation();
   return (
-    <>
-    <FlowerBurst />
-    <motion.div initial={{opacity:0,scale:.9}} animate={{opacity:1,scale:1}} transition={{type:'spring',stiffness:180}}
-      style={{ maxWidth:540, margin:'0 auto', textAlign:'center', padding:'20px 0' }}>
-      <motion.div animate={{rotate:[0,12,-12,8,-6,0],scale:[1,1.3,1]}} transition={{duration:.8}}
-        style={{fontSize:64,marginBottom:20}}>🏪</motion.div>
-      <h2 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:900, fontSize:'1.8rem', color:T1, letterSpacing:'-.03em', marginBottom:10 }}>
-        {storeData.name || 'Your Store'} is registered!
-      </h2>
-      <p style={{ color:T2, fontSize:14.5, lineHeight:1.7, marginBottom:28 }}>
-        We've received your registration. Our team will contact you on <strong>{storeData.phone}</strong> to verify your store and set up your Zyphix listing.
-      </p>
-
-      {/* Categories summary */}
-      {categories.size>0 && (
-        <div style={{ background:W, borderRadius:16, padding:'18px 20px', border:`1px solid ${BD}`, boxShadow:SH, marginBottom:20, textAlign:'left' }}>
-          <p style={{ fontSize:12, fontWeight:700, color:T3, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:12 }}>Categories Selected ({categories.size})</p>
-          <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
-            {[...categories].map(id=>{
-              const cat = CATS.find(c=>c.id===id);
+    <RegisterSuccess
+      track="store"
+      name={storeData.ownerName}
+      headline={storeData.name ? `Thank you! ${storeData.name} is registered.` : undefined}
+      message={<>Our partner team will call <strong className="text-white">{storeData.phone}</strong> to verify your store and set up your Zyphix Now listing.</>}
+      nextSteps={['Verification call from our partner team', 'Catalogue, prices and stock set up with your onboarding manager', 'Your store goes live on Zyphix Now']}
+      summary={categories.size > 0 ? (
+        <div className="rounded-[24px] border border-gray-200 bg-white p-6">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-gray-500">Categories selected · {categories.size}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {[...categories].map(id => {
+              const cat = CATS.find(c => c.id === id);
               if (!cat) return null;
-              return (
-                <span key={id} style={{ display:'inline-flex', alignItems:'center', gap:5, background:cat.bg, border:`1px solid ${cat.c}30`, color:cat.c, fontSize:12, fontWeight:700, padding:'5px 11px', borderRadius:99 }}>
-                  {cat.n}
-                </span>
-              );
+              return <span key={id} className="inline-flex items-center rounded-full px-3 py-1.5 text-[13px] font-semibold" style={{ background: cat.bg, color: cat.c, boxShadow: `inset 0 0 0 1px ${cat.c}30` }}>{cat.n}</span>;
             })}
           </div>
         </div>
-      )}
-
-      {/* How Zyphix helps merchants grow */}
-      <div style={{ background:'linear-gradient(135deg,#0A0E1A,#0D1520)', borderRadius:20, padding:'22px 22px', marginBottom:20, textAlign:'left' }}>
-        <p style={{ fontSize:13, fontWeight:800, color:'#fff', marginBottom:14, textAlign:'center' }}>🚀 How Zyphix grows your local business</p>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-          {[
-            { icon:'📈', title:'New customers',   desc:'Reach people nearby who can\'t visit your store in person' },
-            { icon:'💰', title:'₹0 Setup Cost',   desc:'No monthly fee, no listing charge. We earn only when you earn — tiny commission per order' },
-            { icon:'⚡', title:'Live in 24 Hours', desc:'Once verified, your store is searchable on Zyphix and begins receiving orders' },
-            { icon:'📦', title:'Delivery Handled', desc:'Our fleet covers your area — you focus on the store, we handle the last mile' },
-          ].map(({ icon, title, desc }) => (
-            <motion.div key={title} initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }}
-              style={{ background:'rgba(255,255,255,.05)', border:'1px solid rgba(255,255,255,.08)', borderRadius:13, padding:'13px 13px' }}>
-              <div style={{ fontSize:22, marginBottom:6 }}>{icon}</div>
-              <p style={{ fontWeight:800, color:'#fff', fontSize:12.5, marginBottom:4 }}>{title}</p>
-              <p style={{ fontSize:11, color:'rgba(255,255,255,.48)', lineHeight:1.55 }}>{desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ background:`${G}0C`, border:`1.5px solid ${G}30`, borderRadius:14, padding:'16px 20px', marginBottom:24 }}>
-        <p style={{ fontSize:13, color:G, fontWeight:700, marginBottom:8 }}>⏱ What happens next?</p>
-        <ul style={{ listStyle:'none', padding:0, margin:0, display:'flex', flexDirection:'column', gap:6 }}>
-          {['Our team verifies your store (24-48 hrs)','We help you set up your product catalogue','Your store goes live on Zyphix!'].map((s,i)=>(
-            <li key={i} style={{ fontSize:13, color:T2, display:'flex', alignItems:'center', gap:8 }}>
-              <span style={{ width:18, height:18, borderRadius:'50%', background:G, color:'#fff', fontSize:10, fontWeight:900, display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>{i+1}</span>
-              {s}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Action buttons */}
-      <div style={{ display:'flex', gap:12, justifyContent:'center' }}>
-        <motion.button onClick={()=>exportMerchantPDF(storeData, categories, selectedSubs)} whileHover={{scale:1.03}} whileTap={{scale:.97}}
-          style={{ padding:'13px 24px', borderRadius:12, background:W, border:`2px solid ${G}`, color:G, fontSize:14, fontWeight:800, cursor:'pointer', display:'flex', alignItems:'center', gap:8, boxShadow:SH }}>
-          <FileDown size={17}/> Export to PDF
-        </motion.button>
-        <motion.button onClick={()=>setLoc('/')} whileHover={{scale:1.02}} whileTap={{scale:.97}}
-          style={{ padding:'13px 24px', borderRadius:12, background:G, color:'#fff', fontSize:14, fontWeight:800, border:'none', cursor:'pointer', boxShadow:`0 4px 20px ${G}40` }}>
-          Back to Home
-        </motion.button>
-      </div>
-    </motion.div>
-    </>
+      ) : undefined}
+      actions={<>
+        <SuccessButton onClick={() => exportMerchantPDF(storeData, categories, selectedSubs)}><FileDown size={17} /> Save as PDF</SuccessButton>
+        <SuccessButton primary onClick={() => setLoc('/')}>Back to partner home</SuccessButton>
+      </>}
+    />
   );
 }
 
@@ -1047,26 +996,8 @@ export function MerchantSetup() {
   };
 
   return (
-    <div style={{ background:BG, minHeight:'100vh' }}>
-      {/* Header */}
-      <div style={{ background:W, borderBottom:`1px solid ${BD}`, padding:'0 24px', position:'sticky', top:0, zIndex:50, boxShadow:SH }}>
-        <div style={{ maxWidth:1100, margin:'0 auto', height:60, display:'flex', alignItems:'center', gap:14 }}>
-          <button onClick={()=>setLoc('/')} style={{ background:BG, border:`1px solid ${BD}`, borderRadius:8, padding:'6px 10px', cursor:'pointer', display:'flex', alignItems:'center', gap:5, color:T2, fontSize:13, fontWeight:600 }}>
-            <ArrowLeft size={14}/> Home
-          </button>
-          <ZyphixLogo size={30} />
-          <div style={{ height:20, width:1, background:BD }} />
-          <span style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:800, fontSize:14.5, color:T1 }}>Register Your Store</span>
-          <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:8, background:`${G}10`, border:`1px solid ${G}30`, borderRadius:99, padding:'5px 14px' }}>
-            <span style={{ width:8, height:8, borderRadius:'50%', background:G, display:'inline-block' }} />
-            <span style={{ fontSize:12, fontWeight:700, color:G }}>Partner Program Open</span>
-          </div>
-        </div>
-      </div>
-
-      <StepBar step={step} />
-
-      <div style={{ maxWidth:1000, margin:'0 auto', padding:'36px 24px 80px' }}>
+    <RegisterShell track="store" steps={['Store info', 'Categories', 'Business']} step={step} done={step===3}>
+      <div>
         <AnimatePresence mode="wait">
           {step===0 && <StoreInfoStep key="s0" onNext={handleStoreNext} />}
           {step===1 && <CategoriesStep key="s1" onNext={handleCatsNext} onBack={()=>{setStep(0);window.scrollTo(0,0);}} />}
@@ -1074,6 +1005,6 @@ export function MerchantSetup() {
           {step===3 && <SuccessStep key="s3" storeData={storeData} categories={categories} selectedSubs={selectedSubs} />}
         </AnimatePresence>
       </div>
-    </div>
+    </RegisterShell>
   );
 }

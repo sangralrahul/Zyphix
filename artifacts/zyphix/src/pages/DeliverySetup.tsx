@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from '@/lib/motion';
 import { ArrowLeft, ArrowRight, Check, Upload, User, Bike, Calendar, CreditCard, FileDown } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
+import { RegisterShell } from '@/components/register/RegisterShell';
+import { RegisterSuccess, SuccessButton } from '@/components/register/RegisterSuccess';
 
 const G = '#0DA366'; const T1 = '#111827'; const T2 = '#6B7280';
 const T3 = '#9CA3AF'; const BD = '#E5E7EB'; const W = '#FFFFFF'; const BG = '#F8F9FA';
@@ -686,41 +688,16 @@ function FlowerBurst() {
 function SuccessStep({ personal }: { personal: Record<string,string> }) {
   const [, setLoc] = useLocation();
   return (
-    <>
-    <FlowerBurst />
-    <motion.div initial={{opacity:0,scale:.9}} animate={{opacity:1,scale:1}} transition={{type:'spring',stiffness:180}}
-      style={{ maxWidth:540, margin:'0 auto', textAlign:'center', padding:'20px 0' }}>
-      <motion.div animate={{y:[0,-8,0]}} transition={{repeat:Infinity,duration:1.8}} style={{fontSize:64,marginBottom:20}}>🛵</motion.div>
-      <h2 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif",fontWeight:900,fontSize:'1.8rem',color:T1,letterSpacing:'-.03em',marginBottom:10 }}>Application Submitted!</h2>
-      <p style={{ color:T2,fontSize:14.5,lineHeight:1.7,marginBottom:28 }}>
-        Hey <strong>{personal.name}</strong>! We've received your delivery partner application. Our team will verify your documents and call you on <strong>{personal.phone}</strong> within 48 hours.
-      </p>
-      <div style={{ background:`${G}0C`,border:`1.5px solid ${G}30`,borderRadius:14,padding:'18px 20px',marginBottom:20,textAlign:'left' }}>
-        <p style={{ fontSize:13,fontWeight:700,color:G,marginBottom:12 }}>⏱ What happens next?</p>
-        <ul style={{ listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:8 }}>
-          {['Document verification by our team','Background check (24–48 hours)','App onboarding & training session','Start delivering and earn!'].map((s,i)=>(
-            <li key={i} style={{ fontSize:13,color:T2,display:'flex',alignItems:'center',gap:10 }}>
-              <span style={{ width:20,height:20,borderRadius:'50%',background:G,color:'#fff',fontSize:10,fontWeight:900,display:'inline-flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>{i+1}</span>
-              {s}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div style={{ background:'#FFFBEB',border:'1.5px solid #FDE68A',borderRadius:14,padding:'14px 18px',marginBottom:28 }}>
-        <p style={{ fontSize:13,color:'#78350F',fontWeight:600 }}>💰 Earn ₹18–₹25 per delivery + daily bonuses + fuel allowance (EV gets extra incentive!)</p>
-      </div>
-      <div style={{ display:'flex', gap:12, justifyContent:'center' }}>
-        <motion.button onClick={()=>exportDeliveryPDF(personal)} whileHover={{scale:1.03}} whileTap={{scale:.97}}
-          style={{ padding:'13px 24px',borderRadius:12,background:W,border:`2px solid ${G}`,color:G,fontSize:14,fontWeight:800,cursor:'pointer',display:'flex',alignItems:'center',gap:8,boxShadow:'0 2px 8px rgba(0,0,0,.07)' }}>
-          <FileDown size={17}/> Export to PDF
-        </motion.button>
-        <motion.button onClick={()=>setLoc('/')} whileHover={{scale:1.02}} whileTap={{scale:.97}}
-          style={{ padding:'13px 24px',borderRadius:12,background:G,color:'#fff',fontSize:14,fontWeight:800,border:'none',cursor:'pointer',boxShadow:`0 4px 20px ${G}40` }}>
-          Back to Home
-        </motion.button>
-      </div>
-    </motion.div>
-    </>
+    <RegisterSuccess
+      track="delivery"
+      name={personal.name}
+      message={<>We have your delivery partner application. Our team will verify your documents and call <strong className="text-white">{personal.phone}</strong> within 48 hours.</>}
+      nextSteps={['Document verification by our team', 'Background check (24–48 hours)', 'App onboarding and a short training session', 'Start delivering in your area']}
+      actions={<>
+        <SuccessButton onClick={() => exportDeliveryPDF(personal)}><FileDown size={17} /> Save as PDF</SuccessButton>
+        <SuccessButton primary onClick={() => setLoc('/')}>Back to partner home</SuccessButton>
+      </>}
+    />
   );
 }
 
@@ -756,26 +733,8 @@ export function DeliverySetup() {
   };
 
   return (
-    <div style={{ background:BG, minHeight:'100vh' }}>
-      {/* Header */}
-      <div style={{ background:W,borderBottom:`1px solid ${BD}`,padding:'0 24px',position:'sticky',top:0,zIndex:50,boxShadow:SH }}>
-        <div style={{ maxWidth:1100,margin:'0 auto',height:60,display:'flex',alignItems:'center',gap:14 }}>
-          <button onClick={()=>setLoc('/')} style={{ background:BG,border:`1px solid ${BD}`,borderRadius:8,padding:'6px 10px',cursor:'pointer',display:'flex',alignItems:'center',gap:5,color:T2,fontSize:13,fontWeight:600 }}>
-            <ArrowLeft size={14}/> Home
-          </button>
-          <ZyphixLogo size={30} />
-          <div style={{ height:20,width:1,background:BD }} />
-          <span style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif",fontWeight:800,fontSize:14.5,color:T1 }}>Delivery Partner Registration</span>
-          <div style={{ marginLeft:'auto',display:'flex',alignItems:'center',gap:8,background:'#FFF7ED',border:'1px solid #FED7AA',borderRadius:99,padding:'5px 14px' }}>
-            <span style={{ width:8,height:8,borderRadius:'50%',background:'#EA580C',display:'inline-block' }} />
-            <span style={{ fontSize:12,fontWeight:700,color:'#EA580C' }}>Hiring Open</span>
-          </div>
-        </div>
-      </div>
-
-      <StepBar step={step} />
-
-      <div style={{ maxWidth:1000,margin:'0 auto',padding:'36px 24px 80px' }}>
+    <RegisterShell track="delivery" steps={['Personal', 'Licence', 'Vehicle', 'Availability']} step={step} done={step===4}>
+      <div>
         <AnimatePresence mode="wait">
           {step===0 && <PersonalStep key="s0" onNext={d=>{setPersonal(d as Record<string,string>);go(1);}} />}
           {step===1 && <LicenseStep key="s1" onNext={()=>go(2)} onBack={()=>go(0)} />}
@@ -784,6 +743,6 @@ export function DeliverySetup() {
           {step===4 && <SuccessStep key="s4" personal={personal} />}
         </AnimatePresence>
       </div>
-    </div>
+    </RegisterShell>
   );
 }
