@@ -29,8 +29,10 @@ export interface Env {
   ASSETS: Fetcher;
   ADMIN_TOKEN: string;
   PUBLIC_IMAGE_BASE?: string; // optional, e.g. https://img.zyphix.in  (defaults to same-origin /img)
-  SUPABASE_URL?: string;      // email-otp edge function host (same fallbacks as src/lib/api.ts)
+  SUPABASE_URL?: string;      // legacy, unused
   SUPABASE_KEY?: string;
+  BREVO_API_KEY?: string;     // transactional email (sign-in codes) — `wrangler secret put BREVO_API_KEY`
+  MAIL_FROM?: string;         // sender address verified in Brevo (default noreply@zyphix.in)
 }
 
 type ProductRow = {
@@ -237,6 +239,11 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   if (p === '/api/partners' && request.method === 'POST') return await createPartner(request, env);
   if (p === '/api/partners' && request.method === 'GET') return await listPartners(env, url);
 
+  /* ── Forms: partner sign-ups, advertiser inquiries, support requests, "notify me" ── */
+  if (p === '/api/partner-register' && request.method === 'POST') return await partnerRegister(request, env);
+  if (p === '/api/support' && request.method === 'POST') return await saveMessage(request, env, 'support');
+  if (p === '/api/notify' && request.method === 'POST') return await saveMessage(request, env, 'notify');
+
   if (p === '/api/categories') {
     const { results } = await env.DB.prepare('SELECT name, icon, color, image_url AS image, sort FROM categories ORDER BY sort').all();
     return json(results, 200, cache);
@@ -318,6 +325,12 @@ async function handleAdmin(request: Request, env: Env, url: URL): Promise<Respon
     const { results } = await env.DB.prepare('SELECT * FROM waitlist ORDER BY created_at DESC LIMIT 1000').all();
     return json(results);
   }
+  if (p === '/admin/messages' && request.method === 'GET') {
+    await ensureMessages(env);
+    const { results } = await env.DB.prepare('SELECT * FROM messages ORDER BY id DESC LIMIT 1000').all();
+    return json(results);
+  }
+  if (p === '/admin/mail-status') return json({ configured: !!env.BREVO_API_KEY, from: env.MAIL_FROM || 'noreply@zyphix.in' });
   const pm = p.match(/^\/admin\/partners\/([^/]+)\/status$/);
   if (pm && request.method === 'POST') {
     const status = url.searchParams.get('status');
@@ -631,8 +644,6 @@ async function listPartners(env: Env, url: URL): Promise<Response> {
    now.|eats.|book.|auth.zyphix.in share it), SHA-256 hash in `sessions`.
    Addresses and orders live in D1 and are scoped to the session user.      */
 
-const SUPABASE_URL_FALLBACK = 'https://awbccdtdszdxcxnsossy.supabase.co';
-const SUPABASE_KEY_FALLBACK = 'sb_publishable_YE-BT6c07paKhTvlCiItZw_Mm2k6z5A';
 const SESSION_COOKIE = 'zsid';
 const SESSION_TTL_S = 90 * 24 * 60 * 60; // 90 days
 const MAX_ADDRESSES = 10;
@@ -718,6 +729,7 @@ async function handleAccount(request: Request, env: Env, url: URL): Promise<Resp
   const m = request.method;
 
   /* ── auth ── */
+  if (p === '/api/auth/send' && m === 'POST') return await authSend(request, env);
   if (p === '/api/auth/verify' && m === 'POST') return await authVerify(request, env);
   if (p === '/api/auth/logout' && m === 'POST') {
     const token = sessionToken(request);
@@ -807,25 +819,111 @@ async function handleAccount(request: Request, env: Env, url: URL): Promise<Resp
   return json({ error: 'not found' }, 404);
 }
 
+/* ---- email sign-in codes (stored in D1, sent with Brevo) ---- */
+
+type OtpRow = { token: string; email: string; code_hash: string; name: string | null; attempts: number; expires_at: number; used: number; ip: string | null; created_at: number };
+async function ensureOtp(env: Env) {
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS otp_codes (token TEXT PRIMARY KEY, email TEXT NOT NULL, code_hash TEXT NOT NULL, name TEXT, attempts INTEGER NOT NULL DEFAULT 0, expires_at INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0, ip TEXT, created_at INTEGER NOT NULL)').run();
+}
+
+async function sendMail(env: Env, to: string, subject: string, html: string, text: string): Promise<void> {
+  if (!env.BREVO_API_KEY) throw new Error('mail-not-configured');
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'api-key': env.BREVO_API_KEY, 'content-type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify({ sender: { name: 'Zyphix', email: env.MAIL_FROM || 'noreply@zyphix.in' }, to: [{ email: to }], subject, htmlContent: html, textContent: text }),
+  });
+  if (!res.ok) throw new Error(`mail-failed ${res.status} ${(await res.text()).slice(0, 200)}`);
+}
+
+function otpEmail(code: string) {
+  const html = `<!doctype html><html><body style="margin:0;background:#F4F5F2;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 12px"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#fff;border-radius:20px;overflow:hidden;border:1px solid #E5E7EB">
+<tr><td style="background:#06080A;padding:22px 28px"><span style="display:inline-block;background:#0DA366;color:#fff;font-weight:800;border-radius:8px;padding:4px 8px;font-size:13px">//</span> <span style="color:#fff;font-weight:800;font-size:17px;letter-spacing:.02em;vertical-align:middle">ZYPHIX</span></td></tr>
+<tr><td style="padding:30px 28px 8px"><p style="margin:0;font-size:20px;font-weight:700;color:#0B0F12">Your sign-in code</p>
+<p style="margin:10px 0 0;font-size:14.5px;line-height:1.6;color:#4B5563">Enter this code to sign in to Zyphix. It expires in 10 minutes.</p>
+<p style="margin:22px 0 4px;font-size:34px;font-weight:800;letter-spacing:10px;color:#0B0F12">${code}</p></td></tr>
+<tr><td style="padding:14px 28px 28px"><p style="margin:0;font-size:12.5px;line-height:1.6;color:#9CA3AF">If you didn't ask for this, you can ignore this email. Never share this code with anyone.</p></td></tr>
+</table><p style="margin:16px 0 0;font-size:11.5px;color:#9CA3AF">&copy; ${new Date().getFullYear()} Zyphix &middot; zyphix.in</p></td></tr></table></body></html>`;
+  return { html, text: `Your Zyphix sign-in code is ${code}. It expires in 10 minutes. If you didn't ask for it, ignore this email.` };
+}
+
+async function authSend(request: Request, env: Env): Promise<Response> {
+  const body = await readJson(request); if (!body) return json({ error: 'invalid JSON' }, 400);
+  const email = str(body.email, 160).toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'Enter a valid email address' }, 400);
+  await ensureOtp(env);
+  const now = Date.now(); const ip = request.headers.get('cf-connecting-ip') || '';
+  // rate limits: 5 codes per email and 20 per IP in 15 minutes
+  const since = now - 15 * 60_000;
+  const byEmail = await env.DB.prepare('SELECT COUNT(*) AS n FROM otp_codes WHERE email = ? AND created_at > ?').bind(email, since).first<{ n: number }>();
+  const byIp = ip ? await env.DB.prepare('SELECT COUNT(*) AS n FROM otp_codes WHERE ip = ? AND created_at > ?').bind(ip, since).first<{ n: number }>() : { n: 0 };
+  if ((byEmail?.n ?? 0) >= 5 || (byIp?.n ?? 0) >= 20) return json({ error: 'Too many codes requested. Please wait a few minutes and try again.' }, 429);
+
+  const code = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1_000_000).padStart(6, '0');
+  const token = randomId('otp_');
+  await env.DB.prepare('INSERT INTO otp_codes (token, email, code_hash, name, expires_at, ip, created_at) VALUES (?,?,?,?,?,?,?)')
+    .bind(token, email, await sha256Hex(`${token}:${code}`), str(body.name, 120) || null, now + 10 * 60_000, ip || null, now).run();
+  // housekeeping
+  await env.DB.prepare('DELETE FROM otp_codes WHERE created_at < ?').bind(now - 24 * 3600_000).run();
+  try {
+    const m = otpEmail(code);
+    await sendMail(env, email, `${code} is your Zyphix sign-in code`, m.html, m.text);
+  } catch (e) {
+    const msg = (e as Error).message;
+    console.error('otp mail', msg);
+    return json({ error: msg === 'mail-not-configured' ? 'Sign-in email is not set up yet. Please try again later.' : 'We could not send the email. Please try again.' }, 503);
+  }
+  return json({ success: true, token });
+}
+
+/* ---- inbox: support requests, advertiser inquiries, "notify me" sign-ups ---- */
+
+async function ensureMessages(env: Env) {
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL, name TEXT, email TEXT, phone TEXT, city TEXT, data TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')))").run();
+}
+async function storeMessage(env: Env, kind: string, b: Record<string, any>) {
+  await ensureMessages(env);
+  const { name, email, phone, city, ...rest } = b;
+  await env.DB.prepare('INSERT INTO messages (kind, name, email, phone, city, data) VALUES (?,?,?,?,?,?)')
+    .bind(kind, str(name, 120) || null, str(email, 160).toLowerCase() || null, str(phone, 20).replace(/\D/g, '') || null, str(city, 120) || null, JSON.stringify(rest).slice(0, 8000)).run();
+}
+async function saveMessage(request: Request, env: Env, kind: 'support' | 'notify' | 'advertise'): Promise<Response> {
+  const body = await readJson(request); if (!body) return json({ error: 'invalid JSON' }, 400);
+  const email = str(body.email, 160);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'Enter a valid email address' }, 400);
+  if (kind === 'support' && str(body.message, 4000).length < 5) return json({ error: 'Describe the issue in a sentence or two' }, 400);
+  await storeMessage(env, kind, body);
+  return json({ success: true }, 201);
+}
+/** Legacy form endpoint: partner roles go to the partner directory, advertisers to the inbox. */
+async function partnerRegister(request: Request, env: Env): Promise<Response> {
+  const raw = await request.text();
+  let body: Record<string, any> = {};
+  try { body = JSON.parse(raw); } catch { return json({ error: 'invalid JSON' }, 400); }
+  if (PARTNER_TYPES[str(body.role)]) return await createPartner(new Request(request.url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: raw }), env);
+  const email = str(body.email, 160);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'Enter a valid email address' }, 400);
+  await storeMessage(env, str(body.role, 30) === 'advertiser' ? 'advertise' : 'partner-other', body);
+  return json({ success: true }, 201);
+}
+
 async function authVerify(request: Request, env: Env): Promise<Response> {
   const body = await readJson(request); if (!body) return json({ error: 'invalid JSON' }, 400);
   const email = str(body.email, 160).toLowerCase(); const otp = str(body.otp, 10); const token = str(body.token, 2000);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\d{4,8}$/.test(otp) || !token) return json({ error: 'email, otp and token are required' }, 400);
 
-  const base = (env.SUPABASE_URL ?? SUPABASE_URL_FALLBACK).replace(/\/$/, '');
-  const key = env.SUPABASE_KEY ?? SUPABASE_KEY_FALLBACK;
-  let data: any = null;
-  try {
-    const res = await fetch(`${base}/functions/v1/email-otp`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', apikey: key, authorization: `Bearer ${key}` },
-      body: JSON.stringify({ action: 'verify', email, otp, token }),
-    });
-    data = await res.json().catch(() => null);
-    if (!res.ok || !data?.success) return json({ error: str(data?.error, 300) || 'Incorrect or expired OTP' }, 400);
-  } catch {
-    return json({ error: 'Could not reach the verification service' }, 502);
+  await ensureOtp(env);
+  const row = await env.DB.prepare('SELECT * FROM otp_codes WHERE token = ?').bind(token).first<OtpRow>();
+  if (!row || row.email !== email || row.used || row.expires_at < Date.now()) return json({ error: 'This code has expired. Request a new one.' }, 400);
+  if (row.attempts >= 5) return json({ error: 'Too many attempts. Request a new code.' }, 429);
+  if (await sha256Hex(`${token}:${otp}`) !== row.code_hash) {
+    await env.DB.prepare('UPDATE otp_codes SET attempts = attempts + 1 WHERE token = ?').bind(token).run();
+    return json({ error: 'Incorrect code. Check the email and try again.' }, 400);
   }
+  await env.DB.prepare('UPDATE otp_codes SET used = 1 WHERE token = ?').bind(token).run();
+  const data = { name: row.name };
 
   const name = str(body.name, 120) || str(data?.name, 120);
   let user = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(email).first<UserRow>();

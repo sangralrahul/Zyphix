@@ -28,7 +28,8 @@ type Status = 'live' | 'pending' | 'hidden' | 'rejected';
 type Partner = { id: string; type: string; name: string; business_name: string; email: string; phone: string; city: string; locality: string; category: string; tags: string; details: string; status: Status; created_at: string; updated_at?: string };
 type Order = { id: string; createdAt: string; status: string; items: { name?: string; qty?: number; note?: string }[]; total: number; paymentMode: string; address: Record<string, string>; email?: string };
 type Waiter = { id: number; product: string; name: string | null; phone: string; city: string | null; created_at: string };
-type View = 'overview' | 'partners' | 'orders' | 'waitlist';
+type View = 'overview' | 'partners' | 'orders' | 'waitlist' | 'inbox';
+type Msg = { id: number; kind: string; name: string | null; email: string | null; phone: string | null; city: string | null; data: string | null; created_at: string };
 
 const TYPES: Record<string, { label: string; icon: React.ElementType; color: string }> = {
   store: { label: 'Store', icon: Store, color: '#0DA366' },
@@ -176,6 +177,8 @@ export function Admin() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [waitlist, setWaitlist] = useState<Waiter[]>([]);
+  const [messages, setMessages] = useState<Msg[]>([]);
+  const [mailOk, setMailOk] = useState(true);
   const [loading, setLoading] = useState(false);
   const [synced, setSynced] = useState<Date | null>(null);
   const [open, setOpen] = useState<Partner | null>(null);
@@ -198,9 +201,11 @@ export function Admin() {
     if (!token) return;
     if (!quiet) setLoading(true);
     try {
-      const [p, o, w] = await Promise.all([
+      const [p, o, w, msgs, mail] = await Promise.all([
         api<Partner[]>('/admin/partners', token), api<Order[]>('/admin/orders', token), api<Waiter[]>('/admin/waitlist', token).catch(() => [] as Waiter[]),
+        api<Msg[]>('/admin/messages', token).catch(() => [] as Msg[]), api<{ configured: boolean }>('/admin/mail-status', token).catch(() => ({ configured: true })),
       ]);
+      setMessages(msgs); setMailOk(mail.configured);
       if (seen.current) {
         const added = p.filter(x => !seen.current!.has(x.id));
         if (added.length) {
@@ -256,6 +261,7 @@ export function Admin() {
     { k: 'overview', label: 'Overview', icon: LayoutDashboard },
     { k: 'partners', label: 'Partners', icon: Users, badge: pending.length },
     { k: 'orders', label: 'Orders & requests', icon: ShoppingBag, badge: orders.filter(o => o.status === 'requested').length },
+    { k: 'inbox', label: 'Inbox', icon: Mail, badge: messages.filter(m => m.kind !== 'notify' && toDate(m.created_at).toDateString() === new Date().toDateString()).length },
     { k: 'waitlist', label: 'Waitlist', icon: Bell },
   ];
   const hour = new Date().getHours();
@@ -293,6 +299,11 @@ export function Admin() {
         </nav>
       </header>
 
+      {!mailOk && (
+        <div className="zx-dark fixed inset-x-0 bottom-0 z-40 border-t border-amber-400/30 bg-amber-500/95 px-4 py-2.5 text-center text-[13px] font-medium text-gray-950">
+          Sign-in emails are off: add your Brevo API key to the Worker (<code className="font-mono">npx wrangler secret put BREVO_API_KEY</code>) so customers can sign in.
+        </div>
+      )}
       <AnimatePresence mode="wait">
         <motion.main key={view} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: EASE }} className="min-w-0">
           {view === 'overview' ? (
@@ -308,6 +319,7 @@ export function Admin() {
                 {view === 'partners' && <Partners partners={partners} onOpen={setOpen} onStatus={setStatus} fresh={fresh} loading={loading} />}
                 {view === 'orders' && <Orders orders={orders} loading={loading} />}
                 {view === 'waitlist' && <Waitlist rows={waitlist} loading={loading} />}
+                {view === 'inbox' && <InboxView rows={messages} loading={loading} />}
               </div>
             </div>
           )}
@@ -671,6 +683,55 @@ function Waitlist({ rows, loading }: { rows: Waiter[]; loading: boolean }) {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ── Inbox: support, advertisers, notify-me ─────────────────────────────── */
+const KIND: Record<string, { label: string; c: string }> = {
+  support: { label: 'Support', c: '#2563EB' }, advertise: { label: 'Advertiser', c: '#D97706' }, notify: { label: 'Notify me', c: G }, 'partner-other': { label: 'Partner (other)', c: '#7C3AED' },
+};
+function InboxView({ rows, loading }: { rows: Msg[]; loading: boolean }) {
+  const [f, setF] = useState<string>('all');
+  const kinds = ['all', ...Object.keys(KIND).filter(k => rows.some(r => r.kind === k))];
+  const shown = rows.filter(r => f === 'all' || r.kind === f);
+  return (
+    <>
+      <div className="mb-5 flex w-fit flex-wrap gap-1 rounded-full border border-white/10 bg-white/[.04] p-1">
+        {kinds.map(k => (
+          <button key={k} onClick={() => setF(k)} className={`relative h-9 rounded-full px-3.5 text-[13.5px] font-medium ${f === k ? 'text-gray-950' : 'text-white/60 hover:text-white'}`}>
+            {f === k && <motion.span layoutId="inbox-pill" className="absolute inset-0 rounded-full bg-white" transition={{ type: 'spring', stiffness: 400, damping: 34 }} />}
+            <span className="relative">{k === 'all' ? 'All' : KIND[k].label} <span className="opacity-60">{k === 'all' ? rows.length : rows.filter(r => r.kind === k).length}</span></span>
+          </button>
+        ))}
+      </div>
+      {shown.length === 0 ? <div className="rounded-[26px] border border-dashed border-white/15 bg-white/[.02]"><Empty icon={Mail} title={loading ? 'Loading…' : 'Inbox is empty'} body="Support requests, advertiser inquiries and notify-me sign-ups appear here." /></div> : (
+        <div className="grid gap-3">
+          {shown.map((m, i) => { const k = KIND[m.kind] ?? { label: m.kind, c: '#6B7280' }; const d = parse(m.data ?? ''); const det = (d.details ?? {}) as Record<string, unknown>; const extra = { ...d, ...det }; delete (extra as Record<string, unknown>).details; return (
+            <motion.article key={m.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i, 10) * 0.025 }}
+              className="rounded-[26px] border border-white/[.08] bg-white/[.035] p-5 backdrop-blur-xl">
+              <div className="flex flex-wrap items-center gap-3">
+                <ProductTag pr={{ k: k.label, c: k.c }} />
+                <p className="text-[15px] font-semibold">{m.name || m.email || 'Someone'}</p>
+                <p className="ml-auto text-[12px] text-white/45">{ago(m.created_at)}</p>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-white/65">
+                {m.email && <a href={`mailto:${m.email}`} className="text-emerald-300 hover:underline">{m.email}</a>}
+                {m.phone && <a href={`tel:+91${m.phone}`} className="hover:underline">+91 {m.phone}</a>}
+                {m.city && <span>{m.city}</span>}
+              </div>
+              {typeof extra.message === 'string' && <p className="mt-3 whitespace-pre-wrap text-[14px] leading-[1.6] text-white/80">{extra.message}</p>}
+              {Object.entries(extra).filter(([kk, v]) => kk !== 'message' && kk !== 'role' && v !== '' && v != null && typeof v !== 'object').length > 0 && (
+                <dl className="mt-3 grid grid-cols-2 gap-x-5 gap-y-2 sm:grid-cols-4">
+                  {Object.entries(extra).filter(([kk, v]) => kk !== 'message' && kk !== 'role' && v !== '' && v != null && typeof v !== 'object').map(([kk, v]) => (
+                    <div key={kk} className="min-w-0"><dt className="text-[11.5px] text-white/45">{pretty(kk)}</dt><dd className="truncate text-[13.5px] text-white">{String(v)}</dd></div>
+                  ))}
+                </dl>
+              )}
+            </motion.article>
+          ); })}
         </div>
       )}
     </>
