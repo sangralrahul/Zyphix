@@ -168,10 +168,10 @@ export function ZyphixEats() {
         /* ── Restaurant list ── */
         <motion.div key="list" {...enter}>
           {/* Hero: video, headline, search, cuisine chips */}
-          <div className="-mx-4 md:mx-0">
-            <VideoHero clip={VIDEOS.food} height="min-h-[50svh] md:min-h-[60svh]" dim={0.4} className="md:rounded-3xl">
+          <div className="zx-bleed -mx-4 md:-mt-4">
+            <VideoHero clip={VIDEOS.food} height="min-h-[56svh] md:min-h-[78svh]" dim={0.4}>
               <EatsHeroLiveOrder />
-              <div className="px-4 pb-7 pt-14 md:px-10 md:pb-10 md:pt-16">
+              <div className="zx-bleed-inner px-4 pb-7 pt-14 md:pb-14 md:pt-24">
                 <Kicker light>Zyphix Eats</Kicker>
                 <SplitHeadline className={`${DISPLAY} max-w-[15ch] text-[38px] leading-[1.0] text-white sm:text-[48px] md:text-[64px]`}
                   parts={["Your city's best kitchens, at your", { accent: 'door.', green: true }]} />

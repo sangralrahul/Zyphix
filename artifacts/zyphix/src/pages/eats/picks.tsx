@@ -187,7 +187,7 @@ export function RestaurantCta() {
 /* ── Hero live order (desktop) ── */
 export function EatsHeroLiveOrder() {
   return (
-    <div className="pointer-events-none absolute bottom-10 right-10 z-10 hidden w-[300px] xl:block">
+    <div className="pointer-events-none zx-bleed-right absolute bottom-12 right-10 z-10 hidden w-[300px] xl:block">
       <Reveal delay={0.5} y={20}>
         <LiveOrder dark className="pointer-events-auto" items={['Paneer tikka', 'Margherita pizza', 'Iced lemon tea × 2']} />
       </Reveal>

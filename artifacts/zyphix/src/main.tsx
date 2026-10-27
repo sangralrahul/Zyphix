@@ -90,3 +90,19 @@ const startWarm = () => {
 };
 if (document.readyState === "complete") startWarm();
 else window.addEventListener("load", startWarm, { once: true });
+
+/* ── Instant return visits ─────────────────────────────────────────────────
+   public/sw.js serves the page and its code from this device on the next visit.
+   If a deploy removed a code chunk an old cached page still points at, drop the cached
+   pages and reload once from the network. */
+window.addEventListener("vite:preloadError", (event) => {
+  event.preventDefault();
+  let reloaded = false;
+  try { reloaded = sessionStorage.getItem("zx-reloaded") === "1"; sessionStorage.setItem("zx-reloaded", "1"); } catch { /* ignore */ }
+  if (reloaded) return;
+  const go = () => location.reload();
+  if ("caches" in window) caches.delete("zx-html-v1").then(go, go); else go();
+});
+if ("serviceWorker" in navigator && /(^|\.)zyphix\.in$/.test(location.hostname)) {
+  window.addEventListener("load", () => { navigator.serviceWorker.register("/sw.js").catch(() => {}); }, { once: true });
+}

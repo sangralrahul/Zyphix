@@ -30,7 +30,7 @@ export function useRotatingWord(words: string[], ms = 2200) {
 /** Floating live-order card over the hero (desktop only). */
 export function HeroLiveOrder() {
   return (
-    <div className="pointer-events-none absolute bottom-24 right-10 z-10 hidden w-[300px] xl:block">
+    <div className="pointer-events-none zx-bleed-right absolute bottom-28 right-10 z-10 hidden w-[300px] xl:block">
       <Reveal delay={0.5} y={20}>
         <LiveOrder dark className="pointer-events-auto" items={['Fresh milk 1 L', 'Whole-wheat flour 5 kg', 'Bananas · 6']} />
       </Reveal>

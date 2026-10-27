@@ -209,9 +209,9 @@ export function ZyphixBook() {
   return (
     <div className="w-full text-gray-900" style={{ fontFamily: FONT }}>
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <div className="-mx-4 md:mx-0 md:mt-4">
-        <VideoHero clip={VIDEOS.cleaning} height="min-h-[600px] md:min-h-[72svh]" dim={0.45} className="md:rounded-3xl">
-          <div className="relative px-4 pb-7 pt-20 md:px-10 md:pb-12 md:pt-24 lg:px-14">
+      <div className="zx-bleed -mx-4">
+        <VideoHero clip={VIDEOS.cleaning} height="min-h-[600px] md:min-h-[82svh]" dim={0.45}>
+          <div className="zx-bleed-inner relative px-4 pb-7 pt-20 md:pb-16 md:pt-28">
             <div className="lg:max-w-[640px] xl:max-w-[700px]">
               <Kicker light>Zyphix Book</Kicker>
               <SplitHeadline parts={['Home services, done by', { accent: 'verified', green: true }, 'pros.']}
@@ -229,7 +229,7 @@ export function ZyphixBook() {
               </div>
             </div>
             {/* live "pro on the way" card, desktop only */}
-            <div className="pointer-events-none absolute bottom-12 right-10 hidden xl:block xl:right-14">
+            <div className="zx-bleed-right pointer-events-none absolute bottom-16 right-10 hidden xl:block">
               <Reveal delay={0.6} y={24} className="pointer-events-auto">
                 <LiveJob />
               </Reveal>

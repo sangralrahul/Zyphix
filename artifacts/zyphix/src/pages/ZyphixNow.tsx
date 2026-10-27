@@ -204,7 +204,7 @@ export function ZyphixNow() {
   const productCount = products.length.toLocaleString('en-IN');
 
   return (
-    <div className="relative mx-auto w-full max-w-[1180px] pt-0 text-gray-900 md:pt-4" style={{ fontFamily: FONT }}>
+    <div className="relative mx-auto w-full max-w-[1180px] pt-0 text-gray-900" style={{ fontFamily: FONT }}>
 
       {/* ── Cinematic hero (store mode) / compact search bar (search mode) ── */}
       {showStore ? (
@@ -492,12 +492,12 @@ function Hero({ productCount, onSearch }: { productCount: string; onSearch: (q: 
     { icon: <MapPin size={13} />, text: 'Check if we deliver to you' },
   ];
   return (
-    <section aria-label="Zyphix Now" className="relative isolate -mx-4 flex min-h-[50svh] items-end overflow-hidden bg-[#05080E] text-white md:mx-0 md:min-h-[60svh] md:rounded-3xl">
+    <section aria-label="Zyphix Now" className="zx-bleed relative isolate -mx-4 flex min-h-[56svh] items-end overflow-hidden bg-[#05080E] text-white md:min-h-[78svh]">
       <BgVideo clip={VIDEOS.groceryShelf} dim={0.35} position="center" priority />
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.35) 0%, rgba(5,8,14,.05) 30%, rgba(5,8,14,.55) 65%, rgba(5,8,14,.92) 100%)' }} />
       <Grain opacity={0.05} />
       <HeroLiveOrder />
-      <div className="relative z-10 w-full px-4 pb-16 pt-14 md:px-10 md:pb-24 md:pt-16">
+      <div className="zx-bleed-inner relative z-10 w-full px-4 pb-16 pt-14 md:pb-28 md:pt-24">
         <Kicker light>Zyphix Now</Kicker>
         <SplitHeadline className={`${DISPLAY} max-w-[13ch] text-[38px] leading-[1.0] text-white sm:text-[48px] md:text-[64px]`}
           parts={['Groceries in', { accent: '30', green: true }, 'minutes.']} />

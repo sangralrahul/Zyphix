@@ -149,3 +149,10 @@
   /* pb-safe for bottom nav on notch devices */
   .pb-safe { padding-bottom: env(safe-area-inset-bottom, 8px); }
 }
+
+/* Full-bleed heroes inside the 1180px shop container (unlayered so it beats utility margins). */
+@media (min-width: 768px) {
+  .zx-bleed { margin-inline: calc(50% - 50vw) !important; border-radius: 0 !important; }
+  .zx-bleed-inner { padding-inline: max(2.5rem, calc((100vw - 1180px) / 2 + 1rem)) !important; }
+  .zx-bleed-right { right: max(2.5rem, calc((100vw - 1180px) / 2 + 1rem)) !important; }
+}
