@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'wouter';
+import { motion } from '@/lib/motion';
 import { Menu, X, Instagram, Linkedin, Twitter, ArrowUpRight } from 'lucide-react';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
 import { Button, Container, Display, Eyebrow, Lead, Mesh, FONT, G as KIT_G, G_DEEP, INK as KIT_INK } from '@/ui/kit';
@@ -119,27 +120,40 @@ const SOCIALS: Array<[React.ReactNode, string, string]> = [
   [<Twitter size={15} />, 'https://x.com/zyphix_in', 'X'],
 ];
 
-/** Oversized serif-italic "Zyphix" that closes every footer, cropped by the page edge. */
+/**
+ * Oversized serif-italic "Zyphix" that closes every footer.
+ * Fully visible (descenders included). Letters rise in one by one when the footer scrolls into view,
+ * a green shine sweeps through them on a loop, and each letter lifts under the cursor.
+ */
+const WORD = 'Zyphix'.split('');
 export function FooterWordmark({ dark = false }: { dark?: boolean }) {
+  const stat = typeof window !== 'undefined' && (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || /noanim/.test(location.search) || !!(navigator as any).webdriver);
+  const base = dark ? 'rgba(255,255,255,.14)' : '#D5DAE1';
+  const shine = dark ? 'rgba(52,211,153,.75)' : '#0DA366';
   return (
-    <div aria-hidden className="pointer-events-none relative select-none overflow-hidden" style={{ height: 'clamp(84px, 17vw, 300px)' }}>
-      <div
-        className="absolute inset-x-0 top-0 text-center leading-[0.82]"
+    <div aria-label="Zyphix" role="img" className="relative select-none overflow-hidden px-4 pb-20 pt-2 md:pb-[2vw]">
+      <div className="flex justify-center"
         style={{
           fontFamily: "'Instrument Serif', 'Instrument Serif Fallback', ui-serif, Georgia, serif",
-          fontStyle: 'italic',
-          fontWeight: 400,
-          fontSize: 'clamp(120px, 25vw, 440px)',
-          letterSpacing: '-0.02em',
-          backgroundImage: dark
-            ? 'linear-gradient(180deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.03) 75%)'
-            : 'linear-gradient(180deg, #E4E7EB 0%, #F3F4F6 80%)',
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          color: 'transparent',
-        }}
-      >
-        Zyphix
+          fontStyle: 'italic', fontWeight: 400, lineHeight: 1.04,
+          fontSize: 'clamp(96px, 22vw, 400px)', letterSpacing: '-0.02em',
+        }}>
+        {WORD.map((ch, i) => (
+          <motion.span key={i} aria-hidden className="zx-wm-letter inline-block cursor-default px-[0.02em] pb-[0.14em]"
+            style={{
+              backgroundImage: `linear-gradient(100deg, ${base} 0%, ${base} 40%, ${shine} 50%, ${base} 60%, ${base} 100%)`,
+              backgroundSize: '300% 100%',
+              WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
+              animationDelay: `${i * 0.14}s`,
+            }}
+            initial={stat ? false : { y: '45%', opacity: 0, rotate: -4 }}
+            whileInView={{ y: 0, opacity: 1, rotate: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.9, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+            whileHover={stat ? undefined : { y: '-6%', transition: { type: 'spring', stiffness: 300, damping: 15 } }}>
+            {ch}
+          </motion.span>
+        ))}
       </div>
     </div>
   );

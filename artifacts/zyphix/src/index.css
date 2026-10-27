@@ -191,3 +191,8 @@
   .zx-reg main [style*="grid-template-columns: repeat(5, 1fr)"] { grid-template-columns: repeat(3, 1fr) !important; }
   .zx-reg main [style*="padding: 32px 28px"] { padding: 22px 18px !important; }
 }
+
+/* Footer wordmark shine: a green highlight travels letter to letter on a loop. */
+@keyframes zx-wm-shine { 0% { background-position: 100% 0; } 55%, 100% { background-position: 0% 0; } }
+.zx-wm-letter { animation: zx-wm-shine 5.5s cubic-bezier(.45,0,.2,1) infinite; }
+@media (prefers-reduced-motion: reduce) { .zx-wm-letter { animation: none; } }
