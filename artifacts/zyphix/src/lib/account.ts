@@ -104,7 +104,7 @@ export function authUrl(next?: string): string {
 }
 
 /** Only allow redirects back to https://*.zyphix.in or the current origin. */
-export function safeNext(raw: string | null | undefined, fallback = 'https://zyphix.in/account'): string {
+export function safeNext(raw: string | null | undefined, fallback = 'https://accounts.zyphix.in/'): string {
   if (!raw) return fallback;
   try {
     const u = new URL(raw, typeof window !== 'undefined' ? window.location.origin : AUTH_SITE);

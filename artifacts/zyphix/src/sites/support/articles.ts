@@ -61,7 +61,7 @@ export const ARTICLES: Article[] = [
     keywords: ['track', 'where is my order', 'rider', 'live location', 'status'],
     body: [
       p('Every Zyphix Now order moves through four statuses: Confirmed, Packing, On the way and Delivered. You can watch it move in real time from your account.'),
-      steps('Open now.zyphix.in/account (or the Orders tab in the app).', 'Tap the order at the top of the list; the newest order is always first.', 'The status bar shows the current step. Once a rider is assigned, their name and a live map appear below it.', 'Use "Call rider" if you need to share a gate code or landmark.'),
+      steps('Open accounts.zyphix.in (or the Orders tab in the app).', 'Tap the order at the top of the list; the newest order is always first.', 'The status bar shows the current step. Once a rider is assigned, their name and a live map appear below it.', 'Use "Call rider" if you need to share a gate code or landmark.'),
       p('Our target is 30 minutes from confirmation. The promised time on the order page already accounts for the store\'s packing time and the distance to you.'),
       note('If the page shows "Confirmed" for more than 10 minutes, the store has not yet accepted the order. You can cancel at no charge until it moves to Packing.'),
     ],

@@ -1,11 +1,12 @@
 /** Which Zyphix site this page is serving (hostname based; ?site= overrides for previews). */
-export function detectSite(): "main" | "partner" | "advertise" | "now" | "eats" | "book" | "auth" | "support" | "admin" {
+export function detectSite(): "main" | "partner" | "advertise" | "now" | "eats" | "book" | "auth" | "support" | "admin" | "accounts" {
   if (typeof window === "undefined") return "main";
   const override = new URLSearchParams(window.location.search).get("site");
-  if (override === "partner" || override === "advertise" || override === "now" || override === "eats" || override === "book" || override === "auth" || override === "support" || override === "admin") return override;
+  if (override === "partner" || override === "advertise" || override === "now" || override === "eats" || override === "book" || override === "auth" || override === "support" || override === "admin" || override === "accounts") return override;
   const host = window.location.hostname.toLowerCase();
   if (host.startsWith("admin.")) return "admin";
-  if (host.startsWith("auth.") || host.startsWith("account.")) return "auth";
+  if (host.startsWith("accounts.") || host.startsWith("account.")) return "accounts";
+  if (host.startsWith("auth.")) return "auth";
   if (host.startsWith("support.") || host.startsWith("help.")) return "support";
   if (host.startsWith("partner.") || host.startsWith("partners.")) return "partner";
   if (host.startsWith("advertise.") || host.startsWith("ads.")) return "advertise";

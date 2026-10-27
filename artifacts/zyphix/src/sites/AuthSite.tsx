@@ -268,7 +268,7 @@ export default function AuthSite() {
                   </div>
                   <div className="mt-6 flex flex-col gap-3">
                     <PrimaryBtn type="button" onClick={() => go(next)}>Continue to {nextHost} <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" /></PrimaryBtn>
-                    <a href="https://zyphix.in/account" className={secondaryBtn}><MapPin size={16} /> Manage addresses &amp; orders</a>
+                    <a href="https://accounts.zyphix.in/?tab=addresses" className={secondaryBtn}><MapPin size={16} /> Manage addresses &amp; orders</a>
                   </div>
                   <button type="button" onClick={switchAccount} disabled={busy} className="mt-6 inline-flex items-center gap-2 text-[14px] font-medium text-gray-500 transition hover:text-gray-900 disabled:opacity-60">
                     <LogOut size={15} /> {busy ? 'Signing out…' : 'Sign out or use another account'}

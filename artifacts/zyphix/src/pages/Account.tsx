@@ -721,7 +721,7 @@ export function Account() {
   const [addressCount, setAddressCount] = useState(() => getLS<Address[]>(LS_ADDR, []).length);
   const orderCount = orders.length;
 
-  const goTab = (t: TabId) => { setTab(t); nav(`/account?tab=${t}`, { replace: true }); };
+  const goTab = (t: TabId) => { setTab(t); nav(`${window.location.pathname}?tab=${t}`, { replace: true }); };
 
   useEffect(() => {
     const t = (new URLSearchParams(window.location.search)).get('tab') as TabId | null;

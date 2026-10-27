@@ -61,7 +61,7 @@ function directRouteEntries() {
 const SITE_PAGES: Record<string, string> = {
   now: "src/pages/ZyphixNow.tsx", eats: "src/pages/ZyphixEats.tsx", book: "src/pages/ZyphixBook.tsx",
   partner: "src/sites/PartnerSite.tsx", advertise: "src/sites/AdvertiseSite.tsx",
-  auth: "src/sites/AuthSite.tsx", support: "src/sites/SupportSite.tsx",
+  auth: "src/sites/AuthSite.tsx", accounts: "src/sites/AccountsSite.tsx", support: "src/sites/SupportSite.tsx",
 };
 function sitePreload() {
   return {
@@ -85,7 +85,7 @@ function sitePreload() {
           walk(chunk);
           map[site] = [...files];
         }
-        const script = `<script>(function(M){var h=location.hostname.toLowerCase(),q=new URLSearchParams(location.search).get('site'),A={account:'auth',help:'support',partners:'partner',ads:'advertise',shop:'now',food:'eats',services:'book'},s=q||h.split('.')[0];s=A[s]||s;(M[s]||[]).forEach(function(f){var l=document.createElement('link');l.rel='modulepreload';l.crossOrigin='';l.href='${basePath}'+f;document.head.appendChild(l);});})(${JSON.stringify(map)});</script>`;
+        const script = `<script>(function(M){var h=location.hostname.toLowerCase(),q=new URLSearchParams(location.search).get('site'),A={account:'accounts',help:'support',partners:'partner',ads:'advertise',shop:'now',food:'eats',services:'book'},s=q||h.split('.')[0];s=A[s]||s;(M[s]||[]).forEach(function(f){var l=document.createElement('link');l.rel='modulepreload';l.crossOrigin='';l.href='${basePath}'+f;document.head.appendChild(l);});})(${JSON.stringify(map)});</script>`;
         return html.replace("</head>", `    ${script}\n  </head>`);
       },
     },

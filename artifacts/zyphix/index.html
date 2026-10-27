@@ -25,9 +25,10 @@
           partner: ["Partner with Zyphix · Zyphix Partners", "List your store, restaurant or skill on Zyphix, or deliver in your own area. Free to apply, weekly payouts."],
           advertise: ["Advertise on Zyphix · Zyphix Advertise", "Placements inside a shopping app, shown to buyers in the delivery areas you choose and always labelled Sponsored."],
           support: ["Help centre · Zyphix Support", "Answers for Zyphix Now, Eats and Book orders, refunds, sign-in and partners."],
-          auth: ["Sign in · Zyphix", "One account for Zyphix Now, Eats and Book. Sign in with a one-time code, no password."]
+          auth: ["Sign in · Zyphix", "One account for Zyphix Now, Eats and Book. Sign in with a one-time code, no password."],
+          accounts: ["Your account · Zyphix", "Your Zyphix profile, saved addresses and orders across Now, Eats and Book."]
         };
-        var A = { shop: "now", food: "eats", services: "book", partners: "partner", ads: "advertise", help: "support", account: "auth" };
+        var A = { shop: "now", food: "eats", services: "book", partners: "partner", ads: "advertise", help: "support", account: "accounts" };
         var s = location.hostname.split(".")[0]; s = A[s] || s; var m = M[s];
         var url = "https://" + location.hostname + location.pathname;
         if (/(^|\.)zyphix\.in$/.test(location.hostname)) {

@@ -17,9 +17,9 @@ import { ARTICLES, TOPICS, POPULAR, HOURS, SUPPORT_EMAIL, PARTNERS_EMAIL, articl
 ──────────────────────────────────────────────────────────────────────────── */
 
 const QUICK = [
-  { icon: Package, label: 'Track or manage an order', href: 'https://now.zyphix.in/account' },
+  { icon: Package, label: 'Track or manage an order', href: 'https://accounts.zyphix.in/?tab=orders' },
   { icon: Wallet, label: 'Wallet & refunds', href: 'https://now.zyphix.in/wallet' },
-  { icon: UserRound, label: 'Account & addresses', href: 'https://now.zyphix.in/account' },
+  { icon: UserRound, label: 'Account & addresses', href: 'https://accounts.zyphix.in/?tab=addresses' },
   { icon: LifeBuoy, label: 'Partner portal', href: 'https://partner.zyphix.in' },
 ];
 

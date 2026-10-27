@@ -58,6 +58,7 @@ const OrderConfirmation = lazy(() => import("@/pages/OrderConfirmation").then(m 
 const WalletPage = lazy(() => import("@/pages/Wallet").then(m => ({ default: m.Wallet })));
 const WishlistPage = lazy(() => import("@/pages/Wishlist").then(m => ({ default: m.Wishlist })));
 const NotificationsPage = lazy(() => import("@/pages/Notifications").then(m => ({ default: m.Notifications })));
+const AccountsSite = lazy(() => import("@/sites/AccountsSite"));
 const Admin = lazy(() => import("@/pages/Admin").then(m => ({ default: m.Admin })));
 const PartnerDashboard = lazy(() => import("@/pages/PartnerDashboard").then(m => ({ default: m.PartnerDashboard })));
 
@@ -117,6 +118,7 @@ const MAIN_ONLY = ["/about", "/contact", "/blog", "/investors", "/privacy", "/te
 function Router() {
   const site = detectSite();
   if (site === "admin") return <Admin />;
+  if (site === "accounts") return <AccountsSite />;
   if (site === "partner") return <PartnerSite />;
   if (site === "advertise") return <AdvertiseSite />;
   if (site === "auth") return <AuthSite />;
@@ -201,7 +203,11 @@ function Router() {
       <Route path="/support/:rest*" component={SupportSite} />
       <Route path="/app" component={AppComingSoon} />
       <Route path="/account">
-        <DarkLayout><Account /></DarkLayout>
+        {() => {
+          // The account lives on accounts.zyphix.in; forward from the shop sites in production.
+          if (typeof window !== "undefined" && /(^|\.)zyphix\.in$/.test(window.location.hostname)) { window.location.replace("https://accounts.zyphix.in/" + window.location.search); return null; }
+          return <DarkLayout><Account /></DarkLayout>;
+        }}
       </Route>
       <Route component={NotFound} />
     </Switch>
