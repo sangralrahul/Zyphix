@@ -23,21 +23,21 @@ const PARTNERS = [
     tag: 'Local & retail stores', title: 'Sell from your store.',
     sub: 'Your corner store, supermarket or shop online in days. Accept orders, manage inventory and keep the customers you already have.',
     perks: ['Free onboarding and catalogue setup', 'Hyperlocal delivery network, under-30-minute target', 'Weekly payouts, no hidden fees'],
-    cta: 'List your store', href: '/merchant-setup', img: '/images/groceries.png',
+    cta: 'List your store', href: '/merchant-setup', img: '/images/groceries.webp',
   },
   {
     icon: <UtensilsCrossed size={22} />, tint: '#EA580C', bg: '#FFF7ED',
     tag: 'Restaurants & kitchens', title: 'List your restaurant.',
     sub: 'Reach nearby customers with fair, flat commissions. Set your own menu, hours and prices from a simple dashboard.',
     perks: ['Fair, transparent commission', 'Real-time order dashboard', 'Help from our onboarding team'],
-    cta: 'Register restaurant', href: '/restaurant-setup', img: '/images/food.png',
+    cta: 'Register restaurant', href: '/restaurant-setup', img: '/images/food.webp',
   },
   {
     icon: <Bike size={22} />, tint: '#2563EB', bg: '#EFF6FF',
     tag: 'Delivery partners', title: 'Earn on your schedule.',
     sub: 'Short, local runs in your own area. Ride when you want, with transparent per-order earnings shown before you accept.',
     perks: ['Flexible hours, no forced targets', 'Short local distances', 'Bike, bicycle, scooter or car'],
-    cta: 'Start delivering', href: '/delivery-setup', img: '/images/scooter.png',
+    cta: 'Start delivering', href: '/delivery-setup', img: '/images/scooter.webp',
   },
 ];
 

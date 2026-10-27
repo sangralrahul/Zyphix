@@ -62,7 +62,7 @@ export function SiteHeader({ variant = 'solid' }: { variant?: 'solid' | 'transpa
 
   const { user } = useAuth();
   // Signed-in visitors go straight to their account; everyone else to auth.zyphix.in and back here.
-  const signIn = user ? { href: mainHref('/account'), label: 'My account' } : { href: typeof window !== 'undefined' ? authUrl(window.location.href) : '/auth', label: 'Sign in' };
+  const signIn = user ? { href: 'https://accounts.zyphix.in/', label: 'My account' } : { href: typeof window !== 'undefined' ? authUrl(window.location.href) : '/auth', label: 'Sign in' };
 
   const desktop = clear ? 'text-[14px] font-medium tracking-[-0.01em] text-white/80 transition-colors hover:text-white' : 'text-[14px] font-medium tracking-[-0.01em] text-gray-600 transition-colors hover:text-gray-900';
   const mobile = 'flex items-center justify-between py-3.5 text-[17px] font-medium tracking-[-0.01em] text-gray-900';
@@ -109,8 +109,8 @@ export function SiteHeader({ variant = 'solid' }: { variant?: 'solid' | 'transpa
 
 /* ── Footer ───────────────────────────────────────────────────────────────── */
 const FOOT: Array<[string, Array<[string, string]>]> = [
-  ['Products', [['Zyphix Now', '/now'], ['Zyphix Eats', '/eats'], ['Zyphix Book', '/book'], ['Offers', '/offers'], ['Store map', '/kirana-map'], ['Mobile app', '/app']]],
-  ['Partners', [['Partner portal', 'https://partner.zyphix.in'], ['Deliver with us', '/delivery-setup'], ['Register a restaurant', '/restaurant-setup'], ['Join as a professional', '/service-setup'], ['List your store', '/merchant-setup']]],
+  ['Products', [['Zyphix Now', 'https://now.zyphix.in/'], ['Zyphix Eats', 'https://eats.zyphix.in/'], ['Zyphix Book', 'https://book.zyphix.in/'], ['Offers', '/offers'], ['Store map', '/kirana-map'], ['Mobile app', '/app']]],
+  ['Partners', [['Partner portal', 'https://partner.zyphix.in/'], ['Deliver with us', 'https://partner.zyphix.in/delivery'], ['Register a restaurant', 'https://partner.zyphix.in/restaurant'], ['Join as a professional', 'https://partner.zyphix.in/services'], ['List your store', 'https://partner.zyphix.in/store']]],
   ['Company', [['About', '/about'], ['Investors', '/investors'], ['Contact', '/contact'], ['Press', 'mailto:press@zyphix.in']]],
   ['Resources', [['Blog', '/blog'], ['Advertise', 'https://advertise.zyphix.in'], ['Help centre', 'https://support.zyphix.in'], ['Partnerships', 'mailto:partnerships@zyphix.in']]],
   ['Legal', [['Privacy', '/privacy'], ['Terms', '/terms'], ['Legal enquiries', 'mailto:legal@zyphix.in']]],

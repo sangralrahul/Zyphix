@@ -17,7 +17,7 @@ export function thumb(src: string): string {
 export function productImageFor(p: Product, categories: Category[], variant: 'thumb' | 'full' = 'thumb'): { src: string; isFallback: boolean } {
   if (hasRealImage(p)) return { src: variant === 'thumb' ? thumb(p.image) : p.image, isFallback: false };
   const cat = categories.find(c => c.name === p.category);
-  return { src: cat?.image || '/images/groceries.png', isFallback: true };
+  return { src: cat?.image || '/images/groceries.webp', isFallback: true };
 }
 
 /** Soft tint for fallback cards, derived from the category colour. */

@@ -282,7 +282,7 @@ function ProfileTab() {
         <div className="flex items-center gap-3">
           <div className="relative shrink-0">
             <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-gray-900 text-[20px] font-semibold text-white">
-              {avatar ? <img src={avatar} alt="avatar" className="h-full w-full object-cover" /> : initial}
+              {avatar ? <img loading="lazy" decoding="async" src={avatar} alt="avatar" className="h-full w-full object-cover" /> : initial}
             </div>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
             <button type="button" onClick={() => fileRef.current?.click()} aria-label="Change photo"
@@ -590,7 +590,7 @@ function OrdersTab() {
               <div className="px-4 py-3">
                 <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {order.items.slice(0, 6).map((item, i) => (
-                    <img key={i} src={item.image} alt={item.name} className="h-10 w-10 shrink-0 rounded-lg border border-gray-200 bg-white object-contain p-0.5" />
+                    <img loading="lazy" decoding="async" key={i} src={item.image} alt={item.name} className="h-10 w-10 shrink-0 rounded-lg border border-gray-200 bg-white object-contain p-0.5" />
                   ))}
                   {order.items.length > 6 && <span className="shrink-0 text-[12px] text-gray-500">+{order.items.length - 6}</span>}
                 </div>

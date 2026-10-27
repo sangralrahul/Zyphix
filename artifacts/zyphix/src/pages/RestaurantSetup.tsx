@@ -606,7 +606,7 @@ function SuccessStep({ restData, cuisines }: { restData: Record<string, string>;
               if (!c) return null;
               return (
                 <span key={id} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold" style={{ background: c.bg, color: c.c, boxShadow: `inset 0 0 0 1px ${c.c}30` }}>
-                  <img src={c.img} alt="" width={16} height={16} style={{ objectFit: 'contain' }} /> {c.n}
+                  <img loading="lazy" decoding="async" src={c.img} alt="" width={16} height={16} style={{ objectFit: 'contain' }} /> {c.n}
                 </span>
               );
             })}

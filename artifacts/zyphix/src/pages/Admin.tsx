@@ -691,7 +691,7 @@ function Waitlist({ rows, loading }: { rows: Waiter[]; loading: boolean }) {
 
 /* ── Inbox: support, advertisers, notify-me ─────────────────────────────── */
 const KIND: Record<string, { label: string; c: string }> = {
-  support: { label: 'Support', c: '#2563EB' }, advertise: { label: 'Advertiser', c: '#D97706' }, notify: { label: 'Notify me', c: G }, 'partner-other': { label: 'Partner (other)', c: '#7C3AED' },
+  contact: { label: 'Contact form', c: '#0891B2' }, support: { label: 'Support', c: '#2563EB' }, advertise: { label: 'Advertiser', c: '#D97706' }, notify: { label: 'Notify me', c: G }, 'partner-other': { label: 'Partner (other)', c: '#7C3AED' },
 };
 function InboxView({ rows, loading }: { rows: Msg[]; loading: boolean }) {
   const [f, setF] = useState<string>('all');

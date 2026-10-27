@@ -31,6 +31,7 @@ const SupportSite = lazy(() => import("@/sites/SupportSite"));
 export { detectSite } from "@/lib/site";
 import { detectSite } from "@/lib/site";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
+import { useSeoSync } from "@/lib/seoSync";
 
 const HomeLight = lazy(() => import("@/pages/HomeLight").then(m => ({ default: m.HomeLight })));
 const Privacy = lazy(() => import("@/pages/Privacy").then(m => ({ default: m.Privacy })));
@@ -117,6 +118,7 @@ const DarkLayout = LightLayout;
 const MAIN_ONLY = ["/about", "/contact", "/blog", "/investors", "/privacy", "/terms", "/app", "/partner", "/merchant-setup", "/restaurant-setup", "/delivery-setup", "/service-setup"];
 
 function Router() {
+  useSeoSync();
   const site = detectSite();
   if (site === "admin") return <Admin />;
   if (site === "accounts") return <AccountsSite />;

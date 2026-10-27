@@ -62,7 +62,7 @@ export function AppSection() {
             <Reveal delay={0.15} className="mt-9 flex flex-wrap gap-3">
               {STORES.map(s => (
                 <Link key={s.big} href="/app" className="inline-flex h-[52px] items-center gap-3 rounded-xl border border-white/15 bg-white/[.06] px-4 text-white transition hover:bg-white/10">
-                  <img src={s.src} alt="" width={22} height={22} className="h-[22px] w-[22px] object-contain" />
+                  <img loading="lazy" decoding="async" src={s.src} alt="" width={22} height={22} className="h-[22px] w-[22px] object-contain" />
                   <span className="leading-none">
                     <span className="block text-[10px] font-medium text-white/60">{s.small}</span>
                     <span className="mt-0.5 block text-[15px] font-semibold tracking-[-0.01em]">{s.big}</span>

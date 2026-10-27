@@ -231,7 +231,7 @@ function GroceryCard({ item, delay, show }: { item: typeof GROCERIES[0]; delay: 
       transition={{ duration: 0.48, delay, ease: [0.34, 1.56, 0.64, 1] }}>
       <div style={{ position: 'absolute', top: 5, right: 5, fontSize: '0.55vw', fontFamily: INT, fontWeight: 700, color: CAT_COLOR[item.cat] ?? G, background: `${CAT_COLOR[item.cat] ?? G}14`, padding: '2px 5px', borderRadius: 4 }}>{item.cat}</div>
       <div style={{ width: '4.8vw', height: '4.8vw', minWidth: 48, minHeight: 48, borderRadius: '50%', overflow: 'hidden', marginBottom: '0.5vw', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}>
-        <img src={`https://images.unsplash.com/${item.img}?w=200&q=80`} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img loading="lazy" decoding="async" src={`https://images.unsplash.com/${item.img}?w=200&q=80`} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
       <p style={{ fontFamily: OFT, fontWeight: 700, fontSize: '0.8vw', color: T1, textAlign: 'center', lineHeight: 1.2, marginBottom: '0.3vw' }}>{item.name}</p>
       <p style={{ fontFamily: INT, fontWeight: 700, fontSize: '0.72vw', color: CAT_COLOR[item.cat] ?? G }}>{item.price}</p>
@@ -495,7 +495,7 @@ function PizzaPull({ show }: { show: boolean }) {
         initial={{ opacity: 0, scale: 0.85 }}
         animate={show ? { opacity: 1, scale: 1 } : {}}
         transition={{ duration: 0.75, ease: [0.34, 1.56, 0.64, 1] }}>
-        <img src={PIZZA_IMG} alt="pizza" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img loading="lazy" decoding="async" src={PIZZA_IMG} alt="pizza" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </motion.div>
 
       {/* Lifted slice — same image, triangle clip-path */}
@@ -621,7 +621,7 @@ function Scene3() {
               transition={{ duration: 0.35, ease: EASE }}
               style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ width: '3.8vw', height: '3.8vw', minWidth: 42, minHeight: 42, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
-                <img src={`https://images.unsplash.com/${food.img}?w=200&q=80`} alt={food.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img loading="lazy" decoding="async" src={`https://images.unsplash.com/${food.img}?w=200&q=80`} alt={food.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <div>
                 <p style={{ fontFamily: OFT, fontWeight: 700, fontSize: '1vw', color: T1, lineHeight: 1.2 }}>{food.name}</p>
@@ -682,7 +682,7 @@ function Scene3() {
               animate={ph >= 3 ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.1 + i * 0.12, duration: 0.45, ease: [0.34, 1.56, 0.64, 1] }}>
               <div style={{ width: '5.5vw', height: '5.5vw', minWidth: 52, minHeight: 52, borderRadius: 12, overflow: 'hidden', boxShadow: `0 3px 14px rgba(0,0,0,0.15), 0 0 0 2px ${OR}18` }}>
-                <img src={`https://images.unsplash.com/${f.img}?w=200&q=80`} alt={f.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img loading="lazy" decoding="async" src={`https://images.unsplash.com/${f.img}?w=200&q=80`} alt={f.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <span style={{ fontFamily: INT, fontWeight: 600, fontSize: '0.7vw', color: T2 }}>{f.label}</span>
             </motion.div>

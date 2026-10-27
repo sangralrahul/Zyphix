@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'wouter';
 import { motion } from '@/lib/motion';
 import { Mail, Send, Check, ArrowRight, LifeBuoy, Handshake, Newspaper, Scale, MessageCircle } from 'lucide-react';
 import { btnSecondary, G } from '@/components/layout/SiteChrome';
@@ -8,7 +7,7 @@ import { landscape } from '@/data/media';
 import { InnerPage, InnerHero, SectionIntro, Band, panel, iconChip } from './home/Inner';
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Contact — message form (behaviour unchanged), email cards, quick links.
+   Contact — message form (saved to the admin inbox + emailed to the team), email cards, quick links.
 ──────────────────────────────────────────────────────────────────────────── */
 
 const EMAILS = [
@@ -20,9 +19,9 @@ const EMAILS = [
 ];
 
 const QUICK: Array<{ q: string; a: string; href: string; cta: string }> = [
-  { q: 'Where is Zyphix available?', a: 'We are rolling out neighbourhood by neighbourhood. Enter your location at now.zyphix.in to check if we deliver to you and see live partners nearby.', href: '/now', cta: 'Open the app' },
-  { q: 'How do I list my store or restaurant?', a: 'Onboarding is free. Register from the partner page and our team will verify your business and help you go live.', href: '/partner', cta: 'Partner overview' },
-  { q: 'How do I become a delivery partner?', a: 'Sign up with your vehicle details and documents. Short, local runs in your own area, on your own schedule.', href: '/delivery-setup', cta: 'Start delivering' },
+  { q: 'Where is Zyphix available?', a: 'We are rolling out neighbourhood by neighbourhood. Enter your location at now.zyphix.in to check if we deliver to you and see live partners nearby.', href: 'https://now.zyphix.in/', cta: 'Open the app' },
+  { q: 'How do I list my store or restaurant?', a: 'Onboarding is free. Register from the partner page and our team will verify your business and help you go live.', href: 'https://partner.zyphix.in/', cta: 'Partner overview' },
+  { q: 'How do I become a delivery partner?', a: 'Sign up with your vehicle details and documents. Short, local runs in your own area, on your own schedule.', href: 'https://partner.zyphix.in/delivery', cta: 'Start delivering' },
   { q: 'Where can I read your policies?', a: 'Our privacy policy and terms of service explain how we handle your data and what you can expect from us.', href: '/privacy', cta: 'Privacy policy' },
 ];
 
@@ -34,6 +33,8 @@ export function Contact() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [apiError, setApiError] = useState('');
+  const [trap, setTrap] = useState(''); // honeypot: hidden from people, bots fill it
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }));
@@ -52,10 +53,16 @@ export function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 1600));
+    setLoading(true); setApiError('');
+    try {
+      const res = await fetch('/api/contact', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...form, website: trap, source: 'zyphix.in/contact' }) });
+      const data = await res.json().catch(() => ({})) as { error?: string };
+      if (!res.ok) { setApiError(data.error || 'We could not send your message. Please try again or email us directly.'); setLoading(false); return; }
+      setSent(true);
+    } catch {
+      setApiError('We could not reach our server. Check your connection, or email hello@zyphix.in.');
+    }
     setLoading(false);
-    setSent(true);
   };
 
   return (
@@ -135,6 +142,8 @@ export function Contact() {
                     <p className="text-[12px] text-gray-400">{form.message.length} chars</p>
                   </div>
                 </div>
+                <input type="text" name="website" value={trap} onChange={e => setTrap(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 opacity-0" />
+                {apiError && <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[13.5px] font-medium text-red-700">{apiError}</p>}
                 <button type="submit" disabled={loading}
                   className="inline-flex h-[52px] items-center justify-center gap-2 rounded-full px-7 text-[15.5px] font-semibold text-white transition hover:opacity-95 disabled:cursor-wait disabled:opacity-70"
                   style={{ background: G }}>
@@ -154,7 +163,7 @@ export function Contact() {
               <Reveal key={q.q} delay={i * 0.05} y={20} className={`${panel} flex flex-col p-7`}>
                 <h3 className="text-[20px] font-semibold tracking-[-0.025em] text-gray-900">{q.q}</h3>
                 <p className="mt-3 flex-1 text-[15px] leading-[1.6] text-gray-600">{q.a}</p>
-                <Link href={q.href} className="mt-5 inline-flex items-center gap-1.5 text-[14.5px] font-semibold" style={{ color: G }}>{q.cta} <ArrowRight size={15} /></Link>
+                <a href={q.href} className="mt-5 inline-flex items-center gap-1.5 text-[14.5px] font-semibold" style={{ color: G }}>{q.cta} <ArrowRight size={15} /></a>
               </Reveal>
             ))}
           </div>

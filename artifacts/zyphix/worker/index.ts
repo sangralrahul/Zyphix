@@ -21,6 +21,8 @@ import { PhotonImage, resize, SamplingFilter } from '@cf-wasm/photon';
  *
  * Everything else falls through to the static Vite build (SPA).
  */
+import { sendPartnerMails } from './partnerMail';
+import { edge } from './edge';
 
 export interface Env {
   DB: D1Database;
@@ -33,6 +35,9 @@ export interface Env {
   SUPABASE_KEY?: string;
   BREVO_API_KEY?: string;     // transactional email (sign-in codes) — `wrangler secret put BREVO_API_KEY`
   MAIL_FROM?: string;         // sender address verified in Brevo (default noreply@zyphix.in)
+  PARTNER_FROM?: string;      // partner emails sender (default partnerships@zyphix.in)
+  PARTNER_NOTIFY_EMAIL?: string; // who is told about new partner applications (default rahul@zyphix.in)
+  NOTIFY_EMAIL?: string;      // who gets contact / support / advertiser messages (default rahul@zyphix.in)
 }
 
 type ProductRow = {
@@ -61,8 +66,7 @@ function toClient(r: ProductRow, origin: string, env: Env) {
   };
 }
 
-export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+async function handleRequest(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const { pathname } = url;
 
@@ -103,6 +107,11 @@ export default {
     if (pathname === '/mobile' || pathname.startsWith('/mobile/')) return await serveMobileApp(request, env, url);
 
     return env.ASSETS.fetch(request);
+}
+
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    return edge(request, env, req => handleRequest(req, env, ctx));
   },
 
   /**
@@ -242,6 +251,7 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   /* ── Forms: partner sign-ups, advertiser inquiries, support requests, "notify me" ── */
   if (p === '/api/partner-register' && request.method === 'POST') return await partnerRegister(request, env);
   if (p === '/api/support' && request.method === 'POST') return await saveMessage(request, env, 'support');
+  if (p === '/api/contact' && request.method === 'POST') return await saveMessage(request, env, 'contact');
   if (p === '/api/notify' && request.method === 'POST') return await saveMessage(request, env, 'notify');
   if (p === '/api/client-error' && request.method === 'POST') {
     const b = await readJson(request); if (!b) return json({ ok: false }, 400);
@@ -311,11 +321,30 @@ async function handleImage(request: Request, env: Env, ctx: ExecutionContext, ke
 
 function authorized(request: Request, env: Env) {
   const h = request.headers.get('authorization') ?? '';
-  return env.ADMIN_TOKEN && h === `Bearer ${env.ADMIN_TOKEN}`;
+  if (!env.ADMIN_TOKEN) return false;
+  const a = new TextEncoder().encode(h), b = new TextEncoder().encode(`Bearer ${env.ADMIN_TOKEN}`);
+  if (a.byteLength !== b.byteLength) return false;
+  return (crypto.subtle as unknown as { timingSafeEqual(a: ArrayBufferView, b: ArrayBufferView): boolean }).timingSafeEqual(a, b);
 }
 
+/* ---- rate limiting (D1): forms and admin sign-in ---- */
+async function hit(env: Env, key: string, limit: number, windowSec: number, record = true): Promise<boolean> {
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS rate_hits (k TEXT NOT NULL, ts INTEGER NOT NULL)').run();
+  const now = Date.now();
+  const row = await env.DB.prepare('SELECT COUNT(*) AS n FROM rate_hits WHERE k = ? AND ts > ?').bind(key, now - windowSec * 1000).first<{ n: number }>();
+  if ((row?.n ?? 0) >= limit) return true;
+  if (record) await env.DB.prepare('INSERT INTO rate_hits (k, ts) VALUES (?, ?)').bind(key, now).run();
+  if (Math.random() < 0.02) await env.DB.prepare('DELETE FROM rate_hits WHERE ts < ?').bind(now - 86400_000).run();
+  return false;
+}
+const ipOf = (r: Request) => r.headers.get('cf-connecting-ip') || 'local';
+const tooMany = () => json({ error: 'Too many requests. Please wait a few minutes and try again.' }, 429, { 'retry-after': '600' });
+
 async function handleAdmin(request: Request, env: Env, url: URL): Promise<Response> {
-  if (!authorized(request, env)) return json({ error: 'unauthorized' }, 401);
+  const ip = ipOf(request);
+  // 10 wrong keys in 15 minutes locks that IP out of the admin API
+  if (await hit(env, `admin-fail:${ip}`, 10, 900, false)) return json({ error: 'Too many wrong attempts. Try again in 15 minutes.' }, 429, { 'retry-after': '900' });
+  if (!authorized(request, env)) { await hit(env, `admin-fail:${ip}`, 10, 900); return json({ error: 'unauthorized' }, 401); }
   const p = url.pathname;
 
   if (p === '/admin/partners' && request.method === 'GET') {
@@ -602,6 +631,7 @@ const PARTNER_TYPES: Record<string, string> = { merchant: 'store', store: 'store
 const str = (v: unknown, max = 200) => (typeof v === 'string' ? v : Array.isArray(v) ? v.join(', ') : v == null ? '' : String(v)).trim().slice(0, max);
 
 async function createPartner(request: Request, env: Env): Promise<Response> {
+  if (await hit(env, `partner:${ipOf(request)}`, 8, 600)) return tooMany();
   let body: any;
   try { body = await request.json(); } catch { return json({ error: 'invalid JSON' }, 400); }
   const type = PARTNER_TYPES[str(body.role)];
@@ -621,11 +651,13 @@ async function createPartner(request: Request, env: Env): Promise<Response> {
   if (existing) {
     await env.DB.prepare("UPDATE partners SET name=?, business_name=?, phone=?, city=?, locality=?, category=?, tags=?, details=?, status=CASE WHEN status='rejected' THEN 'pending' ELSE status END, updated_at=datetime('now') WHERE id=?")
       .bind(name, businessName, phone, city, locality, category, tags, JSON.stringify(d).slice(0, 8000), existing.id).run();
-    return json({ success: true, id: existing.id, updated: true });
+    const mail = await sendPartnerMails(env, { id: existing.id, type, name, businessName, email, phone, city, category, tags, details: d, updated: true });
+    return json({ success: true, id: existing.id, updated: true, emailed: mail.applicant });
   }
   await env.DB.prepare('INSERT INTO partners (id, type, name, business_name, email, phone, city, locality, category, tags, details, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
     .bind(id, type, name, businessName, email, phone, city, locality, category, tags, JSON.stringify(d).slice(0, 8000), 'pending').run();
-  return json({ success: true, id }, 201);
+  const mail = await sendPartnerMails(env, { id, type, name, businessName, email, phone, city, category, tags, details: d, updated: false });
+  return json({ success: true, id, emailed: mail.applicant }, 201);
 }
 
 async function listPartners(env: Env, url: URL): Promise<Response> {
@@ -896,23 +928,47 @@ async function storeMessage(env: Env, kind: string, b: Record<string, any>) {
   await env.DB.prepare('INSERT INTO messages (kind, name, email, phone, city, data) VALUES (?,?,?,?,?,?)')
     .bind(kind, str(name, 120) || null, str(email, 160).toLowerCase() || null, str(phone, 20).replace(/\D/g, '') || null, str(city, 120) || null, JSON.stringify(rest).slice(0, 8000)).run();
 }
-async function saveMessage(request: Request, env: Env, kind: 'support' | 'notify' | 'advertise'): Promise<Response> {
+async function saveMessage(request: Request, env: Env, kind: 'support' | 'notify' | 'advertise' | 'contact'): Promise<Response> {
+  if (await hit(env, `form:${ipOf(request)}`, 12, 600)) return tooMany();
   const body = await readJson(request); if (!body) return json({ error: 'invalid JSON' }, 400);
+  if (str(body.website ?? body.company_url, 200)) return json({ success: true }, 201); // honeypot: bots fill hidden fields
   const email = str(body.email, 160);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'Enter a valid email address' }, 400);
-  if (kind === 'support' && str(body.message, 4000).length < 5) return json({ error: 'Describe the issue in a sentence or two' }, 400);
+  if ((kind === 'support' || kind === 'contact') && str(body.message, 4000).length < 5) return json({ error: 'Write a sentence or two about what you need' }, 400);
   await storeMessage(env, kind, body);
+  if (kind !== 'notify') await notifyOwner(env, kind, body);
   return json({ success: true }, 201);
+}
+
+/** Tell the owner about a new contact / support / advertiser message (never fails the request). */
+async function notifyOwner(env: Env, kind: string, b: Record<string, any>) {
+  const label: Record<string, string> = { contact: 'Contact form', support: 'Support request', advertise: 'Advertiser inquiry', 'partner-other': 'Partner inquiry' };
+  const esc = (v: unknown) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const flat: [string, string][] = [];
+  const walk = (o: Record<string, any>, pre = '') => { for (const [k, v] of Object.entries(o)) { if (k === 'website' || v === '' || v == null) continue; if (v && typeof v === 'object' && !Array.isArray(v)) walk(v, `${k} › `); else flat.push([pre + k, Array.isArray(v) ? v.join(', ') : String(v)]); } };
+  walk(b);
+  const rows = flat.map(([k, v]) => `<tr><td style="padding:8px 0;border-bottom:1px solid #F0F1F3;color:#6B7280;width:34%;vertical-align:top">${esc(k)}</td><td style="padding:8px 0;border-bottom:1px solid #F0F1F3;color:#0B0F12;white-space:pre-wrap">${esc(v)}</td></tr>`).join('');
+  const html = `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px"><p style="margin:0;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#0DA366">${esc(label[kind] ?? kind)}</p><p style="margin:6px 0 16px;font-size:20px;font-weight:700;color:#0B0F12">${esc(b.name || b.email)}</p><table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;border-collapse:collapse">${rows}</table><p style="margin:18px 0 0"><a href="https://admin.zyphix.in/" style="color:#0DA366;font-weight:700">Open the admin inbox</a></p></div>`;
+  try {
+    if (!env.BREVO_API_KEY) return;
+    await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST', headers: { 'api-key': env.BREVO_API_KEY, 'content-type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify({ sender: { name: 'Zyphix', email: env.MAIL_FROM || 'noreply@zyphix.in' }, to: [{ email: env.NOTIFY_EMAIL || env.PARTNER_NOTIFY_EMAIL || 'rahul@zyphix.in' }], replyTo: { email: str(b.email, 160) || 'noreply@zyphix.in', name: str(b.name, 120) || undefined }, subject: `${label[kind] ?? kind}: ${str(b.name, 80) || str(b.email, 80)}`, htmlContent: html, textContent: flat.map(([k, v]) => `${k}: ${v}`).join('\n') }),
+    });
+  } catch (e) { console.error('notify owner', (e as Error).message); }
 }
 /** Legacy form endpoint: partner roles go to the partner directory, advertisers to the inbox. */
 async function partnerRegister(request: Request, env: Env): Promise<Response> {
+  if (await hit(env, `form:${ipOf(request)}`, 12, 600)) return tooMany();
   const raw = await request.text();
   let body: Record<string, any> = {};
   try { body = JSON.parse(raw); } catch { return json({ error: 'invalid JSON' }, 400); }
   if (PARTNER_TYPES[str(body.role)]) return await createPartner(new Request(request.url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: raw }), env);
   const email = str(body.email, 160);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'Enter a valid email address' }, 400);
-  await storeMessage(env, str(body.role, 30) === 'advertiser' ? 'advertise' : 'partner-other', body);
+  const kind = str(body.role, 30) === 'advertiser' ? 'advertise' : 'partner-other';
+  await storeMessage(env, kind, body);
+  await notifyOwner(env, kind, body);
   return json({ success: true }, 201);
 }
 
@@ -1002,6 +1058,7 @@ async function ensureWaitlist(env: Env) {
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS waitlist (id INTEGER PRIMARY KEY AUTOINCREMENT, product TEXT NOT NULL, name TEXT, phone TEXT NOT NULL, email TEXT, city TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')), UNIQUE(product, phone))").run();
 }
 async function joinWaitlist(request: Request, env: Env): Promise<Response> {
+  if (await hit(env, `form:${ipOf(request)}`, 12, 600)) return tooMany();
   const body = await readJson(request); if (!body) return json({ error: 'invalid JSON' }, 400);
   const product = str(body.product, 20).toLowerCase();
   if (!['now', 'eats', 'book'].includes(product)) return json({ error: 'unknown product' }, 400);

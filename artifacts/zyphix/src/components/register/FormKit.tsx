@@ -134,7 +134,7 @@ export function ChoiceTiles<T extends string>({ options, value, onChange, invali
             style={on ? { background: 'color-mix(in srgb, var(--acc) 6%, white)' } : undefined}>
             {o.img ? (
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50" style={on ? { background: '#fff' } : undefined}>
-                <img src={o.img} alt="" draggable={false} className="h-7 w-7 object-contain" />
+                <img loading="lazy" decoding="async" src={o.img} alt="" draggable={false} className="h-7 w-7 object-contain" />
               </span>
             ) : o.icon}
             <span className="min-w-0 flex-1">

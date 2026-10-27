@@ -85,7 +85,7 @@ export function Cart() {
                 <motion.div key={i.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
                   className="flex items-center gap-3 p-3">
                   <Link href={`/now/product/${i.id}`} className="shrink-0">
-                    <img src={i.image} alt={i.name} className="h-16 w-16 rounded-lg border border-gray-200 bg-white object-contain p-1" />
+                    <img loading="lazy" decoding="async" src={i.image} alt={i.name} className="h-16 w-16 rounded-lg border border-gray-200 bg-white object-contain p-1" />
                   </Link>
                   <div className="min-w-0 flex-1">
                     <Link href={`/now/product/${i.id}`} className="block truncate text-[13.5px] font-medium text-gray-900 no-underline">{i.name}</Link>

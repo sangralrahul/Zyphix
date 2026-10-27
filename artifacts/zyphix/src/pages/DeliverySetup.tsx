@@ -204,7 +204,7 @@ function UploadBox({ label, preview, onChange, required }: { label:string; previ
         style={{ width:'100%', height:140, borderRadius:14, border:`2px dashed ${preview?G:BD}`, background:preview?`${G}06`:W, cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:8, overflow:'hidden', position:'relative', transition:'all .2s' }}>
         {preview ? (
           <>
-            <img src={preview} alt="" style={{ position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:.8 }} />
+            <img loading="lazy" decoding="async" src={preview} alt="" style={{ position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:.8 }} />
             <div style={{ position:'absolute',inset:0,background:'rgba(0,0,0,.3)',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:6 }}>
               <Check size={28} color="#fff" strokeWidth={2.5} />
               <span style={{ color:'#fff',fontSize:12.5,fontWeight:700 }}>Tap to change</span>

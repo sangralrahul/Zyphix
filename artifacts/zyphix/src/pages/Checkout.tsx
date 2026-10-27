@@ -203,7 +203,7 @@ export function Checkout() {
           <div className="mt-2 max-h-[320px] divide-y divide-gray-100 overflow-y-auto [scrollbar-width:thin]">
             {items.map(i => (
               <div key={i.id} className="flex items-center gap-2.5 py-2">
-                <img src={i.image} alt={i.name} className="h-10 w-10 shrink-0 rounded-lg border border-[#E6E8EC] bg-white object-contain p-0.5" />
+                <img loading="lazy" decoding="async" src={i.image} alt={i.name} className="h-10 w-10 shrink-0 rounded-lg border border-[#E6E8EC] bg-white object-contain p-0.5" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-medium text-gray-900">{i.name}</p>
                   <p className="text-[12px] text-gray-500">{[i.weight, `Qty ${i.qty}`].filter(Boolean).join(' · ')}</p>

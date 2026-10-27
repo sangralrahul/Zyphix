@@ -49,7 +49,7 @@ export function CategoryGrid() {
               whileHover={{ y: -4, scale: 1.04 }}
               style={{ border: `1.5px solid ${bd}`, borderRadius: 16, overflow: 'hidden', textAlign: 'center', cursor: 'pointer', background: bg, boxShadow: SH, transition: 'box-shadow .18s' }}>
               <div style={{ width: '100%', aspectRatio: '1', overflow: 'hidden' }}>
-                <img src={img} alt={name} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <img loading="lazy" decoding="async" src={img} alt={name} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               </div>
               <p style={{ fontSize: 12.5, fontWeight: 700, color: tc, lineHeight: 1.3, padding: '10px 6px 12px' }}>{name}</p>
             </motion.div>

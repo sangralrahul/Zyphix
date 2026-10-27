@@ -447,7 +447,7 @@ function Navbar({ tab = 'now', setTab }: { tab?: TabId; setTab?: (t: TabId) => v
                         style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 18px', cursor: 'pointer', transition: 'background .1s' }}
                         onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,.05)')}
                         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                        <img src={p.image} alt={p.name} style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', background: '#1A2332', flexShrink: 0 }} />
+                        <img loading="lazy" decoding="async" src={p.image} alt={p.name} style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', background: '#1A2332', flexShrink: 0 }} />
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</p>
                           <p style={{ fontSize: 11, color: 'rgba(255,255,255,.5)' }}>{p.weight} · ₹{p.price}</p>
@@ -473,7 +473,7 @@ function Navbar({ tab = 'now', setTab }: { tab?: TabId; setTab?: (t: TabId) => v
                         style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 18px', cursor: 'pointer', transition: 'background .1s' }}
                         onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,.05)')}
                         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                        <img src={m.image} alt={m.name} style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', background: '#1A2332', flexShrink: 0 }} />
+                        <img loading="lazy" decoding="async" src={m.image} alt={m.name} style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', background: '#1A2332', flexShrink: 0 }} />
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name}</p>
                           <p style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.desc}</p>
@@ -493,7 +493,7 @@ function Navbar({ tab = 'now', setTab }: { tab?: TabId; setTab?: (t: TabId) => v
                         style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 18px', cursor: 'pointer', transition: 'background .1s' }}
                         onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,.05)')}
                         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                        <img src={r.image} alt={r.name} style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', background: '#1A2332', flexShrink: 0 }} />
+                        <img loading="lazy" decoding="async" src={r.image} alt={r.name} style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', background: '#1A2332', flexShrink: 0 }} />
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</p>
                           <p style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.cuisine}</p>
@@ -773,7 +773,7 @@ function PCard({ p, cart, add, rm }: { p: typeof products[0]; cart: Record<strin
       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = SH2; (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; }}
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = SH; (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}>
       <div style={{ position: 'relative', height: 130, background: BG }}>
-        <img src={p.image} alt={p.name} className="w-full h-full img-cover group-hover:scale-105 transition-transform duration-300" />
+        <img loading="lazy" decoding="async" src={p.image} alt={p.name} className="w-full h-full img-cover group-hover:scale-105 transition-transform duration-300" />
         {disc && <div style={{ position: 'absolute', top: 8, left: 8, background: '#EF4444', color: '#fff', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>-{disc}%</div>}
         {!disc && p.tag && <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(13,163,102,.1)', color: G, fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6, border: `1px solid rgba(13,163,102,.25)` }}>{p.tag}</div>}
       </div>
@@ -909,7 +909,7 @@ function NowTab() {
           { tag: 'Pharmacy', h: 'Medicines delivered fast', sub: 'Prescription & OTC · All brands', code: '', img: 'https://images.unsplash.com/photo-1585435557343-3b092031a831?w=900&h=380&fit=crop&q=85' },
         ].map((b, i) => (
           <div key={i} className="snap-start shrink-0" style={{ width: 'min(660px,88vw)', height: 210, borderRadius: 20, overflow: 'hidden', position: 'relative', background: '#111', flexShrink: 0, boxShadow: SH2, cursor: 'pointer' }}>
-            <img src={b.img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: .32 }} />
+            <img loading="lazy" decoding="async" src={b.img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: .32 }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(100deg,rgba(0,0,0,.92) 40%,rgba(0,0,0,.15))' }} />
             <div style={{ position: 'absolute', inset: 0, padding: '24px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <span style={{ display: 'inline-block', background: 'rgba(255,255,255,.14)', backdropFilter: 'blur(6px)', color: '#fff', fontSize: 10.5, fontWeight: 700, padding: '3px 10px', borderRadius: 7, border: '1px solid rgba(255,255,255,.2)', width: 'fit-content' }}>{b.tag}</span>
@@ -981,7 +981,7 @@ function EatsTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
       <div style={{ position: 'relative', height: 240, borderRadius: 22, overflow: 'hidden', boxShadow: SH2 }}>
-        <img src="https://images.unsplash.com/photo-1567337710282-00832b415979?w=1400&h=500&fit=crop&q=85" alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1567337710282-00832b415979?w=1400&h=500&fit=crop&q=85" alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(100deg,rgba(0,0,0,.88) 40%,rgba(0,0,0,.18))' }} />
         <div style={{ position: 'absolute', inset: 0, padding: '36px 44px', display: 'flex', flexDirection: 'column', justifyContent: 'center', maxWidth: 520 }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: '#FCA5A5', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 12 }}>Zyphix Eats</p>
@@ -1000,7 +1000,7 @@ function EatsTab() {
               <div style={{ width: 76, height: 76, borderRadius: '50%', overflow: 'hidden', border: `2px solid ${BD}`, boxShadow: SH, transition: 'all .2s' }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = '#EA580C'}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = BD}>
-                <img src={fc.image} alt={fc.name} className="w-full h-full img-cover group-hover:scale-110 transition-transform duration-300" />
+                <img loading="lazy" decoding="async" src={fc.image} alt={fc.name} className="w-full h-full img-cover group-hover:scale-110 transition-transform duration-300" />
               </div>
               <span style={{ fontSize: 11.5, fontWeight: 600, color: T2, textAlign: 'center', width: 80, lineHeight: 1.3 }}>{fc.name}</span>
             </button>
@@ -1019,7 +1019,7 @@ function EatsTab() {
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = SH2; (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = SH; (e.currentTarget as HTMLElement).style.transform = 'none'; }}>
                 <div style={{ height: 158, background: BG, overflow: 'hidden', position: 'relative' }}>
-                  <img src={r.image} alt={r.name} className="w-full h-full img-cover group-hover:scale-105 transition-transform duration-400" />
+                  <img loading="lazy" decoding="async" src={r.image} alt={r.name} className="w-full h-full img-cover group-hover:scale-105 transition-transform duration-400" />
                   {r.deliveryFee === 0 && <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(13,163,102,.12)', color: G, fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 7, border: '1px solid rgba(13,163,102,.25)', backdropFilter: 'blur(4px)' }}>FREE DELIVERY</div>}
                 </div>
                 <div style={{ padding: '13px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -1084,7 +1084,7 @@ function OffersTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ position: 'relative', height: 230, borderRadius: 22, overflow: 'hidden', boxShadow: SH2 }}>
-        <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&h=460&fit=crop&q=85" alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&h=460&fit=crop&q=85" alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(100deg,rgba(0,0,0,.92) 45%,rgba(0,0,0,.15))' }} />
         <div style={{ position: 'absolute', inset: 0, padding: '36px 44px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: '#86EFAC', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 12 }}>New User Offer</p>
@@ -1585,7 +1585,7 @@ function HowItWorks() {
               >
                 {/* Image */}
                 <div style={{ height: 196, overflow: 'hidden', position: 'relative' }}>
-                  <img src={s.img} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .45s ease' }} />
+                  <img loading="lazy" decoding="async" src={s.img} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .45s ease' }} />
                   <div style={{ position: 'absolute', inset: 0, background: s.highlight ? 'linear-gradient(180deg,rgba(6,95,70,.25),rgba(6,95,70,.55))' : 'linear-gradient(180deg,transparent 45%,rgba(0,0,0,.22) 100%)' }} />
                   <div style={{ position: 'absolute', top: 18, left: 18, fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: '2.6rem', color: 'rgba(255,255,255,.5)', letterSpacing: '-.05em', lineHeight: 1, textShadow: '0 2px 14px rgba(0,0,0,.3)' }}>{s.n}</div>
                   <div style={{ position: 'absolute', bottom: 16, right: 16, width: 44, height: 44, borderRadius: 13, background: s.highlight ? '#fff' : 'rgba(255,255,255,.94)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px rgba(0,0,0,.18)' }}>
@@ -1861,7 +1861,7 @@ function AppDownload() {
                   onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
                   onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}>
                   <span style={{ position: 'absolute', top: -8, right: 10, fontSize: 8, fontWeight: 900, color: '#000', background: '#00E28A', padding: '2px 7px', borderRadius: 5, letterSpacing: '.06em' }}>SOON</span>
-                  <img src="/images/appstore.webp" alt="App Store" style={{ width: 30, height: 30, borderRadius: 7, flexShrink: 0 }} />
+                  <img loading="lazy" decoding="async" src="/images/appstore.webp" alt="App Store" style={{ width: 30, height: 30, borderRadius: 7, flexShrink: 0 }} />
                   <div style={{ textAlign: 'left', lineHeight: 1 }}>
                     <p style={{ margin: 0, fontSize: 10, color: '#fff', fontWeight: 500, letterSpacing: '.01em' }}>Download on the</p>
                     <p style={{ margin: '3px 0 0', fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '-.02em', fontFamily: "'Geist', 'Geist Fallback', sans-serif" }}>App Store</p>
@@ -1872,7 +1872,7 @@ function AppDownload() {
                   onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
                   onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}>
                   <span style={{ position: 'absolute', top: -8, right: 10, fontSize: 8, fontWeight: 900, color: '#000', background: '#00E28A', padding: '2px 7px', borderRadius: 5, letterSpacing: '.06em' }}>SOON</span>
-                  <img src="/images/googleplay.webp" alt="Google Play" style={{ width: 28, height: 28, flexShrink: 0 }} />
+                  <img loading="lazy" decoding="async" src="/images/googleplay.webp" alt="Google Play" style={{ width: 28, height: 28, flexShrink: 0 }} />
                   <div style={{ textAlign: 'left', lineHeight: 1 }}>
                     <p style={{ margin: 0, fontSize: 10, color: '#fff', fontWeight: 500, letterSpacing: '.06em', textTransform: 'uppercase' }}>Get it on</p>
                     <p style={{ margin: '3px 0 0', fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '-.02em', fontFamily: "'Geist', 'Geist Fallback', sans-serif" }}>Google Play</p>
@@ -2133,7 +2133,7 @@ function CategoryModal({ open, onClose, type, navigate }: { open: boolean; onClo
                 onClick={() => handleCatClick(c.n)}
                 style={{ padding: 0, borderRadius: 14, background: c.bg, border: `1.5px solid ${c.bd}`, cursor: 'pointer', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', boxShadow: '0 1px 5px rgba(0,0,0,.06)' }}>
                 <div style={{ width: '100%', aspectRatio: '1', overflow: 'hidden' }}>
-                  <img src={c.e} alt={c.n} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  <img loading="lazy" decoding="async" src={c.e} alt={c.n} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 </div>
                 <span style={{ fontSize: 11, fontWeight: 700, color: c.tc, lineHeight: 1.3, padding: '7px 4px 8px', wordBreak: 'keep-all' }}>{c.n}</span>
               </motion.button>
@@ -2175,7 +2175,7 @@ function QuickBrowse({ setTab }: { setTab?: (t: TabId) => void }) {
       style={{ padding: 0, borderRadius: 14, background: bg, border: `1.5px solid ${bd}`, cursor: 'pointer', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', boxShadow: '0 1px 5px rgba(0,0,0,.06)', transition: 'box-shadow .15s', minWidth: 0 }}
     >
       <div style={{ width: '100%', aspectRatio: '1', overflow: 'hidden', background: bg }}>
-        <img src={e} alt={n} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        <img loading="lazy" decoding="async" src={e} alt={n} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
       </div>
       <span style={{ fontSize: 11, fontWeight: 700, color: tc, lineHeight: 1.3, padding: '7px 4px 8px', wordBreak: 'keep-all' }}>{n}</span>
     </motion.button>
@@ -2333,7 +2333,7 @@ function OfferCards() {
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = `0 14px 40px ${b.glow}`; }}
               style={{ height: 250, borderRadius: 24, overflow: 'hidden', position: 'relative', background: b.grad, boxShadow: `0 14px 40px ${b.glow}`, cursor: 'pointer', transition: 'transform .25s, box-shadow .25s' }}>
               {/* real photo */}
-              <img src={b.img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img loading="lazy" decoding="async" src={b.img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
               {/* color wash for brand identity + legibility */}
               <div style={{ position: 'absolute', inset: 0, background: b.grad, opacity: .58, mixBlendMode: 'multiply' }} />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(0,0,0,.1) 0%,transparent 35%,rgba(0,0,0,.55) 100%)' }} />
@@ -2411,7 +2411,7 @@ function KiranaCTA() {
 
           {/* Right visual */}
           <div className="kc-visual" style={{ position: 'relative', minHeight: 460, overflow: 'hidden' }}>
-            <img src="https://images.unsplash.com/flagged/photo-1563884542782-13d6a05b17c0?w=900&q=85&auto=format&fit=crop" alt="Local kirana store" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/flagged/photo-1563884542782-13d6a05b17c0?w=900&q=85&auto=format&fit=crop" alt="Local kirana store" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(270deg, transparent 30%, rgba(11,15,20,.35) 70%, #0B0F14 100%)' }} />
             {/* floating stat cards */}
             <motion.div animate={{ y: [0, -12, 0] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
