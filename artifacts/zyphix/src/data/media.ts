@@ -195,6 +195,16 @@ export const VIDEOS: Record<string, Clip> = {
     alt: "Close-up of colourful Indian whole and ground spices — cumin, coriander and chai masala",
     credit: CREDIT,
   },
+  vegFresh: {
+    id: "9020658",
+    src: vid(9020658, "9020658-hd_1920_1080_25fps.mp4"),
+    src720: vid(9020658, "9020658-hd_1280_720_25fps.mp4"),
+    src540: vid(9020658, "9020658-sd_960_540_25fps.mp4"),
+    src360: vid(9020658, "9020658-sd_640_360_25fps.mp4"),
+    poster: "https://images.pexels.com/videos/9020658/pexels-photo-9020658.jpeg",
+    alt: "Close-up of fresh wet vegetables: tomatoes, garlic and bell peppers",
+    credit: CREDIT,
+  },
   vegMarket: {
     id: "29695848",
     src: vid(29695848, "12770716_1920_1080_30fps.mp4"),

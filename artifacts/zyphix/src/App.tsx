@@ -116,6 +116,7 @@ const MAIN_ONLY = ["/about", "/contact", "/blog", "/investors", "/privacy", "/te
 
 function Router() {
   const site = detectSite();
+  if (site === "admin") return <Admin />;
   if (site === "partner") return <PartnerSite />;
   if (site === "advertise") return <AdvertiseSite />;
   if (site === "auth") return <AuthSite />;

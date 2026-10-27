@@ -68,7 +68,7 @@ router.post("/notify", async (req, res) => {
               <tr><td style="padding:20px 24px;">
                 <p style="margin:0 0 14px;font-size:12px;font-weight:700;color:#065f46;letter-spacing:0.06em;text-transform:uppercase;">Your early-access perks</p>
                 <p style="margin:0 0 10px;font-size:14px;color:#374151;">⚡ 30-min grocery delivery at kirana prices</p>
-                <p style="margin:0 0 10px;font-size:14px;color:#374151;">🍱 Food from Jammu's best local dhabas</p>
+                <p style="margin:0 0 10px;font-size:14px;color:#374151;">🍱 Food from the best local kitchens near you</p>
                 <p style="margin:0 0 10px;font-size:14px;color:#374151;">🏷️ App-exclusive deals — not available on web</p>
                 <p style="margin:0 0 10px;font-size:14px;color:#374151;">🎁 50% OFF on your very first app order</p>
                 <p style="margin:0;font-size:14px;color:#374151;">🔔 Priority launch-day access</p>
@@ -93,7 +93,7 @@ router.post("/notify", async (req, res) => {
         <tr>
           <td style="padding:24px 40px;text-align:center;">
             <p style="margin:0 0 4px;font-size:12px;color:#9ca3af;">You're receiving this because you signed up for the Zyphix app waitlist.</p>
-            <p style="margin:0;font-size:12px;color:#9ca3af;">&copy; 2025 Zyphix &middot; Jammu, J&amp;K &middot; <a href="mailto:app@zyphix.in" style="color:#0DA366;text-decoration:none;">app@zyphix.in</a></p>
+            <p style="margin:0;font-size:12px;color:#9ca3af;">&copy; 2026 Zyphix &middot; <a href="mailto:app@zyphix.in" style="color:#0DA366;text-decoration:none;">app@zyphix.in</a></p>
           </td>
         </tr>
 

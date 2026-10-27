@@ -719,7 +719,7 @@ function Footer() {
               </div>
               <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 800, fontSize: 16, color: '#fff', letterSpacing: '-0.03em' }}>ZYPHIX</span>
             </div>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', lineHeight: 1.72, maxWidth: 250, marginBottom: 20 }}>India's SuperLocal App — groceries & food from kirana stores near you. Now live across India.</p>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', lineHeight: 1.72, maxWidth: 250, marginBottom: 20 }}>The SuperLocal App — groceries & food from kirana stores near you. Now live across India.</p>
             <div style={{ display: 'flex', gap: 8 }}>
               {[
                 { ic: <Twitter size={13} />, h: '#' },

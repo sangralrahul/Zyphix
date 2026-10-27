@@ -141,13 +141,13 @@ export function SplashScreen({ onComplete }: Props) {
               transition={{ delay: 2.3, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               style={{ width: 200, height: 2, background: 'linear-gradient(to right, transparent, #0DA366 20%, #18F590 50%, #0DA366 80%, transparent)', marginBottom: 20, transformOrigin: 'center' }} />
 
-            {/* India's SuperLocal App */}
+            {/* The SuperLocal App */}
             <motion.p
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 2.8, duration: 0.6, ease: 'easeOut' }}
               style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 700, fontSize: 'clamp(0.8rem, 2vw, 1rem)', color: 'rgba(255,255,255,0.72)', letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: 10 }}>
-              India's SuperLocal App
+              The SuperLocal App
             </motion.p>
 
             {/* Sub-tagline */}
@@ -156,7 +156,7 @@ export function SplashScreen({ onComplete }: Props) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 3.3, duration: 0.55, ease: 'easeOut' }}
               style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontSize: 'clamp(0.75rem, 1.5vw, 0.875rem)', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.14em', marginBottom: 44 }}>
-              Groceries · Food · Services · Jammu, J&K
+              Groceries · Food · Services
             </motion.p>
 
             {/* Feature badges */}
@@ -184,7 +184,7 @@ export function SplashScreen({ onComplete }: Props) {
                 animate={{ opacity: [1, 0.2, 1], scale: [1, 1.4, 1] }}
                 transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }} />
               <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 700, fontSize: '0.82rem', color: '#10D678', letterSpacing: '0.07em' }}>
-                Now Live · Jammu, J&K
+                Now live
               </span>
             </motion.div>
           </div>

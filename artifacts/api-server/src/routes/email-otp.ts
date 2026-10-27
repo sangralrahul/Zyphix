@@ -97,7 +97,7 @@ router.post("/send-email-otp", async (req, res) => {
   </td></tr>
 
   <tr><td style="background:#F9FAFB;padding:16px 36px;text-align:center;">
-    <p style="margin:0;font-size:11px;color:#9CA3AF;">© 2025 Zyphix · Jammu, J&K · <a href="https://zyphix.in" style="color:#0DA366;text-decoration:none;">zyphix.in</a></p>
+    <p style="margin:0;font-size:11px;color:#9CA3AF;">© 2026 Zyphix · <a href="https://zyphix.in" style="color:#0DA366;text-decoration:none;">zyphix.in</a></p>
   </td></tr>
 </table>
 </td></tr>

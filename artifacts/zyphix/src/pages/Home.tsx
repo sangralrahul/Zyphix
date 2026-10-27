@@ -1931,7 +1931,7 @@ function Footer() {
             <div style={{ marginBottom: 16 }}>
               <LogoMark size={30} dark />
             </div>
-            <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,.4)', lineHeight: 1.7, marginBottom: 10, maxWidth: 260 }}>India's SuperLocal App — groceries &amp; food delivered from kirana stores near you.</p>
+            <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,.4)', lineHeight: 1.7, marginBottom: 10, maxWidth: 260 }}>The SuperLocal App — groceries &amp; food delivered from kirana stores near you.</p>
             <p style={{ fontSize: 12, color: 'rgba(255,255,255,.28)', lineHeight: 1.6, marginBottom: 22, maxWidth: 260 }}>Now live across India · More cities being added every week</p>
             <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
               {([

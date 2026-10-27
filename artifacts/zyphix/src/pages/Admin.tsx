@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowRight, Bell, Bike, Check, ChevronRight, Clock, Eye, EyeOff, Inbox, LayoutDashboard, Loader2, LogOut, Mail, MapPin, MessageCircle,
+  ArrowRight, Bell, Moon, Sun, Bike, Check, ChevronRight, Clock, Eye, EyeOff, Inbox, LayoutDashboard, Loader2, LogOut, Mail, MapPin, MessageCircle,
   Package, Phone, RefreshCw, Search, ShieldCheck, ShoppingBag, Store, Undo2, Users, UtensilsCrossed, Wrench, X, XCircle,
 } from 'lucide-react';
 import { motion, AnimatePresence, animate, useMotionValue, useTransform } from '@/lib/motion';
@@ -22,6 +22,7 @@ const G = '#0DA366';
 const KEY = 'zx-admin-token';
 const EASE = [0.22, 1, 0.36, 1] as const;
 const POLL_MS = 20_000;
+const THEME_KEY = 'zx-admin-theme';
 
 type Status = 'live' | 'pending' | 'hidden' | 'rejected';
 type Partner = { id: string; type: string; name: string; business_name: string; email: string; phone: string; city: string; locality: string; category: string; tags: string; details: string; status: Status; created_at: string; updated_at?: string };
@@ -68,7 +69,7 @@ function MarketVideo({ dim = 0.4, priority = true }: { dim?: number; priority?: 
   return (
     <div aria-hidden className="absolute inset-0 overflow-hidden" style={{ background: 'radial-gradient(60% 70% at 85% 30%, rgba(13,163,102,.35), transparent 70%), radial-gradient(40% 50% at 60% 80%, rgba(132,204,22,.18), transparent 70%), #06080A' }}>
       <motion.div className="absolute inset-0" initial={{ scale: 1.08 }} animate={{ scale: 1 }} transition={{ duration: 2.4, ease: EASE }}>
-        <BgVideo clip={VIDEOS.vegMarket} dim={dim} priority={priority} />
+        <BgVideo clip={VIDEOS.vegFresh} dim={dim} priority={priority} />
       </motion.div>
     </div>
   );
@@ -182,6 +183,8 @@ export function Admin() {
   const [fresh, setFresh] = useState<Set<string>>(new Set());
   const seen = useRef<Set<string> | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => { try { return localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark'; } catch { return 'dark'; } });
+  const toggleTheme = () => setTheme(t => { const n = t === 'dark' ? 'light' : 'dark'; try { localStorage.setItem(THEME_KEY, n); } catch { /* ignore */ } return n; });
   useEffect(() => { const f = () => setScrolled(window.scrollY > 40); f(); window.addEventListener('scroll', f, { passive: true }); return () => window.removeEventListener('scroll', f); }, []);
 
   const toast = useCallback((text: string, tone: Toast['tone'] = 'ok') => {
@@ -259,12 +262,13 @@ export function Admin() {
   const greeting = `Good ${hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening'}`;
 
   return (
-    <div className="relative min-h-screen bg-[#06080A] text-white [color-scheme:dark]" style={{ fontFamily: FONT }}>
+    <div data-theme={theme} className="zx-admin relative min-h-screen bg-[#06080A] text-white [color-scheme:dark]" style={{ fontFamily: FONT }}>
+      <style>{LIGHT_CSS}</style>
       {/* ── Top bar ── */}
-      <header className={`fixed inset-x-0 top-0 z-50 transition-[background,border-color] duration-300 ${view === 'overview' && !scrolled ? 'border-b border-transparent bg-gradient-to-b from-black/60 to-transparent' : 'border-b border-white/[.06] bg-[#06080A]/80 backdrop-blur-xl'}`}>
+      <header className={`fixed inset-x-0 top-0 z-50 transition-[background,border-color] duration-300 ${view === 'overview' && !scrolled ? 'zx-dark border-b border-transparent bg-gradient-to-b from-black/60 to-transparent' : 'border-b border-white/[.06] bg-[#06080A]/80 backdrop-blur-xl'}`}>
         <div className="mx-auto flex max-w-[1400px] items-center gap-4 px-4 py-3.5 sm:px-8">
           <button onClick={() => setView('overview')} className="flex shrink-0 items-center gap-2.5" aria-label="Overview">
-            <ZyphixLogo size={26} ixColor="#FFFFFF" />
+            <ZyphixLogo size={26} ixColor={theme === 'light' && !(view === 'overview' && !scrolled) ? '#0A0F1A' : '#FFFFFF'} />
             <span className="hidden rounded-md bg-white/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75 ring-1 ring-white/15 sm:inline">Admin</span>
           </button>
           <nav className="mx-auto hidden items-center gap-1 rounded-full bg-black/30 p-1 ring-1 ring-white/10 backdrop-blur-xl md:flex">
@@ -276,6 +280,11 @@ export function Admin() {
               Live{synced && <span className="tabular-nums text-white/45">· {synced.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>}
             </span>
             <button onClick={() => load()} aria-label="Refresh" className="flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white/80 ring-1 ring-white/10 backdrop-blur-xl hover:text-white"><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /></button>
+            <button onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} title={theme === 'dark' ? 'Light theme' : 'Dark theme'} className="flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white/80 ring-1 ring-white/10 backdrop-blur-xl hover:text-white">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span key={theme} initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.25 }}>{theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}</motion.span>
+              </AnimatePresence>
+            </button>
             <button onClick={signOut} aria-label="Sign out" className="flex h-9 items-center gap-2 rounded-full bg-black/30 px-3 text-[13px] text-white/80 ring-1 ring-white/10 backdrop-blur-xl hover:text-white"><LogOut size={15} /><span className="hidden sm:inline">Sign out</span></button>
           </div>
         </div>
@@ -308,7 +317,7 @@ export function Admin() {
       <Drawer partner={open} onClose={() => setOpen(null)} onStatus={setStatus} />
 
       {/* ── Toasts ── */}
-      <div className="pointer-events-none fixed bottom-5 left-1/2 z-[80] flex w-[min(380px,calc(100vw-40px))] -translate-x-1/2 flex-col gap-2">
+      <div className="zx-dark pointer-events-none fixed bottom-5 left-1/2 z-[80] flex w-[min(380px,calc(100vw-40px))] -translate-x-1/2 flex-col gap-2">
         <AnimatePresence>
           {toasts.map(t => (
             <motion.div key={t.id} layout initial={{ opacity: 0, y: 20, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10 }}
@@ -345,9 +354,9 @@ function Overview({ greeting, kpis, pending, orders, onGo, onOpen, onStatus, fre
   return (
     <>
       {/* Hero: live vegetable-market footage */}
-      <section className="relative isolate overflow-hidden">
+      <section className="zx-dark relative isolate overflow-hidden text-white">
         <MarketVideo dim={0.25} />
-        <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(6,8,10,.85) 0%, rgba(6,8,10,.35) 55%, rgba(6,8,10,.1) 100%), linear-gradient(0deg, #06080A 0%, rgba(6,8,10,.6) 22%, transparent 55%)' }} />
+        <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(0deg, var(--zx-bg, #06080A) 0%, var(--zx-fade, rgba(6,8,10,.6)) 22%, transparent 55%), linear-gradient(90deg, rgba(6,8,10,.85) 0%, rgba(6,8,10,.35) 55%, rgba(6,8,10,.1) 100%)' }} />
         <div className="relative mx-auto flex min-h-[540px] max-w-[1400px] flex-col justify-end px-4 pb-36 pt-36 sm:min-h-[600px] sm:px-8 sm:pb-40">
           <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: EASE }} className="text-[12.5px] font-semibold uppercase tracking-[0.2em] text-emerald-300">
             {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -436,7 +445,7 @@ function PanelHead({ title, sub, cta, onCta }: { title: string; sub: string; cta
   );
 }
 function ProductTag({ pr }: { pr: { k: string; c: string } }) {
-  return <span className="shrink-0 rounded-full px-2.5 py-1 text-[12px] font-semibold ring-1 ring-white/10" style={{ color: `color-mix(in srgb, ${pr.c} 55%, white)`, background: `color-mix(in srgb, ${pr.c} 18%, transparent)` }}>{pr.k}</span>;
+  return <span className="shrink-0 rounded-full px-2.5 py-1 text-[12px] font-semibold ring-1 ring-white/10" style={{ color: `color-mix(in srgb, ${pr.c} var(--zx-tag, 55%), white)`, background: `color-mix(in srgb, ${pr.c} 18%, transparent)` }}>{pr.k}</span>;
 }
 
 /* ── Partners ───────────────────────────────────────────────────────────── */
@@ -531,7 +540,7 @@ function Drawer({ partner: p, onClose, onStatus }: { partner: Partner | null; on
           <motion.div key="scrim" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm" />
           <motion.aside key="drawer" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', stiffness: 320, damping: 36 }}
             className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-[520px] flex-col bg-[#0B0F12] text-white shadow-[-30px_0_80px_-30px_rgba(0,0,0,.9)] ring-1 ring-white/10" role="dialog" aria-label="Partner details">
-            <div className="relative isolate overflow-hidden border-b border-white/[.06] bg-[#06080A] px-6 pb-6 pt-5 text-white">
+            <div className="zx-dark relative isolate overflow-hidden border-b border-white/[.06] bg-[#06080A] px-6 pb-6 pt-5 text-white">
               <div aria-hidden className="absolute -right-16 -top-20 h-60 w-60 rounded-full opacity-50 blur-[70px]" style={{ background: t?.color ?? G }} />
               <div className="relative flex items-center justify-between">
                 <Pill status={p.status} />
@@ -667,3 +676,6 @@ function Waitlist({ rows, loading }: { rows: Waiter[]; loading: boolean }) {
     </>
   );
 }
+
+/* Light theme: remaps the dark palette; anything inside .zx-dark (video hero, drawer header, toasts) stays dark. */
+const LIGHT_CSS = '.zx-admin[data-theme=light]{background:#F4F5F2;color:rgb(11,15,18);--zx-bg:#F4F5F2;--zx-tag:100%;--zx-fade:rgba(244,245,242,.35)}\n.zx-admin[data-theme=light] .text-white:not(.zx-dark *):not(.zx-dark){color:rgb(11,15,18)}\n.zx-admin[data-theme=light] .text-white\\/35:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.50)}\n.zx-admin[data-theme=light] .text-white\\/40:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.55)}\n.zx-admin[data-theme=light] .text-white\\/45:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.60)}\n.zx-admin[data-theme=light] .text-white\\/50:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.65)}\n.zx-admin[data-theme=light] .text-white\\/55:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.70)}\n.zx-admin[data-theme=light] .text-white\\/60:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.75)}\n.zx-admin[data-theme=light] .text-white\\/65:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.80)}\n.zx-admin[data-theme=light] .text-white\\/70:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.85)}\n.zx-admin[data-theme=light] .text-white\\/75:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.90)}\n.zx-admin[data-theme=light] .text-white\\/80:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.95)}\n.zx-admin[data-theme=light] .hover\\:text-white:not(.zx-dark *):not(.zx-dark):hover{color:rgb(11,15,18)}\n.zx-admin[data-theme=light] .ring-white\\/10:not(.zx-dark *):not(.zx-dark){--tw-ring-color:rgba(11,15,18,.09)}\n.zx-admin[data-theme=light] .ring-white\\/15:not(.zx-dark *):not(.zx-dark){--tw-ring-color:rgba(11,15,18,.09)}\n.zx-admin[data-theme=light] .border-white\\/15:not(.zx-dark *):not(.zx-dark){border-color:rgba(11,15,18,.09)}\n.zx-admin[data-theme=light] .border-white\\/10:not(.zx-dark *):not(.zx-dark){border-color:rgba(11,15,18,.09)}\n.zx-admin[data-theme=light] .border-white\\/\\[\\.08\\]:not(.zx-dark *):not(.zx-dark){border-color:rgba(11,15,18,.09)}\n.zx-admin[data-theme=light] .border-white\\/\\[\\.06\\]:not(.zx-dark *):not(.zx-dark){border-color:rgba(11,15,18,.09)}\n.zx-admin[data-theme=light] .divide-white\\/\\[\\.06\\]:not(.zx-dark *):not(.zx-dark){border-color:rgba(11,15,18,.07)}\n.zx-admin[data-theme=light] .divide-white\\/\\[\\.06\\]:not(.zx-dark *):not(.zx-dark)>:not(:last-child){border-color:rgba(11,15,18,.07)}\n.zx-admin[data-theme=light] .bg-white\\/\\[\\.035\\]:not(.zx-dark *):not(.zx-dark){background-color:#fff;box-shadow:0 1px 2px rgba(16,24,40,.04),0 18px 40px -30px rgba(16,24,40,.25)}\n.zx-admin[data-theme=light] .bg-white\\/\\[\\.04\\]:not(.zx-dark *):not(.zx-dark){background-color:#fff;box-shadow:0 1px 2px rgba(16,24,40,.04),0 18px 40px -30px rgba(16,24,40,.25)}\n.zx-admin[data-theme=light] .bg-white\\/\\[\\.02\\]:not(.zx-dark *):not(.zx-dark){background-color:#fff;box-shadow:0 1px 2px rgba(16,24,40,.04),0 18px 40px -30px rgba(16,24,40,.25)}\n.zx-admin[data-theme=light] .bg-white\\/\\[\\.06\\]:not(.zx-dark *):not(.zx-dark){background-color:rgba(11,15,18,.05)}\n.zx-admin[data-theme=light] .bg-white\\/10:not(.zx-dark *):not(.zx-dark){background-color:rgba(11,15,18,.05)}\n.zx-admin[data-theme=light] .hover\\:bg-white\\/5:not(.zx-dark *):not(.zx-dark):hover{background-color:rgba(11,15,18,.05)}\n.zx-admin[data-theme=light] .hover\\:bg-white\\/\\[\\.03\\]:not(.zx-dark *):not(.zx-dark):hover{background-color:rgba(11,15,18,.05)}\n.zx-admin[data-theme=light] .hover\\:bg-white\\/10:not(.zx-dark *):not(.zx-dark):hover{background-color:rgba(11,15,18,.05)}\n.zx-admin[data-theme=light] .hover\\:bg-white\\/15:not(.zx-dark *):not(.zx-dark):hover{background-color:rgba(11,15,18,.05)}\n.zx-admin[data-theme=light] .hover\\:bg-white\\/\\[\\.055\\]:not(.zx-dark *):not(.zx-dark):hover{background-color:rgba(11,15,18,.05)}\n.zx-admin[data-theme=light] .bg-black\\/30:not(.zx-dark *):not(.zx-dark){background-color:rgba(255,255,255,.9)}\n.zx-admin[data-theme=light] .bg-\\[\\#0D1215\\]\\/70:not(.zx-dark *):not(.zx-dark){background-color:rgba(255,255,255,.88)}\n.zx-admin[data-theme=light] .bg-\\[\\#06080A\\]\\/80:not(.zx-dark *):not(.zx-dark){background-color:rgba(250,250,248,.85)}\n.zx-admin[data-theme=light] .bg-\\[\\#0B0F12\\]:not(.zx-dark *):not(.zx-dark){background-color:#fff}\n.zx-admin[data-theme=light] .bg-\\[\\#06080A\\]:not(.zx-dark *):not(.zx-dark){background-color:#F4F5F2}\n.zx-admin[data-theme=light] .placeholder\\:text-white\\/35:not(.zx-dark *):not(.zx-dark)::placeholder{color:rgba(11,15,18,.4)}\n.zx-admin[data-theme=light] .text-emerald-300:not(.zx-dark *):not(.zx-dark){color:#047857}\n.zx-admin[data-theme=light] .text-amber-300:not(.zx-dark *):not(.zx-dark){color:#B45309}\n.zx-admin[data-theme=light] .text-rose-300:not(.zx-dark *):not(.zx-dark){color:#BE123C}\n.zx-admin[data-theme=light] .hover\\:text-rose-300:not(.zx-dark *):not(.zx-dark):hover{color:#BE123C}\n.zx-admin[data-theme=light] button.text-gray-950:not(.zx-dark *):not(.zx-dark){color:#fff}\n.zx-admin[data-theme=light] button.text-gray-950:not(.zx-dark *):not(.zx-dark)>span.bg-white{background:#0B0F12}\n.zx-admin[data-theme=light]{color-scheme:light}';

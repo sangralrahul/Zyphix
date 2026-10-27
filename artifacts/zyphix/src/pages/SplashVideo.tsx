@@ -189,7 +189,7 @@ function Scene1() {
         initial={{ opacity: 0, letterSpacing: '0.5em' }}
         animate={ph >= 3 ? { opacity: 1, letterSpacing: '0.25em' } : {}}
         transition={{ duration: 1.1, ease: EASE }}>
-        India's SuperLocal App
+        The SuperLocal App
       </motion.p>
 
       {/* Location pill */}
@@ -769,7 +769,7 @@ function Scene4() {
           initial={{ opacity: 0 }}
           animate={ph >= 3 ? { opacity: 1 } : {}}
           transition={{ duration: 0.8, ease: EASE }}>
-          Building India's SuperLocal Commerce Layer — city by city.
+          Building the SuperLocal commerce layer — city by city.
         </motion.p>
 
         <motion.div style={{ display: 'flex', gap: '4.5vw' }}
@@ -894,7 +894,7 @@ function Scene5({ onDone }: { onDone?: () => void }) {
         initial={{ opacity: 0 }}
         animate={ph >= 3 ? { opacity: 1 } : {}}
         transition={{ duration: 0.75, ease: EASE }}>
-        India's SuperLocal App
+        The SuperLocal App
       </motion.p>
 
       {/* CTA */}
