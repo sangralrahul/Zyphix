@@ -479,7 +479,8 @@ export function ServiceProSetup() {
       let data: { success?: boolean; error?: string } = {};
       try { data = await res.json(); } catch { /* non-JSON response */ }
       if (data.error) { setSubmitError(data.error); setSubmitting(false); return; }
-    } catch { /* network failure — non-blocking, like the other setup pages */ }
+      if (!res.ok) { setSubmitError("We couldn't send your application. Check your internet connection and tap submit again. Your answers are still here."); setSubmitting(false); return; }
+    } catch { setSubmitError("We couldn't send your application. Check your internet connection and tap submit again. Your answers are still here."); setSubmitting(false); return; }
     setSubmitting(false);
     go(3);
   };

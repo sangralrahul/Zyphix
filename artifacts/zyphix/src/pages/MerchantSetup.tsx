@@ -806,12 +806,13 @@ export function MerchantSetup() {
   const handleCatsNext  = (s: Set<string>, subs: Record<string,Set<string>>) => { setCategories(s); setSelectedSubs(subs); setStep(2); window.scrollTo(0,0); };
   const handleBizNext   = async () => {
     setSubmitting(true); setSubmitError('');
+    let sent = false;
     try {
       const catSummary = [...categories].map(id => {
         const items = [...(selectedSubs[id] ?? [])];
         return items.length ? `${id}: ${items.join(', ')}` : id;
       }).join(' | ');
-      await apiFetch('/api/partner-register', {
+      const res = await apiFetch('/api/partner-register', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: storeData.ownerName || storeData.name,
@@ -828,13 +829,15 @@ export function MerchantSetup() {
           },
         }),
       });
-    } catch { /* non-blocking — still show success */ }
+      sent = res.ok;
+    } catch { /* offline */ }
+    if (!sent) { setSubmitting(false); setSubmitError("We couldn't send your application. Check your internet connection and tap submit again. Your answers are still here."); return; }
     setSubmitting(false);
     setStep(3); window.scrollTo(0,0);
   };
 
   return (
-    <RegisterShell track="store" steps={['Store info', 'Categories', 'Business']} step={step} done={step===3}>
+    <RegisterShell track="store" error={submitError} onDismissError={() => setSubmitError('')} steps={['Store info', 'Categories', 'Business']} step={step} done={step===3}>
       <div>
         <AnimatePresence mode="wait">
           {step===0 && <StoreInfoStep key="s0" onNext={handleStoreNext} />}

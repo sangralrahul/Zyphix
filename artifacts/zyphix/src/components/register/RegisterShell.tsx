@@ -102,8 +102,8 @@ function MobileProgress({ steps, step, accent }: { steps: string[]; step: number
   );
 }
 
-export function RegisterShell({ track, steps, step, done = false, children }: {
-  track: Track; steps: string[]; step: number; done?: boolean; children: React.ReactNode;
+export function RegisterShell({ track, steps, step, done = false, children, error, onDismissError }: {
+  track: Track; steps: string[]; step: number; done?: boolean; children: React.ReactNode; error?: string; onDismissError?: () => void;
 }) {
   const [, setLoc] = useLocation();
   const t = TRACKS[track];
@@ -170,6 +170,18 @@ export function RegisterShell({ track, steps, step, done = false, children }: {
           )}
         </div>
       </main>
+
+      {/* Submission error toast */}
+      <AnimatePresence>
+        {error && (
+          <motion.div role="alert" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 24 }}
+            className="fixed inset-x-4 bottom-5 z-50 mx-auto flex max-w-[560px] items-start gap-3 rounded-2xl bg-gray-900 px-5 py-4 text-[14px] leading-[1.5] text-white shadow-[0_20px_50px_-15px_rgba(0,0,0,.5)]">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500 text-[12px] font-bold">!</span>
+            <p className="flex-1">{error}</p>
+            {onDismissError && <button type="button" onClick={onDismissError} className="shrink-0 text-[13px] font-semibold text-white/70 hover:text-white">Dismiss</button>}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

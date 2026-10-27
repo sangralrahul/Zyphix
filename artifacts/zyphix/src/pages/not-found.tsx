@@ -1,3 +1,4 @@
+import { useNoIndex } from '@/lib/seo';
 import { Link } from 'wouter';
 import { ArrowRight, Home, Store, UtensilsCrossed, Mail } from 'lucide-react';
 import { SitePage } from '@/components/layout/SiteChrome';
@@ -15,6 +16,7 @@ const LINKS = [
 ];
 
 export default function NotFound() {
+  useNoIndex();
   return (
     <SitePage title="Page not found">
       <section className="mx-auto max-w-[1180px] px-4 pb-20 pt-16 md:pt-24">

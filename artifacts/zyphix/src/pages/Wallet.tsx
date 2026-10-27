@@ -1,3 +1,4 @@
+import { useSeo } from '@/lib/seo';
 import React, { useState } from 'react';
 import { Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, Copy, Check, Gift } from 'lucide-react';
 import { usePromo } from '@/context/PromoContext';
@@ -7,6 +8,7 @@ import { Button, FONT, IconTile } from '@/ui/kit';
 const card = 'rounded-xl border border-[#E6E8EC] bg-white';
 
 export function Wallet() {
+  useSeo('Wallet · Zyphix');
   const { walletBalance, walletTxns, referralCode } = usePromo();
   const [copied, setCopied] = useState(false);
 

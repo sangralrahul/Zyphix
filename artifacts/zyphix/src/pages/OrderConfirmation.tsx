@@ -1,3 +1,4 @@
+import { useSeo } from '@/lib/seo';
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { motion } from '@/lib/motion';
@@ -10,6 +11,7 @@ import { Button, FONT } from '@/ui/kit';
 const card = 'rounded-xl border border-[#E6E8EC] bg-white';
 
 export function OrderConfirmation() {
+  useSeo('Your order · Zyphix');
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const [order, setOrder] = useState<Order | null>(null);

@@ -616,14 +616,16 @@ export function DeliverySetup() {
   const [step, setStep] = useState(0);
   const [personal, setPersonal] = useState<Record<string,string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [, setLoc] = useLocation();
 
   const go = (s:number) => { setStep(s); window.scrollTo(0,0); };
 
   const handleAvailabilityNext = async () => {
-    setSubmitting(true);
+    setSubmitting(true); setSubmitError('');
+    let sent = false;
     try {
-      await apiFetch('/api/partner-register', {
+      const res = await apiFetch('/api/partner-register', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: personal.name,
@@ -637,13 +639,15 @@ export function DeliverySetup() {
           },
         }),
       });
-    } catch { /* non-blocking */ }
+      sent = res.ok;
+    } catch { /* offline */ }
+    if (!sent) { setSubmitting(false); setSubmitError("We couldn't send your application. Check your internet connection and tap submit again. Your answers are still here."); return; }
     setSubmitting(false);
     go(4);
   };
 
   return (
-    <RegisterShell track="delivery" steps={['Personal', 'Licence', 'Vehicle', 'Availability']} step={step} done={step===4}>
+    <RegisterShell track="delivery" error={submitError} onDismissError={() => setSubmitError('')} steps={['Personal', 'Licence', 'Vehicle', 'Availability']} step={step} done={step===4}>
       <div>
         <AnimatePresence mode="wait">
           {step===0 && <PersonalStep key="s0" onNext={d=>{setPersonal(d as Record<string,string>);go(1);}} />}

@@ -1,3 +1,4 @@
+import { useSeo } from '@/lib/seo';
 import React from 'react';
 import { Link, useLocation } from 'wouter';
 import { Heart, X, ShoppingCart, Plus } from 'lucide-react';
@@ -8,6 +9,7 @@ import { Button, FONT } from '@/ui/kit';
 const card = 'rounded-xl border border-[#E6E8EC] bg-white';
 
 export function Wishlist() {
+  useSeo('Wishlist · Zyphix');
   const { items, remove, clear } = useWishlist();
   const { add, qty } = useCart();
   const [, navigate] = useLocation();

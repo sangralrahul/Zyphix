@@ -1,3 +1,4 @@
+import { useSeo } from '@/lib/seo';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
 import { ChevronLeft, MapPin, Wallet, CreditCard, Check } from 'lucide-react';
@@ -11,6 +12,7 @@ import { Button, FONT } from '@/ui/kit';
 const card = 'rounded-xl border border-[#E6E8EC] bg-white';
 
 export function Checkout() {
+  useSeo('Checkout · Zyphix Now');
   const { items, subtotal, clear } = useCart();
   const {
     appliedCoupon, applyCoupon,
@@ -48,6 +50,7 @@ export function Checkout() {
   const [payment, setPayment] = useState<'COD' | 'ONLINE'>('COD');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [placing, setPlacing] = useState(false);
+  const [placeError, setPlaceError] = useState('');
 
   const baseDelivery = subtotal === 0 ? 0 : subtotal >= 149 ? 0 : 25;
 
@@ -88,7 +91,7 @@ export function Checkout() {
 
   const placeOrder = async () => {
     if (!validate()) return;
-    setPlacing(true);
+    setPlacing(true); setPlaceError('');
     const id = 'ZNW' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
     const cashback = cashbackFor(grand);
     const order: Order = {
@@ -107,9 +110,16 @@ export function Checkout() {
       status: 'CONFIRMED',
       etaMinutes: 30,
     };
+    // The order only counts once our server has it. If it can't be sent, nothing is charged,
+    // the cart stays as it is, and the shopper is told to retry.
+    try {
+      await createOrder(order);
+    } catch {
+      setPlacing(false);
+      setPlaceError("We couldn't place your order. Check your internet connection and try again. You have not been charged.");
+      return;
+    }
     saveOrder(order);
-    // Persist to D1 (attached to the account when signed in). Best-effort: a failure never blocks the order.
-    try { await createOrder(order); } catch { /* local copy is the fallback */ }
 
     // Ledger effects
     if (walletApplied > 0) debitWallet(walletApplied, `Paid for order`, id);
@@ -189,8 +199,8 @@ export function Checkout() {
 
         {/* Summary */}
         <div className={`${card} p-4 md:sticky md:top-[80px]`}>
-          <p className="text-[14px] font-semibold">Order summary</p>
-          <div className="mt-2 max-h-[220px] divide-y divide-gray-100 overflow-y-auto [scrollbar-width:thin]">
+          <p className="flex items-baseline justify-between text-[14px] font-semibold">Order summary <span className="text-[12.5px] font-normal text-gray-500">{items.reduce((a, i) => a + i.qty, 0)} items{items.length > 4 ? ', scroll for all' : ''}</span></p>
+          <div className="mt-2 max-h-[320px] divide-y divide-gray-100 overflow-y-auto [scrollbar-width:thin]">
             {items.map(i => (
               <div key={i.id} className="flex items-center gap-2.5 py-2">
                 <img src={i.image} alt={i.name} className="h-10 w-10 shrink-0 rounded-lg border border-[#E6E8EC] bg-white object-contain p-0.5" />
@@ -218,6 +228,7 @@ export function Checkout() {
           <Button onClick={placeOrder} className={`mt-3 w-full justify-between ${placing ? 'pointer-events-none opacity-60' : ''}`}>
             <span>{placing ? 'Placing order' : 'Place order'}</span><span>₹{grand}</span>
           </Button>
+          {placeError && <p role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-[13px] leading-[1.5] text-red-700">{placeError}</p>}
           <p className="mt-2 text-center text-[11.5px] text-gray-400">By placing this order you agree to our Terms.</p>
         </div>
       </div>

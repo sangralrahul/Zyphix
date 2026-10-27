@@ -28,20 +28,8 @@ const SupportSite = lazy(() => import("@/sites/SupportSite"));
  * decides which site renders: partner.zyphix.in → partner portal, advertise.zyphix.in → ads site,
  * auth.zyphix.in → the shared sign-in page.
  */
-export function detectSite(): "main" | "partner" | "advertise" | "now" | "eats" | "book" | "auth" | "support" {
-  if (typeof window === "undefined") return "main";
-  const override = new URLSearchParams(window.location.search).get("site");
-  if (override === "partner" || override === "advertise" || override === "now" || override === "eats" || override === "book" || override === "auth" || override === "support") return override;
-  const host = window.location.hostname.toLowerCase();
-  if (host.startsWith("auth.") || host.startsWith("account.")) return "auth";
-  if (host.startsWith("support.") || host.startsWith("help.")) return "support";
-  if (host.startsWith("partner.") || host.startsWith("partners.")) return "partner";
-  if (host.startsWith("advertise.") || host.startsWith("ads.")) return "advertise";
-  if (host.startsWith("now.") || host.startsWith("shop.")) return "now";
-  if (host.startsWith("eats.") || host.startsWith("food.")) return "eats";
-  if (host.startsWith("book.") || host.startsWith("services.")) return "book";
-  return "main";
-}
+export { detectSite } from "@/lib/site";
+import { detectSite } from "@/lib/site";
 
 const HomeLight = lazy(() => import("@/pages/HomeLight").then(m => ({ default: m.HomeLight })));
 const Privacy = lazy(() => import("@/pages/Privacy").then(m => ({ default: m.Privacy })));
@@ -92,6 +80,22 @@ function LazyAuthModal() {
   return <Suspense fallback={null}><AuthModal /></Suspense>;
 }
 
+/** zyphix.in/advertise → the real site at advertise.zyphix.in (keeps one canonical address).
+ *  Off production (previews) it renders in place under a /advertise base. */
+function AdvertiseAtPath() {
+  const prod = typeof window !== 'undefined' && /(^|\.)zyphix\.in$/.test(window.location.hostname);
+  React.useEffect(() => { if (prod) window.location.replace('https://advertise.zyphix.in/' + window.location.hash); }, [prod]);
+  if (prod) return null;
+  return <WouterRouter base="/advertise"><AdvertiseSite /></WouterRouter>;
+}
+
+/** Old landing experiments → home. */
+function ToHome() {
+  const [, setLoc] = useLocation();
+  React.useEffect(() => { setLoc('/', { replace: true }); }, [setLoc]);
+  return null;
+}
+
 function LightLayout({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ minHeight: '100vh', background: '#F8F9FA', color: '#111827' }}>
@@ -108,12 +112,20 @@ function LightLayout({ children }: { children: React.ReactNode }) {
 // All app pages now share the same light layout.
 const DarkLayout = LightLayout;
 
+const MAIN_ONLY = ["/about", "/contact", "/blog", "/investors", "/privacy", "/terms", "/app", "/partner", "/merchant-setup", "/restaurant-setup", "/delivery-setup", "/service-setup"];
+
 function Router() {
   const site = detectSite();
   if (site === "partner") return <PartnerSite />;
   if (site === "advertise") return <AdvertiseSite />;
   if (site === "auth") return <AuthSite />;
   if (site === "support") return <SupportSite />;
+  // Company / legal pages live on zyphix.in only: forward from shop subdomains so there is one copy of each.
+  if ((site === "now" || site === "eats" || site === "book") && typeof window !== "undefined"
+    && /(^|\.)zyphix\.in$/.test(window.location.hostname) && MAIN_ONLY.includes(window.location.pathname.replace(/\/$/, ""))) {
+    window.location.replace("https://zyphix.in" + window.location.pathname);
+    return null;
+  }
   // now.|eats.|book.zyphix.in: the app section is the root; all other paths keep working.
   const appRoot = site === "now" ? <LightLayout><ZyphixNow /></LightLayout>
     : site === "eats" ? <LightLayout><ZyphixEats /></LightLayout>
@@ -126,8 +138,8 @@ function Router() {
       {site === "now" && <Route path="/checkout"><LightLayout><CheckoutPage /></LightLayout></Route>}
       {site === "now" && <Route path="/order/:id">{() => <LightLayout><OrderConfirmation /></LightLayout>}</Route>}
       <Route path="/" component={Landing} />
-      <Route path="/launch" component={Home} />
-      <Route path="/light" component={HomeLight} />
+      <Route path="/launch" component={ToHome} />
+      <Route path="/light" component={ToHome} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route path="/about" component={About} />
@@ -137,7 +149,7 @@ function Router() {
       <Route path="/merchant-setup" component={MerchantSetup} />
       <Route path="/delivery-setup" component={DeliverySetup} />
       <Route path="/restaurant-setup" component={RestaurantSetup} />
-      <Route path="/splash-video" component={SplashVideo} />
+      <Route path="/splash-video" component={ToHome} />
       <Route path="/now">
         <LightLayout><ZyphixNow /></LightLayout>
       </Route>
@@ -162,9 +174,7 @@ function Router() {
       <Route path="/notifications">
         <LightLayout><NotificationsPage /></LightLayout>
       </Route>
-      <Route path="/admin">
-        <LightLayout><Admin /></LightLayout>
-      </Route>
+      <Route path="/admin" component={Admin} />
       <Route path="/partner-dashboard">
         <LightLayout><PartnerDashboard /></LightLayout>
       </Route>
@@ -184,7 +194,7 @@ function Router() {
       </Route>
       <Route path="/partner" component={PartnerLanding} />
       <Route path="/service-setup" component={ServiceProSetup} />
-      <Route path="/advertise" component={AdvertiseSite} />
+      <Route path="/advertise">{() => <AdvertiseAtPath />}</Route>
       <Route path="/auth" component={AuthSite} />
       <Route path="/support" component={SupportSite} />
       <Route path="/support/:rest*" component={SupportSite} />

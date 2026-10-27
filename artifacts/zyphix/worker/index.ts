@@ -89,6 +89,8 @@ export default {
       if (pathname.startsWith('/api/')) return await handleApi(request, env, url);
       if (pathname.startsWith('/img/')) return await handleImage(request, env, ctx, pathname.slice('/img/'.length));
       if (pathname.startsWith('/media/')) return await handleMedia(request, env, ctx, url);
+      // The admin page itself (SPA) vs the admin API: only API paths go to handleAdmin.
+      if (pathname === '/admin/' || pathname === '/admin/index.html') return env.ASSETS.fetch(new Request(new URL('/', url).toString(), request));
       if (pathname.startsWith('/admin/')) return await handleAdmin(request, env, url);
     } catch (err) {
       console.error(err);
@@ -304,6 +306,16 @@ async function handleAdmin(request: Request, env: Env, url: URL): Promise<Respon
 
   if (p === '/admin/partners' && request.method === 'GET') {
     const { results } = await env.DB.prepare('SELECT * FROM partners ORDER BY created_at DESC LIMIT 500').all();
+    return json(results);
+  }
+  if (p === '/admin/orders' && request.method === 'GET') {
+    const { results } = await env.DB.prepare('SELECT * FROM orders ORDER BY created_at DESC LIMIT 300').all<OrderRow>();
+    return json((results ?? []).map(orderToClient));
+  }
+  if (p === '/admin/whoami') return json({ ok: true });
+  if (p === '/admin/waitlist' && request.method === 'GET') {
+    await ensureWaitlist(env);
+    const { results } = await env.DB.prepare('SELECT * FROM waitlist ORDER BY created_at DESC LIMIT 1000').all();
     return json(results);
   }
   const pm = p.match(/^\/admin\/partners\/([^/]+)\/status$/);
@@ -563,8 +575,8 @@ async function generateProduceImage(env: Env, row: ProductRow): Promise<ImageRes
 /* ───────────────────────── partner directory ─────────────────────────
    Registrations from the sign-up forms (store / restaurant / service / delivery)
    are stored here and listed on now.zyphix.in, eats.zyphix.in, book.zyphix.in and
-   partner.zyphix.in. New entries go live immediately; /admin/partners/:id/status
-   can hide one. Contact details are never returned by the public GET.          */
+   partner.zyphix.in. New entries start as 'pending' and appear publicly once approved
+   on zyphix.in/admin (POST /admin/partners/:id/status). Contact details are never returned by the public GET.          */
 
 const PARTNER_TYPES: Record<string, string> = { merchant: 'store', store: 'store', restaurant: 'restaurant', service: 'service', delivery: 'delivery' };
 const str = (v: unknown, max = 200) => (typeof v === 'string' ? v : Array.isArray(v) ? v.join(', ') : v == null ? '' : String(v)).trim().slice(0, max);
@@ -575,22 +587,24 @@ async function createPartner(request: Request, env: Env): Promise<Response> {
   const type = PARTNER_TYPES[str(body.role)];
   if (!type) return json({ error: 'unknown role' }, 400);
   const name = str(body.name, 120), email = str(body.email, 160).toLowerCase(), phone = str(body.phone, 20).replace(/\D/g, ''), city = str(body.city, 80);
-  if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || phone.length < 10) return json({ error: 'name, valid email and 10-digit phone are required' }, 400);
+  if (!name || phone.length < 10 || (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) return json({ error: 'name and a 10-digit phone are required; email must be valid if given' }, 400);
   const d = (body.details ?? {}) as Record<string, unknown>;
   const businessName = str(d.storeName ?? d.restaurantName ?? d.businessName ?? (type === 'delivery' || type === 'service' ? name : ''), 140) || name;
   const category = str(d.primaryCategory ?? d.restaurantType ?? d.storeType ?? d.vehicleType ?? d.vehicle ?? '', 80);
   const tags = str(d.cuisines ?? d.categories ?? d.additionalSkills ?? '', 300);
   const locality = str(d.locality ?? d.area ?? d.address ?? '', 160);
   const id = `${type.slice(0, 2)}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
-  // one live listing per (type, email): re-registering updates instead of duplicating
-  const existing = await env.DB.prepare('SELECT id FROM partners WHERE type = ? AND email = ?').bind(type, email).first<{ id: string }>();
+  // one listing per (type, email) — or (type, phone) when no email: re-registering updates instead of duplicating
+  const existing = email
+    ? await env.DB.prepare('SELECT id FROM partners WHERE type = ? AND email = ?').bind(type, email).first<{ id: string }>()
+    : await env.DB.prepare('SELECT id FROM partners WHERE type = ? AND phone = ?').bind(type, phone).first<{ id: string }>();
   if (existing) {
     await env.DB.prepare("UPDATE partners SET name=?, business_name=?, phone=?, city=?, locality=?, category=?, tags=?, details=?, updated_at=datetime('now') WHERE id=?")
       .bind(name, businessName, phone, city, locality, category, tags, JSON.stringify(d).slice(0, 8000), existing.id).run();
     return json({ success: true, id: existing.id, updated: true });
   }
   await env.DB.prepare('INSERT INTO partners (id, type, name, business_name, email, phone, city, locality, category, tags, details, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
-    .bind(id, type, name, businessName, email, phone, city, locality, category, tags, JSON.stringify(d).slice(0, 8000), 'live').run();
+    .bind(id, type, name, businessName, email, phone, city, locality, category, tags, JSON.stringify(d).slice(0, 8000), 'pending').run();
   return json({ success: true, id }, 201);
 }
 
@@ -627,7 +641,7 @@ type UserRow = { id: string; email: string; name: string | null; phone: string |
 type AddressRow = { id: string; user_id: string; label: string | null; name: string | null; phone: string | null; line1: string; line2: string | null; city: string | null; pincode: string | null; is_default: number; created_at: string };
 type OrderRow = { id: string; user_id: string | null; email: string | null; status: string; items: string; subtotal: number; delivery_fee: number; discount: number; total: number; payment_mode: string | null; address: string | null; eta_minutes: number | null; created_at: string };
 
-const ACCOUNT_PATH = /^\/api\/(auth\/|me($|\/)|orders($|\/))/;
+const ACCOUNT_PATH = /^\/api\/(auth\/|me($|\/)|orders($|\/)|waitlist$)/;
 const isAccountPath = (p: string) => ACCOUNT_PATH.test(p);
 
 /** Credentialed CORS for https://zyphix.in and https://*.zyphix.in (plus localhost for dev). */
@@ -713,6 +727,7 @@ async function handleAccount(request: Request, env: Env, url: URL): Promise<Resp
 
   /* ── orders: POST works for guests too; GET /api/orders/:id allows guest lookup of guest orders ── */
   if (p === '/api/orders' && m === 'POST') return await createOrder(request, env);
+  if (p === '/api/waitlist' && m === 'POST') return await joinWaitlist(request, env);
   const om = p.match(/^\/api\/orders\/([^/]+)$/);
   if (om && m === 'GET') {
     const row = await env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(decodeURIComponent(om[1])).first<OrderRow>();
@@ -875,6 +890,22 @@ async function createOrder(request: Request, env: Env): Promise<Response> {
     .bind(id, user?.id ?? null, email, status, JSON.stringify(items).slice(0, 60000), subtotal, deliveryFee, discount, total, paymentMode, JSON.stringify(address).slice(0, 4000), eta).run();
   const row = await env.DB.prepare('SELECT created_at FROM orders WHERE id = ?').bind(id).first<{ created_at: string }>();
   return json({ id, createdAt: sqliteToIso(row?.created_at) }, 201);
+}
+
+/* ── waitlist ("tell me when it opens near me") — table is created on first use ── */
+async function ensureWaitlist(env: Env) {
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS waitlist (id INTEGER PRIMARY KEY AUTOINCREMENT, product TEXT NOT NULL, name TEXT, phone TEXT NOT NULL, email TEXT, city TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')), UNIQUE(product, phone))").run();
+}
+async function joinWaitlist(request: Request, env: Env): Promise<Response> {
+  const body = await readJson(request); if (!body) return json({ error: 'invalid JSON' }, 400);
+  const product = str(body.product, 20).toLowerCase();
+  if (!['now', 'eats', 'book'].includes(product)) return json({ error: 'unknown product' }, 400);
+  const phone = str(body.phone, 20).replace(/\D/g, '').slice(-10);
+  if (phone.length !== 10) return json({ error: 'a 10-digit phone is required' }, 400);
+  await ensureWaitlist(env);
+  await env.DB.prepare('INSERT INTO waitlist (product, name, phone, email, city) VALUES (?,?,?,?,?) ON CONFLICT(product, phone) DO UPDATE SET name = excluded.name, city = excluded.city, email = excluded.email')
+    .bind(product, str(body.name, 120) || null, phone, str(body.email, 160).toLowerCase() || null, str(body.city, 120) || null).run();
+  return json({ success: true }, 201);
 }
 
 const sqliteToIso = (s: string | undefined | null) => s ? (s.includes('T') ? s : s.replace(' ', 'T') + 'Z') : new Date().toISOString();

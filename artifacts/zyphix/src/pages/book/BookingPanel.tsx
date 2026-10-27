@@ -18,10 +18,12 @@ export type BookingState = {
   slot: string | null; setSlot: (s: string | null) => void;
   address: string; setAddress: (a: string) => void;
   booked: boolean; onBook: () => void;
+  name: string; setName: (v: string) => void; phone: string; setPhone: (v: string) => void;
+  sending: boolean; error: string; onReset: () => void;
 };
 
 export function BookingPanel({ id, state }: { id: string; state: BookingState }) {
-  const { activeService, day, setDay, slot, setSlot, address, setAddress, booked, onBook } = state;
+  const { activeService, day, setDay, slot, setSlot, address, setAddress, booked, onBook, name, setName, phone, setPhone, sending, error, onReset } = state;
   const stat = isStatic();
   const anim = stat ? {} : { initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -10 }, transition: { duration: 0.25, ease: EASE } };
 
@@ -72,8 +74,23 @@ export function BookingPanel({ id, state }: { id: string; state: BookingState })
               })}
             </div>
 
-            <label className="mt-4 block">
-              <span className="text-[12.5px] font-medium text-gray-700">Address <span className="font-normal text-gray-400">(optional)</span></span>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <label className="block">
+                <span className="text-[12.5px] font-medium text-gray-700">Your name</span>
+                <input value={name} onChange={e => setName(e.target.value)} placeholder="Full name" autoComplete="name"
+                  className="mt-1.5 h-11 w-full rounded-xl border border-gray-200 bg-white px-3 text-[13.5px] text-gray-900 outline-none placeholder:text-gray-400 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600" />
+              </label>
+              <label className="block">
+                <span className="text-[12.5px] font-medium text-gray-700">Mobile</span>
+                <span className="mt-1.5 flex h-11 items-center rounded-xl border border-gray-200 bg-white focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600">
+                  <span className="pl-3 pr-2 text-[13px] text-gray-500">+91</span>
+                  <input value={phone} onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} inputMode="numeric" autoComplete="tel-national" placeholder="10 digits"
+                    className="h-full w-full min-w-0 bg-transparent pr-3 text-[13.5px] text-gray-900 outline-none placeholder:text-gray-400" />
+                </span>
+              </label>
+            </div>
+            <label className="mt-3 block">
+              <span className="text-[12.5px] font-medium text-gray-700">Address</span>
               <span className="mt-1.5 flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 focus-within:border-emerald-600 focus-within:ring-1 focus-within:ring-emerald-600">
                 <MapPin size={14} className="shrink-0 text-gray-400" />
                 <input value={address} onChange={e => setAddress(e.target.value)} placeholder="Flat, street, locality" className="h-11 w-full bg-transparent text-[13.5px] text-gray-900 outline-none placeholder:text-gray-400" />
@@ -93,22 +110,24 @@ export function BookingPanel({ id, state }: { id: string; state: BookingState })
                     className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white" style={{ background: G }}><Check size={20} strokeWidth={3} /></span>
                     <div>
-                      <p className="text-[14px] font-semibold text-emerald-900">Booking confirmed</p>
-                      <p className="text-[12.5px] text-emerald-800/80">{activeService.title} · {day}, {slot}</p>
+                      <p className="text-[14px] font-semibold text-emerald-900">Request received</p>
+                      <p className="text-[12.5px] text-emerald-800/80">{activeService.title} · {day}, {slot}. We'll call +91 {phone} to confirm the pro and the price.</p>
+                      <button type="button" onClick={onReset} className="mt-1 text-[12px] font-semibold text-emerald-800 underline underline-offset-2">Book another</button>
                     </div>
                   </motion.div>
                 ) : (
                   <motion.div key="cta" {...(stat ? {} : { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.2 } })}>
-                    <button type="button" onClick={onBook} disabled={!slot}
+                    {error && <p role="alert" className="mb-2.5 rounded-xl bg-red-50 px-3 py-2 text-[12.5px] text-red-700">{error}</p>}
+                    <button type="button" onClick={onBook} disabled={!slot || sending}
                       className="inline-flex h-12 w-full items-center justify-center gap-1.5 rounded-full text-[14.5px] font-semibold text-white shadow-[0_12px_30px_-10px_rgba(13,163,102,.6)] transition hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
                       style={{ background: `linear-gradient(180deg, #19C27C 0%, ${G} 100%)` }}>
-                      {slot ? 'Confirm booking' : 'Choose a time slot'}
+                      {sending ? 'Sending…' : slot ? 'Request this booking' : 'Choose a time slot'}
                     </button>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-            <p className="mt-2.5 text-center text-[12px] text-gray-500">Free cancellation up to 1 hour before your slot.</p>
+            <p className="mt-2.5 text-center text-[12px] text-gray-500">No payment now. We confirm by phone, and you pay after the work is done.</p>
           </motion.div>
         ) : (
           <motion.div key="empty" {...(stat ? {} : { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.2 } })} className="mt-4">

@@ -1,3 +1,4 @@
+import { useSeo } from '@/lib/seo';
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion } from '@/lib/motion';
 import { Plus, Minus, ChevronDown, ShoppingBag, ArrowRight, Store, X, Search, Clock, Truck, Package, MapPin } from 'lucide-react';
@@ -33,6 +34,7 @@ const isDesktop = () => typeof window !== 'undefined' && window.matchMedia('(min
 const scrollOffset = () => (isDesktop() ? NAV_H + 16 : NAV_H + MOBILE_RAIL_H + 8);
 
 export function ZyphixNow() {
+  useSeo('Zyphix Now — Groceries delivered in 30 minutes', 'Fresh produce, dairy, snacks and daily staples from stores near you, delivered in about 30 minutes at shelf prices.');
   const { products, categories: allCategories, loading: catalogLoading } = useCatalog();
   const { partners: stores } = usePartners('store');
   // Hide categories that have no products yet so the rail never shows empty entries.

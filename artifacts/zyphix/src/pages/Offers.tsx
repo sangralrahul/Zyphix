@@ -1,3 +1,4 @@
+import { useSeo } from '@/lib/seo';
 import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { Tag, Copy, Check, Zap, Users, ShoppingBag, Utensils, CalendarCheck, Store } from 'lucide-react';
@@ -19,6 +20,7 @@ const CATEGORIES = [
 ];
 
 export function Offers() {
+  useSeo('Offers and coupons · Zyphix', 'Current coupons and deals on Zyphix Now, Eats and Book.');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const copyCode = (code: string) => {

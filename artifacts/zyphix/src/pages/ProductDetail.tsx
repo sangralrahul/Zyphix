@@ -1,3 +1,4 @@
+import { useSeo } from '@/lib/seo';
 import React, { useMemo } from 'react';
 import { Link, useLocation, useParams } from 'wouter';
 import { ChevronLeft, Plus, Minus, Clock, Truck, ShieldCheck, Star, Heart, Share2 } from 'lucide-react';
@@ -18,6 +19,8 @@ export function ProductDetail() {
 
   const { products, categories } = useCatalog();
   const product = useMemo(() => products.find(p => p.id === params.id), [products, params.id]);
+  useSeo(product ? `${product.name}${product.weight ? ` (${product.weight})` : ''} · Zyphix Now` : 'Product · Zyphix Now',
+    product ? `Order ${product.name} from stores near you on Zyphix Now, delivered in about 30 minutes.` : undefined);
   const mainImage = useMemo(() => product ? productImageFor(product, categories, 'full') : null, [product, categories]);
   const related = useMemo(() => {
     if (!product) return [];

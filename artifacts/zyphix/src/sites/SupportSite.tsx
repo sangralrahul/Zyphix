@@ -1,3 +1,4 @@
+import { useNoIndex, useNoIndexIf } from '@/lib/seo';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Route, Router, Switch, useLocation } from 'wouter';
 import { ArrowRight, ArrowUpRight, ChevronRight, Clock, Mail, Search, X, CheckCircle2, AlertCircle, LifeBuoy, Package, Wallet, UserRound, Activity } from 'lucide-react';
@@ -311,7 +312,7 @@ function ArticleCard({ a, n }: { a: Article; n: number }) {
 
 function TopicPage({ id }: { id: string }) {
   const t = topicById(id);
-  useTitle(t ? t.title : 'Topic');
+  useTitle(t ? t.title : 'Page not found');
   const [q, setQ] = useState('');
   if (!t) return <NotFound />;
   const list = articlesForTopic(t.id);
@@ -423,7 +424,8 @@ function Toc({ heads }: { heads: string[] }) {
 
 function ArticlePage({ slug }: { slug: string }) {
   const a = articleBySlug(slug);
-  useTitle(a ? a.title : 'Article');
+  useTitle(a ? a.title : 'Page not found');
+  useNoIndexIf(!a);
   const [vote, setVote] = useState<'yes' | 'no' | null>(null);
   if (!a) return <NotFound />;
   const t = topicById(a.topic)!;
@@ -647,6 +649,7 @@ function ContactPage() {
 
 /* ── 404 ─────────────────────────────────────────────────────────────────── */
 function NotFound() {
+  useNoIndex();
   useTitle('Page not found');
   return (
     <Page>

@@ -1,3 +1,4 @@
+import { useNoIndex } from '@/lib/seo';
 import React from 'react';
 import { Switch, Route } from 'wouter';
 import { ArrowRight } from 'lucide-react';
@@ -41,6 +42,7 @@ function Home() {
 }
 
 function NotFound() {
+  useNoIndex();
   return (
     <Shell title="Page not found" sticky={false}>
       <Light>

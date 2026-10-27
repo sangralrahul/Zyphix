@@ -1,3 +1,5 @@
+import { OrderRequestForm, WaitlistForm } from '@/components/RequestForms';
+import { useSeo } from '@/lib/seo';
 import React, { useState, useEffect } from 'react';
 import { motion } from '@/lib/motion';
 import { Search, Star, X, Plus, Minus, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -52,6 +54,7 @@ const feeLabel = (fee: number) => (fee === 0 ? 'Free delivery' : `₹${fee} deli
 const enter = { initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.2, ease: 'easeOut' as const } };
 
 export function ZyphixEats() {
+  useSeo('Zyphix Eats — Food from your favourite local kitchens', 'Restaurants, cafés, dhabas and home kitchens near you, cooked to order at menu prices and tracked to your door.');
   const initCuisine = () => {
     try { return localStorage.getItem('zyphix_food_cat') || 'All'; } catch { return 'All'; }
   };
@@ -77,7 +80,8 @@ export function ZyphixEats() {
     tags: ['New on Zyphix'],
     registered: true,
   }));
-  const allRestaurants: Restaurant[] = [...registered, ...restaurants];
+  // Only real, approved restaurants are listed (the old sample list is not shown publicly).
+  const allRestaurants: Restaurant[] = registered;
 
   useEffect(() => {
     try { localStorage.removeItem('zyphix_food_cat'); } catch {}
@@ -105,8 +109,9 @@ export function ZyphixEats() {
     return cuisineMatch && searchMatch;
   });
 
-  const popular = [...restaurants].sort((a, b) => b.rating - a.rating).slice(0, 6);
-  const showPopular = activeCuisine === 'All' && !search;
+  const popular = allRestaurants.slice(0, 6) as unknown as typeof restaurants;
+  const showPopular = activeCuisine === 'All' && !search && allRestaurants.length > 0;
+  const openingSoon = allRestaurants.length === 0;
 
   const activeR = activeRestaurant ? allRestaurants.find(r => r.id === activeRestaurant) : null;
   const activeMenu = activeRestaurant ? menuItems.filter(m => m.restaurantId === activeRestaurant) : [];
@@ -156,11 +161,10 @@ export function ZyphixEats() {
               ))}
             </Card>
           ) : (
-            <Card hover={false} className="mt-3 rounded-xl px-4 py-5">
-              <p className="text-[14px] font-semibold text-gray-900">Menu coming soon</p>
-              <p className="mt-0.5 text-[13px] text-gray-500">
-                {activeR.registered ? 'This restaurant just joined Zyphix — their menu is being set up.' : 'This restaurant is still setting up their menu.'}
-              </p>
+            <Card hover={false} className="mt-3 rounded-2xl p-5 md:p-6">
+              <p className="text-[16px] font-semibold text-gray-900">Order by request</p>
+              <p className="mt-1 mb-4 text-[13.5px] text-gray-500">{activeR.name} is setting up its full menu on Zyphix. Tell us what you'd like and we'll call you to confirm it with the kitchen.</p>
+              <OrderRequestForm restaurant={activeR.name} />
             </Card>
           )}
         </motion.div>
@@ -170,7 +174,7 @@ export function ZyphixEats() {
           {/* Hero: video, headline, search, cuisine chips */}
           <div className="zx-bleed -mx-4 md:-mt-4">
             <VideoHero clip={VIDEOS.food} height="min-h-[56svh] md:min-h-[78svh]" dim={0.4}>
-              <EatsHeroLiveOrder />
+              {!openingSoon && <EatsHeroLiveOrder />}
               <div className="zx-bleed-inner px-4 pb-7 pt-14 md:pb-14 md:pt-24">
                 <Kicker light>Zyphix Eats</Kicker>
                 <SplitHeadline className={`${DISPLAY} max-w-[15ch] text-[38px] leading-[1.0] text-white sm:text-[48px] md:text-[64px]`}
@@ -192,10 +196,10 @@ export function ZyphixEats() {
                     <button type="button" onClick={() => setSearch('')} aria-label="Clear search" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700"><X size={15} /></button>
                   )}
                   <span className="hidden h-9 items-center rounded-xl px-4 text-[13.5px] font-semibold text-white md:inline-flex md:h-11 md:px-5" style={{ background: `linear-gradient(180deg, #13B874 0%, ${G} 100%)` }}>
-                    {allRestaurants.length} open
+                    {openingSoon ? 'Opening soon' : `${allRestaurants.length} open`}
                   </span>
                 </form>
-                <div className="mt-4 flex gap-1.5 overflow-x-auto pb-0.5 no-scrollbar xl:max-w-[calc(100%-340px)]">
+                {!openingSoon && <div className="mt-4 flex gap-1.5 overflow-x-auto pb-0.5 no-scrollbar xl:max-w-[calc(100%-340px)]">
                   {FOOD_CUISINE_TYPES.map(c => {
                     const active = activeCuisine === c;
                     return (
@@ -208,7 +212,7 @@ export function ZyphixEats() {
                       </button>
                     );
                   })}
-                </div>
+                </div>}
               </div>
             </VideoHero>
           </div>
@@ -223,8 +227,22 @@ export function ZyphixEats() {
             </>
           )}
 
+          {openingSoon && (
+            <section id="eats-grid" className="mt-8 scroll-mt-20 md:mt-10">
+              <div className="grid gap-6 overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 md:grid-cols-[1fr_1.1fr] md:gap-10 md:p-10">
+                <div>
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-emerald-700">Opening soon near you</p>
+                  <h2 className="mt-3 text-[28px] font-semibold leading-[1.08] tracking-[-0.035em] text-gray-900 md:text-[36px]">Your favourite kitchens are joining Zyphix Eats.</h2>
+                  <p className="mt-3 text-[15px] leading-[1.6] text-gray-500">We're onboarding restaurants neighbourhood by neighbourhood. Leave your number and we'll tell you the day Eats opens where you live.</p>
+                  <a href="https://partner.zyphix.in/restaurant" className="mt-5 inline-flex items-center gap-1.5 text-[14px] font-semibold text-emerald-700 hover:text-emerald-800">Own a restaurant? List it free <ChevronRight size={15} /></a>
+                </div>
+                <div className="md:pt-2"><WaitlistForm product="eats" cta="Notify me when Eats opens" /></div>
+              </div>
+            </section>
+          )}
+
           {/* Grid */}
-          <section id="eats-grid" className="mt-8 scroll-mt-20 md:mt-10">
+          {!openingSoon && <section id="eats-grid" className="mt-8 scroll-mt-20 md:mt-10">
             <Reveal y={12} amount={0.4} className="flex items-baseline justify-between gap-3">
               <h2 className="text-[17px] font-semibold tracking-[-0.01em] text-gray-900 md:text-[18px]">
                 {search ? `Results for “${search}”` : activeCuisine === 'All' ? 'All restaurants' : activeCuisine}
@@ -251,7 +269,7 @@ export function ZyphixEats() {
                 ))}
               </div>
             )}
-          </section>
+          </section>}
 
           {showPopular && (
             <>

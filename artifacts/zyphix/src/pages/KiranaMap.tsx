@@ -1,3 +1,4 @@
+import { useSeo } from '@/lib/seo';
 import React, { useState } from 'react';
 import { MapPin, Navigation, Star, Clock, Store } from 'lucide-react';
 import { stores } from '@/data/localData';
@@ -6,6 +7,7 @@ import { Button, FONT, IconTile } from '@/ui/kit';
 const card = 'rounded-xl border border-[#E6E8EC] bg-white';
 
 export function KiranaMap() {
+  useSeo('Store map · Zyphix', 'Find Zyphix partner stores in your neighbourhood.');
   const [selectedStore, setSelectedStore] = useState<string | null>(stores[0].id);
 
   return (

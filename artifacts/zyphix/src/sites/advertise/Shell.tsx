@@ -19,7 +19,7 @@ const FOOT: Array<[string, Array<[string, string]>]> = [
   ['Advertise', [['Formats', '#formats'], ['Who it\'s for', '#audience'], ['Targeting', '#targeting'], ['Reporting', '#reporting'], ['Pricing', '#pricing']]],
   ['Resources', [['How it works', '#process'], ['FAQ', '#faq'], ['Send a brief', '#contact'], ['Partner portal', PARTNER_SITE]]],
   ['Company', [['zyphix.in', MAIN_SITE], ['Become a partner', PARTNER_SITE], ['Partnerships email', `mailto:${PARTNERSHIPS_EMAIL}`]]],
-  ['Legal', [['Privacy', '/privacy'], ['Terms', '/terms']]],
+  ['Legal', [['Privacy', 'https://zyphix.in/privacy'], ['Terms', 'https://zyphix.in/terms']]],
 ];
 
 export function Footer() {

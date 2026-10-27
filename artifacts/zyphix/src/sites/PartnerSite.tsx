@@ -1,3 +1,4 @@
+import { useNoIndex } from '@/lib/seo';
 import React from 'react';
 import { Route, Switch } from 'wouter';
 import { ArrowRight } from 'lucide-react';
@@ -39,6 +40,7 @@ function PartnerHome() {
 
 /* ── Not found ───────────────────────────────────────────────────────────── */
 function PartnerNotFound() {
+  useNoIndex();
   React.useEffect(() => { document.title = 'Page not found · Zyphix Partners'; }, []);
   return (
     <Container narrow className="py-28 text-center">

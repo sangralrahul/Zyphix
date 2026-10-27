@@ -1,3 +1,4 @@
+import { useSeo } from '@/lib/seo';
 import React, { useMemo, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from '@/lib/motion';
@@ -10,6 +11,7 @@ import { Button, FONT, G } from '@/ui/kit';
 const card = 'rounded-2xl border border-gray-200 bg-white';
 
 export function Cart() {
+  useSeo('Your cart · Zyphix Now');
   const { items, add, remove, setQty, subtotal, totalItems } = useCart();
   const { appliedCoupon, applyCoupon, walletBalance, useWalletAtCheckout, setUseWalletAtCheckout, hasPreviousOrders } = usePromo();
   const [, navigate] = useLocation();

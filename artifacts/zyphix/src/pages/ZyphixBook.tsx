@@ -1,3 +1,5 @@
+import { sendRequest, OFFLINE_MSG } from '@/lib/requests';
+import { useSeo } from '@/lib/seo';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, ArrowUpRight, BadgeCheck, CalendarClock, Clock, MapPin, Search, ShieldCheck, X } from 'lucide-react';
 import { services } from '@/data/localData';
@@ -159,19 +161,30 @@ function ProCard({ p, onBook }: { p: PartnerListing; onBook: () => void }) {
 
 /* ════════════════════════════════════════════════════════════════════════════ */
 export function ZyphixBook() {
+  useSeo('Zyphix Book — Home services by verified pros', 'Plumbers, electricians, cleaners and more from your neighbourhood. ID-verified pros, price shown before you confirm.');
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [booked, setBooked] = useState(false);
   const [day, setDay] = useState<Day>(DAYS[0]);
   const [address, setAddress] = useState('');
+  const [contactName, setContactName] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [sending, setSending] = useState(false);
+  const [bookError, setBookError] = useState('');
 
-  useEffect(() => { document.title = 'Zyphix Book — Home services by verified pros'; }, []);
 
-  const handleBook = () => {
-    if (selectedSlot) {
+  const handleBook = async () => {
+    const svc = selectedService ? services.find(s => s.id === selectedService) : null;
+    if (!svc || !selectedSlot) return;
+    if (!contactName.trim()) { setBookError('Add your name so the pro knows who to ask for.'); return; }
+    if (!/^\d{10}$/.test(contactPhone)) { setBookError('Enter a 10-digit mobile number so we can confirm the visit.'); return; }
+    if (address.trim().length < 6) { setBookError('Add the address where the work is needed.'); return; }
+    setSending(true); setBookError('');
+    try {
+      await sendRequest('book', { name: contactName, phone: contactPhone, address }, [{ name: svc.title, note: `${day}, ${selectedSlot}` }], { slot: `${day}, ${selectedSlot}`, service: svc.title });
       setBooked(true);
-      setTimeout(() => setBooked(false), 3000);
-    }
+    } catch { setBookError(OFFLINE_MSG); }
+    setSending(false);
   };
 
   const activeService = selectedService ? services.find(s => s.id === selectedService) || null : null;
@@ -204,7 +217,8 @@ export function ZyphixBook() {
   };
   const pickById = (id: string) => { const s = services.find(x => x.id === id); if (s) pickFromHero(s); };
 
-  const booking: BookingState = { activeService, day, setDay, slot: selectedSlot, setSlot: setSelectedSlot, address, setAddress, booked, onBook: handleBook };
+  const booking: BookingState = { activeService, day, setDay, slot: selectedSlot, setSlot: setSelectedSlot, address, setAddress, booked, onBook: handleBook,
+    name: contactName, setName: setContactName, phone: contactPhone, setPhone: setContactPhone, sending, error: bookError, onReset: () => { setBooked(false); setSelectedSlot(null); } };
 
   return (
     <div className="w-full text-gray-900" style={{ fontFamily: FONT }}>

@@ -627,12 +627,14 @@ export function RestaurantSetup() {
   const [restData, setRestData] = useState<Record<string, string>>({});
   const [cuisines, setCuisines] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [, setLoc] = useLocation();
 
   const handleOperationsNext = async () => {
-    setSubmitting(true);
+    setSubmitting(true); setSubmitError('');
+    let sent = false;
     try {
-      await apiFetch('/api/partner-register', {
+      const res = await apiFetch('/api/partner-register', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: restData.owner || restData.name,
@@ -649,13 +651,15 @@ export function RestaurantSetup() {
           },
         }),
       });
-    } catch { /* non-blocking */ }
+      sent = res.ok;
+    } catch { /* offline */ }
+    if (!sent) { setSubmitting(false); setSubmitError("We couldn't send your application. Check your internet connection and tap submit again. Your answers are still here."); return; }
     setSubmitting(false);
     setStep(3); window.scrollTo(0, 0);
   };
 
   return (
-    <RegisterShell track="restaurant" steps={['Restaurant info', 'Menu & cuisine', 'Operations']} step={step} done={step === 3}>
+    <RegisterShell track="restaurant" error={submitError} onDismissError={() => setSubmitError('')} steps={['Restaurant info', 'Menu & cuisine', 'Operations']} step={step} done={step === 3}>
       <div>
         <AnimatePresence mode="wait">
           {step === 0 && <RestaurantInfoStep key="r0" onNext={d => { setRestData(d as Record<string, string>); setStep(1); window.scrollTo(0, 0); }} />}

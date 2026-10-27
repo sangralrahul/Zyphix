@@ -1,3 +1,4 @@
+import { useSeo } from '@/lib/seo';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from '@/lib/motion';
 import { useLocation, useSearch } from 'wouter';
@@ -709,6 +710,7 @@ const VALID_TABS: TabId[] = ['profile', 'addresses', 'orders', 'settings'];
 
 /* ─── ROOT EXPORT ─── */
 export function Account() {
+  useSeo('Your account · Zyphix');
   const { user, ready, openModal } = useAuth();
   const [, nav] = useLocation();
   const search = useSearch();

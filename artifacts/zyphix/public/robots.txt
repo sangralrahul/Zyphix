@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /partner-dashboard
+Disallow: /api/
+Disallow: /checkout
+Disallow: /account
 
-Sitemap: https://www.zyphix.in/sitemap.xml
+Sitemap: https://zyphix.in/sitemap.xml

@@ -6,6 +6,7 @@ import { ZyphixLogo } from '@/components/ZyphixLogo';
 import { Button, Container, Display, Eyebrow, Lead, Mesh, FONT, G as KIT_G, G_DEEP, INK as KIT_INK } from '@/ui/kit';
 import { authUrl } from '@/lib/account';
 import { useAuth } from '@/context/AuthContext';
+import { detectSite, mainHref } from '@/lib/site';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Shared marketing chrome for zyphix.in — header, footer, page helpers.
@@ -32,8 +33,8 @@ const NAV: NavItem[] = [
 
 function NavLink({ item, onClick, className }: { item: NavItem; onClick?: () => void; className: string }) {
   if (item.external) return <a href={item.href} target="_blank" rel="noopener noreferrer" onClick={onClick} className={className}>{item.label}</a>;
-  if (item.href.startsWith('/#')) return <a href={item.href} onClick={onClick} className={className}>{item.label}</a>;
-  return <Link href={item.href} onClick={onClick} className={className}>{item.label}</Link>;
+  if (item.href.startsWith('/#')) return <a href={mainHref(item.href)} onClick={onClick} className={className}>{item.label}</a>;
+  return <SmartLink href={item.href} onClick={onClick} className={className}>{item.label}</SmartLink>;
 }
 
 /* ── Header ───────────────────────────────────────────────────────────────── */
@@ -61,7 +62,7 @@ export function SiteHeader({ variant = 'solid' }: { variant?: 'solid' | 'transpa
 
   const { user } = useAuth();
   // Signed-in visitors go straight to their account; everyone else to auth.zyphix.in and back here.
-  const signIn = user ? { href: '/account', label: 'My account' } : { href: typeof window !== 'undefined' ? authUrl(window.location.href) : '/auth', label: 'Sign in' };
+  const signIn = user ? { href: mainHref('/account'), label: 'My account' } : { href: typeof window !== 'undefined' ? authUrl(window.location.href) : '/auth', label: 'Sign in' };
 
   const desktop = clear ? 'text-[14px] font-medium tracking-[-0.01em] text-white/80 transition-colors hover:text-white' : 'text-[14px] font-medium tracking-[-0.01em] text-gray-600 transition-colors hover:text-gray-900';
   const mobile = 'flex items-center justify-between py-3.5 text-[17px] font-medium tracking-[-0.01em] text-gray-900';
@@ -79,7 +80,7 @@ export function SiteHeader({ variant = 'solid' }: { variant?: 'solid' | 'transpa
 
         <div className="hidden items-center gap-2 lg:flex">
           <Button href={signIn.href} sameTab variant="ghost" size="sm" className={clear ? 'text-white/85 hover:bg-white/10 hover:text-white' : ''}>{signIn.label}</Button>
-          <Button href="/now" variant="primary" size="sm">Order now</Button>
+          <Button href={NOW_HREF} variant="primary" size="sm">Order now</Button>
         </div>
 
         <button className={`-mr-2 rounded-lg p-2 lg:hidden ${clear ? 'text-white' : 'text-gray-700'}`} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} onClick={() => setOpen(v => !v)}>
@@ -96,7 +97,7 @@ export function SiteHeader({ variant = 'solid' }: { variant?: 'solid' | 'transpa
               ))}
             </div>
             <div className="mt-6 flex flex-col gap-3">
-              <Button href="/now" variant="primary" size="lg" className="w-full">Order now</Button>
+              <Button href={NOW_HREF} variant="primary" size="lg" className="w-full">Order now</Button>
               <Button href={signIn.href} sameTab variant="secondary" size="lg" className="w-full">{signIn.label}</Button>
             </div>
           </Container>
@@ -159,6 +160,13 @@ export function FooterWordmark({ dark = false }: { dark?: boolean }) {
   );
 }
 
+/** On zyphix.in: client-side link that ignores nested bases (e.g. /support). On a subdomain: full URL to zyphix.in. */
+function SmartLink({ href, className, onClick, children, ...rest }: { href: string; className?: string; onClick?: () => void; children: React.ReactNode; [k: string]: unknown }) {
+  if (detectSite() === 'main') return <Link href={`~${href}`} className={className} onClick={onClick} {...rest}>{children}</Link>;
+  return <a href={mainHref(href)} className={className} onClick={onClick} {...rest}>{children}</a>;
+}
+const NOW_HREF = 'https://now.zyphix.in';
+
 export function SiteFooter() {
   const link = 'inline-flex items-center gap-1 text-[13.5px] text-gray-600 transition-colors hover:text-gray-900';
   return (
@@ -178,7 +186,7 @@ export function SiteFooter() {
                     ? <a href={href} target="_blank" rel="noopener noreferrer" className={link}>{l}<ArrowUpRight size={12} className="text-gray-400" /></a>
                     : href.startsWith('mailto:')
                       ? <a href={href} className={link}>{l}</a>
-                      : <Link href={href} className={link}>{l}</Link>}
+                      : <SmartLink href={href} className={link}>{l}</SmartLink>}
                 </li>
               ))}
             </ul>

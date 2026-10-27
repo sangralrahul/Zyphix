@@ -1,3 +1,4 @@
+import { useSeo } from '@/lib/seo';
 import React, { useEffect } from 'react';
 import { Link } from 'wouter';
 import { Bell, Check, X, Package, Wallet as WalletIcon, Tag, Info } from 'lucide-react';
@@ -16,6 +17,7 @@ const ICONS: Record<string, React.ReactNode> = {
 const fmt = (iso: string) => new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 
 export function Notifications() {
+  useSeo('Notifications · Zyphix');
   const { items, unread, markAllRead, markRead, remove, clear } = useNotifications();
 
   useEffect(() => {
