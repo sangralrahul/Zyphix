@@ -159,21 +159,21 @@
 
 /* ── Partner registration forms (RegisterShell adds .zx-reg and --acc) ──────────
    Unlayered + !important so it beats the forms' inline styles without rewriting them. */
-.zx-reg label { text-transform: none !important; letter-spacing: -0.005em !important; font-size: 13.5px !important; font-weight: 600 !important; color: #374151 !important; }
-.zx-reg input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
-.zx-reg select,
-.zx-reg textarea {
+.zx-reg label:not(.group) { text-transform: none !important; letter-spacing: -0.005em !important; font-size: 13.5px !important; font-weight: 600 !important; color: #374151 !important; }
+.zx-reg input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(.zx-kit),
+.zx-reg select:not(.zx-kit),
+.zx-reg textarea:not(.zx-kit) {
   min-height: 50px; border-radius: 14px !important; font-size: 15px !important; padding-left: 16px !important; padding-right: 16px !important;
   background-color: #fff; border-width: 1.5px !important; transition: border-color .2s ease, box-shadow .25s ease, transform .2s ease !important;
 }
-.zx-reg textarea { padding-top: 14px !important; }
-.zx-reg select {
+.zx-reg textarea:not(.zx-kit) { padding-top: 14px !important; }
+.zx-reg select:not(.zx-kit) {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px !important;
 }
-.zx-reg input:not([type="checkbox"]):not([type="radio"]):focus,
-.zx-reg select:focus,
-.zx-reg textarea:focus {
+.zx-reg input:not([type="checkbox"]):not([type="radio"]):not(.zx-kit):focus,
+.zx-reg select:not(.zx-kit):focus,
+.zx-reg textarea:not(.zx-kit):focus {
   border-color: var(--acc, #0DA366) !important;
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--acc, #0DA366) 16%, transparent), 0 8px 24px -12px color-mix(in srgb, var(--acc, #0DA366) 45%, transparent) !important;
   outline: none !important;
@@ -181,7 +181,7 @@
 .zx-reg input::placeholder, .zx-reg textarea::placeholder { color: #9CA3AF; }
 .zx-reg input[type="checkbox"], .zx-reg input[type="radio"] { accent-color: var(--acc, #0DA366); }
 @media (prefers-reduced-motion: no-preference) {
-  .zx-reg input:not([type="checkbox"]):not([type="radio"]):focus, .zx-reg textarea:focus { transform: translateY(-1px); }
+  .zx-reg input:not([type="checkbox"]):not([type="radio"]):not(.zx-kit):focus, .zx-reg textarea:not(.zx-kit):focus { transform: translateY(-1px); }
 }
 .zx-reg main h2 { font-weight: 650 !important; letter-spacing: -0.03em !important; }
 @media (max-width: 640px) {
@@ -196,3 +196,7 @@
 @keyframes zx-wm-shine { 0% { background-position: 100% 0; } 55%, 100% { background-position: 0% 0; } }
 .zx-wm-letter { animation: zx-wm-shine 5.5s cubic-bezier(.45,0,.2,1) infinite; }
 @media (prefers-reduced-motion: reduce) { .zx-wm-letter { animation: none; } }
+
+/* Older step markup inside the new card: drop its own card chrome so there is one clean surface. */
+.zx-reg-card [style*="border-radius: 20px"][style*="box-shadow"] { box-shadow: none !important; border: 0 !important; padding: 0 !important; background: transparent !important; }
+.zx-reg-card [style*="max-width: 640px"], .zx-reg-card [style*="max-width: 620px"] { max-width: none !important; }

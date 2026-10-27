@@ -5,6 +5,8 @@ import { ArrowLeft, ArrowRight, Check, Utensils, Clock, FileText, Star, FileDown
 import { useLocation } from 'wouter';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
 import { RegisterShell } from '@/components/register/RegisterShell';
+import { StepIntro, Section, Field, TextInput, SelectInput, TextArea, ChoiceTiles, Actions, isPhone, isEmail, digits10 } from '@/components/register/FormKit';
+import { MapPin, User, Users, Mail } from 'lucide-react';
 import { RegisterSuccess, SuccessButton } from '@/components/register/RegisterSuccess';
 
 const G = '#0DA366'; const T1 = '#111827'; const T2 = '#6B7280';
@@ -238,77 +240,51 @@ function RestaurantInfoStep({ onNext }: { onNext: (d: object) => void }) {
   };
 
   const TYPES = ['Dine-in Restaurant', 'Cloud Kitchen / Dark Kitchen', 'Dhaba', 'Cafe', 'Fast Food Outlet', 'Sweet Shop / Mithai', 'Food Truck', 'Home Kitchen'];
+  const next = () => { const e = validate(); if (Object.keys(e).length) { setErrors(e); return; } onNext(form); };
 
   return (
     <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
-      <div style={{ background: W, borderRadius: 20, padding: '32px 28px', boxShadow: SH2, border: `1px solid ${BD}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 13, background: `${RA}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>🍽️</div>
-          <div>
-            <h2 style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: '1.3rem', color: T1 }}>Restaurant Information</h2>
-            <p style={{ fontSize: 13, color: T3 }}>Tell us about your restaurant</p>
-          </div>
+      <StepIntro title="Tell us about your restaurant" sub="Takes about two minutes. This becomes your Zyphix Eats listing." />
+
+      <Section n={1} first title="What kind of kitchen is it?" desc="Choose the closest match.">
+        <div className="sm:col-span-2">
+          <ChoiceTiles cols={4} options={TYPES.map(t => ({ v: t, label: t }))} value={form.type} onChange={v => f('type', v)} invalid={!!errors.type} />
+          {errors.type && <p className="mt-2 text-[12.5px] font-medium text-red-600">{errors.type}</p>}
         </div>
+      </Section>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-          {[
-            { k: 'name', label: 'Restaurant Name', ph: 'e.g. Sharma Dhaba', full: true },
-            { k: 'owner', label: 'Owner / Manager Name', ph: 'Full name' },
-            { k: 'phone', label: 'Mobile Number', ph: '10-digit number', type: 'tel' },
-            { k: 'email', label: 'Email Address (optional)', ph: 'you@example.com — for confirmation', type: 'email' },
-            { k: 'seating', label: 'Seating Capacity (optional)', ph: 'e.g. 30 seats', type: 'number' },
-          ].map(({ k, label, ph, full, type }) => (
-            <div key={k} style={{ gridColumn: full ? '1 / -1' : undefined }}>
-              <label style={{ fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 5, display: 'block', textTransform: 'uppercase', letterSpacing: '.04em' }}>{label}</label>
-              <input value={(form as Record<string, string>)[k]} type={type || 'text'}
-                onChange={e => f(k, e.target.value)} placeholder={ph}
-                style={inp(errors[k])}
-                onFocus={e => { e.target.style.borderColor = RA; e.target.style.boxShadow = `0 0 0 3px ${RA}18`; }}
-                onBlur={e => { e.target.style.borderColor = errors[k] ? '#EF4444' : BD; e.target.style.boxShadow = 'none'; }} />
-              {errors[k] && <p style={{ fontSize: 11.5, color: '#EF4444', marginTop: 4 }}>{errors[k]}</p>}
-            </div>
-          ))}
+      <Section n={2} title="Restaurant details" desc="Shown to customers on your restaurant page.">
+        <Field label="Restaurant name" error={errors.name}>
+          <TextInput icon={<Utensils size={18} />} value={form.name} onValue={v => f('name', v)} placeholder="e.g. Sharma Dhaba" invalid={!!errors.name} valid={form.name.trim().length > 2} />
+        </Field>
+        <Field label="Seating capacity" optional error={errors.seating}>
+          <TextInput icon={<Users size={18} />} value={form.seating} onValue={v => f('seating', v.replace(/\D/g, '').slice(0, 4))} inputMode="numeric" placeholder="e.g. 30 seats" valid={!!form.seating} />
+        </Field>
+        <Field label="Area / colony" error={errors.area} full>
+          <SelectInput icon={<MapPin size={18} />} value={form.area} onValue={v => f('area', v)} placeholder="Select your locality" invalid={!!errors.area} valid={!!form.area}>
+            {AREAS_BY_DISTRICT.map(d => (
+              <optgroup key={d.d} label={d.d}>{d.areas.map(a => <option key={a} value={a}>{a}</option>)}</optgroup>
+            ))}
+          </SelectInput>
+        </Field>
+        <Field label="Full address" error={errors.address} full>
+          <TextArea value={form.address} onValue={v => f('address', v)} placeholder="Shop no., street, landmark" rows={2} invalid={!!errors.address} />
+        </Field>
+      </Section>
 
-          <div>
-            <label style={{ fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 5, display: 'block', textTransform: 'uppercase', letterSpacing: '.04em' }}>Area / Colony</label>
-            <select value={form.area} onChange={e => f('area', e.target.value)} style={{ ...inp(errors.area), appearance: 'none', cursor: 'pointer', color: form.area ? T1 : T3 }}>
-              <option value="">Select district & locality</option>
-              {AREAS_BY_DISTRICT.map(d => (
-                <optgroup key={d.d} label={`── ${d.d} ──`}>
-                  {d.areas.map(a => <option key={a} value={a}>{a}</option>)}
-                </optgroup>
-              ))}
-            </select>
-            {errors.area && <p style={{ fontSize: 11.5, color: '#EF4444', marginTop: 4 }}>{errors.area}</p>}
-          </div>
+      <Section n={3} title="Owner and contact" desc="We call this number to verify your restaurant. It is never shown to customers.">
+        <Field label="Owner / manager name" error={errors.owner}>
+          <TextInput icon={<User size={18} />} value={form.owner} onValue={v => f('owner', v)} placeholder="Full name" autoComplete="name" invalid={!!errors.owner} valid={form.owner.trim().length > 2} />
+        </Field>
+        <Field label="Mobile number" error={errors.phone}>
+          <TextInput prefix="+91" value={form.phone} onValue={v => f('phone', digits10(v))} type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="98765 43210" invalid={!!errors.phone} valid={isPhone(form.phone)} />
+        </Field>
+        <Field label="Email" optional hint="For your confirmation" error={errors.email} full>
+          <TextInput icon={<Mail size={18} />} value={form.email} onValue={v => f('email', v)} type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" invalid={!!errors.email} valid={isEmail(form.email)} />
+        </Field>
+      </Section>
 
-          <div>
-            <label style={{ fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 5, display: 'block', textTransform: 'uppercase', letterSpacing: '.04em' }}>Restaurant Type</label>
-            <select value={form.type} onChange={e => f('type', e.target.value)} style={{ ...inp(errors.type), appearance: 'none', cursor: 'pointer', color: form.type ? T1 : T3 }}>
-              <option value="">Select type</option>
-              {TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
-            {errors.type && <p style={{ fontSize: 11.5, color: '#EF4444', marginTop: 4 }}>{errors.type}</p>}
-          </div>
-
-          <div style={{ gridColumn: '1 / -1' }}>
-            <label style={{ fontSize: 11.5, fontWeight: 700, color: T2, marginBottom: 5, display: 'block', textTransform: 'uppercase', letterSpacing: '.04em' }}>Full Address</label>
-            <textarea value={form.address} onChange={e => f('address', e.target.value)} placeholder="Shop no., street, landmark..."
-              rows={2} style={{ ...inp(errors.address), resize: 'none', fontFamily: 'inherit' }}
-              onFocus={e => { e.target.style.borderColor = RA; e.target.style.boxShadow = `0 0 0 3px ${RA}18`; }}
-              onBlur={e => { e.target.style.borderColor = errors.address ? '#EF4444' : BD; e.target.style.boxShadow = 'none'; }} />
-            {errors.address && <p style={{ fontSize: 11.5, color: '#EF4444', marginTop: 4 }}>{errors.address}</p>}
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
-          <motion.button onClick={() => { const e = validate(); if (Object.keys(e).length) { setErrors(e); return; } onNext(form); }}
-            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '13px 28px', borderRadius: 12, background: RA, color: '#fff', fontSize: 14, fontWeight: 800, border: 'none', cursor: 'pointer', boxShadow: `0 4px 20px ${RA}40` }}>
-            Continue <ArrowRight size={16} />
-          </motion.button>
-        </div>
-      </div>
+      <Actions onNext={next} label="Continue to menu" note="Free to apply. No joining fee." />
     </motion.div>
   );
 }

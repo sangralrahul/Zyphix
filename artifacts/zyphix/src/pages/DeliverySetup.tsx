@@ -5,6 +5,8 @@ import { ArrowLeft, ArrowRight, Check, Upload, User, Bike, Calendar, CreditCard,
 import { useLocation } from 'wouter';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
 import { RegisterShell } from '@/components/register/RegisterShell';
+import { StepIntro, Section, Field, TextInput, SelectInput, Actions, isPhone, isEmail, digits10 } from '@/components/register/FormKit';
+import { MapPin, Mail } from 'lucide-react';
 import { RegisterSuccess, SuccessButton } from '@/components/register/RegisterSuccess';
 
 const G = '#0DA366'; const T1 = '#111827'; const T2 = '#6B7280';
@@ -149,73 +151,41 @@ function PersonalStep({ onNext }: { onNext:(d:object)=>void }) {
 
   return (
     <motion.div initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}} transition={{type:'spring',stiffness:120,damping:18}}>
-      <div style={{ maxWidth:620, margin:'0 auto' }}>
-        <div style={{ marginBottom:24 }}>
-          <h2 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif",fontWeight:900,fontSize:'1.55rem',color:T1,letterSpacing:'-.03em',marginBottom:6 }}>Personal Information</h2>
-          <p style={{ color:T2,fontSize:14 }}>Your details for the delivery partner account</p>
-        </div>
-        <div style={{ display:'flex',flexDirection:'column',gap:14 }}>
-          <div style={{ display:'grid',gridTemplateColumns:'2fr 1fr',gap:12 }}>
-            <div>
-              <label style={{ fontSize:12,fontWeight:700,color:T2,textTransform:'uppercase',letterSpacing:'.04em',display:'block',marginBottom:5 }}>Full Name</label>
-              <input value={form.name} onChange={e=>f('name',e.target.value)} placeholder="As on Aadhaar card" style={inp(errors.name)}
-                onFocus={e=>{e.target.style.borderColor=G;e.target.style.boxShadow=`0 0 0 3px ${G}1A`;}}
-                onBlur={e=>{e.target.style.borderColor=errors.name?'#EF4444':BD;e.target.style.boxShadow='none';}} />
-              {errors.name && <p style={{fontSize:11.5,color:'#EF4444',marginTop:4}}>{errors.name}</p>}
-            </div>
-            <div>
-              <label style={{ fontSize:12,fontWeight:700,color:T2,textTransform:'uppercase',letterSpacing:'.04em',display:'block',marginBottom:5 }}>Age</label>
-              <input value={form.age} onChange={e=>f('age',e.target.value)} type="number" min="18" max="55" placeholder="18–55" style={inp(errors.age)}
-                onFocus={e=>{e.target.style.borderColor=G;e.target.style.boxShadow=`0 0 0 3px ${G}1A`;}}
-                onBlur={e=>{e.target.style.borderColor=errors.age?'#EF4444':BD;e.target.style.boxShadow='none';}} />
-              {errors.age && <p style={{fontSize:11.5,color:'#EF4444',marginTop:4}}>{errors.age}</p>}
-            </div>
-          </div>
-          <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:12 }}>
-            <div>
-              <label style={{ fontSize:12,fontWeight:700,color:T2,textTransform:'uppercase',letterSpacing:'.04em',display:'block',marginBottom:5 }}>Mobile Number</label>
-              <input value={form.phone} onChange={e=>f('phone',e.target.value)} type="tel" inputMode="numeric" maxLength={10} placeholder="10-digit number" style={inp(errors.phone)}
-                onFocus={e=>{e.target.style.borderColor=G;e.target.style.boxShadow=`0 0 0 3px ${G}1A`;}}
-                onBlur={e=>{e.target.style.borderColor=errors.phone?'#EF4444':BD;e.target.style.boxShadow='none';}} />
-              {errors.phone && <p style={{fontSize:11.5,color:'#EF4444',marginTop:4}}>{errors.phone}</p>}
-            </div>
-            <div>
-              <label style={{ fontSize:12,fontWeight:700,color:T2,textTransform:'uppercase',letterSpacing:'.04em',display:'block',marginBottom:5 }}>Area / Colony</label>
-              <select value={form.area} onChange={e=>f('area',e.target.value)}
-                style={{...inp(errors.area),appearance:'none',cursor:'pointer',color:form.area?T1:T3}}>
-                <option value="">Select district & locality</option>
-                {AREAS_BY_DISTRICT.map(d=>(
-                  <optgroup key={d.d} label={`── ${d.d} ──`}>
-                    {d.areas.map(a=><option key={a} value={a}>{a}</option>)}
-                  </optgroup>
-                ))}
-              </select>
-              {errors.area && <p style={{fontSize:11.5,color:'#EF4444',marginTop:4}}>{errors.area}</p>}
-            </div>
-          </div>
-          <div>
-            <label style={{ fontSize:12,fontWeight:700,color:T2,textTransform:'uppercase',letterSpacing:'.04em',display:'block',marginBottom:5 }}>Emergency Contact Number</label>
-            <input value={form.emergency} onChange={e=>f('emergency',e.target.value)} type="tel" inputMode="numeric" maxLength={10} placeholder="Parent / Spouse number" style={inp(errors.emergency)}
-              onFocus={e=>{e.target.style.borderColor=G;e.target.style.boxShadow=`0 0 0 3px ${G}1A`;}}
-              onBlur={e=>{e.target.style.borderColor=errors.emergency?'#EF4444':BD;e.target.style.boxShadow='none';}} />
-            {errors.emergency && <p style={{fontSize:11.5,color:'#EF4444',marginTop:4}}>{errors.emergency}</p>}
-          </div>
-          <div>
-            <label style={{ fontSize:12,fontWeight:700,color:T2,textTransform:'uppercase',letterSpacing:'.04em',display:'block',marginBottom:5 }}>Email Address <span style={{color:T2,fontWeight:400,fontSize:11}}>(optional)</span></label>
-            <input value={form.email} onChange={e=>f('email',e.target.value)} type="email" inputMode="email" placeholder="you@example.com — for confirmation email" style={inp(errors.email)}
-              onFocus={e=>{e.target.style.borderColor=G;e.target.style.boxShadow=`0 0 0 3px ${G}1A`;}}
-              onBlur={e=>{e.target.style.borderColor=errors.email?'#EF4444':BD;e.target.style.boxShadow='none';}} />
-            {errors.email && <p style={{fontSize:11.5,color:'#EF4444',marginTop:4}}>{errors.email}</p>}
-          </div>
-        </div>
-        <motion.button onClick={next} whileHover={{scale:1.02}} whileTap={{scale:.97}}
-          style={{ width:'100%',marginTop:28,padding:'15px',borderRadius:13,background:G,color:'#fff',fontSize:15.5,fontWeight:800,border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,boxShadow:`0 6px 24px ${G}45` }}>
-          Continue to License <ArrowRight size={16}/>
-        </motion.button>
-      </div>
+      <StepIntro title="Let's get to know you" sub="Takes about two minutes. Your details stay private and are only used for onboarding." />
+
+      <Section n={1} first title="About you" desc="Use your name exactly as it appears on your Aadhaar card.">
+        <Field label="Full name" error={errors.name}>
+          <TextInput icon={<User size={18} />} value={form.name} onValue={v => f('name', v)} placeholder="As on Aadhaar card" autoComplete="name" invalid={!!errors.name} valid={form.name.trim().length > 2} />
+        </Field>
+        <Field label="Age" hint="18 to 55" error={errors.age}>
+          <TextInput icon={<Calendar size={18} />} value={form.age} onValue={v => f('age', v.replace(/\D/g, '').slice(0, 2))} inputMode="numeric" placeholder="e.g. 24" invalid={!!errors.age} valid={+form.age >= 18 && +form.age <= 55} />
+        </Field>
+        <Field label="Area you want to ride in" error={errors.area} full>
+          <SelectInput icon={<MapPin size={18} />} value={form.area} onValue={v => f('area', v)} placeholder="Select your locality" invalid={!!errors.area} valid={!!form.area}>
+            {AREAS_BY_DISTRICT.map(d => (
+              <optgroup key={d.d} label={d.d}>{d.areas.map(a => <option key={a} value={a}>{a}</option>)}</optgroup>
+            ))}
+          </SelectInput>
+        </Field>
+      </Section>
+
+      <Section n={2} title="How we reach you" desc="We call to schedule your document check and app training.">
+        <Field label="Mobile number" error={errors.phone}>
+          <TextInput prefix="+91" value={form.phone} onValue={v => f('phone', digits10(v))} type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="98765 43210" invalid={!!errors.phone} valid={isPhone(form.phone)} />
+        </Field>
+        <Field label="Emergency contact" hint="Parent or spouse" error={errors.emergency}>
+          <TextInput prefix="+91" value={form.emergency} onValue={v => f('emergency', digits10(v))} type="tel" inputMode="numeric" placeholder="98765 43210" invalid={!!errors.emergency} valid={isPhone(form.emergency)} />
+        </Field>
+        <Field label="Email" optional hint="For your confirmation" error={errors.email} full>
+          <TextInput icon={<Mail size={18} />} value={form.email} onValue={v => f('email', v)} type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" invalid={!!errors.email} valid={isEmail(form.email)} />
+        </Field>
+      </Section>
+
+      <Actions onNext={next} label="Continue to licence" note="Free to apply. No joining fee." />
     </motion.div>
   );
 }
+
 
 /* ─── Upload Box ─── */
 function UploadBox({ label, preview, onChange, required }: { label:string; preview:string|null; onChange:(url:string)=>void; required?:boolean }) {

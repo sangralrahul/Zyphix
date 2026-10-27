@@ -159,7 +159,15 @@ export function RegisterShell({ track, steps, step, done = false, children }: {
               </AnimatePresence>
             </div>
           )}
-          {children}
+          {done ? children : (
+            <div className="zx-reg-card relative overflow-hidden rounded-[28px] border border-gray-200/80 bg-white px-5 pb-8 pt-9 shadow-[0_1px_2px_rgba(16,24,40,.04),0_30px_70px_-40px_rgba(16,24,40,.28)] sm:px-10 sm:pb-10 sm:pt-11">
+              <div aria-hidden className="absolute inset-x-0 top-0 h-[3px] bg-gray-100">
+                <motion.div className="h-full origin-left" style={{ background: t.accent }}
+                  initial={false} animate={{ scaleX: (step + 1) / steps.length }} transition={{ duration: 0.7, ease: EASE }} />
+              </div>
+              {children}
+            </div>
+          )}
         </div>
       </main>
     </div>

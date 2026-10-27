@@ -8,6 +8,8 @@ import {
 import { apiFetch } from '@/lib/api';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
 import { RegisterShell } from '@/components/register/RegisterShell';
+import { StepIntro, Section, Field as KitField, TextInput, Actions, isPhone, isEmail, digits10 } from '@/components/register/FormKit';
+import { Mail, Building2 } from 'lucide-react';
 import { RegisterSuccess, SuccessButton } from '@/components/register/RegisterSuccess';
 import { G, HEAD_FONT } from '@/components/layout/SiteChrome';
 
@@ -60,46 +62,22 @@ type Verification = { idType: string; idLast4: string; bgConsent: boolean; terms
 type Errors = Record<string, string>;
 
 /* ── Small UI atoms ──────────────────────────────────────────────────────── */
-const labelCls = 'mb-1.5 block text-[12px] font-bold uppercase tracking-[.04em] text-gray-500';
+const labelCls = 'mb-2 block text-[13.5px] font-medium text-gray-800';
 const inputCls = (err?: string) =>
-  `w-full rounded-xl border bg-white px-3.5 py-3 text-[14px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:ring-[3px] ${
-    err ? 'border-red-500 focus:border-red-500 focus:ring-red-100' : 'border-gray-200 focus:border-emerald-600 focus:ring-emerald-100'
+  `zx-kit h-[52px] w-full rounded-2xl border-[1.5px] bg-white px-4 text-[15px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:!border-[var(--acc)] focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--acc)_14%,transparent)] ${
+    err ? 'border-red-400' : 'border-gray-200 hover:border-gray-300'
   }`;
 
 function Field({ label, error, hint, children }: { label: string; error?: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label className={labelCls}>{label} {hint && <span className="font-normal normal-case tracking-normal text-gray-400">({hint})</span>}</label>
-      {children}
-      {error && <p className="mt-1 text-[11.5px] text-red-600">{error}</p>}
-    </div>
-  );
+  return <KitField label={label} hint={hint} error={error}>{children}</KitField>;
 }
 
 function StepHead({ title, sub }: { title: string; sub: string }) {
-  return (
-    <div className="mb-6">
-      <h2 className="text-[1.55rem] font-black tracking-[-0.03em] text-gray-900" style={{ fontFamily: HEAD_FONT }}>{title}</h2>
-      <p className="mt-1 text-[14px] text-gray-500">{sub}</p>
-    </div>
-  );
+  return <StepIntro title={title} sub={sub} />;
 }
 
 function NavButtons({ onBack, onNext, nextLabel, busy }: { onBack?: () => void; onNext: () => void; nextLabel: string; busy?: boolean }) {
-  return (
-    <div className="mt-7 flex gap-3">
-      {onBack && (
-        <button type="button" onClick={onBack} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-5 py-3.5 text-[14px] font-bold text-gray-600 hover:bg-gray-50">
-          <ArrowLeft size={15} /> Back
-        </button>
-      )}
-      <button type="button" onClick={onNext} disabled={busy}
-        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-[15px] font-extrabold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
-        style={{ background: G }}>
-        {busy ? 'Submitting…' : <>{nextLabel} <ArrowRight size={16} /></>}
-      </button>
-    </div>
-  );
+  return <Actions onBack={onBack} onNext={onNext} label={nextLabel} busy={busy} note={onBack ? undefined : 'Free to apply. No joining fee.'} />;
 }
 
 const slide = {
@@ -149,26 +127,26 @@ function PersonalStep({ initial, onNext }: { initial: Personal; onNext: (d: Pers
 
   return (
     <motion.div {...slide}>
-      <StepHead title="Personal details" sub="How we reach you during onboarding" />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="sm:col-span-2">
-          <Field label="Full name" error={errors.name}>
-            <input value={form.name} onChange={e => f('name', e.target.value)} placeholder="As on your government ID" className={inputCls(errors.name)} />
-          </Field>
-        </div>
-        <Field label="Mobile number" error={errors.phone}>
-          <input value={form.phone} onChange={e => f('phone', e.target.value.replace(/\D/g, '').slice(0, 10))} type="tel" inputMode="numeric" maxLength={10} placeholder="10-digit number" className={inputCls(errors.phone)} />
-        </Field>
-        <Field label="Email" error={errors.email}>
-          <input value={form.email} onChange={e => f('email', e.target.value)} type="email" inputMode="email" placeholder="you@example.com" className={inputCls(errors.email)} />
-        </Field>
-        <Field label="City" error={errors.city}>
-          <input value={form.city} onChange={e => f('city', e.target.value)} placeholder="e.g. Dehradun" className={inputCls(errors.city)} />
-        </Field>
-        <Field label="Area / locality" error={errors.locality}>
-          <input value={form.locality} onChange={e => f('locality', e.target.value)} placeholder="e.g. Rajpur Road" className={inputCls(errors.locality)} />
-        </Field>
-      </div>
+      <StepHead title="Let's start with you" sub="Takes about two minutes. We use this to reach you during onboarding." />
+      <Section n={1} first title="About you" desc="Use the name on your government ID.">
+        <KitField label="Full name" error={errors.name} full>
+          <TextInput icon={<User size={18} />} value={form.name} onValue={v => f('name', v)} placeholder="As on your government ID" autoComplete="name" invalid={!!errors.name} valid={form.name.trim().length > 2} />
+        </KitField>
+        <KitField label="Mobile number" error={errors.phone}>
+          <TextInput prefix="+91" value={form.phone} onValue={v => f('phone', digits10(v))} type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="98765 43210" invalid={!!errors.phone} valid={isPhone(form.phone)} />
+        </KitField>
+        <KitField label="Email" error={errors.email}>
+          <TextInput icon={<Mail size={18} />} value={form.email} onValue={v => f('email', v)} type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" invalid={!!errors.email} valid={isEmail(form.email)} />
+        </KitField>
+      </Section>
+      <Section n={2} title="Where you work" desc="Customers near this area will see your profile.">
+        <KitField label="City" error={errors.city}>
+          <TextInput icon={<Building2 size={18} />} value={form.city} onValue={v => f('city', v)} placeholder="e.g. Dehradun" invalid={!!errors.city} valid={form.city.trim().length > 1} />
+        </KitField>
+        <KitField label="Area / locality" error={errors.locality}>
+          <TextInput icon={<MapPin size={18} />} value={form.locality} onValue={v => f('locality', v)} placeholder="e.g. Rajpur Road" invalid={!!errors.locality} valid={form.locality.trim().length > 1} />
+        </KitField>
+      </Section>
       <NavButtons onNext={next} nextLabel="Continue to profession" />
     </motion.div>
   );
@@ -494,7 +472,7 @@ export function ServiceProSetup() {
   return (
     <RegisterShell track="service" steps={['Personal', 'Profession', 'Verification']} step={step} done={step === 3}>
       <div>
-        <div className={step < 3 ? 'rounded-3xl border border-gray-200 bg-white p-5 sm:p-8' : ''}>
+        <div>
           <AnimatePresence mode="wait">
             {step === 0 && <PersonalStep key="s0" initial={personal} onNext={d => { setPersonal(d); go(1); }} />}
             {step === 1 && <ProfessionStep key="s1" initial={profession} onNext={d => { setProfession(d); go(2); }} onBack={() => go(0)} />}

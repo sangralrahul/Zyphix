@@ -5,6 +5,8 @@ import { ArrowLeft, ArrowRight, Check, Store, Clock, FileText, Sparkles, FileDow
 import { useLocation } from 'wouter';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
 import { RegisterShell } from '@/components/register/RegisterShell';
+import { StepIntro, Section, Field, TextInput, SelectInput, ChoiceTiles, Actions, isPhone, isEmail, digits10 } from '@/components/register/FormKit';
+import { Store as StoreIcon, MapPin, Home, User, Mail } from 'lucide-react';
 import { RegisterSuccess, SuccessButton } from '@/components/register/RegisterSuccess';
 
 const G = '#0DA366'; const T1 = '#111827'; const T2 = '#6B7280';
@@ -341,100 +343,44 @@ function StoreInfoStep({ onNext }: { onNext:(d:object)=>void }) {
 
   return (
     <motion.div initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-30}} transition={{type:'spring',stiffness:120,damping:18}}>
-      <div style={{ maxWidth:640, margin:'0 auto' }}>
-        <div style={{ marginBottom:28 }}>
-          <h2 style={{ fontFamily:"'Geist', 'Geist Fallback', sans-serif", fontWeight:900, fontSize:'1.55rem', color:T1, letterSpacing:'-.03em', marginBottom:6 }}>Tell us about your store</h2>
-          <p style={{ color:T2, fontSize:14 }}>We'll use this to set up your listing on Zyphix</p>
-        </div>
+      <StepIntro title="Tell us about your store" sub="Takes about two minutes. We use this to set up your listing on Zyphix Now." />
 
-        {/* Store type */}
-        <div style={{ marginBottom:20 }}>
-          <label style={{ fontSize:12, fontWeight:700, color:T2, textTransform:'uppercase', letterSpacing:'.04em', display:'block', marginBottom:10 }}>Store Type</label>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
-            {STORE_TYPES.map(({v,e,l})=>(
-              <motion.button key={v} whileHover={{scale:1.03,y:-2}} whileTap={{scale:.97}}
-                onClick={()=>f('type',v)}
-                style={{ padding:'14px 10px', borderRadius:14, background:form.type===v?`${G}0F`:W, border:`2px solid ${form.type===v?G:BD}`, cursor:'pointer', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', gap:6, boxShadow:form.type===v?`0 0 0 3px ${G}1A`:SH, transition:'all .15s' }}>
-                <img src={e} alt={l} draggable={false} style={{width:36,height:36,objectFit:'contain'}} />
-                <span style={{fontSize:10.5,fontWeight:700,color:form.type===v?'#065F46':T2,lineHeight:1.3}}>{l}</span>
-              </motion.button>
+      <Section n={1} first title="What kind of store is it?" desc="Pick the one that fits best. You can sell across categories later.">
+        <div className="sm:col-span-2">
+          <ChoiceTiles options={STORE_TYPES.map(t => ({ v: t.v, label: t.l, img: t.e }))} value={form.type} onChange={v => f('type', v)} invalid={!!errors.type} />
+          {errors.type && <p className="mt-2 text-[12.5px] font-medium text-red-600">{errors.type}</p>}
+        </div>
+      </Section>
+
+      <Section n={2} title="Store details" desc="Shown to customers on your store page.">
+        <Field label="Store name" error={errors.name} full>
+          <TextInput icon={<StoreIcon size={18} />} value={form.name} onValue={v => f('name', v)} placeholder="e.g. Sharma Kirana Store" invalid={!!errors.name} valid={form.name.trim().length > 2} />
+        </Field>
+        <Field label="Area / colony" error={errors.area}>
+          <SelectInput icon={<MapPin size={18} />} value={form.area} onValue={v => f('area', v)} placeholder="Select your locality" invalid={!!errors.area} valid={!!form.area}>
+            {AREAS_BY_DISTRICT.map(d => (
+              <optgroup key={d.d} label={d.d}>{d.areas.map(a => <option key={a} value={a}>{a}</option>)}</optgroup>
             ))}
-          </div>
-          {errors.type && <p style={{fontSize:11.5,color:'#EF4444',marginTop:6}}>{errors.type}</p>}
-        </div>
+          </SelectInput>
+        </Field>
+        <Field label="Full address" error={errors.address}>
+          <TextInput icon={<Home size={18} />} value={form.address} onValue={v => f('address', v)} placeholder="Shop no., street, landmark" invalid={!!errors.address} valid={form.address.trim().length > 5} />
+        </Field>
+      </Section>
 
-        <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-          {/* Store name */}
-          <div>
-            <label style={{ fontSize:12, fontWeight:700, color:T2, textTransform:'uppercase', letterSpacing:'.04em', display:'block', marginBottom:5 }}>Store Name</label>
-            <input value={form.name} onChange={e=>f('name',e.target.value)} placeholder="e.g. Sharma Kirana Store"
-              style={inp(errors.name)}
-              onFocus={e=>{e.target.style.borderColor=G;e.target.style.boxShadow=`0 0 0 3px ${G}1A`;}}
-              onBlur={e=>{e.target.style.borderColor=errors.name?'#EF4444':BD;e.target.style.boxShadow='none';}} />
-            {errors.name && <p style={{fontSize:11.5,color:'#EF4444',marginTop:4}}>{errors.name}</p>}
-          </div>
+      <Section n={3} title="Owner and contact" desc="We call this number to verify your store. It is never shown to customers.">
+        <Field label="Owner name" error={errors.ownerName}>
+          <TextInput icon={<User size={18} />} value={form.ownerName} onValue={v => f('ownerName', v)} placeholder="Your full name" autoComplete="name" invalid={!!errors.ownerName} valid={form.ownerName.trim().length > 2} />
+        </Field>
+        <Field label="Mobile number" error={errors.phone}>
+          <TextInput prefix="+91" value={form.phone} onValue={v => f('phone', digits10(v))} type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="98765 43210" invalid={!!errors.phone} valid={isPhone(form.phone)} />
+        </Field>
+        <Field label="Email" optional hint="For your confirmation" error={errors.email} full>
+          <TextInput icon={<Mail size={18} />} value={form.email} onValue={v => f('email', v)} type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" invalid={!!errors.email} valid={isEmail(form.email)} />
+        </Field>
+      </Section>
 
-          {/* Area + Address */}
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 2fr', gap:12 }}>
-            <div>
-              <label style={{ fontSize:12, fontWeight:700, color:T2, textTransform:'uppercase', letterSpacing:'.04em', display:'block', marginBottom:5 }}>Area / Colony</label>
-              <select value={form.area} onChange={e=>f('area',e.target.value)}
-                style={{...inp(errors.area), appearance:'none', cursor:'pointer', color:form.area?T1:T3}}>
-                <option value="">Select district & locality</option>
-                {AREAS_BY_DISTRICT.map(d=>(
-                  <optgroup key={d.d} label={`── ${d.d} ──`}>
-                    {d.areas.map(a=><option key={a} value={a}>{a}</option>)}
-                  </optgroup>
-                ))}
-              </select>
-              {errors.area && <p style={{fontSize:11.5,color:'#EF4444',marginTop:4}}>{errors.area}</p>}
-            </div>
-            <div>
-              <label style={{ fontSize:12, fontWeight:700, color:T2, textTransform:'uppercase', letterSpacing:'.04em', display:'block', marginBottom:5 }}>Full Address</label>
-              <input value={form.address} onChange={e=>f('address',e.target.value)} placeholder="Shop no., street, landmark"
-                style={inp(errors.address)}
-                onFocus={e=>{e.target.style.borderColor=G;e.target.style.boxShadow=`0 0 0 3px ${G}1A`;}}
-                onBlur={e=>{e.target.style.borderColor=errors.address?'#EF4444':BD;e.target.style.boxShadow='none';}} />
-              {errors.address && <p style={{fontSize:11.5,color:'#EF4444',marginTop:4}}>{errors.address}</p>}
-            </div>
-          </div>
-
-          {/* Owner + Phone */}
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-            <div>
-              <label style={{ fontSize:12, fontWeight:700, color:T2, textTransform:'uppercase', letterSpacing:'.04em', display:'block', marginBottom:5 }}>Owner Name</label>
-              <input value={form.ownerName} onChange={e=>f('ownerName',e.target.value)} placeholder="Your full name"
-                style={inp(errors.ownerName)}
-                onFocus={e=>{e.target.style.borderColor=G;e.target.style.boxShadow=`0 0 0 3px ${G}1A`;}}
-                onBlur={e=>{e.target.style.borderColor=errors.ownerName?'#EF4444':BD;e.target.style.boxShadow='none';}} />
-              {errors.ownerName && <p style={{fontSize:11.5,color:'#EF4444',marginTop:4}}>{errors.ownerName}</p>}
-            </div>
-            <div>
-              <label style={{ fontSize:12, fontWeight:700, color:T2, textTransform:'uppercase', letterSpacing:'.04em', display:'block', marginBottom:5 }}>Mobile Number</label>
-              <input value={form.phone} onChange={e=>f('phone',e.target.value)} type="tel" inputMode="numeric" maxLength={10} placeholder="10-digit number"
-                style={inp(errors.phone)}
-                onFocus={e=>{e.target.style.borderColor=G;e.target.style.boxShadow=`0 0 0 3px ${G}1A`;}}
-                onBlur={e=>{e.target.style.borderColor=errors.phone?'#EF4444':BD;e.target.style.boxShadow='none';}} />
-              {errors.phone && <p style={{fontSize:11.5,color:'#EF4444',marginTop:4}}>{errors.phone}</p>}
-            </div>
-          </div>
-
-          {/* Email */}
-          <div>
-            <label style={{ fontSize:12, fontWeight:700, color:T2, textTransform:'uppercase', letterSpacing:'.04em', display:'block', marginBottom:5 }}>Email Address <span style={{color:T2,fontWeight:400,fontSize:11}}>(optional)</span></label>
-            <input value={form.email} onChange={e=>f('email',e.target.value)} type="email" inputMode="email" placeholder="you@example.com — for confirmation email"
-              style={inp(errors.email)}
-              onFocus={e=>{e.target.style.borderColor=G;e.target.style.boxShadow=`0 0 0 3px ${G}1A`;}}
-              onBlur={e=>{e.target.style.borderColor=errors.email?'#EF4444':BD;e.target.style.boxShadow='none';}} />
-            {errors.email && <p style={{fontSize:11.5,color:'#EF4444',marginTop:4}}>{errors.email}</p>}
-          </div>
-        </div>
-
-        <motion.button onClick={next} whileHover={{scale:1.02}} whileTap={{scale:.97}}
-          style={{ width:'100%', marginTop:28, padding:'15px', borderRadius:13, background:G, color:'#fff', fontSize:15.5, fontWeight:800, border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8, boxShadow:`0 6px 24px ${G}45` }}>
-          Continue to Categories <ArrowRight size={16}/>
-        </motion.button>
-      </div>
+      <Actions onNext={next} label="Continue to categories" note="Free to apply. No joining fee." />
     </motion.div>
   );
 }
