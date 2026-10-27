@@ -119,6 +119,32 @@ const SOCIALS: Array<[React.ReactNode, string, string]> = [
   [<Twitter size={15} />, 'https://x.com/zyphix_in', 'X'],
 ];
 
+/** Oversized serif-italic "Zyphix" that closes every footer, cropped by the page edge. */
+export function FooterWordmark({ dark = false }: { dark?: boolean }) {
+  return (
+    <div aria-hidden className="pointer-events-none relative select-none overflow-hidden" style={{ height: 'clamp(84px, 17vw, 300px)' }}>
+      <div
+        className="absolute inset-x-0 top-0 text-center leading-[0.82]"
+        style={{
+          fontFamily: "'Instrument Serif', 'Instrument Serif Fallback', ui-serif, Georgia, serif",
+          fontStyle: 'italic',
+          fontWeight: 400,
+          fontSize: 'clamp(120px, 25vw, 440px)',
+          letterSpacing: '-0.02em',
+          backgroundImage: dark
+            ? 'linear-gradient(180deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.03) 75%)'
+            : 'linear-gradient(180deg, #E4E7EB 0%, #F3F4F6 80%)',
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          color: 'transparent',
+        }}
+      >
+        Zyphix
+      </div>
+    </div>
+  );
+}
+
 export function SiteFooter() {
   const link = 'inline-flex items-center gap-1 text-[13.5px] text-gray-600 transition-colors hover:text-gray-900';
   return (
@@ -160,6 +186,7 @@ export function SiteFooter() {
           </div>
         </Container>
       </div>
+      <FooterWordmark />
     </footer>
   );
 }

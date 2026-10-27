@@ -14,6 +14,7 @@ import { ReviewsProvider } from "@/context/ReviewsContext";
 import { NotificationsProvider } from "@/context/NotificationsContext";
 const AuthModal = lazy(() => import("@/components/AuthModal").then(m => ({ default: m.AuthModal })));
 import { Navbar } from "@/components/layout/Navbar";
+import { SiteFooter } from "@/components/layout/SiteChrome";
 const BottomNav = lazy(() => import("@/components/layout/BottomNav").then(m => ({ default: m.BottomNav })));
 
 
@@ -98,6 +99,7 @@ function LightLayout({ children }: { children: React.ReactNode }) {
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 16px 96px', boxSizing: 'border-box' as const }}>
         {children}
       </div>
+      <div className="pb-16 md:pb-0"><SiteFooter /></div>
       <Suspense fallback={null}><BottomNav /></Suspense>
     </div>
   );

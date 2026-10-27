@@ -1,3 +1,4 @@
+import { FooterWordmark } from '@/components/layout/SiteChrome';
 import React, { useEffect } from 'react';
 import { Link } from 'wouter';
 import { ArrowRight } from 'lucide-react';
@@ -54,6 +55,7 @@ export function Footer() {
           <p className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full" style={{ background: G }} /> Rolling out neighbourhood by neighbourhood</p>
         </Container>
       </div>
+      <FooterWordmark />
     </footer>
   );
 }
