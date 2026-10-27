@@ -243,6 +243,13 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   if (p === '/api/partner-register' && request.method === 'POST') return await partnerRegister(request, env);
   if (p === '/api/support' && request.method === 'POST') return await saveMessage(request, env, 'support');
   if (p === '/api/notify' && request.method === 'POST') return await saveMessage(request, env, 'notify');
+  if (p === '/api/client-error' && request.method === 'POST') {
+    const b = await readJson(request); if (!b) return json({ ok: false }, 400);
+    await ensureMessages(env);
+    const recent = await env.DB.prepare("SELECT COUNT(*) AS n FROM messages WHERE kind = 'client-error' AND created_at > datetime('now', '-1 hour')").first<{ n: number }>();
+    if ((recent?.n ?? 0) < 200) await env.DB.prepare("INSERT INTO messages (kind, data) VALUES ('client-error', ?)").bind(JSON.stringify({ message: str(b.message, 500), stack: str(b.stack, 2000), url: str(b.url, 300), ua: str(b.ua, 300), ip_country: request.headers.get('cf-ipcountry') || '' })).run();
+    return json({ ok: true });
+  }
 
   if (p === '/api/categories') {
     const { results } = await env.DB.prepare('SELECT name, icon, color, image_url AS image, sort FROM categories ORDER BY sort').all();

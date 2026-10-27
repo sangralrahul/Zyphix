@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { imgFallback } from "./data/media";
+import { reloadOnce, reportClientError } from "@/components/AppErrorBoundary";
 
 // Safety net: if any proxied /media image fails anywhere on the site, load it straight from Pexels.
 window.addEventListener(
@@ -97,12 +98,10 @@ else window.addEventListener("load", startWarm, { once: true });
    pages and reload once from the network. */
 window.addEventListener("vite:preloadError", (event) => {
   event.preventDefault();
-  let reloaded = false;
-  try { reloaded = sessionStorage.getItem("zx-reloaded") === "1"; sessionStorage.setItem("zx-reloaded", "1"); } catch { /* ignore */ }
-  if (reloaded) return;
-  const go = () => location.reload();
-  if ("caches" in window) caches.delete("zx-html-v1").then(go, go); else go();
+  reloadOnce();
 });
+window.addEventListener("error", (e) => { if (e.error) reportClientError(e.message, e.error?.stack); });
+window.addEventListener("unhandledrejection", (e) => { const r = e.reason as Error | undefined; if (r && /module|chunk/i.test(String(r.message))) reportClientError(String(r.message), r.stack); });
 if ("serviceWorker" in navigator && /(^|\.)zyphix\.in$/.test(location.hostname)) {
   window.addEventListener("load", () => { navigator.serviceWorker.register("/sw.js").catch(() => {}); }, { once: true });
 }

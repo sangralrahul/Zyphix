@@ -30,6 +30,7 @@ const SupportSite = lazy(() => import("@/sites/SupportSite"));
  */
 export { detectSite } from "@/lib/site";
 import { detectSite } from "@/lib/site";
+import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 
 const HomeLight = lazy(() => import("@/pages/HomeLight").then(m => ({ default: m.HomeLight })));
 const Privacy = lazy(() => import("@/pages/Privacy").then(m => ({ default: m.Privacy })));
@@ -224,9 +225,11 @@ function App() {
                 <CartProvider>
                   <PromoProvider>
                     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-                      <Suspense fallback={<RouteFallback />}>
-                        <Router />
-                      </Suspense>
+                      <AppErrorBoundary>
+                        <Suspense fallback={<RouteFallback />}>
+                          <Router />
+                        </Suspense>
+                      </AppErrorBoundary>
                       <LazyAuthModal />
                     </WouterRouter>
                   </PromoProvider>

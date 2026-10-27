@@ -205,7 +205,7 @@ export function Admin() {
         api<Partner[]>('/admin/partners', token), api<Order[]>('/admin/orders', token), api<Waiter[]>('/admin/waitlist', token).catch(() => [] as Waiter[]),
         api<Msg[]>('/admin/messages', token).catch(() => [] as Msg[]), api<{ configured: boolean }>('/admin/mail-status', token).catch(() => ({ configured: true })),
       ]);
-      setMessages(msgs); setMailOk(mail.configured);
+      setMessages(msgs.filter(m => m.kind !== 'client-error')); setMailOk(mail.configured);
       if (seen.current) {
         const added = p.filter(x => !seen.current!.has(x.id));
         if (added.length) {
