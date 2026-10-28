@@ -210,3 +210,27 @@
 /* Logo: a short lift on hover, nothing else */
 a:hover > .zx-logo .zx-logo-mark, button:hover > .zx-logo .zx-logo-mark, a:hover .zx-logo .zx-logo-mark { transform: translateY(-1px) rotate(-4deg); }
 @media (prefers-reduced-motion: reduce) { .zx-logo-mark { transition: none !important; } }
+
+/* ── Click feedback everywhere ───────────────────────────────────────────────
+   A quick press-in on every button and link. Uses the independent `scale`
+   property so it never fights an element's own transform. In the base layer,
+   so any element's own transition utilities still win. */
+@layer base {
+  a[href], button, [role="button"], [role="tab"], summary, input[type="submit"] {
+    transition-property: scale, color, background-color, border-color, box-shadow, opacity;
+    transition-duration: 160ms;
+    transition-timing-function: cubic-bezier(.22,1,.36,1);
+  }
+  a[href]:active, button:not(:disabled):active, [role="button"]:active, [role="tab"]:active, summary:active, input[type="submit"]:active { scale: .97; }
+  li > a[href]:active, article a[href]:active, a[class*="rounded-3xl"]:active, button[class*="rounded-3xl"]:active { scale: .99; }
+}
+button:focus-visible, a:focus-visible, [role="button"]:focus-visible { outline: 2px solid #0DA366; outline-offset: 3px; }
+
+/* Smooth fade between full page loads (same-origin, supporting browsers) */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 260ms; animation-timing-function: cubic-bezier(.22,1,.36,1); }
+
+@media (prefers-reduced-motion: reduce) {
+  a[href]:active, button:active, [role="button"]:active, [role="tab"]:active, summary:active { scale: none; }
+  @view-transition { navigation: none; }
+}

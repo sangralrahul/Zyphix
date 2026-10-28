@@ -43,6 +43,10 @@
     <meta name="twitter:title" content="Zyphix — The SuperLocal App" />
     <meta name="twitter:description" content="Groceries in minutes, food from local kitchens and verified home services — from the businesses already in your neighbourhood." />
 
+    <!-- Instant navigation: browsers that support it fetch a page as soon as you hover/touch its link -->
+    <script type="speculationrules">
+    {"prefetch":[{"source":"document","where":{"and":[{"or":[{"href_matches":"/*"},{"href_matches":"https://zyphix.in/*"},{"href_matches":"https://*.zyphix.in/*"}]},{"not":{"href_matches":"*/admin*"}},{"not":{"href_matches":"*/api/*"}},{"not":{"selector_matches":"[rel~=nofollow]"}}]},"eagerness":"moderate"}]}
+    </script>
     <!-- Warm up connections to the photo/video CDNs used by every hero -->
     <link rel="preconnect" href="https://images.pexels.com" />
     <link rel="dns-prefetch" href="https://videos.pexels.com" />

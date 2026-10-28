@@ -34,7 +34,7 @@ export { detectSite } from "@/lib/site";
 import { detectSite } from "@/lib/site";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import { useSeoSync } from "@/lib/seoSync";
-import { ScrollProgress, FilmGrain, PageFade, Spotlight } from "@/ui/CinemaLayer";
+import { ScrollProgress, FilmGrain, PageFade, Spotlight, ClickPulse } from "@/ui/CinemaLayer";
 
 const HomeLight = lazy(() => import("@/pages/HomeLight").then(m => ({ default: m.HomeLight })));
 const Privacy = lazy(() => import("@/pages/Privacy").then(m => ({ default: m.Privacy })));
@@ -119,6 +119,30 @@ function LightLayout({ children }: { children: React.ReactNode }) {
 const DarkLayout = LightLayout;
 
 const MAIN_ONLY = ["/about", "/contact", "/blog", "/investors", "/privacy", "/terms", "/app", "/partner", "/merchant-setup", "/restaurant-setup", "/delivery-setup", "/service-setup"];
+
+/** Route chunks to warm up when a link to them is hovered or touched (clicks then render instantly). */
+const ROUTE_CHUNKS: [RegExp, () => Promise<unknown>][] = [
+  [/^\/$/, () => import("@/pages/Landing")], [/^\/about/, () => import("@/pages/About")], [/^\/contact/, () => import("@/pages/Contact")],
+  [/^\/blog/, () => import("@/pages/Blog")], [/^\/investors/, () => import("@/pages/Investors")], [/^\/privacy/, () => import("@/pages/Privacy")],
+  [/^\/terms/, () => import("@/pages/Terms")], [/^\/app$/, () => import("@/pages/AppComingSoon")], [/^\/offers/, () => import("@/pages/Offers")],
+  [/^\/kirana-map/, () => import("@/pages/KiranaMap")], [/^\/(now\/)?product\//, () => import("@/pages/ProductDetail")],
+  [/^\/(now\/)?cart/, () => import("@/pages/Cart")], [/^\/(now\/)?checkout/, () => import("@/pages/Checkout")],
+  [/^\/wallet/, () => import("@/pages/Wallet")], [/^\/wishlist/, () => import("@/pages/Wishlist")], [/^\/notifications/, () => import("@/pages/Notifications")],
+];
+if (typeof window !== "undefined") {
+  const warmed = new Set<string>();
+  const warm = (e: Event) => {
+    const a = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+    if (!a) return;
+    let u: URL; try { u = new URL(a.href); } catch { return; }
+    if (u.origin !== window.location.origin || warmed.has(u.pathname)) return;
+    warmed.add(u.pathname);
+    for (const [re, load] of ROUTE_CHUNKS) if (re.test(u.pathname)) { load().catch(() => {}); break; }
+  };
+  window.addEventListener("pointerover", warm, { passive: true });
+  window.addEventListener("touchstart", warm, { passive: true });
+  window.addEventListener("focusin", warm);
+}
 
 function Router() {
   useSeoSync();
@@ -238,6 +262,7 @@ function App() {
                       <ScrollProgress />
                       <FilmGrain />
                       <Spotlight />
+                      <ClickPulse />
                       <LazyAuthModal />
                     </WouterRouter>
                   </PromoProvider>

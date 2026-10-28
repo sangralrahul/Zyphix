@@ -65,3 +65,43 @@ export function Spotlight() {
   }, []);
   return null;
 }
+
+/** Every click or tap on something interactive answers with a soft green pulse at the pointer.
+ *  Drawn on a fixed layer, so it never changes the clicked element's own styles. */
+export function ClickPulse() {
+  React.useEffect(() => {
+    if (isStatic()) return;
+    const SEL = 'a[href], button:not(:disabled), [role="button"], [role="tab"], [role="menuitem"], input[type="submit"], input[type="checkbox"], input[type="radio"], label, summary, select';
+    const down = (e: PointerEvent) => {
+      if (e.button !== 0) return;
+      const t = (e.target as Element | null)?.closest?.(SEL) as HTMLElement | null;
+      if (!t) return;
+      // find the surface behind the element: first ancestor with a solid background
+      let dark = false;
+      for (let el: HTMLElement | null = t; el; el = el.parentElement) {
+        const c = getComputedStyle(el).backgroundColor.match(/[\d.]+/g)?.map(Number);
+        if (c && (c.length < 4 || c[3] > 0.5)) { dark = (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) < 110; break; }
+      }
+      const r = t.getBoundingClientRect();
+      const size = Math.min(240, Math.max(72, Math.max(r.width, r.height) * 1.35));
+      const glow = dark ? 'rgba(110,231,183,.6)' : 'rgba(13,163,102,.34)';
+      const ring = dark ? 'rgba(167,243,208,.95)' : 'rgba(13,163,102,.8)';
+      const mk = (css: string) => {
+        const el = document.createElement('span');
+        el.setAttribute('aria-hidden', 'true');
+        el.style.cssText = `position:fixed;left:${e.clientX - size / 2}px;top:${e.clientY - size / 2}px;width:${size}px;height:${size}px;border-radius:50%;pointer-events:none;z-index:2147483000;will-change:transform,opacity;${css}`;
+        document.body.appendChild(el);
+        return el;
+      };
+      const dot = mk(`background:radial-gradient(circle, ${glow} 0%, ${glow} 30%, transparent 70%)`);
+      const rim = mk(`box-shadow:inset 0 0 0 2px ${ring}`);
+      dot.animate([{ transform: 'scale(.35)', opacity: 1 }, { transform: 'scale(.8)', opacity: .9, offset: .55 }, { transform: 'scale(1)', opacity: 0 }], { duration: 600, easing: 'ease-out' }).onfinish = () => dot.remove();
+      rim.animate([{ transform: 'scale(.2)', opacity: 1 }, { transform: 'scale(.8)', opacity: 1, offset: .55 }, { transform: 'scale(1.1)', opacity: 0 }], { duration: 680, easing: 'ease-out' }).onfinish = () => rim.remove();
+      setTimeout(() => rim.remove(), 900);
+      setTimeout(() => dot.remove(), 900);
+    };
+    window.addEventListener('pointerdown', down, { passive: true, capture: true });
+    return () => window.removeEventListener('pointerdown', down, { capture: true } as EventListenerOptions);
+  }, []);
+  return null;
+}
