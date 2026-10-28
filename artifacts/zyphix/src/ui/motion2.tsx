@@ -21,7 +21,7 @@ import {
   motion, AnimatePresence, useInView, useMotionTemplate, useMotionValue, useScroll, useSpring,
   useTransform, useVelocity, useAnimationFrame, type MotionValue,
 } from '@/lib/motion';
-import { BgVideo, isStatic, EASE, G } from './cinema';
+import { BgVideo, isStatic, handoff, EASE, G } from './cinema';
 import type { Clip } from '@/data/media';
 
 /* ── Accent ──────────────────────────────────────────────────────────────── */
@@ -419,7 +419,7 @@ export function SplitHeadline({ parts, className = '', delay = 0, as: Tag = 'h1'
   });
   const render = (t: typeof tokens[number]) => (t.accent ? <Accent green={t.green} className="pr-[0.04em]">{t.w}</Accent> : t.w);
 
-  if (isStatic()) {
+  if (isStatic() || handoff()) {
     return (
       <Tag className={className}>
         {tokens.map((t, i) => <React.Fragment key={i}>{render(t)}{i < tokens.length - 1 ? ' ' : ''}</React.Fragment>)}

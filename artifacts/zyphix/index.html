@@ -73,7 +73,7 @@
         var url = proxy ? '/media/vp/' + f + '?w=' + w : 'https://images.pexels.com/videos/' + id + '/' + name + '?auto=compress&cs=tinysrgb&w=' + w;
         var l = document.createElement('link'); l.rel = 'preload'; l.as = 'image'; l.href = url; l.setAttribute('fetchpriority', 'high');
         document.head.appendChild(l);
-        if (location.pathname === '/' && !/noanim/.test(location.search)) window.__zxBoot = url;
+        if (location.pathname === '/' && !/noanim/.test(location.search)) { window.__zxBoot = url; window.__zxSite = s; }
       })();
     </script>
     <style>
@@ -84,6 +84,29 @@
       @keyframes zx-load { 0% { transform: translateX(-100%) scaleX(.4); } 100% { transform: translateX(100%) scaleX(.4); } }
       @media (prefers-reduced-motion: reduce) { #zx-boot::before { animation: none; } }
       #zx-boot.out { opacity: 0; pointer-events: none; }
+      #zx-boot .t { position: absolute; z-index: 2; left: max(20px, calc((100vw - 1200px) / 2 + 24px)); right: 20px; top: 141px; color: #fff; font-family: Geist, 'Geist Fallback', system-ui, sans-serif; }
+      #zx-boot .k { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #6EE7B7; }
+      #zx-boot .k::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #34D399; }
+      #zx-boot .h { margin: 18px 0 0; max-width: 16ch; font-size: 46px; line-height: .99; letter-spacing: -.045em; font-weight: 600; text-wrap: balance; }
+      #zx-boot .h em { font-family: 'Instrument Serif', 'Instrument Serif Fallback', Georgia, serif; font-weight: 400; color: #34D399; letter-spacing: -.01em; }
+      #zx-boot .s { margin: 28px 0 0; max-width: 52ch; font-size: 17px; line-height: 1.6; color: rgba(255,255,255,.75); }
+      @media (min-width: 640px) { #zx-boot .h { font-size: 64px; } #zx-boot .s { font-size: 19px; } }
+      #zx-boot .m { display: none; } @media (min-width: 340px) and (max-width: 639px) { #zx-boot .m { display: inline; } }
+      #zx-boot .partner { top: 157px; } #zx-boot .partner .h { max-width: 14ch; } #zx-boot .partner .s { max-width: 580px; margin-top: 24px; }
+      /* desktop: the real hero anchors its content to the bottom of the viewport; mirror that */
+      @media (min-width: 768px) {
+        #zx-boot .t { left: max(32px, calc((100vw - 1056px) / 2)); top: calc(max(199px, 100vh - 573px) - 42px); }
+        #zx-boot .h { max-width: none; font-size: 78px; }
+        #zx-boot .s { margin-top: 32px; }
+        #zx-boot .partner { top: calc(max(231px, 100vh - 627px) - 42px); }
+        #zx-boot .partner .h { max-width: 14ch; font-size: 84px; }
+      }
+      @media (min-width: 1024px) {
+        #zx-boot .t { top: calc(max(199px, 100vh - 583px) - 42px); }
+        #zx-boot .s { margin-top: 88px; }
+        #zx-boot .partner { top: calc(max(231px, 100vh - 584px) - 42px); }
+      }
+      @media (min-width: 1200px) { #zx-boot .s { margin-top: 118px; } }
     </style>
   </head>
   <body>
@@ -99,7 +122,18 @@
         var d = document.createElement('div'); d.id = 'zx-boot'; d.setAttribute('aria-hidden', 'true');
         var i = new Image(); i.alt = ''; i.decoding = 'async'; i.setAttribute('fetchpriority', 'high'); i.src = u;
         i.onerror = function () { i.remove(); };
-        d.appendChild(i); document.body.appendChild(d);
+        d.appendChild(i);
+        /* The site's real headline, painted from the HTML so it shows before the app has loaded. */
+        var T = {
+          main: ['The SuperLocal app', 'Your neighbourhood,<br><em>delivered</em> in<br class="m"> 10 minutes.', 'Groceries from the corner store, dinner from your favourite kitchen, an electrician for the weekend. One app, one account, every shop near you.'],
+          partner: ['Partner portal', 'Grow with the <em>SuperLocal</em> app.', 'Deliver, cook, fix or sell for customers a few streets away. Free to apply, transparent terms, weekly payouts and a real onboarding manager from application to go-live.']
+        }[window.__zxSite];
+        if (T) {
+          var t = document.createElement('div'); t.className = 't ' + window.__zxSite;
+          t.innerHTML = '<div class="k">' + T[0] + '</div><div class="h">' + T[1] + '</div><p class="s">' + T[2] + '</p>';
+          d.appendChild(t); window.__zxBootText = true;
+        }
+        document.body.appendChild(d);
         setTimeout(function () { d.classList.add('out'); setTimeout(function () { d.remove(); }, 400); }, 9000);
       })();
     </script>

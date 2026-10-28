@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from '@/lib/motion';
 import { SiteHeader, SiteFooter } from '@/components/layout/SiteChrome';
 import { FONT, Container } from '@/ui/kit';
-import { VideoHero, Kicker, Sub, Reveal, isStatic, EASE } from '@/ui/cinema';
+import { VideoHero, Kicker, Sub, Reveal, isStatic, EASE, handoff } from '@/ui/cinema';
 import { SplitHeadline, type Part } from '@/ui/motion2';
 import type { Clip, Photo } from '@/data/media';
 import { Display } from './shared';
@@ -45,7 +45,7 @@ export function InnerHero({ clip, photo, kicker, parts, sub, children, aside, he
   clip?: Clip; photo?: Photo; kicker: string; parts: Part[]; sub?: React.ReactNode; children?: React.ReactNode; aside?: React.ReactNode; height?: string; position?: string;
 }) {
   const stat = isStatic();
-  const fade = (d: number) => (stat ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, ease: EASE, delay: d } });
+  const fade = (d: number) => (stat || handoff()) ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5, ease: EASE, delay: d * 0.4 } };
   const body = (
     <Container className="pb-16 pt-36 md:pb-24 md:pt-44">
       <div className={aside ? 'grid items-end gap-12 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-16' : ''}>

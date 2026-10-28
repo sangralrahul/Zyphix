@@ -29,7 +29,7 @@ if (boot) {
     obs.disconnect();
     requestAnimationFrame(() => requestAnimationFrame(() => {
       boot.classList.add("out");
-      setTimeout(() => boot.remove(), 400);
+      setTimeout(() => { boot.remove(); (window as any).__zxBootText = false; }, 400);
     }));
   };
   const obs = new MutationObserver(() => { if (root.querySelector("h1")) finish(); });

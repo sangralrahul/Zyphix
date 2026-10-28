@@ -57,6 +57,9 @@ export function ZyphixNow() {
   const [sortBy, setSortBy] = useState<SortKey>('featured');
   const [onlyDiscounted, setOnlyDiscounted] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
+  /* Render the first few aisles straight away and the rest in idle time, so the
+     page is usable before the whole catalogue is on screen. */
+  const [allAisles, setAllAisles] = useState(false);
   const [activeCat, setActiveCat] = useState<string>('');
   const mobileRailRef = useRef<HTMLDivElement>(null);
 
@@ -134,6 +137,7 @@ export function ZyphixNow() {
 
   /* ── Category navigation ── */
   const scrollToId = useCallback((id: string) => {
+    setAllAisles(true);
     const go = () => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -174,8 +178,7 @@ export function ZyphixNow() {
   // Scroll-spy: highlight the rail entry of the section nearest the top of the viewport.
   useEffect(() => {
     if (q || catalogLoading) return;
-    const els = categories.map(c => document.getElementById(sectionId(c.name))).filter(Boolean) as HTMLElement[];
-    if (!els.length) return;
+    if (!categories.length) return;
     let ticking = false;
     const onScroll = () => {
       if (ticking) return;
@@ -184,7 +187,7 @@ export function ZyphixNow() {
         ticking = false;
         const threshold = scrollOffset() + 16;
         let best: HTMLElement | null = null;
-        for (const el of els) {
+        for (const el of document.querySelectorAll<HTMLElement>('section[data-cat]')) {
           if (el.getBoundingClientRect().top - threshold <= 0) best = el; else break;
         }
         if (best) setActiveCat(best.dataset.cat || '');
@@ -414,28 +417,7 @@ export function ZyphixNow() {
               ) : categories.length === 0 ? (
                 <SkeletonSection />
               ) : (
-                categories.map(c => {
-                  const list = byCategory.get(c.name) || [];
-                  if (!list.length) return null;
-                  const isOpen = expanded.has(c.name);
-                  const canExpand = list.length > ROW_LIMIT;
-                  const shown = isOpen || !canExpand ? list : list.slice(0, ROW_LIMIT);
-                  return (
-                    <section key={c.name} id={sectionId(c.name)} data-cat={c.name}>
-                      <SectionHead
-                        title={c.name}
-                        sub={`${list.length} ${list.length === 1 ? 'product' : 'products'}`}
-                        action={canExpand ? (
-                          <button type="button" onClick={() => toggleExpanded(c.name)}
-                            className="group inline-flex items-center gap-1 text-[13.5px] font-semibold text-emerald-700 hover:text-emerald-800">
-                            {isOpen ? <>Show less <ChevronDown size={14} className="rotate-180" /></> : <>View all <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" /></>}
-                          </button>
-                        ) : undefined}
-                      />
-                      <ProductGrid products={shown} categories={categories} cart={cart} add={add} remove={remove} />
-                    </section>
-                  );
-                })
+                <AisleList categories={categories} byCategory={byCategory} expanded={expanded} showAll={allAisles} toggle={toggleExpanded} cart={cart} add={add} remove={remove} />
               )}
             </div>
           )}
@@ -759,6 +741,49 @@ function SortControls({ sortBy, setSortBy, onlyDiscounted, setOnlyDiscounted }: 
     </div>
   );
 }
+
+/* Aisles render a few at a time in idle callbacks, inside their own component so
+   each batch only touches the new aisles, not the whole page. */
+const AisleList = React.memo(function AisleList({ categories, byCategory, expanded, showAll, toggle, cart, add, remove }: {
+  categories: Category[]; byCategory: Map<string, Product[]>; expanded: Set<string>; showAll: boolean;
+  toggle: (name: string) => void; cart: Record<string, number>; add: (id: string) => void; remove: (id: string) => void;
+}) {
+  const [n, setN] = useState(2);
+  const count = showAll ? categories.length : n;
+  useEffect(() => {
+    if (count >= categories.length) return;
+    const w = window as any;
+    const id = w.requestIdleCallback ? w.requestIdleCallback(() => setN(v => v + 1), { timeout: 400 }) : setTimeout(() => setN(v => v + 1), 60);
+    return () => (w.cancelIdleCallback ? w.cancelIdleCallback(id) : clearTimeout(id));
+  }, [count, categories.length]);
+  return <>{categories.slice(0, count).map(c => (
+    <Aisle key={c.name} cat={c} list={byCategory.get(c.name) || []} open={expanded.has(c.name)} toggle={toggle} categories={categories} cart={cart} add={add} remove={remove} />
+  ))}</>;
+});
+
+const Aisle = React.memo(function Aisle({ cat, list, open, toggle, categories, cart, add, remove }: {
+  cat: Category; list: Product[]; open: boolean; toggle: (name: string) => void;
+  categories: Category[]; cart: Record<string, number>; add: (id: string) => void; remove: (id: string) => void;
+}) {
+  if (!list.length) return null;
+  const canExpand = list.length > ROW_LIMIT;
+  const shown = open || !canExpand ? list : list.slice(0, ROW_LIMIT);
+  return (
+    <section id={sectionId(cat.name)} data-cat={cat.name} className="zx-aisle">
+      <SectionHead
+        title={cat.name}
+        sub={`${list.length} ${list.length === 1 ? 'product' : 'products'}`}
+        action={canExpand ? (
+          <button type="button" onClick={() => toggle(cat.name)}
+            className="group inline-flex items-center gap-1 text-[13.5px] font-semibold text-emerald-700 hover:text-emerald-800">
+            {open ? <>Show less <ChevronDown size={14} className="rotate-180" /></> : <>View all <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" /></>}
+          </button>
+        ) : undefined}
+      />
+      <ProductGrid products={shown} categories={categories} cart={cart} add={add} remove={remove} />
+    </section>
+  );
+});
 
 function ProductGrid({ products, categories, cart, add, remove }: {
   products: Product[]; categories: Category[]; cart: Record<string, number>; add: (id: string) => void; remove: (id: string) => void;

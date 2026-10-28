@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from '@/lib/motion';
 import { ArrowRight, ShoppingBasket, UtensilsCrossed, Wrench, ChevronDown } from 'lucide-react';
-import { VideoHero, Kicker, GlowButton, GhostButton, Reveal, Light, Sub, isStatic, EASE } from '@/ui/cinema';
+import { VideoHero, Kicker, GlowButton, GhostButton, Reveal, Light, Sub, isStatic, EASE, handoff } from '@/ui/cinema';
 import { Accent, Magnetic, LiveOrder, GiantMarquee, SplitHeadline } from '@/ui/motion2';
 import { Container } from '@/ui/kit';
 import { VIDEOS } from '@/data/media';
@@ -40,7 +40,7 @@ const HERO_ITEMS = ['Fresh milk 1 L', 'Whole-wheat flour 5 kg', 'Bananas · 6'];
 
 export function Hero() {
   const stat = isStatic();
-  const fade = (d: number) => stat ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, ease: EASE, delay: d } };
+  const fade = (d: number) => (stat || handoff()) ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5, ease: EASE, delay: d * 0.4 } };
   return (
     <VideoHero clip={VIDEOS.heroCity} height="min-h-[100svh]" dim={0.42} position="center 40%">
       <Container className="pb-8 pt-36 sm:pb-10 md:pt-40">

@@ -28,6 +28,10 @@ export function isStatic(): boolean {
   return (_static = q || wd || rm);
 }
 
+/** True while the HTML boot screen is handing over to the app: the headline is
+ *  already on screen, so the hero renders in place instead of animating in. */
+export const handoff = () => typeof window !== 'undefined' && (window as any).__zxBootText === true;
+
 /* ── Reveal ───────────────────────────────────────────────────────────────── */
 type RevealProps = {
   children: React.ReactNode;
@@ -43,24 +47,37 @@ type RevealProps = {
   style?: React.CSSProperties;
 };
 /** Scroll-triggered fade/slide. `delay` in seconds (capped at 0.8). */
-export function Reveal({ children, delay = 0, y = 24, x = 0, scale = 1, blur = false, once = true, amount = 0.2, className = '', as = 'div', style }: RevealProps) {
-  const Tag = (motion as any)[as] as typeof motion.div;
-  if (isStatic()) {
-    const Plain = as as any;
-    return <Plain className={className} style={style}>{children}</Plain>;
-  }
-  return (
-    <Tag
-      className={className}
-      style={style}
-      initial={{ opacity: 0, y, x, scale, filter: blur ? 'blur(10px)' : 'none' }}
-      whileInView={{ opacity: 1, y: 0, x: 0, scale: 1, filter: 'blur(0px)' }}
-      viewport={{ once, amount: Math.min(amount, 0.12), margin: '0px 0px 8% 0px' }}
-      transition={{ duration: 0.6, ease: EASE, delay: Math.min(delay, 0.35) }}
-    >
-      {children}
-    </Tag>
-  );
+/* One shared IntersectionObserver for every Reveal on the page. The animation
+   itself is plain CSS (see .zx-rv in index.css), so hundreds of reveals cost
+   almost nothing: no per-element animation engine, no React re-renders. */
+let revealIO: IntersectionObserver | null = null;
+function observeReveal(el: HTMLElement) {
+  if (typeof IntersectionObserver === 'undefined') { el.setAttribute('data-in', ''); return () => {}; }
+  revealIO ??= new IntersectionObserver(entries => {
+    for (const e of entries) {
+      const t = e.target as HTMLElement;
+      if (e.isIntersecting) {
+        t.setAttribute('data-in', '');
+        if (t.dataset.once !== '0') revealIO!.unobserve(t);
+      } else if (t.dataset.once === '0') t.removeAttribute('data-in');
+    }
+  }, { rootMargin: '0px 0px 8% 0px', threshold: 0.08 });
+  revealIO.observe(el);
+  return () => revealIO?.unobserve(el);
+}
+
+export function Reveal({ children, delay = 0, y = 24, x = 0, scale = 1, blur = false, once = true, className = '', as = 'div', style }: RevealProps) {
+  const ref = React.useRef<HTMLElement>(null);
+  const stat = isStatic();
+  React.useEffect(() => (!stat && ref.current ? observeReveal(ref.current) : undefined), [stat]);
+  const Tag = as as any;
+  if (stat) return <Tag className={className} style={style}>{children}</Tag>;
+  const vars = {
+    '--ry': `${y}px`, '--rx': `${x}px`, '--rs': scale, '--rd': `${Math.min(delay, 0.35)}s`,
+    ...(blur ? { '--rb': 'blur(10px)' } : null),
+    ...style,
+  } as React.CSSProperties;
+  return <Tag ref={ref} className={`zx-rv ${className}`} style={vars} data-once={once ? undefined : '0'}>{children}</Tag>;
 }
 
 /** Staggers direct children (each child is wrapped). */

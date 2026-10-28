@@ -234,3 +234,19 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible { outline: 
   a[href]:active, button:active, [role="button"]:active, [role="tab"]:active, summary:active { scale: none; }
   @view-transition { navigation: none; }
 }
+
+/* Scroll reveal (driven by one shared observer in ui/cinema.tsx) */
+@layer components {
+  .zx-rv {
+    opacity: 0;
+    transform: translate3d(var(--rx, 0), var(--ry, 24px), 0) scale(var(--rs, 1));
+    filter: var(--rb, none);
+    transition: opacity .6s cubic-bezier(.22,1,.36,1) var(--rd, 0s), transform .7s cubic-bezier(.22,1,.36,1) var(--rd, 0s), filter .6s ease var(--rd, 0s);
+  }
+  .zx-rv[data-in] { opacity: 1; transform: none; filter: none; }
+  .zx-rv.contents { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zx-rv { opacity: 1 !important; transform: none !important; filter: none !important; transition: none !important; }
+}
+@media print { .zx-rv { opacity: 1 !important; transform: none !important; } }

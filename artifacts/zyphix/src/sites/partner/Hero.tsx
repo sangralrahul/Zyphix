@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from '@/lib/motion';
 import { ArrowRight } from 'lucide-react';
-import { VideoHero, Kicker, GlowButton, GhostButton, Ticker, Reveal, Light, isStatic, EASE } from '@/ui/cinema';
+import { VideoHero, Kicker, GlowButton, GhostButton, Ticker, Reveal, Light, isStatic, EASE, handoff } from '@/ui/cinema';
 import { Container } from '@/ui/kit';
 import { VIDEOS } from '@/data/media';
 import { Magnetic, SplitHeadline } from '@/ui/motion2';
@@ -13,7 +13,7 @@ import { PARTNERSHIPS_EMAIL, TRACKS } from './shared';
 
 export function Hero() {
   const stat = isStatic();
-  const fade = (d: number) => stat ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, ease: EASE, delay: d } };
+  const fade = (d: number) => (stat || handoff()) ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5, ease: EASE, delay: d * 0.4 } };
   return (
     <VideoHero clip={VIDEOS.heroCity} height="min-h-[100svh]" dim={0.45} position="center 45%">
       <Container className="pb-8 pt-40 sm:pb-10 md:pt-48">
