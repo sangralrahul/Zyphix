@@ -319,7 +319,7 @@ export function Admin() {
                 {view === 'partners' && <Partners partners={partners} onOpen={setOpen} onStatus={setStatus} fresh={fresh} loading={loading} />}
                 {view === 'orders' && <Orders orders={orders} loading={loading} />}
                 {view === 'waitlist' && <Waitlist rows={waitlist} loading={loading} />}
-                {view === 'inbox' && <InboxView rows={messages} loading={loading} />}
+                {view === 'inbox' && <><EmailHealth token={token} /><InboxView rows={messages} loading={loading} /></>}
               </div>
             </div>
           )}
@@ -693,6 +693,41 @@ function Waitlist({ rows, loading }: { rows: Waiter[]; loading: boolean }) {
 const KIND: Record<string, { label: string; c: string }> = {
   contact: { label: 'Contact form', c: '#0891B2' }, support: { label: 'Support', c: '#2563EB' }, advertise: { label: 'Advertiser', c: '#D97706' }, notify: { label: 'Notify me', c: G }, 'partner-other': { label: 'Partner (other)', c: '#7C3AED' },
 };
+type MailRow = { id: number; to_addr: string; subject: string; ok: number; detail: string; created_at: string };
+function EmailHealth({ token }: { token: string }) {
+  const [rows, setRows] = useState<MailRow[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState('');
+  const load = useCallback(() => { api<MailRow[]>('/admin/mail-log', token).then(setRows).catch(() => {}); }, [token]);
+  useEffect(() => { load(); }, [load]);
+  const test = async () => {
+    setBusy(true); setResult('');
+    try { const r = await api<{ sentTo: string; ok: boolean }>('/admin/mail-test', token, { method: 'POST' }); setResult(r.ok ? `Test email sent to ${r.sentTo}. Check your inbox (and spam).` : 'The test email failed. See the reason in the log below.'); }
+    catch (e) { setResult((e as Error).message); }
+    setBusy(false); load();
+  };
+  return (
+    <section className={`${PANEL} mb-6 p-5 sm:p-6`}>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="mr-auto"><h2 className="text-[17px] font-semibold">Email delivery</h2><p className="text-[13px] text-white/50">Every email the site sends (partner confirmations, your notifications, sign-in codes are not listed).</p></div>
+        <button onClick={test} disabled={busy} className="inline-flex h-10 items-center gap-2 rounded-full px-4 text-[13.5px] font-semibold text-white disabled:opacity-60" style={{ background: G }}>{busy ? <Loader2 size={15} className="animate-spin" /> : <Mail size={15} />} Send test email</button>
+      </div>
+      {result && <p className="mt-3 rounded-2xl bg-white/[.06] px-4 py-2.5 text-[13.5px] text-white/80">{result}</p>}
+      {rows.length > 0 && (
+        <ul className="mt-4 divide-y divide-white/[.06]">
+          {rows.slice(0, 8).map(r => (
+            <li key={r.id} className="flex items-start gap-3 py-2.5 text-[13px]">
+              <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${r.ok ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+              <div className="min-w-0 flex-1"><p className="truncate font-medium text-white">{r.subject}</p><p className="truncate text-white/50">to {r.to_addr} · {r.detail}</p></div>
+              <span className="shrink-0 text-white/40">{ago(r.created_at)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 function InboxView({ rows, loading }: { rows: Msg[]; loading: boolean }) {
   const [f, setF] = useState<string>('all');
   const kinds = ['all', ...Object.keys(KIND).filter(k => rows.some(r => r.kind === k))];

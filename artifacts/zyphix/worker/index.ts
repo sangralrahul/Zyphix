@@ -327,6 +327,14 @@ function authorized(request: Request, env: Env) {
   return (crypto.subtle as unknown as { timingSafeEqual(a: ArrayBufferView, b: ArrayBufferView): boolean }).timingSafeEqual(a, b);
 }
 
+/* ---- email log (D1): every send attempt, visible in the admin ---- */
+function mailLogger(env: Env) {
+  return async (to: string, subject: string, ok: boolean, detail: string) => {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS mail_log (id INTEGER PRIMARY KEY AUTOINCREMENT, to_addr TEXT, subject TEXT, ok INTEGER, detail TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')))").run();
+    await env.DB.prepare('INSERT INTO mail_log (to_addr, subject, ok, detail) VALUES (?,?,?,?)').bind(to, subject.slice(0, 200), ok ? 1 : 0, detail.slice(0, 500)).run();
+  };
+}
+
 /* ---- rate limiting (D1): forms and admin sign-in ---- */
 async function hit(env: Env, key: string, limit: number, windowSec: number, record = true): Promise<boolean> {
   await env.DB.prepare('CREATE TABLE IF NOT EXISTS rate_hits (k TEXT NOT NULL, ts INTEGER NOT NULL)').run();
@@ -366,7 +374,18 @@ async function handleAdmin(request: Request, env: Env, url: URL): Promise<Respon
     const { results } = await env.DB.prepare('SELECT * FROM messages ORDER BY id DESC LIMIT 1000').all();
     return json(results);
   }
-  if (p === '/admin/mail-status') return json({ configured: !!env.BREVO_API_KEY, from: env.MAIL_FROM || 'noreply@zyphix.in' });
+  if (p === '/admin/mail-status') return json({ configured: !!env.BREVO_API_KEY, from: env.MAIL_FROM || 'noreply@zyphix.in', partnerFrom: env.PARTNER_FROM || 'partnerships@zyphix.in', notify: env.PARTNER_NOTIFY_EMAIL || 'rahul@zyphix.in' });
+  if (p === '/admin/mail-log' && request.method === 'GET') {
+    await mailLogger(env)('', '', true, '').catch(() => {}); // ensures the table exists
+    await env.DB.prepare("DELETE FROM mail_log WHERE to_addr = '' AND subject = ''").run();
+    const { results } = await env.DB.prepare('SELECT * FROM mail_log ORDER BY id DESC LIMIT 100').all();
+    return json(results);
+  }
+  if (p === '/admin/mail-test' && request.method === 'POST') {
+    const to = env.PARTNER_NOTIFY_EMAIL || 'rahul@zyphix.in';
+    const r = await sendPartnerMails(env, { id: 'TEST-' + Date.now().toString(36).toUpperCase(), type: 'store', name: 'Test Applicant', businessName: 'Test Store (email check)', email: '', phone: '9999999999', city: 'Delhi', category: 'Kirana', tags: '', details: { note: 'This is a test sent from the admin console.' }, updated: false }, mailLogger(env));
+    return json({ sentTo: to, ok: r.owner });
+  }
   const pm = p.match(/^\/admin\/partners\/([^/]+)\/status$/);
   if (pm && request.method === 'POST') {
     const status = url.searchParams.get('status');
@@ -651,12 +670,12 @@ async function createPartner(request: Request, env: Env): Promise<Response> {
   if (existing) {
     await env.DB.prepare("UPDATE partners SET name=?, business_name=?, phone=?, city=?, locality=?, category=?, tags=?, details=?, status=CASE WHEN status='rejected' THEN 'pending' ELSE status END, updated_at=datetime('now') WHERE id=?")
       .bind(name, businessName, phone, city, locality, category, tags, JSON.stringify(d).slice(0, 8000), existing.id).run();
-    const mail = await sendPartnerMails(env, { id: existing.id, type, name, businessName, email, phone, city, category, tags, details: d, updated: true });
+    const mail = await sendPartnerMails(env, { id: existing.id, type, name, businessName, email, phone, city, category, tags, details: d, updated: true }, mailLogger(env));
     return json({ success: true, id: existing.id, updated: true, emailed: mail.applicant });
   }
   await env.DB.prepare('INSERT INTO partners (id, type, name, business_name, email, phone, city, locality, category, tags, details, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
     .bind(id, type, name, businessName, email, phone, city, locality, category, tags, JSON.stringify(d).slice(0, 8000), 'pending').run();
-  const mail = await sendPartnerMails(env, { id, type, name, businessName, email, phone, city, category, tags, details: d, updated: false });
+  const mail = await sendPartnerMails(env, { id, type, name, businessName, email, phone, city, category, tags, details: d, updated: false }, mailLogger(env));
   return json({ success: true, id, emailed: mail.applicant }, 201);
 }
 
@@ -963,7 +982,7 @@ async function partnerRegister(request: Request, env: Env): Promise<Response> {
   const raw = await request.text();
   let body: Record<string, any> = {};
   try { body = JSON.parse(raw); } catch { return json({ error: 'invalid JSON' }, 400); }
-  if (PARTNER_TYPES[str(body.role)]) return await createPartner(new Request(request.url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: raw }), env);
+  if (PARTNER_TYPES[str(body.role)]) return await createPartner(new Request(request.url, { method: 'POST', headers: request.headers, body: raw }), env);
   const email = str(body.email, 160);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'Enter a valid email address' }, 400);
   const kind = str(body.role, 30) === 'advertiser' ? 'advertise' : 'partner-other';

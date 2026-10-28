@@ -131,32 +131,46 @@ export function ownerEmail(p: PartnerMailInput) {
   return { subject: `${p.updated ? 'Updated' : 'New'} partner application: ${p.businessName || p.name} (${TYPE_LABEL[p.type] ?? p.type}, ${p.city || 'no city'})`, html, text };
 }
 
-export type MailEnv = { BREVO_API_KEY?: string; PARTNER_FROM?: string; PARTNER_NOTIFY_EMAIL?: string };
+export type MailEnv = { BREVO_API_KEY?: string; PARTNER_FROM?: string; PARTNER_NOTIFY_EMAIL?: string; MAIL_FROM?: string };
+export type MailLog = (to: string, subject: string, ok: boolean, detail: string) => Promise<void>;
 
-async function brevo(env: MailEnv, body: Record<string, unknown>) {
-  if (!env.BREVO_API_KEY) throw new Error('mail-not-configured');
-  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-    method: 'POST', headers: { 'api-key': env.BREVO_API_KEY, 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(body),
+/** One Brevo send. If Brevo refuses the sender (address not verified in Brevo), retry once
+ *  from the verified MAIL_FROM address, keeping replies going to the intended sender. */
+async function brevo(env: MailEnv, body: Record<string, any>): Promise<string> {
+  if (!env.BREVO_API_KEY) throw new Error('BREVO_API_KEY is not set on the Worker');
+  const send = async (b: Record<string, any>) => fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST', headers: { 'api-key': env.BREVO_API_KEY!, 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(b),
   });
-  if (!res.ok) throw new Error(`brevo ${res.status} ${(await res.text()).slice(0, 200)}`);
+  let res = await send(body);
+  if (res.ok) return `sent from ${body.sender?.email} (${(await res.text()).slice(0, 80)})`;
+  let err = (await res.text()).slice(0, 300);
+  const fallback = env.MAIL_FROM || 'noreply@zyphix.in';
+  if (res.status === 400 && /sender|not valid|domain/i.test(err) && body.sender?.email !== fallback) {
+    res = await send({ ...body, sender: { name: body.sender?.name || 'Zyphix', email: fallback }, replyTo: body.replyTo ?? body.sender });
+    if (res.ok) return `sender ${body.sender?.email} refused by Brevo, sent from ${fallback} instead`;
+    err = `${err} | fallback: ${(await res.text()).slice(0, 200)}`;
+  }
+  throw new Error(`Brevo ${res.status}: ${err}`);
 }
 
 /** Sends both emails; never throws (registration must succeed even if email fails). */
-export async function sendPartnerMails(env: MailEnv, p: PartnerMailInput): Promise<{ applicant: boolean; owner: boolean }> {
+export async function sendPartnerMails(env: MailEnv, p: PartnerMailInput, log?: MailLog): Promise<{ applicant: boolean; owner: boolean }> {
   const from = { name: 'Zyphix Partnerships', email: env.PARTNER_FROM || 'partnerships@zyphix.in' };
   const owner = env.PARTNER_NOTIFY_EMAIL || 'rahul@zyphix.in';
   let attachment: { name: string; content: string }[] | undefined;
   try { attachment = [{ name: `Zyphix-partner-application-${p.id}.pdf`, content: b64(await partnerPdf(p)) }]; } catch (e) { console.error('partner pdf', (e as Error).message); }
   const result = { applicant: false, owner: false };
+  const run = async (to: string, mail: Record<string, any>, key: 'applicant' | 'owner') => {
+    try { const d = await brevo(env, mail); result[key] = true; await log?.(to, mail.subject, true, d); }
+    catch (e) { const m = (e as Error).message; console.error(`partner ${key} mail`, m); await log?.(to, mail.subject, false, m).catch(() => {}); }
+  };
   const jobs: Promise<void>[] = [];
   if (p.email) {
     const m = applicantEmail(p);
-    jobs.push(brevo(env, { sender: from, to: [{ email: p.email, name: p.name || undefined }], replyTo: from, subject: m.subject, htmlContent: m.html, textContent: m.text, attachment })
-      .then(() => { result.applicant = true; }).catch(e => console.error('partner applicant mail', (e as Error).message)));
+    jobs.push(run(p.email, { sender: from, to: [{ email: p.email, name: p.name || undefined }], replyTo: from, subject: m.subject, htmlContent: m.html, textContent: m.text, attachment }, 'applicant'));
   }
   const o = ownerEmail(p);
-  jobs.push(brevo(env, { sender: from, to: [{ email: owner }], replyTo: p.email ? { email: p.email, name: p.name || undefined } : undefined, subject: o.subject, htmlContent: o.html, textContent: o.text, attachment })
-    .then(() => { result.owner = true; }).catch(e => console.error('partner owner mail', (e as Error).message)));
+  jobs.push(run(owner, { sender: from, to: [{ email: owner }], replyTo: p.email ? { email: p.email, name: p.name || undefined } : undefined, subject: o.subject, htmlContent: o.html, textContent: o.text, attachment }, 'owner'));
   await Promise.all(jobs);
   return result;
 }
