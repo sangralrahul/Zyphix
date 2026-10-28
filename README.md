@@ -1,153 +1,182 @@
 <div align="center">
-  <a href="https://zyphix.in">
-    <img src="https://zyphix.in/favicon.svg" alt="Zyphix logo" width="88" height="88" />
-  </a>
 
-  # ZYPHIX
+<a href="https://zyphix.in"><img src="https://zyphix.in/og/main.jpg" alt="Zyphix — your neighbourhood, delivered" width="100%" /></a>
 
-  **India's SuperLocal App**
+<br />
 
-  Groceries, food, pharmacy, and neighbourhood essentials—delivered from trusted local businesses.
+# Zyphix
 
-  [![Website](https://img.shields.io/badge/Website-zyphix.in-111111?style=for-the-badge)](https://zyphix.in)
-  [![Delivery](https://img.shields.io/badge/Delivery-Under_30_Minutes-16a34a?style=for-the-badge)](https://zyphix.in)
-  [![Built for India](https://img.shields.io/badge/Built_for-Bharat-ff7a00?style=for-the-badge)](https://zyphix.in)
+**The SuperLocal app.** Groceries in minutes, food from local kitchens and verified home services, from the businesses already in your neighbourhood.
+
+[![Website](https://img.shields.io/badge/zyphix.in-live-0DA366?style=flat-square)](https://zyphix.in)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers%20%C2%B7%20D1%20%C2%B7%20R2-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/workers/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![pnpm](https://img.shields.io/badge/pnpm-workspace-F69220?style=flat-square&logo=pnpm&logoColor=white)](https://pnpm.io)
+
+[Website](https://zyphix.in) · [Zyphix Now](https://now.zyphix.in) · [Zyphix Eats](https://eats.zyphix.in) · [Zyphix Book](https://book.zyphix.in) · [Partners](https://partner.zyphix.in) · [Help centre](https://support.zyphix.in)
+
 </div>
 
 ---
 
-## About Zyphix
+## Overview
 
-Zyphix is a hyperlocal commerce platform connecting customers with nearby kirana stores, restaurants, pharmacies, and local partners. It is designed to make neighbourhood shopping fast and convenient while helping independent businesses serve customers digitally.
+Zyphix connects people with the corner stores, kitchens and professionals already on their street. Instead of dark stores and warehouses, orders are fulfilled by independent local businesses at their own prices, with riders from the same neighbourhood.
 
-The platform focuses on transparent pricing, real local inventory, and fast last-mile fulfilment—without relying on dark warehouses.
+One account works across every product, and every product runs on a single edge deployment.
 
-🌐 **Live website:** [zyphix.in](https://zyphix.in)
+## Products
 
-## Product Experiences
+| Product | Domain | What it does |
+| --- | --- | --- |
+| **Zyphix Now** | [now.zyphix.in](https://now.zyphix.in) | Groceries and daily essentials from nearby stores, delivered in about 30 minutes |
+| **Zyphix Eats** | [eats.zyphix.in](https://eats.zyphix.in) | Restaurants, cafés, dhabas and home kitchens, cooked to order |
+| **Zyphix Book** | [book.zyphix.in](https://book.zyphix.in) | Plumbers, electricians, cleaners and other verified home-service professionals |
+| **Partners** | [partner.zyphix.in](https://partner.zyphix.in) | Onboarding for stores, restaurants, professionals and delivery partners |
+| **Advertise** | [advertise.zyphix.in](https://advertise.zyphix.in) | Sponsored placements for local businesses and brands |
+| **Support** | [support.zyphix.in](https://support.zyphix.in) | Help centre, articles and contact |
+| **Accounts** | [auth.zyphix.in](https://auth.zyphix.in) · [accounts.zyphix.in](https://accounts.zyphix.in) | Passwordless email sign-in and the customer account |
+| **Operations** | admin.zyphix.in | Partner review, orders, requests, inbox and email delivery |
 
-### ⚡ Zyphix Now
+## Highlights
 
-Fast access to everyday essentials from nearby stores, including:
+- **One codebase, every subdomain.** A single React app detects the host and renders the right product.
+- **Edge-first.** Pages, APIs, images and media are served from Cloudflare's network. Per-page titles, canonicals, Open Graph tags and structured data are rendered at the edge, so crawlers get them without running JavaScript.
+- **Passwordless sign-in.** Six-digit email codes are stored hashed in D1, expire after ten minutes, and are rate-limited. One session cookie is shared across `*.zyphix.in`.
+- **Partner pipeline.** Applications arrive as *pending*. The operations console approves, rejects or hides them, and approved partners go live on the public sites. Applicants and the team both receive an email with a PDF of the application.
+- **Self-maintaining catalog.** A scheduled Worker resolves product photos, generates produce imagery with Workers AI and builds WebP thumbnails in R2.
+- **Production hygiene.** Per-host `robots.txt` and sitemaps, 301 redirects, real 404 status codes, security headers (HSTS, CSP baseline, frame protection), rate limiting and spam traps on public forms, and an admin lockout after repeated failed keys.
 
-- Fresh fruits and vegetables
-- Dairy and eggs
-- Snacks and beverages
-- Pharmacy products
-- Grains and staples
-- Household and personal-care products
+## Architecture
 
-### 🍱 Zyphix Eats
+```text
+               Browser / mobile app
+                       │
+        *.zyphix.in  (Cloudflare edge)
+                       │
+   ┌───────────────────┴──────────────────────────┐
+   │  Worker  (artifacts/zyphix/worker)            │
+   │  edge.ts       redirects · SEO tags · robots  │
+   │                sitemaps · security headers    │
+   │  index.ts      /api/*  catalog, orders, auth  │
+   │                /admin/*  operations API       │
+   │                /img/*  /media/*  proxies      │
+   │  partnerMail   Brevo email + PDF (pdf-lib)    │
+   └──────┬──────────────┬──────────────┬─────────┘
+          │              │              │
+     D1 (SQLite)     R2 (images)    Workers AI
+ products · orders   thumbnails     produce photos
+ users · sessions
+ partners · inbox
+          │
+   Static assets  →  React 19 + Vite SPA (one build, all hosts)
+```
 
-Discover and order from neighbourhood restaurants, dhabas, cloud kitchens, and local favourites across categories such as biryani, pizza, burgers, thali, desserts, and street food.
+## Tech stack
 
-### 🤝 Partner Network
+| Layer | Technology |
+| --- | --- |
+| Frontend | React 19, Vite 7, TypeScript, Tailwind CSS v4, wouter, Framer Motion, lucide-react |
+| Edge and API | Cloudflare Workers, HTMLRewriter, static assets binding |
+| Data | Cloudflare D1, R2, Workers AI |
+| Email | Brevo transactional API; PDFs generated with pdf-lib |
+| Mobile | Expo / React Native (`mobile/`) |
+| Tooling | pnpm workspaces, Wrangler, Playwright for audits |
 
-Zyphix helps local merchants and restaurants reach nearby customers while retaining their neighbourhood identity. Businesses can join through the [partner portal](https://zyphix.in/partner).
-
-## Key Features
-
-- **Hyperlocal discovery** — surfaces relevant businesses around the customer's location
-- **Fast delivery** — designed for fulfilment in under 30 minutes
-- **Local-first marketplace** — works with kirana stores and independent food partners
-- **Unified experience** — groceries, food, and pharmacy in one platform
-- **Transparent pricing** — focused on fair pricing without surge charges
-- **Real-time availability** — supports local inventory and order visibility
-- **Responsive interface** — designed for mobile and desktop experiences
-- **Location-aware ordering** — enables service discovery based on delivery area
-
-## How It Works
-
-1. **Set a location** — enter an address or use device location.
-2. **Discover nearby options** — browse local stores, restaurants, and pharmacies.
-3. **Place an order** — select products or meals through a unified ordering experience.
-4. **Track fulfilment** — follow the order from the partner location to the doorstep.
-
-## Technology
-
-The production frontend is built as a modern React application using a Vite-based build pipeline. The repository is organized to support frontend, backend, database, deployment, and operational workflows.
+## Repository layout
 
 ```text
 Zyphix/
-├── frontend/          # Frontend application modules
-├── backend/           # Backend services and APIs
-├── src/               # Shared/product source code
-├── supabase/          # Database configuration and migrations
-├── scripts/           # Development and operational scripts
-├── attached_assets/   # Project assets
-├── artifacts/         # Generated or supporting artifacts
-└── README.md
+├── artifacts/
+│   └── zyphix/                 # the web app and the Worker (deployed to Cloudflare)
+│       ├── src/                # React app: pages, sites (partner, support, auth…), UI kit
+│       ├── worker/             # Cloudflare Worker: API, edge layer, email
+│       ├── shared/             # page map shared by the Worker and the app (SEO, sitemaps)
+│       ├── public/             # static files: fonts, images, OG images, service worker
+│       ├── db/                 # D1 schema and seed data
+│       ├── scripts/            # build, catalog export and image pipeline scripts
+│       ├── wrangler.toml       # Worker configuration and bindings
+│       └── DEPLOY.md           # first-time Cloudflare setup
+├── mobile/                     # Expo app for Android and iOS
+├── lib/                        # shared workspace libraries
+└── package.json                # pnpm workspace root
 ```
 
-> The exact commands and environment variables are defined by the repository's package scripts and environment templates.
+## Getting started
 
-## Local Development
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) 18 or newer
-- npm (or the package manager associated with the repository lockfile)
-- Git
-
-### Setup
+**Prerequisites:** Node.js 20+, pnpm 10, and a Cloudflare account with Wrangler signed in (`pnpm exec wrangler login`).
 
 ```bash
 git clone https://github.com/sangralrahul/Zyphix.git
 cd Zyphix
-npm install
-npm run dev
+pnpm install
+
+cd artifacts/zyphix
+pnpm run dev          # front-end only, Vite dev server
+pnpm run cf:dev       # full stack: build + Worker with local D1/R2
 ```
 
-Open the local URL printed by the development server.
+To preview a subdomain locally, add `?site=` to any URL: `now`, `eats`, `book`, `partner`, `advertise`, `support`, `auth`, `accounts` or `admin`.
 
-### Production Build
+## Configuration
+
+Secrets are stored on the Worker and never committed:
 
 ```bash
-npm run build
-npm run preview
+pnpm exec wrangler secret put ADMIN_TOKEN      # key for the operations console
+pnpm exec wrangler secret put BREVO_API_KEY    # transactional email
 ```
 
-Before running the application, configure the environment variables required by the checked-in environment template. Never commit production credentials or private API keys.
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `ADMIN_TOKEN` | Yes | Bearer key for `/admin/*` and the operations console |
+| `BREVO_API_KEY` | Yes | Sign-in codes, partner and contact emails |
+| `MAIL_FROM` | No | Default sender (`noreply@zyphix.in`) |
+| `PARTNER_FROM` | No | Partner email sender (`partnerships@zyphix.in`) |
+| `PARTNER_NOTIFY_EMAIL` | No | Who is told about new partner applications |
+| `NOTIFY_EMAIL` | No | Who receives contact, support and advertiser messages |
+
+For local development, put the same keys in `artifacts/zyphix/.dev.vars`, which is ignored by git.
 
 ## Deployment
 
-The production experience is available at [https://zyphix.in](https://zyphix.in).
+```bash
+cd artifacts/zyphix
+pnpm run cf:deploy    # builds the app and deploys the Worker with its assets
+```
 
-Before deploying:
+Each subdomain is attached to the `zyphix` Worker as a custom domain (Workers & Pages → zyphix → Settings → Domains & Routes). First-time setup for D1, R2 and the catalog seed is covered in [`artifacts/zyphix/DEPLOY.md`](artifacts/zyphix/DEPLOY.md).
 
-1. Run the production build locally.
-2. Verify environment variables for the target environment.
-3. Test location, authentication, ordering, partner, and responsive flows.
-4. Merge reviewed changes into the deployment branch.
-5. Confirm the production health check after release.
+## Scripts
+
+Run these from `artifacts/zyphix`:
+
+| Command | Description |
+| --- | --- |
+| `pnpm run dev` | Vite dev server |
+| `pnpm run build:cf` | Production build for Cloudflare |
+| `pnpm run cf:dev` | Build and run the Worker locally |
+| `pnpm run cf:deploy` | Build and deploy to Cloudflare |
+| `pnpm run typecheck` | Type-check the app |
+| `pnpm run db:schema` / `db:seed` | Create and seed the remote D1 database |
+| `pnpm run images:sync` | Resolve missing product images |
 
 ## Contributing
 
-1. Create a feature branch from `main`.
-2. Make a focused change with clear commit messages.
-3. Run relevant checks and build the project locally.
-4. Open a pull request describing the change and validation performed.
-5. Merge only after review and successful checks.
-
-```bash
-git switch -c feature/short-description
-git add -A
-git commit -m "Add short description"
-git push -u origin feature/short-description
-```
+1. Branch from `main`: `git switch -c feature/short-description`
+2. Keep changes focused and run `pnpm run typecheck` and `pnpm run build:cf` before pushing.
+3. Open a pull request that describes the change and how it was tested.
 
 ## Security
 
-Please do not disclose vulnerabilities in public issues. Report security concerns privately through the official contact options on [zyphix.in](https://zyphix.in).
+Please don't report vulnerabilities in public issues. Email **security@zyphix.in** instead; see [`/.well-known/security.txt`](https://zyphix.in/.well-known/security.txt).
 
-## Company
+## License and company
 
-Zyphix is a product of [Clavix Technologies Pvt. Ltd.](https://clavix.in).
-
----
+Zyphix is a product of [Clavix Technologies Pvt. Ltd.](https://clavix.in) The source code is proprietary; all rights reserved unless stated otherwise.
 
 <div align="center">
-  Built for neighbourhoods. Built for Bharat.
-  <br />
-  © 2026 Clavix Technologies Pvt. Ltd. All rights reserved.
+<br />
+<sub>© 2026 Clavix Technologies Pvt. Ltd. · <a href="https://zyphix.in">zyphix.in</a> · <a href="https://zyphix.in/privacy">Privacy</a> · <a href="https://zyphix.in/terms">Terms</a></sub>
 </div>
