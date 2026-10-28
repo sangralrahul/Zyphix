@@ -163,7 +163,7 @@ export function LiveDirectory() {
     { type: 'service', list: service.partners }, { type: 'delivery', list: delivery.partners },
   ], [store.partners, restaurant.partners, service.partners, delivery.partners]);
   const total = groups.reduce((n, g) => n + g.list.length, 0);
-  if (total === 0) return null;
+  if (total < 6) return null; // show the directory once there is a real network
 
   const latest = groups.flatMap(g => g.list)
     .filter(p => p.name)
@@ -189,7 +189,7 @@ export function LiveDirectory() {
           <div>
             <Kicker>Live partner directory</Kicker>
             <h2 className="text-[26px] font-semibold tracking-[-0.025em] text-gray-900 sm:text-[32px]">
-              <span style={NUM}><Counter to={total} /></span> {total === 1 ? 'partner' : 'partners'} registered so far
+              <span style={NUM}><Counter to={total} /></span> local businesses already live on Zyphix
             </h2>
           </div>
           <ul className="flex flex-wrap gap-1.5">

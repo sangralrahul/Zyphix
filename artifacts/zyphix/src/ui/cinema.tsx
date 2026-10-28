@@ -204,6 +204,13 @@ export function VideoHero({ clip, children, height = 'min-h-[92svh]', dim = 0.5,
   const stat = isStatic();
   return (
     <section ref={ref} className={`relative isolate flex ${height} w-full items-end overflow-hidden bg-[#05080E] text-white ${className}`}>
+      {!stat && (
+        <>
+          {/* film-open: letterbox bars slide away on first paint */}
+          <motion.div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-30 bg-black" initial={{ height: '10vh' }} animate={{ height: 0 }} transition={{ delay: 0.15, duration: 1.4, ease: EASE }} />
+          <motion.div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-30 bg-black" initial={{ height: '10vh' }} animate={{ height: 0 }} transition={{ delay: 0.15, duration: 1.4, ease: EASE }} />
+        </>
+      )}
       <motion.div className="absolute inset-0" style={stat ? undefined : { y, scale }}>
         <BgVideo clip={clip} dim={dim} position={position} priority />
       </motion.div>
@@ -311,7 +318,7 @@ export function GhostButton({ href, children, className = '', size = 'lg', onCli
 
 /* ── Section wrappers ────────────────────────────────────────────────────── */
 export function Dark({ children, className = '', id }: { children: React.ReactNode; className?: string; id?: string }) {
-  return <section id={id} className={`relative overflow-clip bg-[#05080E] text-white ${className}`}>{children}</section>;
+  return <section id={id} className={`zx-spot relative isolate overflow-clip bg-[#05080E] text-white ${className}`}>{children}</section>;
 }
 export function Light({ children, className = '', id, tone = 'white' }: { children: React.ReactNode; className?: string; id?: string; tone?: 'white' | 'soft' }) {
   return <section id={id} className={`relative overflow-clip ${tone === 'soft' ? 'bg-[#F6F7F9]' : 'bg-white'} text-gray-900 ${className}`}>{children}</section>;

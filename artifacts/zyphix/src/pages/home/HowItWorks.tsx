@@ -88,7 +88,8 @@ export function LiveProof() {
     const seen = new Set<string>();
     return [...stores.partners, ...restaurants.partners, ...pros.partners].filter(p => p.name && !seen.has(p.id) && seen.add(p.id));
   }, [stores.partners, restaurants.partners, pros.partners]);
-  if (!all.length) return null;
+  // A directory with a handful of names reads as "just launched"; show it once there is a real network.
+  if (all.length < 6) return null;
 
   const items = all.slice(0, 40).map(p => {
     const t = TYPE_LABEL[p.type] ?? TYPE_LABEL.store;
@@ -107,7 +108,7 @@ export function LiveProof() {
           <div>
             <Kicker>Live partner directory</Kicker>
             <h2 className="text-[26px] font-semibold tracking-[-0.035em] text-gray-900 sm:text-[32px]">
-              <span style={NUM}><Counter to={all.length} /></span> {all.length === 1 ? 'partner' : 'partners'} registered on Zyphix
+              <span style={NUM}><Counter to={all.length} /></span> local businesses already on Zyphix
             </h2>
           </div>
           <a href={PARTNER_SITE} target="_blank" rel="noopener noreferrer" className="text-[14.5px] font-semibold text-emerald-700">Add your business</a>

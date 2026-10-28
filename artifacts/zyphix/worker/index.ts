@@ -277,7 +277,7 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
     if (category) { where.push('category = ?'); binds.push(category); }
     if (q) { where.push('(name LIKE ? OR brand LIKE ?)'); binds.push(`%${q}%`, `%${q}%`); }
 
-    const sql = `SELECT * FROM products WHERE ${where.join(' AND ')} ORDER BY rowid LIMIT ? OFFSET ?`;
+    const sql = `SELECT * FROM products WHERE ${where.join(' AND ')} ORDER BY (image_url IS NULL OR image_url = '') , rowid LIMIT ? OFFSET ?`; // products with real photos first
     const { results } = await env.DB.prepare(sql).bind(...binds, limit, offset).all<ProductRow>();
     return json(results.map(r => toClient(r, origin, env)), 200, cache);
   }
@@ -288,7 +288,7 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
     const row = await env.DB.prepare('SELECT * FROM products WHERE id = ?').bind(id).first<ProductRow>();
     if (!row) return json({ error: 'not found' }, 404);
     if (!m[2]) return json(toClient(row, origin, env), 200, cache);
-    const { results } = await env.DB.prepare('SELECT * FROM products WHERE category = ? AND id != ? AND in_stock = 1 LIMIT 8').bind(row.category, id).all<ProductRow>();
+    const { results } = await env.DB.prepare("SELECT * FROM products WHERE category = ? AND id != ? AND in_stock = 1 ORDER BY (image_url IS NULL OR image_url = ''), rowid LIMIT 8").bind(row.category, id).all<ProductRow>();
     return json(results.map(r => toClient(r, origin, env)), 200, cache);
   }
 

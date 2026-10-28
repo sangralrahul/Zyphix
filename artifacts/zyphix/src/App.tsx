@@ -32,6 +32,7 @@ export { detectSite } from "@/lib/site";
 import { detectSite } from "@/lib/site";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import { useSeoSync } from "@/lib/seoSync";
+import { ScrollProgress, FilmGrain, PageFade, Spotlight } from "@/ui/CinemaLayer";
 
 const HomeLight = lazy(() => import("@/pages/HomeLight").then(m => ({ default: m.HomeLight })));
 const Privacy = lazy(() => import("@/pages/Privacy").then(m => ({ default: m.Privacy })));
@@ -229,9 +230,12 @@ function App() {
                     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
                       <AppErrorBoundary>
                         <Suspense fallback={<RouteFallback />}>
-                          <Router />
+                          <PageFade><Router /></PageFade>
                         </Suspense>
                       </AppErrorBoundary>
+                      <ScrollProgress />
+                      <FilmGrain />
+                      <Spotlight />
                       <LazyAuthModal />
                     </WouterRouter>
                   </PromoProvider>

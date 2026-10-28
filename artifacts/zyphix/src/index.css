@@ -200,3 +200,9 @@
 /* Older step markup inside the new card: drop its own card chrome so there is one clean surface. */
 .zx-reg-card [style*="border-radius: 20px"][style*="box-shadow"] { box-shadow: none !important; border: 0 !important; padding: 0 !important; background: transparent !important; }
 .zx-reg-card [style*="max-width: 640px"], .zx-reg-card [style*="max-width: 620px"] { max-width: none !important; }
+
+/* Cinematic spotlight on dark sections: a soft green light follows the pointer (desktop). */
+.zx-spot::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .4s ease;
+  background:radial-gradient(520px circle at var(--mx,50%) var(--my,50%),rgba(13,163,102,.13),transparent 62%)}
+.zx-spot.zx-lit::before{opacity:1}
+@media (hover:none),(prefers-reduced-motion:reduce){.zx-spot::before{display:none}}
