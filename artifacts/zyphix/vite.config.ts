@@ -62,6 +62,7 @@ const SITE_PAGES: Record<string, string> = {
   now: "src/pages/ZyphixNow.tsx", eats: "src/pages/ZyphixEats.tsx", book: "src/pages/ZyphixBook.tsx",
   partner: "src/sites/PartnerSite.tsx", advertise: "src/sites/AdvertiseSite.tsx",
   auth: "src/sites/AuthSite.tsx", accounts: "src/sites/AccountsSite.tsx", support: "src/sites/SupportSite.tsx",
+  main: "src/pages/Landing.tsx", zyphix: "src/pages/Landing.tsx", www: "src/pages/Landing.tsx",
 };
 function sitePreload() {
   return {

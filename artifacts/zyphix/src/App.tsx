@@ -1,10 +1,12 @@
 import React, { Suspense, lazy } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import NotFound from "@/pages/not-found";
-import { LazyMotion, domAnimation } from "@/lib/motion";
+import { LazyMotion } from "@/lib/motion";
+// Animation features load right after first paint instead of inside the main bundle.
+const motionFeatures = () => import("@/lib/motionFeatures").then(m => m.default);
 
 
-import { Landing } from "@/pages/Landing";
+const Landing = lazy(() => import("@/pages/Landing").then(m => ({ default: m.Landing })));
 const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
@@ -220,7 +222,7 @@ function Router() {
 
 function App() {
   return (
-    <LazyMotion features={domAnimation}>
+    <LazyMotion features={motionFeatures}>
         <AuthProvider>
           <NotificationsProvider>
             <WishlistProvider>

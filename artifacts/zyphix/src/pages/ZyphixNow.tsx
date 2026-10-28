@@ -502,7 +502,7 @@ function Hero({ productCount, onSearch }: { productCount: string; onSearch: (q: 
       <div className="zx-bleed-inner relative z-10 w-full px-4 pb-16 pt-14 md:pb-28 md:pt-24">
         <Kicker light>Zyphix Now</Kicker>
         <SplitHeadline className={`${DISPLAY} max-w-[13ch] text-[38px] leading-[1.0] text-white sm:text-[48px] md:text-[64px]`}
-          parts={['Groceries in', { accent: '30', green: true }, 'minutes.']} />
+          parts={['Groceries in', { accent: '10', green: true }, 'minutes.']} />
         <p className="mt-4 max-w-[520px] text-[15px] leading-[1.55] text-white/75 md:text-[17px]">
           Fresh produce, dairy, snacks and daily staples from stores near you, at your door before the kettle boils.
         </p>

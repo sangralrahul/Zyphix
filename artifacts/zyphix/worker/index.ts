@@ -242,7 +242,7 @@ async function rangedR2(request: Request, env: Env, key: string, size: number, t
 async function handleApi(request: Request, env: Env, url: URL): Promise<Response> {
   const p = url.pathname;
   const origin = url.origin;
-  const cache = { 'cache-control': 'public, max-age=60, s-maxage=300' };
+  const cache = { 'cache-control': 'public, max-age=300, s-maxage=600, stale-while-revalidate=86400' };
 
   /* ── Partner directory (stores, restaurants, service pros, riders) ── */
   if (p === '/api/partners' && request.method === 'POST') return await createPartner(request, env);

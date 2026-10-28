@@ -18,7 +18,7 @@ const STORES = [
 ];
 
 const PROMISES: { n: number; format: (n: number) => string; label: string }[] = [
-  { n: 30, format: n => `${Math.round(n)} min`, label: 'grocery delivery promise' },
+  { n: 10, format: n => `${Math.round(n)} min`, label: 'grocery delivery promise' },
   { n: 3, format: n => `${Math.round(n)} in 1`, label: 'Now, Eats and Book' },
   { n: 1, format: n => `${Math.round(n)} wallet`, label: 'for every order' },
 ];

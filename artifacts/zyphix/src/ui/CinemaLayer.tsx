@@ -24,7 +24,8 @@ export function ScrollProgress() {
 }
 
 export function FilmGrain() {
-  if (isStatic()) return null;
+  // Desktop only: a full-screen blended layer costs scrolling smoothness on phones.
+  if (isStatic() || typeof window === 'undefined' || !window.matchMedia('(min-width: 1024px) and (hover: hover)').matches) return null;
   return <div aria-hidden className="zx-grain pointer-events-none fixed inset-0 z-[119]" style={{ backgroundImage: GRAIN, opacity: 0.045, mixBlendMode: 'overlay' }} />;
 }
 
