@@ -649,8 +649,24 @@ async function generateProduceImage(env: Env, row: ProductRow): Promise<ImageRes
 const PARTNER_TYPES: Record<string, string> = { merchant: 'store', store: 'store', restaurant: 'restaurant', service: 'service', delivery: 'delivery' };
 const str = (v: unknown, max = 200) => (typeof v === 'string' ? v : Array.isArray(v) ? v.join(', ') : v == null ? '' : String(v)).trim().slice(0, max);
 
+/** The original unique index on (type, email) made every partner without an email collide on ''.
+ *  Replace it once with a partial index that only applies when an email is given. */
+let partnerIndexOk = false;
+async function ensurePartnerIndex(env: Env) {
+  if (partnerIndexOk) return;
+  const row = await env.DB.prepare("SELECT sql FROM sqlite_master WHERE type = 'index' AND name = 'idx_partners_type_email'").first<{ sql: string }>().catch(() => null);
+  if (!row || !/WHERE/i.test(row.sql || '')) {
+    await env.DB.batch([
+      env.DB.prepare('DROP INDEX IF EXISTS idx_partners_type_email'),
+      env.DB.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_partners_type_email ON partners(type, email) WHERE email <> ''"),
+    ]);
+  }
+  partnerIndexOk = true;
+}
+
 async function createPartner(request: Request, env: Env): Promise<Response> {
   if (await hit(env, `partner:${ipOf(request)}`, 8, 600)) return tooMany();
+  await ensurePartnerIndex(env);
   let body: any;
   try { body = await request.json(); } catch { return json({ error: 'invalid JSON' }, 400); }
   const type = PARTNER_TYPES[str(body.role)];

@@ -68,7 +68,7 @@ export function SiteHeader({ variant = 'solid' }: { variant?: 'solid' | 'transpa
   const mobile = 'flex items-center justify-between py-3.5 text-[17px] font-medium tracking-[-0.01em] text-gray-900';
 
   return (
-    <header className={`${variant === 'transparent' ? 'fixed' : 'sticky'} top-0 z-50 w-full border-b transition-[background-color,border-color,box-shadow] duration-300 ${clear ? 'border-transparent bg-transparent' : `${BORDER} bg-white/80 backdrop-blur-xl`}`} style={{ fontFamily: FONT }}>
+    <header className={`${variant === 'transparent' ? 'fixed' : 'sticky'} top-0 z-50 w-full border-b transition-[background-color,border-color,box-shadow] duration-300 ${clear ? 'border-transparent bg-transparent' : `${BORDER} bg-white/[.94] backdrop-blur-2xl backdrop-saturate-150 shadow-[0_1px_0_rgba(16,24,40,.04),0_8px_24px_-18px_rgba(16,24,40,.25)]`}`} style={{ fontFamily: FONT }}>
       <Container className="relative flex h-16 items-center justify-between">
         <Link href="/" aria-label="Zyphix home" className="flex items-center" onClick={() => setOpen(false)}>
           <ZyphixLogo size={30} ixColor={clear ? '#FFFFFF' : '#0A0F1A'} />

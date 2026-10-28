@@ -58,7 +58,7 @@ export function Navbar() {
   const avatar = 'flex shrink-0 items-center justify-center rounded-full bg-gray-900 font-semibold text-white';
 
   return (
-    <div className={`sticky top-0 z-50 w-full border-b border-[#E6E8EC] bg-white/90 backdrop-blur-md transition-shadow ${scrolled ? 'shadow-[0_1px_2px_rgba(11,15,25,.04)]' : ''}`} style={{ fontFamily: FONT }}>
+    <div className={`sticky top-0 z-50 w-full border-b border-[#E6E8EC] bg-white/[.94] backdrop-blur-2xl backdrop-saturate-150 transition-shadow ${scrolled ? 'shadow-[0_1px_0_rgba(16,24,40,.04),0_8px_24px_-18px_rgba(16,24,40,.25)]' : ''}`} style={{ fontFamily: FONT }}>
       <div className="mx-auto max-w-[1180px] px-4">
         <div className="flex h-[60px] items-center gap-2 sm:gap-3">
 

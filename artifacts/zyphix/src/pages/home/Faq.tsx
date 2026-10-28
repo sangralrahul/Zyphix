@@ -59,14 +59,22 @@ export function FinalCta() {
   );
 }
 
-/* ── Sticky mobile CTA ────────────────────────────────────────────────────── */
+/* ── Sticky mobile CTA: appears once the hero is scrolled past, dark glass to match the page ── */
 export function StickyCta() {
+  const [show, setShow] = React.useState(false);
+  React.useEffect(() => {
+    const f = () => setShow(window.scrollY > window.innerHeight * 0.85);
+    f(); window.addEventListener('scroll', f, { passive: true });
+    return () => window.removeEventListener('scroll', f);
+  }, []);
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#E6E8EC] bg-white/90 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl md:hidden">
+    <div aria-hidden={!show}
+      className={`fixed inset-x-3 bottom-3 z-40 rounded-2xl border border-white/10 bg-[#0B0F12]/85 px-4 py-3 shadow-[0_20px_50px_-15px_rgba(0,0,0,.7)] backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(.22,1,.36,1)] md:hidden ${show ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-[130%] opacity-0'}`}
+      style={{ marginBottom: 'env(safe-area-inset-bottom)' }}>
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13.5px] font-semibold tracking-[-0.01em] text-gray-900">Groceries in 30 min</p>
-          <p className="truncate text-[11.5px] text-gray-500">Shelf prices · free delivery on bigger baskets</p>
+          <p className="truncate text-[13.5px] font-semibold tracking-[-0.01em] text-white">Groceries in 30 min</p>
+          <p className="truncate text-[11.5px] text-white/55">Shelf prices, no markup</p>
         </div>
         <Button href={NOW_SITE} sameTab size="sm" className="shrink-0">Order now <ArrowRight size={14} /></Button>
       </div>

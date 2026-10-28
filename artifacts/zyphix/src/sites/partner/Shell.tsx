@@ -2,7 +2,6 @@ import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { SiteHeader, SiteFooter } from '@/components/layout/SiteChrome';
 import { Button, FONT } from '@/ui/kit';
-import { ScrollProgress } from '@/ui/cinema';
 
 /* ────────────────────────────────────────────────────────────────────────────
    partner.zyphix.in shell — shared Zyphix chrome (transparent header over the
@@ -28,7 +27,6 @@ export function StickyCta() {
 export function Shell({ children, hero = false, sticky = false }: { children: React.ReactNode; hero?: boolean; sticky?: boolean }) {
   return (
     <div className={`min-h-screen ${hero ? 'bg-[#05080E]' : 'bg-white'} text-gray-900 antialiased`} style={{ fontFamily: FONT }}>
-      <ScrollProgress />
       <SiteHeader variant={hero ? 'transparent' : 'solid'} />
       <main>{children}</main>
       <SiteFooter />

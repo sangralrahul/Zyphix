@@ -206,3 +206,7 @@
   background:radial-gradient(520px circle at var(--mx,50%) var(--my,50%),rgba(13,163,102,.13),transparent 62%)}
 .zx-spot.zx-lit::before{opacity:1}
 @media (hover:none),(prefers-reduced-motion:reduce){.zx-spot::before{display:none}}
+
+/* Logo: a short lift on hover, nothing else */
+a:hover > .zx-logo .zx-logo-mark, button:hover > .zx-logo .zx-logo-mark, a:hover .zx-logo .zx-logo-mark { transform: translateY(-1px) rotate(-4deg); }
+@media (prefers-reduced-motion: reduce) { .zx-logo-mark { transition: none !important; } }

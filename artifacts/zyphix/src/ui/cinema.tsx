@@ -136,11 +136,14 @@ export function BgVideo({ clip, className = '', dim = 0.45, position = 'center',
     const el = box.current;
     if (!el) return;
     setWidth(el.getBoundingClientRect().width || window.innerWidth);
+    // re-measure if the box was laid out at zero width (background tab, hidden parent)
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(([e]) => { const w = e.contentRect.width; if (w > 0) setWidth(prev => (prev > 0 && Math.abs(prev - w) < 200 ? prev : w)); }) : null;
+    ro?.observe(el);
     if (typeof IntersectionObserver === 'undefined') { setNear(true); setVisible(true); return; }
     const nearObs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setNear(true); nearObs.disconnect(); } }, { rootMargin: '120% 0px 120% 0px' });
     const visObs = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { threshold: 0.12 });
     nearObs.observe(el); visObs.observe(el);
-    return () => { nearObs.disconnect(); visObs.disconnect(); };
+    return () => { nearObs.disconnect(); visObs.disconnect(); ro?.disconnect(); };
   }, []);
 
   useEffect(() => {

@@ -5,7 +5,6 @@ import { ArrowRight } from 'lucide-react';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
 import { SiteHeader } from '@/components/layout/SiteChrome';
 import { Container, Button, Chip, FONT, G } from '@/ui/kit';
-import { ScrollProgress } from '@/ui/cinema';
 import { MAIN_SITE, PARTNER_SITE, PARTNERSHIPS_EMAIL } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -80,7 +79,6 @@ export function Shell({ children, title, sticky = true, hero = false }: { childr
   useEffect(() => { document.title = `${title} · Zyphix Advertise`; window.scrollTo(0, 0); }, [title]);
   return (
     <div className={`min-h-screen ${hero ? 'bg-[#05080E]' : 'bg-white'} text-gray-900 antialiased`} style={{ fontFamily: FONT }}>
-      <ScrollProgress />
       <SiteHeader variant={hero ? 'transparent' : 'solid'} />
       <main>{children}</main>
       <Footer />

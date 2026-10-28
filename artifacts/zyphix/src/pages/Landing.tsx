@@ -1,7 +1,6 @@
 import React from 'react';
 import { SiteHeader, SiteFooter } from '@/components/layout/SiteChrome';
 import { FONT } from '@/ui/kit';
-import { ScrollProgress } from '@/ui/cinema';
 import { useCategories } from './home/shared';
 import { Hero, IntroMarquee } from './home/Hero';
 import { ProductStory, AislesGallery } from './home/Products';
@@ -22,7 +21,6 @@ export function Landing() {
 
   return (
     <div className="min-h-screen bg-[#05080E] pb-[72px] text-gray-900 antialiased md:pb-0" style={{ fontFamily: FONT }}>
-      <ScrollProgress />
       <SiteHeader variant="transparent" />
       <main>
         <Hero />

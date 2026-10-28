@@ -43,7 +43,7 @@ export default function AccountsSite() {
 
   return (
     <div className="min-h-screen bg-[#F6F7F9] text-gray-900" style={{ fontFamily: FONT }}>
-      <header className="sticky top-0 z-40 border-b border-gray-200/70 bg-white/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-gray-200/70 bg-white/[.94] backdrop-blur-2xl">
         <div className="mx-auto flex h-16 max-w-[1100px] items-center gap-3 px-4 sm:px-6">
           <a href="https://zyphix.in" className="flex shrink-0 items-center gap-2.5" aria-label="Zyphix home">
             <ZyphixLogo size={26} />

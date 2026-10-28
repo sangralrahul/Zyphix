@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS partners (
   updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_partners_type_status ON partners(type, status);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_partners_type_email ON partners(type, email);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_partners_type_email ON partners(type, email) WHERE email <> '';
 
 -- Accounts (auth.zyphix.in): email-OTP sessions shared across *.zyphix.in via cookie
 CREATE TABLE IF NOT EXISTS users (
