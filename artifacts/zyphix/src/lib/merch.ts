@@ -118,7 +118,7 @@ export function buildOffers(products: Product[], categories: Category[], coupon:
     offers.push({
       key: `from-${dairy.name}`, theme: 'sky', label: dairy.name,
       headline: `From ${inr(dairy.minPrice)}`,
-      sub: `${dairy.count} products · delivery in 30 min`,
+      sub: `${dairy.count} products · delivery in 10 min`,
       images: collage(list), target: { kind: 'category', name: dairy.name },
     });
   }

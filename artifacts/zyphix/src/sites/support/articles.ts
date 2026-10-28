@@ -1,7 +1,7 @@
 /* ────────────────────────────────────────────────────────────────────────────
    support.zyphix.in — help centre content. Typed so pages can filter, search
    and render consistently. Keep answers factual: policies below mirror what
-   the product pages promise (30-min delivery target, free delivery on bigger baskets,
+   the product pages promise (10-min delivery target, free delivery on bigger baskets,
    free cancellation windows, 7-day work guarantee on Book).
 ──────────────────────────────────────────────────────────────────────────── */
 
@@ -37,7 +37,7 @@ export type Article = {
 };
 
 export const TOPICS: Topic[] = [
-  { id: 'now', title: 'Zyphix Now orders', short: 'Now orders', blurb: 'Groceries and essentials in 30 minutes: tracking, delivery fees, missing items.', photo: 'grocery', product: { label: 'Open my Now orders', href: 'https://now.zyphix.in/account' } },
+  { id: 'now', title: 'Zyphix Now orders', short: 'Now orders', blurb: 'Groceries and essentials in 10 minutes: tracking, delivery fees, missing items.', photo: 'grocery', product: { label: 'Open my Now orders', href: 'https://now.zyphix.in/account' } },
   { id: 'eats', title: 'Zyphix Eats', short: 'Eats', blurb: 'Food orders from restaurants near you: late deliveries, wrong items, restaurant hours.', photo: 'restaurant', product: { label: 'Open Zyphix Eats', href: 'https://eats.zyphix.in' } },
   { id: 'book', title: 'Zyphix Book', short: 'Book', blurb: 'Home services from verified professionals: slots, rescheduling, the work guarantee.', photo: 'cleaning', product: { label: 'Open Zyphix Book', href: 'https://book.zyphix.in' } },
   { id: 'partners', title: 'Partners & payouts', short: 'Partners', blurb: 'Stores, restaurants, professionals and delivery partners: onboarding, verification, payouts.', photo: 'team', product: { label: 'Partner portal', href: 'https://partner.zyphix.in' } },
@@ -62,7 +62,7 @@ export const ARTICLES: Article[] = [
     body: [
       p('Every Zyphix Now order moves through four statuses: Confirmed, Packing, On the way and Delivered. You can watch it move in real time from your account.'),
       steps('Open accounts.zyphix.in (or the Orders tab in the app).', 'Tap the order at the top of the list; the newest order is always first.', 'The status bar shows the current step. Once a rider is assigned, their name and a live map appear below it.', 'Use "Call rider" if you need to share a gate code or landmark.'),
-      p('Our target is 30 minutes from confirmation. The promised time on the order page already accounts for the store\'s packing time and the distance to you.'),
+      p('Our target is 10 minutes from confirmation. The promised time on the order page already accounts for the store\'s packing time and the distance to you.'),
       note('If the page shows "Confirmed" for more than 10 minutes, the store has not yet accepted the order. You can cancel at no charge until it moves to Packing.'),
     ],
     related: ['late-delivery', 'missing-or-damaged-item'],
@@ -70,9 +70,9 @@ export const ARTICLES: Article[] = [
   {
     slug: 'late-delivery', topic: 'now', title: 'My order is late', updated: '2026-10-20',
     summary: 'What happens when an order runs past its promised time, and what you can do.',
-    keywords: ['late', 'delayed', 'delay', 'slow', '30 minutes'],
+    keywords: ['late', 'delayed', 'delay', 'slow', '10 minutes'],
     body: [
-      p('Most orders arrive within 30 minutes. Heavy rain, road closures and a store running short-staffed can push that out. When it does, the promised time on your order page updates and we send a notification.'),
+      p('Most orders arrive within 10 minutes. Heavy rain, road closures and a store running short-staffed can push that out. When it does, the promised time on your order page updates and we send a notification.'),
       h('If the order is more than 15 minutes past the promised time'),
       list('You can cancel from the order page without any charge, even if the rider has already picked it up.', 'If you keep the order, any delivery fee on it is refunded to your original payment method automatically within 24 hours.', 'Riders are never penalised for safe riding; we would rather an order be late than unsafe.'),
       h('If the status has not changed for a long time'),

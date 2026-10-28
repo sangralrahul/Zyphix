@@ -15,7 +15,7 @@ import { Display } from './home/shared';
 
 const FACTS = [
   { icon: <MapPin size={18} />, v: 'Founded 2024', l: 'Independent and founder-led' },
-  { icon: <Clock size={18} />, v: 'Under 30 minutes', l: 'Doorstep delivery target' },
+  { icon: <Clock size={18} />, v: 'Under 10 minutes', l: 'Doorstep delivery target' },
   { icon: <BadgePercent size={18} />, v: 'Zero surge', l: 'Shelf price is the app price' },
   { icon: <Store size={18} />, v: 'Rolling out', l: 'Neighbourhood by neighbourhood' },
 ];

@@ -20,7 +20,7 @@ export function ProductDetail() {
   const { products, categories } = useCatalog();
   const product = useMemo(() => products.find(p => p.id === params.id), [products, params.id]);
   useSeo(product ? `${product.name}${product.weight ? ` (${product.weight})` : ''} · Zyphix Now` : 'Product · Zyphix Now',
-    product ? `Order ${product.name} from stores near you on Zyphix Now, delivered in about 30 minutes.` : undefined);
+    product ? `Order ${product.name} from stores near you on Zyphix Now, delivered in about 10 minutes.` : undefined);
   const mainImage = useMemo(() => product ? productImageFor(product, categories, 'full') : null, [product, categories]);
   const related = useMemo(() => {
     if (!product) return [];
@@ -110,7 +110,7 @@ export function ProductDetail() {
           {/* delivery facts */}
           <div className="mt-5 grid grid-cols-3 gap-2">
             {[
-              { icon: <Clock size={14} />, t: '30 min', s: 'Delivery' },
+              { icon: <Clock size={14} />, t: '10 min', s: 'Delivery' },
               { icon: <Truck size={14} />, t: 'Free', s: 'Above ₹149' },
               { icon: <ShieldCheck size={14} />, t: 'Fresh', s: 'Quality checked' },
             ].map((f, i) => (
@@ -141,7 +141,7 @@ export function ProductDetail() {
           <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-4 md:p-5">
             <p className="text-[14px] font-semibold">About this product</p>
             <p className="mt-1.5 text-[13px] leading-[1.6] text-gray-600">
-              {product.name} by {product.brand}{product.weight ? `, ${product.weight}` : ''}. Sourced daily from trusted local suppliers and delivered in about 30 minutes.
+              {product.name} by {product.brand}{product.weight ? `, ${product.weight}` : ''}. Sourced daily from trusted local suppliers and delivered in about 10 minutes.
             </p>
           </div>
 

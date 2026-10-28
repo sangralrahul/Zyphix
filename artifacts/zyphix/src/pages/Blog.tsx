@@ -41,10 +41,10 @@ const POSTS: Post[] = [
     cover: landscape('city', 0),
   },
   {
-    slug: '30-minutes-or-less-the-logistics-behind-quick-commerce',
+    slug: '10-minutes-or-less-the-logistics-behind-quick-commerce',
     category: 'Operations',
-    title: '30 Minutes or Less: The Logistics Behind Quick Commerce',
-    excerpt: 'Delivering groceries in half an hour takes more than fast riders. It needs the right nearby store, live inventory and route planning working in sync.',
+    title: '10 Minutes or Less: The Logistics Behind Quick Commerce',
+    excerpt: 'Delivering groceries in ten minutes takes more than fast riders. It needs the right nearby store, live inventory and route planning working in sync.',
     author: 'Zyphix Team', date: '28 March 2025', readMin: 6,
     cover: landscape('rider', 0),
   },

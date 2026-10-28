@@ -1,7 +1,7 @@
 {
   "name": "Zyphix — The SuperLocal App",
   "short_name": "Zyphix",
-  "description": "Groceries in about 30 minutes, food from local kitchens and verified home services, from the businesses already in your neighbourhood.",
+  "description": "Groceries in about 10 minutes, food from local kitchens and verified home services, from the businesses already in your neighbourhood.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -39,7 +39,7 @@
       "name": "Zyphix Now — Groceries",
       "short_name": "Now",
       "url": "/now",
-      "description": "Groceries in about 30 minutes"
+      "description": "Groceries in about 10 minutes"
     },
     {
       "name": "Zyphix Eats — Food",

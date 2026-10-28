@@ -4,7 +4,7 @@
  *
  *  HeroLiveOrder   floating live order card for the desktop hero
  *  MarketBand      "Fresh from the market" ClipWall (vegMarket, fruit, packing, merchant, spices)
- *  TrackBand       "Track every order live" RouteMap + the 30-minute promise
+ *  TrackBand       "Track every order live" RouteMap + the 10-minute promise
  *  useRotatingWord rotating search placeholder (milk, atta, bananas…)
  */
 import React, { useEffect, useState } from 'react';
@@ -87,7 +87,7 @@ export function TrackBand() {
     <section aria-label="Track every order live" className="overflow-hidden rounded-3xl border border-gray-200 bg-white">
       <div className="grid items-stretch md:grid-cols-[1fr_1.15fr]">
         <Reveal y={16} amount={0.25} className="flex flex-col justify-center p-6 md:p-10">
-          <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-emerald-700">The 30-minute promise</p>
+          <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-emerald-700">The 10-minute promise</p>
           <h2 className={`${DISPLAY} max-w-[16ch] text-[28px] leading-[1.05] text-gray-900 md:text-[40px]`}>
             Track every order <Accent green>live</Accent>.
           </h2>
@@ -104,7 +104,7 @@ export function TrackBand() {
           </ol>
         </Reveal>
         <div className="p-3 pt-0 md:p-3 md:pl-0">
-          <RouteMap dark className="aspect-[56/38] md:aspect-auto md:h-full md:min-h-[420px]" minutes={30} />
+          <RouteMap dark className="aspect-[56/38] md:aspect-auto md:h-full md:min-h-[420px]" minutes={9} />
         </div>
       </div>
     </section>

@@ -32,7 +32,7 @@ const MARKET = [
 ];
 
 const PRODUCTS = [
-  { icon: <Store size={22} />, photo: landscape('produce', 0), name: 'Zyphix Now', tag: 'Groceries & essentials', d: 'Live inventory and shelf prices from stores near the customer, delivered within an under-30-minute target.', href: '/now' },
+  { icon: <Store size={22} />, photo: landscape('produce', 0), name: 'Zyphix Now', tag: 'Groceries & essentials', d: 'Live inventory and shelf prices from stores near the customer, delivered within an under-10-minute target.', href: '/now' },
   { icon: <UtensilsCrossed size={22} />, photo: landscape('chef', 0), name: 'Zyphix Eats', tag: 'Food delivery', d: 'Neighbourhood restaurants, cafés and cloud kitchens on fair, flat commissions.', href: '/eats' },
   { icon: <Wrench size={22} />, photo: landscape('electrician', 0), name: 'Zyphix Book', tag: 'Home services', d: 'Verified local electricians, plumbers, cleaners and more, booked and paid transparently in-app.', href: '/book' },
 ];

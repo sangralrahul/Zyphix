@@ -23,10 +23,10 @@ function Pills({ items }: { items: string[] }) {
 const CHAPTERS: Chapter[] = [
   {
     kicker: '01 · Zyphix Now · Groceries',
-    title: <>Your corner store, at your door in <Accent green>30 minutes</Accent>.</>,
+    title: <>Your corner store, at your door in <Accent green>10 minutes</Accent>.</>,
     body: `Real shelves from stores near you, at shelf prices. ${PRODUCT_COUNT} products, packed the moment you order and tracked to your gate.`,
     clip: VIDEOS.packing,
-    extra: <><Pills items={['30-min promise', 'Free delivery on bigger baskets', 'Cash on delivery']} /><div className="mt-6"><ArrowLink href={NOW_SITE} dark>Shop on now.zyphix.in</ArrowLink></div></>,
+    extra: <><Pills items={['10-min promise', 'Free delivery on bigger baskets', 'Cash on delivery']} /><div className="mt-6"><ArrowLink href={NOW_SITE} dark>Shop on now.zyphix.in</ArrowLink></div></>,
   },
   {
     kicker: '02 · Zyphix Eats · Food',

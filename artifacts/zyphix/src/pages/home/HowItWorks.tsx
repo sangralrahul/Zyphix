@@ -46,7 +46,7 @@ export function HowItWorks() {
 
           <div className="lg:col-span-7">
             <Reveal y={32}>
-              <RouteMap className="aspect-[4/3] w-full shadow-[0_40px_100px_-40px_rgba(11,15,25,.55)] sm:aspect-[560/380]" />
+              <RouteMap minutes={9} className="aspect-[4/3] w-full shadow-[0_40px_100px_-40px_rgba(11,15,25,.55)] sm:aspect-[560/380]" />
             </Reveal>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <Reveal delay={0.1} y={24}>

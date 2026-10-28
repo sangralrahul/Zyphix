@@ -87,7 +87,7 @@ export function TrackBento() {
 
 /* ── Listed automatically ───────────────────────────────────────────────── */
 const DESTINATIONS = [
-  { host: 'now.zyphix.in', href: NOW_SITE, who: 'Stores & shop owners', what: 'Your shelves, at shelf prices, 30-minute delivery.' },
+  { host: 'now.zyphix.in', href: NOW_SITE, who: 'Stores & shop owners', what: 'Your shelves, at shelf prices, 10-minute delivery.' },
   { host: 'eats.zyphix.in', href: EATS_SITE, who: 'Restaurants & kitchens', what: 'Your menu, your prices, riders timed to prep.' },
   { host: 'book.zyphix.in', href: BOOK_SITE, who: 'Zyphix Book professionals', what: 'Your slots and rate card, with a verified badge.' },
 ];

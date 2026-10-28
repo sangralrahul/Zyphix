@@ -28,7 +28,7 @@ export function AppHeader({ area = 'Home', product = 'Zyphix Now', accent = G }:
         <p className="text-[9.5px] font-medium uppercase tracking-wider text-gray-400">{product}</p>
         <p className="flex items-center gap-1 text-[12px] font-semibold text-gray-900"><MapPin size={11} style={{ color: accent }} /> {area} <ChevronDown size={11} className="text-gray-400" /></p>
       </div>
-      <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: `${accent}14`, color: accent }}>30 min</span>
+      <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: `${accent}14`, color: accent }}>10 min</span>
     </div>
   );
 }

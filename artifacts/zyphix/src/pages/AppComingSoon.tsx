@@ -40,7 +40,7 @@ function useCountdown(target: number) {
 }
 
 const FEATURES = [
-  { Icon: Zap, t: '30-minute grocery delivery', d: 'Real shelves from stores near you, packed and moving in minutes.' },
+  { Icon: Zap, t: '10-minute grocery delivery', d: 'Real shelves from stores near you, packed and moving in minutes.' },
   { Icon: UtensilsCrossed, t: 'Food from local kitchens', d: 'Neighbourhood restaurants, cafés and cloud kitchens on fair commissions.' },
   { Icon: MapPin, t: 'Live order tracking', d: 'Follow your delivery partner from pickup to doorstep.' },
   { Icon: Tag, t: 'App-exclusive deals', d: 'Offers and launch-day perks only in the app.' },
@@ -64,7 +64,7 @@ function PhonePreview() {
           <div className="px-4 pb-4 pt-10 text-white" style={{ background: G }}>
             <div className="flex items-center justify-between">
               <span className="text-[16px] font-semibold tracking-[-0.02em]">Zyphix</span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold"><Clock size={10} /> 30 min</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold"><Clock size={10} /> 10 min</span>
             </div>
             <div className="mt-3 rounded-xl bg-white px-3 py-2 text-[11px] font-medium text-gray-400">Search groceries &amp; food…</div>
           </div>
@@ -138,7 +138,7 @@ export function AppComingSoon() {
           height="min-h-[100svh]"
           kicker="Mobile app · Coming soon"
           parts={['The Zyphix app is coming to', { accent: 'iOS & Android.', green: true }]}
-          sub="Groceries in 30 minutes, food from local kitchens and trusted home services in one native app. Leave your email and we will tell you the moment it is live."
+          sub="Groceries in 10 minutes, food from local kitchens and trusted home services in one native app. Leave your email and we will tell you the moment it is live."
           aside={<PhonePreview />}
         >
           {/* Countdown (hidden once the target date has passed) */}

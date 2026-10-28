@@ -52,7 +52,7 @@ const NOINDEX = { noindex: true } as const;
 
 const DESC = {
   main: 'Zyphix is the SuperLocal app: groceries in minutes, food from local kitchens and verified home services, from the businesses already in your neighbourhood.',
-  now: 'Fresh produce, dairy, snacks and daily staples from stores near you, delivered in about 30 minutes at shelf prices.',
+  now: 'Fresh produce, dairy, snacks and daily staples from stores near you, delivered in about 10 minutes at shelf prices.',
   eats: 'Restaurants, cafés, dhabas and home kitchens near you, cooked to order at menu prices and tracked to your door.',
   book: 'Plumbers, electricians, cleaners and more from your neighbourhood. ID-verified pros, price shown before you confirm.',
 };
@@ -78,7 +78,7 @@ const STATIC: Record<SiteKey, Page[]> = {
     P('/checkout', 'Checkout · Zyphix Now', 'Check out your Zyphix Now order.', NOINDEX),
   ],
   now: [
-    P('/', 'Zyphix Now — Groceries delivered in 30 minutes', DESC.now, { changefreq: 'daily', priority: 0.9 }),
+    P('/', 'Zyphix Now — Groceries delivered in 10 minutes', DESC.now, { changefreq: 'daily', priority: 0.9 }),
     P('/cart', 'Your cart · Zyphix Now', 'Your Zyphix Now cart.', NOINDEX),
     P('/checkout', 'Checkout · Zyphix Now', 'Check out your Zyphix Now order.', NOINDEX),
     P('/wallet', 'Wallet · Zyphix', 'Your Zyphix wallet balance and refunds.', NOINDEX),

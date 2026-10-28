@@ -17,7 +17,7 @@ import { Faq, FinalCta, StickyCta } from './home/Faq';
 
 export function Landing() {
   const categories = useCategories();
-  React.useEffect(() => { document.title = 'Zyphix — Your neighbourhood, delivered in 30 minutes'; }, []);
+  React.useEffect(() => { document.title = 'Zyphix — Your neighbourhood, delivered in 10 minutes'; }, []);
 
   return (
     <div className="min-h-screen bg-[#05080E] pb-[72px] text-gray-900 antialiased md:pb-0" style={{ fontFamily: FONT }}>

@@ -22,7 +22,7 @@ const PARTNERS = [
     icon: <Store size={22} />, tint: '#0DA366', bg: '#ECFDF5',
     tag: 'Local & retail stores', title: 'Sell from your store.',
     sub: 'Your corner store, supermarket or shop online in days. Accept orders, manage inventory and keep the customers you already have.',
-    perks: ['Free onboarding and catalogue setup', 'Hyperlocal delivery network, under-30-minute target', 'Weekly payouts, no hidden fees'],
+    perks: ['Free onboarding and catalogue setup', 'Hyperlocal delivery network, under-10-minute target', 'Weekly payouts, no hidden fees'],
     cta: 'List your store', href: '/merchant-setup', img: '/images/groceries.webp',
   },
   {

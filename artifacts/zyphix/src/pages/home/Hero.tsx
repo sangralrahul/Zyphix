@@ -13,7 +13,7 @@ import { NOW_SITE, EATS_SITE, BOOK_SITE, Display } from './shared';
 ──────────────────────────────────────────────────────────────────────────── */
 
 const PRODUCTS = [
-  { name: 'Now', what: 'Groceries in 30 min', href: NOW_SITE, icon: <ShoppingBasket size={15} /> },
+  { name: 'Now', what: 'Groceries in 10 min', href: NOW_SITE, icon: <ShoppingBasket size={15} /> },
   { name: 'Eats', what: 'Food from local kitchens', href: EATS_SITE, icon: <UtensilsCrossed size={15} /> },
   { name: 'Book', what: 'Home services', href: BOOK_SITE, icon: <Wrench size={15} /> },
 ];
@@ -48,7 +48,7 @@ export function Hero() {
           <Kicker light>The SuperLocal app</Kicker>
         </motion.div>
         <SplitHeadline
-          parts={['Your neighbourhood,', { accent: 'delivered', green: true }, 'in 30 minutes.']}
+          parts={['Your neighbourhood,', { accent: 'delivered', green: true }, 'in 10 minutes.']}
           delay={0.1}
           className="max-w-[16ch] text-balance text-[46px] font-semibold leading-[0.98] tracking-[-0.045em] text-white sm:text-[64px] md:max-w-none md:text-[78px]"
         />
@@ -88,7 +88,7 @@ export function Hero() {
 
 /* ── Intro band + giant marquee ─────────────────────────────────────────── */
 const FACTS = [
-  ['30 min', 'grocery delivery promise'],
+  ['10 min', 'grocery delivery promise'],
   ['Free', 'delivery on bigger baskets'],
   ['1 login', 'for Now, Eats and Book'],
 ];

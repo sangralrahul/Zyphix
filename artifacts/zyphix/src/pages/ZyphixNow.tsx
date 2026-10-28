@@ -34,7 +34,7 @@ const isDesktop = () => typeof window !== 'undefined' && window.matchMedia('(min
 const scrollOffset = () => (isDesktop() ? NAV_H + 16 : NAV_H + MOBILE_RAIL_H + 8);
 
 export function ZyphixNow() {
-  useSeo('Zyphix Now — Groceries delivered in 30 minutes', 'Fresh produce, dairy, snacks and daily staples from stores near you, delivered in about 30 minutes at shelf prices.');
+  useSeo('Zyphix Now — Groceries delivered in 10 minutes', 'Fresh produce, dairy, snacks and daily staples from stores near you, delivered in about 10 minutes at shelf prices.');
   const { products, categories: allCategories, loading: catalogLoading } = useCatalog();
   const { partners: stores } = usePartners('store');
   // Hide categories that have no products yet so the rail never shows empty entries.
@@ -451,7 +451,7 @@ export function ZyphixNow() {
               <IconTile className="h-9 w-9 rounded-lg"><ShoppingBag size={16} /></IconTile>
               <div className="min-w-0 leading-tight">
                 <p className="text-[13.5px] font-semibold">{totalItems} item{totalItems > 1 ? 's' : ''} · ₹{subtotal.toLocaleString('en-IN')}</p>
-                <p className="text-[12px] text-gray-500">Delivery in 30 min · Free above ₹149</p>
+                <p className="text-[12px] text-gray-500">Delivery in 10 min · Free above ₹149</p>
               </div>
             </div>
             <Button href="/now/cart" size="sm">View cart <ArrowRight size={14} /></Button>
@@ -488,7 +488,7 @@ function SectionHead({ title, sub, action }: { title: string; sub?: string; acti
 
 function Hero({ productCount, onSearch }: { productCount: string; onSearch: (q: string) => void }) {
   const chips: { icon: React.ReactNode; text: string }[] = [
-    { icon: <Clock size={13} />, text: 'Delivered in 30 min' },
+    { icon: <Clock size={13} />, text: 'Delivered in 10 min' },
     { icon: <Truck size={13} />, text: 'Free delivery on bigger baskets' },
     ...(productCount ? [{ icon: <Package size={13} />, text: `${productCount} products` }] : []),
     { icon: <MapPin size={13} />, text: 'Check if we deliver to you' },
