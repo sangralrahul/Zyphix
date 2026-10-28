@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://zyphix.in"><img src="docs/readme/banner.webp" alt="Zyphix — your neighbourhood, delivered in 30 minutes" width="100%" /></a>
+<a href="https://zyphix.in"><img src="docs/readme/banner.webp" alt="Zyphix — your neighbourhood, delivered in 10 minutes" width="100%" /></a>
 
 <h3>The SuperLocal app</h3>
 
@@ -39,7 +39,7 @@ One account works across every product, and every product runs on a single edge 
     <td width="33%"><a href="https://book.zyphix.in"><img src="artifacts/zyphix/public/og/book.jpg" alt="Zyphix Book" /></a></td>
   </tr>
   <tr>
-    <td><b>Zyphix Now</b><br /><sub>Groceries and daily essentials from nearby stores, delivered in about 30 minutes at shelf prices.</sub></td>
+    <td><b>Zyphix Now</b><br /><sub>Groceries and daily essentials from nearby stores, delivered in about 10 minutes at shelf prices.</sub></td>
     <td><b>Zyphix Eats</b><br /><sub>Restaurants, cafés, dhabas and home kitchens near you, cooked to order.</sub></td>
     <td><b>Zyphix Book</b><br /><sub>Plumbers, electricians, cleaners and more. Verified pros, price shown before you confirm.</sub></td>
   </tr>
