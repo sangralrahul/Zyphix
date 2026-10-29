@@ -3,6 +3,11 @@ import App from "./App";
 import "./index.css";
 import { imgFallback } from "./data/media";
 import { reloadOnce, reportClientError } from "@/components/AppErrorBoundary";
+import { detectSite } from "@/lib/site";
+
+// Zyphix Now: fetch the catalogue while React is still booting (the HTML already
+// preloaded it), so the first render of the store has products in it.
+if (detectSite() === "now") import("@/lib/catalog").then(m => m.loadCatalog()).catch(() => {});
 
 // Safety net: if any proxied /media image fails anywhere on the site, load it straight from Pexels.
 window.addEventListener(

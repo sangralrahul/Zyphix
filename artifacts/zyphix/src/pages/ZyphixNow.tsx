@@ -1,4 +1,5 @@
 import { useSeo } from '@/lib/seo';
+import { num } from '@/lib/format';
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion } from '@/lib/motion';
 import { Plus, Minus, ChevronDown, ShoppingBag, ArrowRight, Store, X, Search, Clock, Truck, Package, MapPin } from 'lucide-react';
@@ -35,7 +36,7 @@ const scrollOffset = () => (isDesktop() ? NAV_H + 16 : NAV_H + MOBILE_RAIL_H + 8
 
 export function ZyphixNow() {
   useSeo('Zyphix Now — Groceries delivered in 10 minutes', 'Fresh produce, dairy, snacks and daily staples from stores near you, delivered in about 10 minutes at shelf prices.');
-  const { products, categories: allCategories, loading: catalogLoading } = useCatalog();
+  const { products, categories: allCategories, loading: catalogLoading, total } = useCatalog();
   const { partners: stores } = usePartners('store');
   // Hide categories that have no products yet so the rail never shows empty entries.
   const categories = useMemo(() => {
@@ -206,7 +207,7 @@ export function ZyphixNow() {
   }, [activeCat]);
 
   const showStore = !q;
-  const productCount = products.length.toLocaleString('en-IN');
+  const productCount = num(total || products.length);
 
   return (
     <div className="relative mx-auto w-full max-w-[1180px] pt-0 text-gray-900" style={{ fontFamily: FONT }}>
@@ -308,7 +309,7 @@ export function ZyphixNow() {
             <section>
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-[17px] font-semibold tracking-[-0.01em]">
-                  {searchResults.length > 0 ? `${searchResults.length.toLocaleString('en-IN')} results` : 'No results'} for “{urlQuery.trim()}”
+                  {searchResults.length > 0 ? `${num(searchResults.length)} results` : 'No results'} for “{urlQuery.trim()}”
                 </h2>
                 <div className="flex items-center gap-2">
                   <SortControls sortBy={sortBy} setSortBy={setSortBy} onlyDiscounted={onlyDiscounted} setOnlyDiscounted={setOnlyDiscounted} />
@@ -344,7 +345,7 @@ export function ZyphixNow() {
 
                   {dealsRow.length > 0 && (
                     <section id="home-deals">
-                      <SectionHead title="Deals of the day" sub={`${dealsCount.toLocaleString('en-IN')} on offer`}
+                      <SectionHead title="Deals of the day" sub={`${num(dealsCount)} on offer`}
                         action={<SeeAll onClick={() => { setSortBy('discount'); setOnlyDiscounted(true); jumpTo(dealsRow[0].category); }} />} />
                       <ProductRow products={dealsRow} categories={categories} cart={cart} add={add} remove={remove} tagTone="red" />
                     </section>
@@ -361,7 +362,7 @@ export function ZyphixNow() {
 
                   {(under49.length > 0 || under99.length > 0) && (
                     <section>
-                      <SectionHead title="Budget picks" sub={`${(priceTab === 49 ? under49Count : under99Count).toLocaleString('en-IN')} products`}
+                      <SectionHead title="Budget picks" sub={`${num(priceTab === 49 ? under49Count : under99Count)} products`}
                         action={<SeeAll label="Low to high" onClick={() => { setSortBy('price_asc'); jumpTo((priceTab === 49 ? under49 : under99)[0]?.category || categories[0].name); }} />} />
                       <div className="mb-3 flex gap-1.5">
                         {([49, 99] as const).map(v => (
@@ -393,7 +394,7 @@ export function ZyphixNow() {
 
                   {produceRow.length > 0 && (
                     <section>
-                      <SectionHead title="Fresh from local farms" sub={`${(countByCategory.get(PRODUCE_CATEGORY) || 0).toLocaleString('en-IN')} products`}
+                      <SectionHead title="Fresh from local farms" sub={`${num(countByCategory.get(PRODUCE_CATEGORY) || 0)} products`}
                         action={<SeeAll onClick={() => jumpTo(PRODUCE_CATEGORY)} />} />
                       <ProductRow products={produceRow} categories={categories} cart={cart} add={add} remove={remove} />
                     </section>
@@ -432,7 +433,7 @@ export function ZyphixNow() {
             <div className="flex min-w-0 items-center gap-3">
               <IconTile className="h-9 w-9 rounded-lg"><ShoppingBag size={16} /></IconTile>
               <div className="min-w-0 leading-tight">
-                <p className="text-[13.5px] font-semibold">{totalItems} item{totalItems > 1 ? 's' : ''} · ₹{subtotal.toLocaleString('en-IN')}</p>
+                <p className="text-[13.5px] font-semibold">{totalItems} item{totalItems > 1 ? 's' : ''} · ₹{num(subtotal)}</p>
                 <p className="text-[12px] text-gray-500">Delivery in 10 min · Free above ₹149</p>
               </div>
             </div>
@@ -748,12 +749,13 @@ const AisleList = React.memo(function AisleList({ categories, byCategory, expand
   categories: Category[]; byCategory: Map<string, Product[]>; expanded: Set<string>; showAll: boolean;
   toggle: (name: string) => void; cart: Record<string, number>; add: (id: string) => void; remove: (id: string) => void;
 }) {
-  const [n, setN] = useState(2);
+  const [n, setN] = useState(3);
   const count = showAll ? categories.length : n;
   useEffect(() => {
     if (count >= categories.length) return;
     const w = window as any;
-    const id = w.requestIdleCallback ? w.requestIdleCallback(() => setN(v => v + 1), { timeout: 400 }) : setTimeout(() => setN(v => v + 1), 60);
+    // Two aisles per tick; a short timeout so a busy phone (images decoding) still makes progress.
+    const id = w.requestIdleCallback ? w.requestIdleCallback(() => setN(v => v + 2), { timeout: 120 }) : setTimeout(() => setN(v => v + 2), 40);
     return () => (w.cancelIdleCallback ? w.cancelIdleCallback(id) : clearTimeout(id));
   }, [count, categories.length]);
   return <>{categories.slice(0, count).map(c => (
@@ -862,9 +864,9 @@ const ProductCard = React.memo(function ProductCard({ product: p, categories, qt
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
           <div className="min-w-0 leading-none">
-            <span className="text-[14px] font-semibold text-gray-900">₹{p.price.toLocaleString('en-IN')}</span>
+            <span className="text-[14px] font-semibold text-gray-900">₹{num(p.price)}</span>
             {p.origPrice && p.origPrice > p.price && (
-              <span className="ml-1 text-[12px] text-gray-400 line-through">₹{p.origPrice.toLocaleString('en-IN')}</span>
+              <span className="ml-1 text-[12px] text-gray-400 line-through">₹{num(p.origPrice)}</span>
             )}
           </div>
 

@@ -17,7 +17,7 @@ export function ProductDetail() {
   const { has: isWished, toggle: toggleWish } = useWishlist();
   const { summary } = useReviews();
 
-  const { products, categories } = useCatalog();
+  const { products, categories, partial } = useCatalog();
   const product = useMemo(() => products.find(p => p.id === params.id), [products, params.id]);
   useSeo(product ? `${product.name}${product.weight ? ` (${product.weight})` : ''} · Zyphix Now` : 'Product · Zyphix Now',
     product ? `Order ${product.name} from stores near you on Zyphix Now, delivered in about 10 minutes.` : undefined);
@@ -28,6 +28,17 @@ export function ProductDetail() {
   }, [products, product]);
 
   if (!product) {
+    // The catalogue arrives in two parts; don't call a product missing until the whole thing is here.
+    if (partial) {
+      return (
+        <div className="mx-auto w-full max-w-[1180px] pt-4" style={{ fontFamily: FONT }} aria-busy="true">
+          <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div className="aspect-square animate-pulse rounded-2xl bg-gray-100" />
+            <div className="space-y-3 pt-2"><div className="h-4 w-24 animate-pulse rounded bg-gray-100" /><div className="h-7 w-3/4 animate-pulse rounded bg-gray-100" /><div className="h-4 w-1/3 animate-pulse rounded bg-gray-100" /><div className="mt-6 h-12 w-40 animate-pulse rounded-full bg-gray-100" /></div>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="mx-auto w-full max-w-[1180px] pt-4 text-gray-900" style={{ fontFamily: FONT }}>
         <div className="rounded-2xl border border-gray-200 bg-white px-6 py-14 text-center">

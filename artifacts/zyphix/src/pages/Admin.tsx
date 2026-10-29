@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { num } from '@/lib/format';
 import {
   ArrowRight, Bell, Moon, Sun, Bike, Check, ChevronRight, Clock, Eye, EyeOff, Inbox, LayoutDashboard, Loader2, LogOut, Mail, MapPin, MessageCircle,
   Package, Phone, RefreshCw, Search, ShieldCheck, ShoppingBag, Store, Undo2, Users, UtensilsCrossed, Wrench, X, XCircle,
@@ -89,7 +90,7 @@ function Glow() {
 
 function CountUp({ value }: { value: number }) {
   const mv = useMotionValue(0);
-  const rounded = useTransform(mv, v => Math.round(v).toLocaleString('en-IN'));
+  const rounded = useTransform(mv, v => num(Math.round(v)));
   const [txt, setTxt] = useState('0');
   useEffect(() => rounded.on('change', setTxt), [rounded]);
   useEffect(() => { const c = animate(mv, value, { duration: 1.1, ease: EASE }); return () => c.stop(); }, [value, mv]);

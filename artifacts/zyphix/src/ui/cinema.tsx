@@ -10,6 +10,7 @@
  *    `playsInline muted loop autoPlay`, and a failed load silently keeps the poster.
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { num } from '@/lib/format';
 import { motion, useInView, useMotionValue, useScroll, useSpring, useTransform, animate as fmAnimate, type MotionProps } from '@/lib/motion';
 import { pickRendition, posterAt, photoSrcSet, directUrl, imgFallback, type Clip, type Photo } from '@/data/media';
 
@@ -285,7 +286,7 @@ export function PhotoTile({ photo, className = '', ratio = '4/3', rounded = 'rou
 
 /* ── Numbers ─────────────────────────────────────────────────────────────── */
 /** Counts up from 0 when scrolled into view. `format` lets you add ₹ / % / +. */
-export function Counter({ to, duration = 1.6, format = (n: number) => Math.round(n).toLocaleString('en-IN'), className = '' }: { to: number; duration?: number; format?: (n: number) => string; className?: string }) {
+export function Counter({ to, duration = 1.6, format = (n: number) => num(Math.round(n)), className = '' }: { to: number; duration?: number; format?: (n: number) => string; className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.6 });
   const mv = useMotionValue(0);

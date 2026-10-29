@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { num } from '@/lib/format';
 import { type Category } from '@/lib/catalog';
 import { PHOTOS, landscape, type Photo } from '@/data/media';
 
@@ -8,7 +9,7 @@ import { PHOTOS, landscape, type Photo } from '@/data/media';
 
 /** Bundled catalogue holds 2,946 SKUs (src/data/mockData.ts) — rounded down, never inflated. */
 export const PRODUCT_COUNT_N = 2900;
-export const PRODUCT_COUNT = `${PRODUCT_COUNT_N.toLocaleString('en-IN')}+`;
+export const PRODUCT_COUNT = `${num(PRODUCT_COUNT_N)}+`;
 
 export const NOW_SITE = 'https://now.zyphix.in';
 export const EATS_SITE = 'https://eats.zyphix.in';

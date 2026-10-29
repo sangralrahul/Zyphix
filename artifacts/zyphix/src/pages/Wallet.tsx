@@ -1,4 +1,5 @@
 import { useSeo } from '@/lib/seo';
+import { num } from '@/lib/format';
 import React, { useState } from 'react';
 import { Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, Copy, Check, Gift } from 'lucide-react';
 import { usePromo } from '@/context/PromoContext';
@@ -25,7 +26,7 @@ export function Wallet() {
         <IconTile><WalletIcon size={18} /></IconTile>
         <div className="min-w-0 flex-1">
           <p className="text-[12px] text-gray-500">Balance</p>
-          <p className="text-[24px] font-semibold leading-tight tracking-[-0.01em] tabular-nums">₹{walletBalance.toLocaleString('en-IN')}</p>
+          <p className="text-[24px] font-semibold leading-tight tracking-[-0.01em] tabular-nums">₹{num(walletBalance)}</p>
           <p className="mt-0.5 text-[12px] text-gray-500">Use up to 20% of any order · 2% cashback on every order</p>
         </div>
         <Button href="/now" size="sm" variant="secondary" className="hidden sm:inline-flex">Shop</Button>

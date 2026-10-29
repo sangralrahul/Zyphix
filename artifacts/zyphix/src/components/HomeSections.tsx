@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { num } from '@/lib/format';
 import { motion } from '@/lib/motion';
 
 const G   = '#0DA366';
@@ -69,7 +70,7 @@ export function CategoryGrid() {
    2. SAVINGS CALCULATOR
 ══════════════════════════════════════════ */
 function fmt(n: number) {
-  return '₹' + Math.round(n).toLocaleString('en-IN');
+  return '₹' + num(Math.round(n));
 }
 
 function funEquivalent(yearly: number) {
@@ -418,7 +419,7 @@ export function LiveCounter() {
         {/* Big number */}
         <div style={{ marginBottom: 6 }}>
           <span style={{ fontFamily: "'Geist', 'Geist Fallback', sans-serif", fontWeight: 900, fontSize: 'clamp(3.2rem,9vw,5.5rem)', color: G, letterSpacing: '-.05em', lineHeight: 1 }}>
-            {display.toLocaleString('en-IN')}
+            {num(display)}
           </span>
         </div>
         <p style={{ fontSize: 15, color: T2, marginBottom: 40, lineHeight: 1.6 }}>people have joined the Zyphix waitlist</p>
@@ -431,7 +432,7 @@ export function LiveCounter() {
               <div key={name} style={{ marginBottom: i < cities.length - 1 ? 22 : 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                   <span style={{ fontSize: 14, fontWeight: 700, color: T1 }}>{name}</span>
-                  <span style={{ fontSize: 14, fontWeight: 800, color: G }}>{cityCount.toLocaleString('en-IN')}</span>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: G }}>{num(cityCount)}</span>
                 </div>
                 <div style={{ height: 8, background: BD, borderRadius: 99, overflow: 'hidden' }}>
                   <motion.div

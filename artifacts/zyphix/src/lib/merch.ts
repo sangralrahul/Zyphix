@@ -3,13 +3,14 @@
  * Everything here is derived from the live catalogue – no typed numbers, no copy.
  */
 import type { Product, Category } from '@/lib/catalog';
+import { num } from '@/lib/format';
 import type { Coupon } from '@/data/coupons';
 import { hasRealImage } from '@/lib/productImage';
 
 export const discountOf = (p: Product) =>
   p.origPrice && p.origPrice > p.price ? Math.round((1 - p.price / p.origPrice) * 100) : 0;
 
-const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
+const inr = (n: number) => `₹${num(n)}`;
 
 /** Stable ordering that floats products with real photos to the front. */
 export function preferPhotos(list: Product[]): Product[] {

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { num } from '@/lib/format';
 import { Store, Bike, ChefHat, Package, IndianRupee, TrendingUp } from 'lucide-react';
 import { listOrders } from '@/context/CartContext';
 import { Button, FONT, IconTile } from '@/ui/kit';
@@ -56,7 +57,7 @@ export function PartnerDashboard() {
       <div className="mt-4 grid grid-cols-3 gap-2.5 lg:gap-3">
         <Kpi icon={<Package size={15} />} label="Today's orders" value={String(stats.todayOrders)} />
         <Kpi icon={<TrendingUp size={15} />} label="Total orders" value={String(stats.totalOrders)} />
-        <Kpi icon={<IndianRupee size={15} />} label="Earnings" value={`₹${stats.earnings.toLocaleString('en-IN')}`} />
+        <Kpi icon={<IndianRupee size={15} />} label="Earnings" value={`₹${num(stats.earnings)}`} />
       </div>
 
       <div className="mt-4 grid items-start gap-4 md:grid-cols-[1fr_320px]">
@@ -86,7 +87,7 @@ export function PartnerDashboard() {
         {/* Payout */}
         <div className={`${card} p-4`}>
           <p className="text-[14px] font-semibold">Payout</p>
-          <p className="mt-2 text-[24px] font-semibold leading-tight tracking-[-0.01em] tabular-nums">₹{Math.round(stats.earnings * 0.6).toLocaleString('en-IN')}</p>
+          <p className="mt-2 text-[24px] font-semibold leading-tight tracking-[-0.01em] tabular-nums">₹{num(Math.round(stats.earnings * 0.6))}</p>
           <p className="mt-0.5 text-[12px] text-gray-500">Pending payout</p>
           <Button size="sm" className="mt-3 w-full">Request payout</Button>
         </div>

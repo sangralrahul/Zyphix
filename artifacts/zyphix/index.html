@@ -73,6 +73,10 @@
         var url = proxy ? '/media/vp/' + f + '?w=' + w : 'https://images.pexels.com/videos/' + id + '/' + name + '?auto=compress&cs=tinysrgb&w=' + w;
         var l = document.createElement('link'); l.rel = 'preload'; l.as = 'image'; l.href = url; l.setAttribute('fetchpriority', 'high');
         document.head.appendChild(l);
+        /* Zyphix Now: start downloading the catalogue now, in parallel with the app, instead of after it boots. */
+        if (s === 'now' && location.pathname === '/') ['/api/products?preview=8', '/api/categories'].forEach(function (u) {
+          var f = document.createElement('link'); f.rel = 'preload'; f.as = 'fetch'; f.href = u; f.crossOrigin = 'anonymous'; document.head.appendChild(f);
+        });
         if (location.pathname === '/' && !/noanim/.test(location.search)) { window.__zxBoot = url; window.__zxSite = s; }
       })();
     </script>

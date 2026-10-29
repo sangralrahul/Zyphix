@@ -52,7 +52,7 @@ type ProductRow = {
   store_name: string | null; distance: string | null; in_stock: number;
 };
 
-const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*' };
+const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*', 'access-control-expose-headers': 'x-total-count' };
 const json = (data: unknown, status = 200, extra: Record<string, string> = {}) =>
   new Response(JSON.stringify(data), { status, headers: { ...JSON_HEADERS, ...extra } });
 
@@ -60,15 +60,17 @@ const placeholder = (name: string) =>
   `https://placehold.co/400x400/E8F7EE/0DA366/png?text=${encodeURIComponent(name.split(' ').slice(0, 3).join(' '))}&font=poppins`;
 
 /** Convert a D1 row to the shape the React app already uses (mockData.ts). */
-function toClient(r: ProductRow, origin: string, env: Env) {
+function toClient(r: ProductRow, origin: string, env: Env, compact = false) {
   let image = r.image_url ?? placeholder(r.name);
   if (image.startsWith('/img/')) image = (env.PUBLIC_IMAGE_BASE ?? origin) + image;
-  return {
+  const base = {
     id: r.id, name: r.name, brand: r.brand, price: r.price, origPrice: r.orig_price,
     category: r.category, weight: r.weight ?? '', image, tag: r.tag,
-    storeName: r.store_name ?? '', distance: r.distance ?? '',
-    inStock: r.in_stock === 1, imageStatus: r.image_status,
   };
+  // The catalogue grid never shows store / distance / image status: leaving them out
+  // makes the 2,900-product download noticeably smaller.
+  if (compact) return { ...base, ...(r.image_status && r.image_status !== 'ok' ? { imageStatus: r.image_status } : {}) };
+  return { ...base, storeName: r.store_name ?? '', distance: r.distance ?? '', inStock: r.in_stock === 1, imageStatus: r.image_status };
 }
 
 async function handleRequest(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -282,9 +284,22 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
     if (category) { where.push('category = ?'); binds.push(category); }
     if (q) { where.push('(name LIKE ? OR brand LIKE ?)'); binds.push(`%${q}%`, `%${q}%`); }
 
-    const sql = `SELECT * FROM products WHERE ${where.join(' AND ')} ORDER BY (image_url IS NULL OR image_url = '') , rowid LIMIT ? OFFSET ?`; // products with real photos first
+    const compact = url.searchParams.get('compact') === '1';
+    const preview = Math.min(Number(url.searchParams.get('preview') ?? 0), 24);
+    const whereSql = where.join(' AND ');
+    if (preview > 0) {
+      // First paint: the top N products of every aisle (photos first) plus the total,
+      // so the page renders complete before the whole catalogue has downloaded.
+      const sql = `SELECT * FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY category ORDER BY (image_url IS NULL OR image_url = ''), rowid) AS rn FROM products WHERE ${whereSql}) WHERE rn <= ? ORDER BY category, rn`;
+      const [{ results }, count] = await Promise.all([
+        env.DB.prepare(sql).bind(...binds, preview).all<ProductRow>(),
+        env.DB.prepare(`SELECT COUNT(*) AS n FROM products WHERE ${whereSql}`).bind(...binds).first<{ n: number }>(),
+      ]);
+      return json(results.map(r => toClient(r, origin, env, true)), 200, { ...cache, 'x-total-count': String(count?.n ?? results.length) });
+    }
+    const sql = `SELECT * FROM products WHERE ${whereSql} ORDER BY (image_url IS NULL OR image_url = '') , rowid LIMIT ? OFFSET ?`; // products with real photos first
     const { results } = await env.DB.prepare(sql).bind(...binds, limit, offset).all<ProductRow>();
-    return json(results.map(r => toClient(r, origin, env)), 200, cache);
+    return json(results.map(r => toClient(r, origin, env, compact)), 200, cache);
   }
 
   const m = p.match(/^\/api\/products\/([^/]+)(\/related)?$/);
