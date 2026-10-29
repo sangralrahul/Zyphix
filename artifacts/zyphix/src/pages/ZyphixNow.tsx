@@ -208,7 +208,8 @@ export function ZyphixNow() {
   const productCount = num(total || products.length);
 
   const maxDeal = dealsRow.reduce((m, p) => Math.max(m, discountOf(p)), 0);
-  const groups = useMemo(() => groupCategories(categories), [categories]);
+  // Grouped tiles show every category, including new ones that have no products yet ("Coming soon").
+  const groups = useMemo(() => groupCategories(allCategories), [allCategories]);
 
   return (
     <div className="relative mx-auto w-full max-w-[1240px] pt-0 text-gray-900">
@@ -531,39 +532,54 @@ function BannerTile({ p, categories, className = '' }: { p: Product; categories:
   );
 }
 
-/* ─── Category groups ("Grocery & Kitchen", "Snacks & Drinks"…) built from category names ─── */
-const GROUPS: { title: string; re: RegExp }[] = [
-  { title: 'Grocery & Kitchen', re: /fruit|veg|dairy|egg|atta|rice|dal|oil|ghee|masala|spice|dry fruit|nut|bakery|bread|biscuit|breakfast|cereal|frozen|meat|fish|sauce|spread|instant|noodle|pasta|kitchen|staple|sugar|salt/i },
-  { title: 'Snacks & Drinks', re: /snack|munch|drink|juice|tea|coffee|chocolate|sweet|ice cream|namkeen|beverage|soda|water|paan/i },
-  { title: 'Beauty & Personal Care', re: /personal|beauty|cosmetic|skin|hair|bath|baby|pharma|health|wellness|hygiene/i },
-  { title: 'Household Essentials', re: /household|clean|home|pet|stationery|pooja|electric|kitchenware|laundry|detergent/i },
+/* ─── Category groups ("Grocery & Kitchen", "Snacks & Drinks"…). The API says which group each
+   category belongs to; the name patterns are only a fallback for categories it doesn't know. ─── */
+const GROUP_ORDER = ['Grocery & Kitchen', 'Snacks & Drinks', 'Beauty & Personal Care', 'Household Essentials', 'Fashion & Lifestyle', 'Hobbies & Interests', 'More to explore'];
+const GROUP_FALLBACK: { title: string; re: RegExp }[] = [
+  { title: 'Snacks & Drinks', re: /snack|munch|drink|juice|tea|coffee|chocolate|sweet|ice cream|namkeen|beverage|paan/i },
+  { title: 'Beauty & Personal Care', re: /personal|beauty|cosmetic|skin|hair|bath|baby|pharma|health|wellness|hygiene|fragrance/i },
+  { title: 'Household Essentials', re: /household|clean|home|pet|kitchenware|appliance|electronic|laundry/i },
+  { title: 'Fashion & Lifestyle', re: /apparel|fashion|jewel|accessor/i },
+  { title: 'Hobbies & Interests', re: /toy|game|stationery|craft|sport|fitness|book/i },
+  { title: 'Grocery & Kitchen', re: /./ },
 ];
 function groupCategories(categories: Category[]): { title: string; items: Category[] }[] {
-  const out = GROUPS.map(g => ({ title: g.title, items: [] as Category[] }));
-  const more: Category[] = [];
+  const by = new Map<string, Category[]>();
   for (const c of categories) {
-    const i = GROUPS.findIndex(g => g.re.test(c.name));
-    (i >= 0 ? out[i].items : more).push(c);
+    const g = c.group || GROUP_FALLBACK.find(x => x.re.test(c.name))!.title;
+    if (!by.has(g)) by.set(g, []);
+    by.get(g)!.push(c);
   }
-  if (more.length) out.push({ title: 'More to explore', items: more });
-  return out.filter(g => g.items.length > 0);
+  return [...by.entries()]
+    .sort(([a], [b]) => (GROUP_ORDER.indexOf(a) + 99 * +(GROUP_ORDER.indexOf(a) < 0)) - (GROUP_ORDER.indexOf(b) + 99 * +(GROUP_ORDER.indexOf(b) < 0)))
+    .map(([title, items]) => ({ title, items }));
 }
 
 function CategoryTiles({ categories, counts, onPick }: { categories: Category[]; counts: Map<string, number>; onPick: (name: string) => void }) {
   return (
     <div className="grid grid-cols-4 gap-x-2.5 gap-y-4 sm:grid-cols-6 md:grid-cols-8 md:gap-x-4">
-      {categories.map(c => (
-        <button key={c.name} type="button" onClick={() => onPick(c.name)} className="group flex flex-col items-center text-center">
-          <span className="relative block aspect-square w-full overflow-hidden rounded-[18px] transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_28px_-14px_rgba(11,15,25,.35)]"
-            style={{ background: `linear-gradient(160deg, ${c.color || '#0DA366'}24, ${c.color || '#0DA366'}0D)` }}>
+      {categories.map(c => {
+        const n = counts.get(c.name) || 0;
+        const art = (
+          <span className="relative block aspect-square w-full overflow-hidden rounded-[18px] bg-[#F1F2F4] transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_28px_-14px_rgba(11,15,25,.35)]">
             {c.image
-              ? <img src={c.image} alt="" loading="lazy" decoding="async" draggable={false} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]" />
-              : <span className="flex h-full w-full items-center justify-center text-[30px]"><CategoryIcon category={c} /></span>}
+              ? <img src={c.image} alt="" loading="lazy" decoding="async" draggable={false} className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05] ${n ? '' : 'opacity-70 grayscale-[35%]'}`} />
+              : <span className="flex h-full w-full items-center justify-center pb-4 [&>span]:!text-[40px]"><CategoryIcon category={c} /></span>}
+            {!n && <span className="absolute inset-x-1.5 bottom-1.5 rounded-full bg-white/90 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-gray-600 backdrop-blur">Coming soon</span>}
           </span>
-          <span className="mt-2 line-clamp-2 text-[12px] font-semibold leading-[1.2] text-gray-800 md:text-[13px]">{c.name}</span>
-          <span className="mt-0.5 text-[11px] font-medium tabular-nums text-gray-400">{num(counts.get(c.name) || 0)} items</span>
-        </button>
-      ))}
+        );
+        const label = <span className="mt-2 line-clamp-2 text-[12px] font-semibold leading-[1.2] text-gray-800 md:text-[13px]">{c.name}</span>;
+        return n ? (
+          <button key={c.name} type="button" onClick={() => onPick(c.name)} className="group flex flex-col items-center text-center">
+            {art}{label}
+            <span className="mt-0.5 text-[11px] font-medium tabular-nums text-gray-400">{num(n)} items</span>
+          </button>
+        ) : (
+          <div key={c.name} className="flex flex-col items-center text-center" aria-label={`${c.name}, coming soon`}>
+            {art}{label}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -759,8 +775,11 @@ function CategoryGrid({ categories, counts, onPick }: { categories: Category[]; 
 function ProductRow({ products, categories, cart, add, remove, tagTone }: {
   products: Product[]; categories: Category[]; cart: Record<string, number>; add: (id: string) => void; remove: (id: string) => void; tagTone?: 'green' | 'red';
 }) {
+  // Keyed on the products so a refreshed list starts at the beginning (scroll snapping would otherwise
+  // follow the previously first card to its new position).
+  const rowKey = products.slice(0, 4).map(p => p.id).join('|');
   return (
-    <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-3 pt-1 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden">
+    <div key={rowKey} className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-3 pt-1 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden">
       {products.map((p, i) => (
         <Reveal key={p.id} delay={Math.min(i * 0.05, 0.4)} y={14} amount={0.1} className="w-[148px] shrink-0 snap-start md:w-[178px]">
           <ProductCard product={p} categories={categories} qty={cart[p.id] || 0} onAdd={() => add(p.id)} onRemove={() => remove(p.id)} tagTone={tagTone} />

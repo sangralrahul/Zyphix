@@ -11,7 +11,7 @@ export type Product = {
   category: string; weight: string; image: string; tag: string | null;
   storeName?: string; distance?: string; inStock?: boolean; imageStatus?: string;
 };
-export type Category = { name: string; icon: string; color: string; image: string };
+export type Category = { name: string; icon: string; color: string; image: string; group?: string | null };
 
 type Catalog = { products: Product[]; categories: Category[]; source: 'api' | 'mock'; partial: boolean; total: number };
 

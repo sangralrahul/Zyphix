@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { num } from '@/lib/format';
 import {
   ArrowRight, Bell, Moon, Sun, Bike, Check, ChevronRight, Clock, Eye, EyeOff, Inbox, LayoutDashboard, Loader2, LogOut, Mail, MapPin, MessageCircle,
-  Package, Phone, RefreshCw, Search, ShieldCheck, ShoppingBag, Store, Undo2, Users, UtensilsCrossed, Wrench, X, XCircle,
+  Package, Phone, RefreshCw, Search, ShieldCheck, ShoppingBag, Store, Undo2, Users, UtensilsCrossed, Wrench, X, XCircle, ImagePlus,
 } from 'lucide-react';
 import { motion, AnimatePresence, animate, useMotionValue, useTransform } from '@/lib/motion';
 import { FONT } from '@/ui/kit';
@@ -321,7 +321,7 @@ export function Admin() {
                 {view === 'partners' && <Partners partners={partners} onOpen={setOpen} onStatus={setStatus} fresh={fresh} loading={loading} />}
                 {view === 'orders' && <Orders orders={orders} loading={loading} />}
                 {view === 'waitlist' && <Waitlist rows={waitlist} loading={loading} />}
-                {view === 'inbox' && <><EmailHealth token={token} /><InboxView rows={messages} loading={loading} /></>}
+                {view === 'inbox' && <><EmailHealth token={token} /><CategoryArt token={token} /><InboxView rows={messages} loading={loading} /></>}
               </div>
             </div>
           )}
@@ -758,6 +758,40 @@ function EmailHealth({ token }: { token: string }) {
           ))}
         </ul>
       )}
+    </section>
+  );
+}
+
+/** Zyphix Now category tiles: generate our own artwork (Workers AI) for every category. */
+function CategoryArt({ token }: { token: string }) {
+  const [st, setSt] = useState<{ total: number; done: number } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [log, setLog] = useState('');
+  const load = useCallback(() => { api<{ total: number; done: number }>('/admin/categories/art', token).then(setSt).catch(e => setLog((e as Error).message)); }, [token]);
+  useEffect(() => { load(); }, [load]);
+  const run = async (force = false) => {
+    setBusy(true); setLog('');
+    try {
+      // A few per request (each image takes a few seconds), until none are left.
+      const tag = force ? Date.now().toString(36) : '';
+      for (let round = 0; round < 30; round++) {
+        const r = await api<{ done: string[]; failed: { name: string; error: string }[]; remaining: number; total: number }>(`/admin/categories/art?limit=3${tag ? `&redo=${tag}` : ''}`, token, { method: 'POST' });
+        setLog(l => `${l}${r.done.length ? `Done: ${r.done.join(', ')}\n` : ''}${r.failed.map(f => `Failed: ${f.name} (${f.error})`).join('\n')}${r.failed.length ? '\n' : ''}`);
+        load();
+        if (r.remaining === 0 || (!r.done.length && r.failed.length)) break;
+      }
+    } catch (e) { setLog(l => `${l}${(e as Error).message}\n`); }
+    setBusy(false); load();
+  };
+  return (
+    <section className={`${PANEL} mb-6 p-5 sm:p-6`}>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="mr-auto"><h2 className="text-[17px] font-semibold">Category images</h2><p className="text-[13px] text-white/50">Our own tile artwork for every Zyphix Now category, generated with Workers AI and stored in R2. {st ? `${st.done} of ${st.total} done.` : ''}</p></div>
+        <button onClick={() => run(false)} disabled={busy || (!!st && st.done >= st.total)} className="inline-flex h-10 items-center gap-2 rounded-full px-4 text-[13.5px] font-semibold text-white disabled:opacity-50" style={{ background: G }}>{busy ? <Loader2 size={15} className="animate-spin" /> : <ImagePlus size={15} />} {busy ? 'Generating…' : st && st.done >= st.total ? 'All done' : 'Generate missing'}</button>
+        <button onClick={() => { if (confirm('Regenerate every category image?')) run(true); }} disabled={busy} className="inline-flex h-10 items-center gap-2 rounded-full border border-white/15 px-4 text-[13.5px] font-semibold text-white/80 disabled:opacity-50"><RefreshCw size={14} /> Redo all</button>
+      </div>
+      {st && <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full transition-all" style={{ width: `${(st.done / Math.max(1, st.total)) * 100}%`, background: G }} /></div>}
+      {log && <pre className="mt-3 max-h-40 overflow-auto whitespace-pre-wrap rounded-2xl bg-white/[.06] px-4 py-2.5 text-[12.5px] text-white/75">{log}</pre>}
     </section>
   );
 }

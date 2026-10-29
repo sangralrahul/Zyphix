@@ -26,6 +26,7 @@ import { PhotonImage, resize, SamplingFilter } from '@cf-wasm/photon';
 import { sendPartnerMails } from './partnerMail';
 import { edge } from './edge';
 import { sendOrderMails, sendPartnerStatusMail } from './notifyMail';
+import { generateCategoryArt, categoryArtStatus, groupOf } from './categoryArt';
 
 export interface Env {
   DB: D1Database;
@@ -132,6 +133,8 @@ export default {
         const packaged = await syncImages(env, 5, 'packaged');
         const produce = await syncImages(env, 10, 'produce');
         const thumbs = await makeMissingThumbs(env, 40);
+        const cats = await generateCategoryArt(env, (k, b, ct) => putImage(env, k, b, ct), 2).catch(e => ({ error: (e as Error).message }));
+        console.log(JSON.stringify({ cron: 'category-art', cats }));
         console.log(JSON.stringify({ cron: 'images', packaged: packaged.processed, produce: produce.processed, remaining: produce.remaining, thumbs }));
       } catch (err) { console.error('cron images failed', (err as Error).message); }
     })());
@@ -269,8 +272,8 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   }
 
   if (p === '/api/categories') {
-    const { results } = await env.DB.prepare('SELECT name, icon, color, image_url AS image, sort FROM categories ORDER BY sort').all();
-    return json(results, 200, cache);
+    const { results } = await env.DB.prepare('SELECT name, icon, color, image_url AS image, sort FROM categories ORDER BY sort').all<{ name: string; [k: string]: unknown }>();
+    return json(results.map(r => ({ ...r, group: groupOf(r.name) })), 200, cache);
   }
 
   if (p === '/api/products') {
@@ -393,6 +396,12 @@ async function handleAdmin(request: Request, env: Env, url: URL, ctx: ExecutionC
     await ensureMessages(env);
     const { results } = await env.DB.prepare('SELECT * FROM messages ORDER BY id DESC LIMIT 1000').all();
     return json(results);
+  }
+  if (p === '/admin/categories/art' && request.method === 'GET') return json(await categoryArtStatus(env));
+  if (p === '/admin/categories/art' && request.method === 'POST') {
+    const limit = Math.min(Math.max(Number(url.searchParams.get('limit') ?? 3), 1), 6);
+    const redo = (url.searchParams.get('redo') ?? '').replace(/[^a-z0-9]/gi, '').slice(0, 16);
+    return json(await generateCategoryArt(env, (k, b, ct) => putImage(env, k, b, ct), limit, redo));
   }
   if (p === '/admin/mail-status') return json({ configured: !!env.BREVO_API_KEY, from: env.MAIL_FROM || 'noreply@zyphix.in', partnerFrom: env.PARTNER_FROM || 'partnerships@zyphix.in', notify: env.PARTNER_NOTIFY_EMAIL || 'rahul@zyphix.in' });
   if (p === '/admin/mail-log' && request.method === 'GET') {
