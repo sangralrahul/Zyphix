@@ -14,6 +14,8 @@ import { PhotonImage, resize, SamplingFilter } from '@cf-wasm/photon';
  *
  *   Accounts (cookie `zsid`, shared across *.zyphix.in; see "accounts" section at the bottom)
  *   POST /api/auth/verify                      {email, otp, token, name?} → session cookie + {user}
+ *   GET  /api/auth/google?next=URL             → Google consent screen (OAuth 2.0 + PKCE)
+ *   GET  /api/auth/google/callback             → session cookie, redirect to `next`
  *   POST /api/auth/logout
  *   GET  /api/me · PATCH /api/me               {name?, phone?}
  *   GET|POST /api/me/addresses · PATCH|DELETE /api/me/addresses/:id · POST /api/me/addresses/:id/default
@@ -38,6 +40,8 @@ export interface Env {
   PARTNER_FROM?: string;      // partner emails sender (default partnerships@zyphix.in)
   PARTNER_NOTIFY_EMAIL?: string; // who is told about new partner applications (default rahul@zyphix.in)
   NOTIFY_EMAIL?: string;      // who gets contact / support / advertiser messages (default rahul@zyphix.in)
+  GOOGLE_CLIENT_ID?: string;     // "Sign in with Google" OAuth client (Google Cloud console)
+  GOOGLE_CLIENT_SECRET?: string; // `wrangler secret put GOOGLE_CLIENT_SECRET`
 }
 
 type ProductRow = {
@@ -805,6 +809,8 @@ async function handleAccount(request: Request, env: Env, url: URL): Promise<Resp
   /* ── auth ── */
   if (p === '/api/auth/send' && m === 'POST') return await authSend(request, env);
   if (p === '/api/auth/verify' && m === 'POST') return await authVerify(request, env);
+  if (p === '/api/auth/google' && m === 'GET') return await googleStart(request, env, url);
+  if (p === '/api/auth/google/callback' && m === 'GET') return await googleCallback(request, env, url);
   if (p === '/api/auth/logout' && m === 'POST') {
     const token = sessionToken(request);
     if (token) await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(await sha256Hex(token)).run();
@@ -1037,6 +1043,127 @@ async function authVerify(request: Request, env: Env): Promise<Response> {
   // The mobile apps keep the token in the device keychain and send it as a Bearer header.
   const forApp = body.client === 'app';
   return json(forApp ? { user: toUser(user), token: session.token } : { user: toUser(user) }, 200, { 'set-cookie': session.cookie });
+}
+
+/* ---- Sign in with Google (OAuth 2.0 authorization code + PKCE) ----
+   The Worker is the OAuth client: Google redirects back here, we exchange the code
+   server-side (the client secret never reaches the browser), read the verified email,
+   and issue the same `zsid` session as email-code sign-in. Accounts are matched by email. */
+
+const G_STATE_COOKIE = 'zg_oauth';
+const AUTH_HOME = 'https://auth.zyphix.in';
+const ACCOUNTS_HOME = 'https://accounts.zyphix.in/';
+
+const isZyphixHost = (h: string) => h === 'zyphix.in' || h.endsWith('.zyphix.in');
+
+/** Only send people back to https://*.zyphix.in (or this dev origin). */
+function oauthNext(raw: string | null, url: URL): string {
+  if (!raw) return isZyphixHost(url.hostname) ? ACCOUNTS_HOME : `${url.origin}/?site=accounts`;
+  try {
+    const u = new URL(raw, url.origin);
+    if ((u.protocol === 'https:' && isZyphixHost(u.hostname)) || u.origin === url.origin) return u.toString();
+  } catch { /* fall through */ }
+  return isZyphixHost(url.hostname) ? ACCOUNTS_HOME : `${url.origin}/?site=accounts`;
+}
+
+/** Google must redirect to exactly one registered URI; on production that is auth.zyphix.in. */
+const googleRedirectUri = (url: URL) => (isZyphixHost(url.hostname) ? AUTH_HOME : url.origin) + '/api/auth/google/callback';
+
+function oauthCookie(url: URL, value: string, maxAge: number) {
+  const domain = isZyphixHost(url.hostname) ? '; Domain=.zyphix.in' : '';
+  const secure = url.protocol === 'https:' ? '; Secure' : '';
+  return `${G_STATE_COOKIE}=${value}${domain}; Path=/api/auth/google; HttpOnly${secure}; SameSite=Lax; Max-Age=${maxAge}`;
+}
+
+/** Back to the sign-in page with a short error code it knows how to explain. */
+function oauthFail(url: URL, code: string, next?: string) {
+  const base = isZyphixHost(url.hostname) ? AUTH_HOME + '/' : `${url.origin}/?site=auth`;
+  const u = new URL(base);
+  u.searchParams.set('error', code);
+  if (next) u.searchParams.set('next', next);
+  return new Response(null, { status: 302, headers: { location: u.toString(), 'set-cookie': oauthCookie(url, '', 0), 'cache-control': 'no-store' } });
+}
+
+async function googleStart(request: Request, env: Env, url: URL): Promise<Response> {
+  const next = oauthNext(url.searchParams.get('next'), url);
+  if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) return oauthFail(url, 'google_unavailable', next);
+  const ip = request.headers.get('cf-connecting-ip') ?? 'local';
+  if (await hit(env, `google:${ip}`, 30, 600)) return oauthFail(url, 'too_many', next);
+
+  const state = b64url(crypto.getRandomValues(new Uint8Array(24)));
+  const verifier = b64url(crypto.getRandomValues(new Uint8Array(48)));
+  const challenge = b64url(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier))));
+  const packed = b64url(new TextEncoder().encode(JSON.stringify({ s: state, v: verifier, n: next })));
+
+  const g = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+  g.searchParams.set('client_id', env.GOOGLE_CLIENT_ID);
+  g.searchParams.set('redirect_uri', googleRedirectUri(url));
+  g.searchParams.set('response_type', 'code');
+  g.searchParams.set('scope', 'openid email profile');
+  g.searchParams.set('state', state);
+  g.searchParams.set('code_challenge', challenge);
+  g.searchParams.set('code_challenge_method', 'S256');
+  g.searchParams.set('prompt', 'select_account');
+  return new Response(null, { status: 302, headers: { location: g.toString(), 'set-cookie': oauthCookie(url, packed, 600), 'cache-control': 'no-store' } });
+}
+
+async function googleCallback(request: Request, env: Env, url: URL): Promise<Response> {
+  let saved: { s: string; v: string; n: string } | null = null;
+  try {
+    const raw = readCookie(request, G_STATE_COOKIE);
+    if (raw) saved = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(raw.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))));
+  } catch { saved = null; }
+  const next = saved?.n ? oauthNext(saved.n, url) : undefined;
+
+  if (url.searchParams.get('error')) return oauthFail(url, 'google_cancelled', next);
+  const code = url.searchParams.get('code');
+  const state = url.searchParams.get('state');
+  if (!saved || !code || !state || state !== saved.s) return oauthFail(url, 'google_expired', next);
+  if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) return oauthFail(url, 'google_unavailable', next);
+
+  // Exchange the code (server to server) and read the verified profile.
+  try {
+    return await googleFinish(request, env, url, code, saved.v, next);
+  } catch (e) {
+    console.log('google sign-in error', String(e).slice(0, 300));
+    return oauthFail(url, 'google_failed', next);
+  }
+}
+
+async function googleFinish(request: Request, env: Env, url: URL, code: string, verifier: string, next: string | undefined): Promise<Response> {
+  const tok = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      code, client_id: env.GOOGLE_CLIENT_ID!, client_secret: env.GOOGLE_CLIENT_SECRET!,
+      redirect_uri: googleRedirectUri(url), grant_type: 'authorization_code', code_verifier: verifier,
+    }),
+  });
+  if (!tok.ok) {
+    console.log('google token exchange failed', tok.status, (await tok.text()).slice(0, 300));
+    return oauthFail(url, 'google_failed', next);
+  }
+  const { access_token } = await tok.json() as { access_token?: string };
+  const info = access_token ? await fetch('https://openidconnect.googleapis.com/v1/userinfo', { headers: { authorization: `Bearer ${access_token}` } }) : null;
+  if (!info?.ok) return oauthFail(url, 'google_failed', next);
+  const profile = await info.json() as { email?: string; email_verified?: boolean; name?: string; given_name?: string };
+  const email = (profile.email ?? '').toLowerCase().trim();
+  if (!email || profile.email_verified !== true) return oauthFail(url, 'google_unverified', next);
+
+  const name = str(profile.name, 120) || str(profile.given_name, 120);
+  let user = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(email).first<UserRow>();
+  if (!user) {
+    const id = randomId('u_');
+    await env.DB.prepare('INSERT INTO users (id, email, name) VALUES (?, ?, ?)').bind(id, email, name || null).run();
+    user = (await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first<UserRow>())!;
+  } else if (name && !user.name) {
+    await env.DB.prepare("UPDATE users SET name = ?, updated_at = datetime('now') WHERE id = ?").bind(name, user.id).run();
+  }
+  const session = await createSession(request, env, user.id);
+  const headers = new Headers({ location: next ?? oauthNext(null, url), 'cache-control': 'no-store' });
+  headers.append('set-cookie', session.cookie);
+  headers.append('set-cookie', oauthCookie(url, '', 0));
+  return new Response(null, { status: 302, headers });
 }
 
 /* ---- addresses ---- */

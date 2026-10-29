@@ -121,6 +121,33 @@ function OtpBoxes({ value, onChange, disabled, invalid }: { value: string[]; onC
   );
 }
 
+/* Google's multicolour "G" (brand guidelines: keep the official colours). */
+function GoogleG() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+    </svg>
+  );
+}
+
+/** Where "Continue with Google" starts: the Worker on auth.zyphix.in (same origin in local dev). */
+function googleStartUrl(next: string) {
+  const onZyphix = /(^|\.)zyphix\.in$/.test(window.location.hostname);
+  return `${onZyphix ? 'https://auth.zyphix.in' : ''}/api/auth/google?next=${encodeURIComponent(next)}`;
+}
+
+const GOOGLE_ERRORS: Record<string, string> = {
+  google_cancelled: 'Google sign-in was cancelled. You can try again or use your email.',
+  google_expired: 'That sign-in link expired. Please try again.',
+  google_unverified: 'Your Google email is not verified. Use your email address instead.',
+  google_unavailable: 'Google sign-in is not available right now. Use your email address instead.',
+  google_failed: 'Google sign-in did not go through. Please try again.',
+  too_many: 'Too many attempts. Please wait a few minutes and try again.',
+};
+
 function ErrorNote({ children }: { children: React.ReactNode }) {
   return <p role="alert" className="mt-2.5 flex items-center gap-1.5 text-[13.5px] text-red-600"><AlertCircle size={14} />{children}</p>;
 }
@@ -151,7 +178,10 @@ export default function AuthSite() {
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
   const [token, setToken] = useState('');
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(() => {
+    try { return GOOGLE_ERRORS[new URLSearchParams(window.location.search).get('error') ?? ''] ?? ''; } catch { return ''; }
+  });
+  const [googleBusy, setGoogleBusy] = useState(false);
   const [resendIn, setResendIn] = useState(0);
   const [account, setAccount] = useState<AccountUser | null>(null);
 
@@ -159,6 +189,12 @@ export default function AuthSite() {
   const nextHost = (() => { try { return new URL(next).hostname; } catch { return 'zyphix.in'; } })();
 
   useEffect(() => { document.title = 'Sign in · Zyphix'; }, []);
+  // Coming back from Google with the browser's back button restores this page from cache.
+  useEffect(() => {
+    const reset = () => setGoogleBusy(false);
+    window.addEventListener('pageshow', reset);
+    return () => window.removeEventListener('pageshow', reset);
+  }, []);
 
   // Wait for AuthContext to check the cookie; a server-backed user (has id) is already signed in.
   useEffect(() => {
@@ -279,8 +315,20 @@ export default function AuthSite() {
               {step === 'email' && (
                 <motion.form key="email" {...slide} onSubmit={send} noValidate>
                   <h1 className={titleCls}>Sign in or create your account</h1>
-                  <p className={subCls}>Enter your email and we'll send a 6-digit code. No password to remember.</p>
-                  <div className="mt-8">
+                  <p className={subCls}>Continue with Google, or use your email and we'll send a 6-digit code. No password to remember.</p>
+                  <a
+                    href={googleStartUrl(next)}
+                    onClick={() => setGoogleBusy(true)}
+                    aria-busy={googleBusy}
+                    className="group mt-8 flex h-[52px] w-full items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white text-[15.5px] font-semibold text-gray-900 shadow-[0_1px_2px_rgba(16,24,40,.05)] transition hover:border-gray-300 hover:bg-gray-50 active:scale-[.98]"
+                  >
+                    {googleBusy ? <Loader2 size={18} className="animate-spin text-gray-500" /> : <GoogleG />}
+                    {googleBusy ? 'Opening Google…' : 'Continue with Google'}
+                  </a>
+                  <div className="my-6 flex items-center gap-4 text-[12.5px] font-medium uppercase tracking-[0.14em] text-gray-400">
+                    <span className="h-px flex-1 bg-gray-200" />or<span className="h-px flex-1 bg-gray-200" />
+                  </div>
+                  <div>
                     <label htmlFor="email" className={labelCls}>Email address</label>
                     <div className="relative">
                       <Mail size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
