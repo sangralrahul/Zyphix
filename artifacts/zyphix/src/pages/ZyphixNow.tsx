@@ -419,7 +419,7 @@ function CategoryStrip({ categories, active, onPick, railRef, loading }: {
             <button key={c.name} type="button" data-pill={c.name} onClick={() => onPick(c.name)} aria-current={on || undefined}
               className="group relative flex w-[76px] shrink-0 flex-col items-center justify-center gap-1 px-1 md:w-[84px]">
               <span className={`relative inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full transition ${on ? 'ring-2 ring-[#0DA366] ring-offset-2' : 'group-hover:scale-105'}`} style={{ background: `${c.color || '#0DA366'}1F` }}>
-                {c.image ? <img src={c.image} alt="" loading="lazy" decoding="async" draggable={false} className="h-full w-full object-cover" /> : <CategoryIcon category={c} />}
+                {c.image ? <img src={c.image} alt="" loading="lazy" decoding="async" draggable={false} className={`h-full w-full object-cover ${c.image.includes('/img/categories/') ? 'scale-[1.3] mix-blend-multiply' : ''}`} /> : <CategoryIcon category={c} />}
               </span>
               <span className={`line-clamp-2 w-full text-center text-[11px] leading-[1.15] ${on ? 'font-bold text-gray-900' : 'font-medium text-gray-600 group-hover:text-gray-900'}`}>{c.name}</span>
               {on && <span aria-hidden className="absolute inset-x-3 bottom-0 h-[3px] rounded-t-full" style={{ background: G }} />}
@@ -548,7 +548,7 @@ function CategoryTiles({ categories, onPick }: { categories: Category[]; counts?
           <span className="relative block aspect-square w-full overflow-hidden rounded-2xl bg-[#EEF1F4] transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover:-translate-y-0.5 group-hover:shadow-[0_10px_22px_-12px_rgba(11,15,25,.35)]"
             style={{ background: `linear-gradient(170deg, ${c.color || '#0DA366'}1F, #F1F2F4 70%)` }}>
             {c.image
-              ? <img src={c.image} alt="" loading="lazy" decoding="async" draggable={false} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]" />
+              ? <img src={c.image} alt="" loading="lazy" decoding="async" draggable={false} className={`h-full w-full object-cover transition-transform duration-500 ${c.image.includes('/img/categories/') ? 'scale-[1.22] mix-blend-multiply group-hover:scale-[1.3]' : 'group-hover:scale-[1.06]'}`} />
               : <span className="flex h-full w-full items-center justify-center [&>span]:!text-[30px]"><CategoryIcon category={c} /></span>}
           </span>
           <span className="mt-1.5 line-clamp-2 text-[11.5px] font-semibold leading-[1.2] text-gray-800 md:text-[12.5px]">{c.name}</span>

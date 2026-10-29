@@ -276,7 +276,8 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
 
   if (p === '/api/categories') {
     const { results } = await env.DB.prepare('SELECT name, icon, color, image_url AS image, sort FROM categories ORDER BY sort').all<{ name: string; [k: string]: unknown }>();
-    return json(results.map(r => ({ ...r, group: groupOf(r.name) })), 200, cache);
+    // Short cache: category artwork and new categories should show up within a minute.
+    return json(results.map(r => ({ ...r, group: groupOf(r.name) })), 200, { 'cache-control': 'public, max-age=60, s-maxage=60, stale-while-revalidate=120' });
   }
 
   if (p === '/api/products') {
