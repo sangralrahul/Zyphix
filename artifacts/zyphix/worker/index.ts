@@ -386,6 +386,22 @@ async function handleAdmin(request: Request, env: Env, url: URL, ctx: ExecutionC
     const { results } = await env.DB.prepare('SELECT * FROM mail_log ORDER BY id DESC LIMIT 100').all();
     return json(results);
   }
+  if (p === '/admin/mail-events' && request.method === 'GET') {
+    // What Brevo did with the emails after accepting them: delivered, bounced, blocked, deferred…
+    if (!env.BREVO_API_KEY) return json({ error: 'BREVO_API_KEY is not set' }, 503);
+    const q = new URLSearchParams({ limit: '50', days: '7' });
+    const em = url.searchParams.get('email'); if (em) q.set('email', em);
+    const r = await fetch(`https://api.brevo.com/v3/smtp/statistics/events?${q}`, { headers: { 'api-key': env.BREVO_API_KEY, accept: 'application/json' } });
+    const text = await r.text();
+    if (!r.ok) return json({ error: `Brevo ${r.status}: ${text.slice(0, 300)}` }, 502);
+    let events: any[] = [];
+    try { events = (JSON.parse(text).events ?? []); } catch { /* empty */ }
+    const senders = await fetch('https://api.brevo.com/v3/senders', { headers: { 'api-key': env.BREVO_API_KEY, accept: 'application/json' } }).then(x => x.json() as Promise<{ senders?: { email: string; active: boolean }[] }>).catch(() => ({ senders: [] as { email: string; active: boolean }[] }));
+    return json({
+      events: events.map((e: any) => ({ email: e.email, event: e.event, subject: e.subject, reason: e.reason, date: e.date, from: e.from })),
+      senders: (senders.senders ?? []).map(x => ({ email: x.email, active: x.active })),
+    });
+  }
   if (p === '/admin/mail-test' && request.method === 'POST') {
     const to = env.PARTNER_NOTIFY_EMAIL || 'rahul@zyphix.in';
     const r = await sendPartnerMails(env, { id: 'TEST-' + Date.now().toString(36).toUpperCase(), type: 'store', name: 'Test Applicant', businessName: 'Test Store (email check)', email: '', phone: '9999999999', city: 'Delhi', category: 'Kirana', tags: '', details: { note: 'This is a test sent from the admin console.' }, updated: false }, mailLogger(env));

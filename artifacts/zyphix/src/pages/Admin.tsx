@@ -699,8 +699,21 @@ function EmailHealth({ token }: { token: string }) {
   const [rows, setRows] = useState<MailRow[]>([]);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState('');
-  const load = useCallback(() => { api<MailRow[]>('/admin/mail-log', token).then(setRows).catch(() => {}); }, [token]);
+  const [events, setEvents] = useState<{ email: string; event: string; subject?: string; reason?: string; date: string }[] | null>(null);
+  const [senders, setSenders] = useState<{ email: string; active: boolean }[]>([]);
+  const [evErr, setEvErr] = useState('');
+  const load = useCallback(() => {
+    api<MailRow[]>('/admin/mail-log', token).then(setRows).catch(() => {});
+    api<{ events: typeof events; senders: typeof senders; error?: string }>('/admin/mail-events', token)
+      .then(r => { setEvents(r.events ?? []); setSenders(r.senders ?? []); setEvErr(''); })
+      .catch(e => setEvErr((e as Error).message));
+  }, [token]);
   useEffect(() => { load(); }, [load]);
+  const EV: Record<string, { label: string; c: string }> = {
+    delivered: { label: 'Delivered', c: 'bg-emerald-400' }, opened: { label: 'Opened', c: 'bg-emerald-400' }, clicks: { label: 'Clicked', c: 'bg-emerald-400' }, requests: { label: 'Accepted by Brevo', c: 'bg-sky-400' },
+    deferred: { label: 'Deferred (retrying)', c: 'bg-amber-400' }, softBounces: { label: 'Soft bounce', c: 'bg-amber-400' }, hardBounces: { label: 'Hard bounce', c: 'bg-rose-400' },
+    blocked: { label: 'Blocked by Brevo', c: 'bg-rose-400' }, invalid: { label: 'Invalid address', c: 'bg-rose-400' }, spam: { label: 'Marked as spam', c: 'bg-rose-400' }, unsubscribed: { label: 'Unsubscribed', c: 'bg-rose-400' }, error: { label: 'Error', c: 'bg-rose-400' },
+  };
   const test = async () => {
     setBusy(true); setResult('');
     try { const r = await api<{ sentTo: string; ok: boolean }>('/admin/mail-test', token, { method: 'POST' }); setResult(r.ok ? `Test email sent to ${r.sentTo}. Check your inbox (and spam).` : 'The test email failed. See the reason in the log below.'); }
@@ -714,6 +727,25 @@ function EmailHealth({ token }: { token: string }) {
         <button onClick={test} disabled={busy} className="inline-flex h-10 items-center gap-2 rounded-full px-4 text-[13.5px] font-semibold text-white disabled:opacity-60" style={{ background: G }}>{busy ? <Loader2 size={15} className="animate-spin" /> : <Mail size={15} />} Send test email</button>
       </div>
       {result && <p className="mt-3 rounded-2xl bg-white/[.06] px-4 py-2.5 text-[13.5px] text-white/80">{result}</p>}
+      {(senders.length > 0 || evErr) && (
+        <p className="mt-3 text-[12.5px] text-white/50">
+          {evErr ? `Brevo delivery status unavailable: ${evErr}` : <>Senders verified in Brevo: {senders.map(s => <span key={s.email} className={`ml-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 ${s.active ? 'bg-emerald-400/15 text-emerald-200' : 'bg-rose-400/15 text-rose-200'}`}>{s.email}{s.active ? '' : ' (not verified)'}</span>)}{senders.length === 0 ? ' none' : ''}</>}
+        </p>
+      )}
+      {events && events.length > 0 && (
+        <div className="mt-4">
+          <p className="mb-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-white/40">What Brevo did with them (last 7 days)</p>
+          <ul className="divide-y divide-white/[.06]">
+            {events.slice(0, 12).map((e, i) => { const k = EV[e.event] ?? { label: e.event, c: 'bg-white/40' }; return (
+              <li key={i} className="flex items-start gap-3 py-2 text-[13px]">
+                <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${k.c}`} />
+                <div className="min-w-0 flex-1"><p className="truncate text-white"><b>{k.label}</b> · {e.email}{e.subject ? ` · ${e.subject}` : ''}</p>{e.reason && <p className="truncate text-rose-200/80">{e.reason}</p>}</div>
+                <span className="shrink-0 text-white/40">{ago(e.date)}</span>
+              </li>); })}
+          </ul>
+        </div>
+      )}
+      {events && events.length === 0 && !evErr && <p className="mt-3 text-[13px] text-white/50">Brevo has no delivery events in the last 7 days.</p>}
       {rows.length > 0 && (
         <ul className="mt-4 divide-y divide-white/[.06]">
           {rows.slice(0, 8).map(r => (
