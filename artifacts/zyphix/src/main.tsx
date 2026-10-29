@@ -5,6 +5,8 @@ import { imgFallback } from "./data/media";
 import { reloadOnce, reportClientError } from "@/components/AppErrorBoundary";
 import { detectSite } from "@/lib/site";
 
+document.documentElement.dataset.site = detectSite();
+
 // Zyphix Now: fetch the catalogue while React is still booting (the HTML already
 // preloaded it), so the first render of the store has products in it.
 if (detectSite() === "now") import("@/lib/catalog").then(m => m.loadCatalog()).catch(() => {});

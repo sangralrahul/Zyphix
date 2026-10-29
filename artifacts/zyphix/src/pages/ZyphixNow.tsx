@@ -2,18 +2,17 @@ import { useSeo } from '@/lib/seo';
 import { num } from '@/lib/format';
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion } from '@/lib/motion';
-import { Plus, Minus, ChevronDown, ShoppingBag, ArrowRight, Store, X, Search, Clock, Truck, Package, MapPin } from 'lucide-react';
+import { Plus, Minus, ChevronDown, ShoppingBag, ArrowRight, Store, X, Search, Clock, Copy, Check, Zap, Percent } from 'lucide-react';
 import { Link, useSearch, useLocation } from 'wouter';
 import { useCatalog, type Product, type Category } from '@/lib/catalog';
 import { productImageFor } from '@/lib/productImage';
 import { useCart } from '@/context/CartContext';
 import { COUPONS } from '@/data/coupons';
 import { usePartners, type PartnerListing } from '@/lib/partners';
-import { Button, IconTile, FONT, G } from '@/ui/kit';
-import { BgVideo, Reveal, Kicker, Grain, isStatic } from '@/ui/cinema';
-import { Magnetic, SplitHeadline } from '@/ui/motion2';
-import { HeroLiveOrder, MarketBand, TrackBand, useRotatingWord, DISPLAY } from './now/bands';
-import { VIDEOS, landscape, type Photo } from '@/data/media';
+import { Button, IconTile, G } from '@/ui/kit';
+import { Reveal, isStatic } from '@/ui/cinema';
+import { useRotatingWord } from './now/bands';
+import { landscape, type Photo } from '@/data/media';
 import {
   discountOf, buildOffers, dealsOfTheDay, bestsellers as pickBestsellers, underPrice, topBrands, freshProduce,
   type Offer, type OfferTheme,
@@ -24,15 +23,14 @@ type SortKey = 'featured' | 'price_asc' | 'price_desc' | 'discount';
 /** Products shown per category before "View all" (one row on desktop, two on mobile). */
 const ROW_LIMIT = 6;
 const NAV_H = 64;               // app Navbar height
-const MOBILE_RAIL_H = 86;       // sticky icon rail height on mobile
+const STRIP_H = 82;             // sticky category strip under the Navbar
 const COUPON_DISMISS_KEY = 'zyphix_now_coupon_dismissed';
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 const sectionId = (name: string) => `cat-${slug(name)}`;
 const PRODUCE_CATEGORY = 'Fruits & Veg';
-const isDesktop = () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
-/** Offset under the sticky chrome: Navbar on desktop, Navbar + icon rail on mobile. */
-const scrollOffset = () => (isDesktop() ? NAV_H + 16 : NAV_H + MOBILE_RAIL_H + 8);
+/** Offset under the sticky chrome: Navbar + category strip. */
+const scrollOffset = () => NAV_H + STRIP_H + 12;
 
 export function ZyphixNow() {
   useSeo('Zyphix Now — Groceries delivered in 10 minutes', 'Fresh produce, dairy, snacks and daily staples from stores near you, delivered in about 10 minutes at shelf prices.');
@@ -191,7 +189,7 @@ export function ZyphixNow() {
         for (const el of document.querySelectorAll<HTMLElement>('section[data-cat]')) {
           if (el.getBoundingClientRect().top - threshold <= 0) best = el; else break;
         }
-        if (best) setActiveCat(best.dataset.cat || '');
+        setActiveCat(best?.dataset.cat || '');
       });
     };
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -209,221 +207,173 @@ export function ZyphixNow() {
   const showStore = !q;
   const productCount = num(total || products.length);
 
-  return (
-    <div className="relative mx-auto w-full max-w-[1180px] pt-0 text-gray-900" style={{ fontFamily: FONT }}>
+  const maxDeal = dealsRow.reduce((m, p) => Math.max(m, discountOf(p)), 0);
+  const groups = useMemo(() => groupCategories(categories), [categories]);
 
-      {/* ── Cinematic hero (store mode) / compact search bar (search mode) ── */}
+  return (
+    <div className="relative mx-auto w-full max-w-[1240px] pt-0 text-gray-900">
+
+      {/* ── Sticky category strip (store mode) / compact search (search mode) ── */}
       {showStore ? (
-        <Hero productCount={catalogLoading ? '' : productCount} onSearch={goSearch} />
+        <CategoryStrip categories={categories} active={activeCat} onPick={jumpTo} railRef={mobileRailRef} loading={catalogLoading && categories.length === 0} />
       ) : (
         <div className="pt-4">
           <SearchField initial={urlQuery.trim()} onSearch={goSearch} compact />
         </div>
       )}
 
-      {/* ── Category card overlapping the hero's bottom edge ── */}
-      {showStore && (
-        <div className="relative z-10 -mt-9 md:-mt-14">
-          <div className="rounded-2xl border border-gray-200 bg-white p-3 shadow-[0_18px_50px_-18px_rgba(11,15,25,.28)] md:p-4">
-            <div className="mb-2.5 flex flex-wrap items-end justify-between gap-x-3 gap-y-2 md:mb-3">
-              <div className="flex min-w-0 items-baseline gap-2">
-                <h2 className="shrink-0 text-[15px] font-semibold tracking-[-0.01em] md:text-[17px]">Shop by category</h2>
-                {categories.length > 0 && <span className="shrink-0 text-[12.5px] text-gray-500">{categories.length} categories</span>}
-              </div>
+      {/* ── Search results ── */}
+      {!showStore && (
+        <section className="mt-5">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h1 className="text-[18px] font-bold tracking-[-0.02em]">
+              {searchResults.length > 0 ? `${num(searchResults.length)} results` : 'No results'} for “{urlQuery.trim()}”
+            </h1>
+            <div className="flex items-center gap-2">
               <SortControls sortBy={sortBy} setSortBy={setSortBy} onlyDiscounted={onlyDiscounted} setOnlyDiscounted={setOnlyDiscounted} />
+              <button type="button" onClick={clearSearch} className="inline-flex h-8 items-center gap-1 text-[13.5px] font-semibold text-emerald-700 hover:text-emerald-800">
+                <X size={14} /> Clear
+              </button>
             </div>
-            {categories.length > 0
-              ? <CategoryGrid categories={categories} counts={countByCategory} onPick={jumpTo} />
-              : <SkeletonCategories />}
           </div>
-        </div>
-      )}
-
-      {/* ── Coupon strip (single, slim, dismissible) ── */}
-      {showStore && coupon && !couponDismissed && (
-        <div className="mt-4 flex h-12 items-center gap-3 rounded-xl border border-emerald-200/80 bg-emerald-50/60 px-3.5 text-[13px]">
-          <span className="rounded-md border border-emerald-200 bg-white px-2 py-0.5 text-[12px] font-semibold tracking-wide text-emerald-700">{coupon.code}</span>
-          <span className="min-w-0 flex-1 truncate text-gray-700">{coupon.desc}</span>
-          <button type="button" onClick={dismissCoupon} aria-label="Dismiss offer"
-            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 transition hover:bg-white hover:text-gray-700">
-            <X size={14} />
-          </button>
-        </div>
-      )}
-
-      {/* ── Mobile category rail (sticky under the Navbar) ── */}
-      {showStore && categories.length > 0 && (
-        <div className="sticky z-30 -mx-4 mt-4 border-b border-gray-200 bg-[#F8F9FA]/95 backdrop-blur md:hidden" style={{ top: NAV_H }}>
-          <div ref={mobileRailRef} className="flex gap-1.5 overflow-x-auto px-4 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {categories.map(c => {
-              const active = activeCat === c.name;
-              return (
-                <button key={c.name} type="button" data-pill={c.name} onClick={() => jumpTo(c.name)}
-                  className="flex w-[56px] shrink-0 flex-col items-center gap-1">
-                  <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border transition ${active ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500' : 'border-gray-200 bg-white'}`}>
-                    <CategoryIcon category={c} />
-                  </span>
-                  <span className={`line-clamp-2 w-full text-center text-[10.5px] leading-[1.15] ${active ? 'font-semibold text-gray-900' : 'font-medium text-gray-600'}`}>{c.name}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      <div className="mt-6 flex items-start gap-6">
-
-        {/* ── Desktop category rail ── */}
-        {showStore && (
-          <aside className="sticky hidden w-[208px] shrink-0 self-start md:block" style={{ top: NAV_H + 16 }}>
-            <div className="max-h-[calc(100vh-96px)] overflow-y-auto rounded-xl border border-gray-200 bg-white p-1.5 [scrollbar-width:thin]">
-              {catalogLoading && categories.length === 0 ? (
-                [0, 1, 2, 3, 4, 5, 6, 7].map(i => (
-                  <div key={i} className="flex items-center gap-2.5 px-2 py-2">
-                    <div className="h-7 w-7 animate-pulse rounded-lg bg-gray-100" />
-                    <div className="h-3 w-24 animate-pulse rounded bg-gray-100" />
-                  </div>
-                ))
-              ) : categories.map(c => {
-                const active = activeCat === c.name;
-                return (
-                  <button key={c.name} type="button" onClick={() => jumpTo(c.name)}
-                    className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition ${active ? 'bg-emerald-50 text-gray-900' : 'text-gray-700 hover:bg-gray-50'}`}>
-                    <span className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border ${active ? 'border-emerald-200 bg-white' : 'border-gray-200 bg-[#FAFAFA]'}`}>
-                      <CategoryIcon category={c} />
-                    </span>
-                    <span className={`min-w-0 flex-1 truncate text-[13px] ${active ? 'font-semibold' : 'font-medium'}`}>{c.name}</span>
-                    <span className={`shrink-0 text-[11.5px] tabular-nums ${active ? 'text-emerald-700' : 'text-gray-400'}`}>{countByCategory.get(c.name) || 0}</span>
-                  </button>
-                );
-              })}
+          {catalogLoading ? (
+            <SkeletonGrid />
+          ) : searchResults.length === 0 ? (
+            <div className="rounded-2xl border border-gray-200 bg-white px-6 py-12 text-center">
+              <span className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-[#FAFAFA] text-gray-400"><Search size={18} /></span>
+              <p className="text-[15px] font-semibold">Nothing matched “{urlQuery.trim()}”</p>
+              <p className="mt-1 text-[13px] text-gray-500">Try a different spelling or a brand name.</p>
+              <div className="mt-4"><Button size="sm" variant="secondary" onClick={clearSearch}>Browse the store</Button></div>
             </div>
-          </aside>
-        )}
-
-        {/* ── Content ── */}
-        <div className="min-w-0 flex-1">
-
-          {/* Search results */}
-          {!showStore && (
-            <section>
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <h2 className="text-[17px] font-semibold tracking-[-0.01em]">
-                  {searchResults.length > 0 ? `${num(searchResults.length)} results` : 'No results'} for “{urlQuery.trim()}”
-                </h2>
-                <div className="flex items-center gap-2">
-                  <SortControls sortBy={sortBy} setSortBy={setSortBy} onlyDiscounted={onlyDiscounted} setOnlyDiscounted={setOnlyDiscounted} />
-                  <button type="button" onClick={clearSearch} className="inline-flex h-8 items-center gap-1 text-[13.5px] font-semibold text-emerald-700 hover:text-emerald-800">
-                    <X size={14} /> Clear
-                  </button>
-                </div>
-              </div>
-              {catalogLoading ? (
-                <SkeletonGrid />
-              ) : searchResults.length === 0 ? (
-                <div className="rounded-xl border border-gray-200 bg-white px-6 py-12 text-center">
-                  <span className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-[#FAFAFA] text-gray-400"><Search size={18} /></span>
-                  <p className="text-[15px] font-semibold">Nothing matched “{urlQuery.trim()}”</p>
-                  <p className="mt-1 text-[13px] text-gray-500">Try a different spelling or a brand name.</p>
-                  <div className="mt-4"><Button size="sm" variant="secondary" onClick={clearSearch}>Browse the store</Button></div>
-                </div>
-              ) : (
-                <ProductGrid products={searchResults} categories={categories} cart={cart} add={add} remove={remove} />
-              )}
-            </section>
+          ) : (
+            <ProductGrid products={searchResults} categories={categories} cart={cart} add={add} remove={remove} />
           )}
+        </section>
+      )}
 
-          {showStore && (
-            <div className="space-y-8">
+      {showStore && (
+        <div className="space-y-9 pt-4 md:space-y-11 md:pt-5">
 
-              {/* ── Merchandised home layer ── */}
-              {!catalogLoading && products.length > 0 && (
-                <>
-                  {offers.length > 0 && (
-                    <OfferCarousel offers={offers} categories={categories} onShop={openOffer} />
-                  )}
+          <div className="space-y-3">
+          {/* Phones: a proper full-width search (the header one is too narrow there) */}
+          <div className="md:hidden"><SearchField onSearch={goSearch} compact /></div>
 
-                  {dealsRow.length > 0 && (
-                    <section id="home-deals">
-                      <SectionHead title="Deals of the day" sub={`${num(dealsCount)} on offer`}
-                        action={<SeeAll onClick={() => { setSortBy('discount'); setOnlyDiscounted(true); jumpTo(dealsRow[0].category); }} />} />
-                      <ProductRow products={dealsRow} categories={categories} cart={cart} add={add} remove={remove} tagTone="red" />
-                    </section>
-                  )}
+          {/* ── Banner row: main promise + coupon + deals ── */}
+          <BannerRow
+            productCount={catalogLoading ? '' : productCount}
+            hero={bestsellerRow.slice(0, 4)}
+            deals={dealsRow.slice(0, 3)}
+            maxDeal={maxDeal}
+            coupon={coupon && !couponDismissed ? coupon : undefined}
+            categories={categories}
+            onShopDeals={() => { if (dealsRow[0]) { setSortBy('discount'); setOnlyDiscounted(true); jumpTo(dealsRow[0].category); } }}
+            onShopAll={() => categories[0] && jumpTo(categories[0].name)}
+            onDismissCoupon={dismissCoupon}
+          />
+          </div>
 
-                  {bestsellerRow.length > 0 && (
-                    <section id="home-bestsellers">
-                      <SectionHead title="Bestsellers" sub={`${bestsellerRow.length} staples`} />
-                      <ProductRow products={bestsellerRow} categories={categories} cart={cart} add={add} remove={remove} />
-                    </section>
-                  )}
+          {/* ── Category tiles, grouped like the store's own aisles ── */}
+          {categories.length === 0 ? (
+            <SkeletonCategories />
+          ) : groups.map(g => (
+            <section key={g.title} aria-labelledby={`grp-${slug(g.title)}`}>
+              <h2 id={`grp-${slug(g.title)}`} className="mb-3.5 text-[19px] font-bold tracking-[-0.025em] md:text-[22px]">{g.title}</h2>
+              <CategoryTiles categories={g.items} counts={countByCategory} onPick={jumpTo} />
+            </section>
+          ))}
 
-                  <MarketBand onShopProduce={countByCategory.get(PRODUCE_CATEGORY) ? () => jumpTo(PRODUCE_CATEGORY) : undefined} />
-
-                  {(under49.length > 0 || under99.length > 0) && (
-                    <section>
-                      <SectionHead title="Budget picks" sub={`${num(priceTab === 49 ? under49Count : under99Count)} products`}
-                        action={<SeeAll label="Low to high" onClick={() => { setSortBy('price_asc'); jumpTo((priceTab === 49 ? under49 : under99)[0]?.category || categories[0].name); }} />} />
-                      <div className="mb-3 flex gap-1.5">
-                        {([49, 99] as const).map(v => (
-                          <button key={v} type="button" onClick={() => setPriceTab(v)} aria-pressed={priceTab === v}
-                            className={`h-8 rounded-lg border px-3 text-[13px] font-medium transition ${priceTab === v ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'}`}>
-                            Under ₹{v}
-                          </button>
-                        ))}
-                      </div>
-                      <ProductRow products={priceTab === 49 ? under49 : under99} categories={categories} cart={cart} add={add} remove={remove} />
-                    </section>
-                  )}
-
-                  {brands.length > 0 && (
-                    <section>
-                      <SectionHead title="Popular brands" sub={`top ${brands.length}`} />
-                      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:flex-wrap md:px-0 [&::-webkit-scrollbar]:hidden">
-                        {brands.map(b => (
-                          <button key={b.brand} type="button" onClick={() => searchBrand(b.brand)}
-                            className="inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-gray-200 bg-white px-3 text-[13px] font-medium text-gray-800 transition hover:border-gray-300 hover:bg-gray-50">
-                            {b.brand}<span className="text-[11.5px] tabular-nums text-gray-400">{b.count}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-
-                  <TrackBand />
-
-                  {produceRow.length > 0 && (
-                    <section>
-                      <SectionHead title="Fresh from local farms" sub={`${num(countByCategory.get(PRODUCE_CATEGORY) || 0)} products`}
-                        action={<SeeAll onClick={() => jumpTo(PRODUCE_CATEGORY)} />} />
-                      <ProductRow products={produceRow} categories={categories} cart={cart} add={add} remove={remove} />
-                    </section>
-                  )}
-                </>
-              )}
-
-              {/* Stores near you — live partner directory, only when there are entries */}
-              {stores.length > 0 && (
-                <section>
-                  <SectionHead title="Shop by store" sub={`${stores.length} near you on Zyphix`} />
-                  <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-2.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden">
-                    {stores.map(s => <StoreRow key={s.id} store={s} />)}
-                  </div>
+          {/* ── Merchandised rows (all computed from the live catalogue) ── */}
+          {!catalogLoading && products.length > 0 && (
+            <>
+              {dealsRow.length > 0 && (
+                <section id="home-deals">
+                  <SectionHead title="Deals of the day" sub={`${num(dealsCount)} on offer`}
+                    action={<SeeAll onClick={() => { setSortBy('discount'); setOnlyDiscounted(true); jumpTo(dealsRow[0].category); }} />} />
+                  <ProductRow products={dealsRow} categories={categories} cart={cart} add={add} remove={remove} tagTone="red" />
                 </section>
               )}
 
-              {/* Category sections */}
-              {catalogLoading ? (
-                <div className="space-y-8">{[0, 1, 2].map(i => <SkeletonSection key={i} />)}</div>
-              ) : categories.length === 0 ? (
-                <SkeletonSection />
-              ) : (
-                <AisleList categories={categories} byCategory={byCategory} expanded={expanded} showAll={allAisles} toggle={toggleExpanded} cart={cart} add={add} remove={remove} />
+              {bestsellerRow.length > 0 && (
+                <section id="home-bestsellers">
+                  <SectionHead title="Bestsellers" sub="what the neighbourhood buys most" />
+                  <ProductRow products={bestsellerRow} categories={categories} cart={cart} add={add} remove={remove} />
+                </section>
               )}
-            </div>
+
+              {offers.length > 0 && <OfferCarousel offers={offers} categories={categories} onShop={openOffer} />}
+
+              {(under49.length > 0 || under99.length > 0) && (
+                <section>
+                  <SectionHead title="Budget picks" sub={`${num(priceTab === 49 ? under49Count : under99Count)} products`}
+                    action={<SeeAll label="Low to high" onClick={() => { setSortBy('price_asc'); jumpTo((priceTab === 49 ? under49 : under99)[0]?.category || categories[0].name); }} />} />
+                  <div className="mb-3 flex gap-1.5">
+                    {([49, 99] as const).map(v => (
+                      <button key={v} type="button" onClick={() => setPriceTab(v)} aria-pressed={priceTab === v}
+                        className={`h-8 rounded-full border px-3.5 text-[13px] font-semibold transition ${priceTab === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'}`}>
+                        Under ₹{v}
+                      </button>
+                    ))}
+                  </div>
+                  <ProductRow products={priceTab === 49 ? under49 : under99} categories={categories} cart={cart} add={add} remove={remove} />
+                </section>
+              )}
+
+              {produceRow.length > 0 && (
+                <section>
+                  <SectionHead title="Fresh from local farms" sub={`${num(countByCategory.get(PRODUCE_CATEGORY) || 0)} products`}
+                    action={<SeeAll onClick={() => jumpTo(PRODUCE_CATEGORY)} />} />
+                  <ProductRow products={produceRow} categories={categories} cart={cart} add={add} remove={remove} />
+                </section>
+              )}
+
+              {brands.length > 0 && (
+                <section>
+                  <SectionHead title="Popular brands" />
+                  <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:flex-wrap md:px-0 [&::-webkit-scrollbar]:hidden">
+                    {brands.map(b => (
+                      <button key={b.brand} type="button" onClick={() => searchBrand(b.brand)}
+                        className="inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-gray-200 bg-white pl-1.5 pr-3.5 text-[13px] font-semibold text-gray-800 transition hover:border-gray-300 hover:shadow-sm">
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-[11px] font-bold text-gray-600">{b.brand.charAt(0)}</span>
+                        {b.brand}<span className="text-[11.5px] font-medium tabular-nums text-gray-400">{b.count}</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
           )}
+
+          {/* Stores near you: live partner directory, only when there are entries */}
+          {stores.length > 0 && (
+            <section>
+              <SectionHead title="Shop by store" sub={`${stores.length} near you on Zyphix`} />
+              <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-2.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden">
+                {stores.map(s => <StoreRow key={s.id} store={s} />)}
+              </div>
+            </section>
+          )}
+
+          {/* ── Every aisle ── */}
+          <section aria-labelledby="all-aisles">
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-t border-gray-200 pt-8">
+              <div>
+                <h2 id="all-aisles" className="text-[19px] font-bold tracking-[-0.025em] md:text-[22px]">Every aisle</h2>
+                <p className="mt-0.5 text-[13px] text-gray-500">{productCount ? `${productCount} products across ${categories.length} categories` : 'Loading the catalogue…'}</p>
+              </div>
+              <SortControls sortBy={sortBy} setSortBy={setSortBy} onlyDiscounted={onlyDiscounted} setOnlyDiscounted={setOnlyDiscounted} />
+            </div>
+            {catalogLoading ? (
+              <div className="space-y-8">{[0, 1, 2].map(i => <SkeletonSection key={i} />)}</div>
+            ) : categories.length === 0 ? (
+              <SkeletonSection />
+            ) : (
+              <div className="space-y-9">
+                <AisleList categories={categories} byCategory={byCategory} expanded={expanded} showAll={allAisles} toggle={toggleExpanded} cart={cart} add={add} remove={remove} />
+              </div>
+            )}
+          </section>
         </div>
-      </div>
+      )}
 
       {/* ── Floating cart bar ── */}
       {totalItems > 0 && (
@@ -459,7 +409,7 @@ function SectionHead({ title, sub, action }: { title: string; sub?: string; acti
   return (
     <Reveal y={12} amount={0.4} className="mb-3 flex items-end justify-between gap-3">
       <div className="flex min-w-0 items-baseline gap-2">
-        <h2 className="truncate text-[17px] font-semibold tracking-[-0.01em] md:text-[18px]">{title}</h2>
+        <h2 className="truncate text-[19px] font-bold tracking-[-0.025em] md:text-[22px]">{title}</h2>
         {sub && <span className="shrink-0 text-[12.5px] text-gray-500">{sub}</span>}
       </div>
       {action}
@@ -467,40 +417,154 @@ function SectionHead({ title, sub, action }: { title: string; sub?: string; acti
   );
 }
 
-/* ─── Hero: compact video hero with search, promise chips; the category card overlaps its bottom edge ─── */
 
-function Hero({ productCount, onSearch }: { productCount: string; onSearch: (q: string) => void }) {
-  const chips: { icon: React.ReactNode; text: string }[] = [
-    { icon: <Clock size={13} />, text: 'Delivered in 10 min' },
-    { icon: <Truck size={13} />, text: 'Free delivery on bigger baskets' },
-    ...(productCount ? [{ icon: <Package size={13} />, text: `${productCount} products` }] : []),
-    { icon: <MapPin size={13} />, text: 'Check if we deliver to you' },
-  ];
+/* ─── Sticky category strip: every aisle one tap away (replaces the side rail) ─── */
+function CategoryStrip({ categories, active, onPick, railRef, loading }: {
+  categories: Category[]; active: string; onPick: (name: string) => void; railRef: React.RefObject<HTMLDivElement | null>; loading: boolean;
+}) {
   return (
-    <section aria-label="Zyphix Now" className="zx-bleed relative isolate -mx-4 flex min-h-[56svh] items-end overflow-hidden bg-[#05080E] text-white md:min-h-[78svh]">
-      <BgVideo clip={VIDEOS.groceryShelf} dim={0.35} position="center" priority />
-      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.35) 0%, rgba(5,8,14,.05) 30%, rgba(5,8,14,.55) 65%, rgba(5,8,14,.92) 100%)' }} />
-      <Grain opacity={0.05} />
-      <HeroLiveOrder />
-      <div className="zx-bleed-inner relative z-10 w-full px-4 pb-16 pt-14 md:pb-28 md:pt-24">
-        <Kicker light>Zyphix Now</Kicker>
-        <SplitHeadline className={`${DISPLAY} max-w-[13ch] text-[38px] leading-[1.0] text-white sm:text-[48px] md:text-[64px]`}
-          parts={['Groceries in', { accent: '10', green: true }, 'minutes.']} />
-        <p className="mt-4 max-w-[520px] text-[15px] leading-[1.55] text-white/75 md:text-[17px]">
-          Fresh produce, dairy, snacks and daily staples from stores near you, at your door before the kettle boils.
-        </p>
-        <div className="mt-5 max-w-[640px] md:mt-6">
-          <SearchField onSearch={onSearch} />
+    <div className="sticky z-30 -mx-4 border-b border-gray-200/80 bg-white/95 backdrop-blur-xl md:mx-[calc(50%-50vw)]" style={{ top: NAV_H }}>
+      <div ref={railRef} className="mx-auto flex max-w-[1240px] gap-1 overflow-x-auto px-3 [scrollbar-width:none] md:px-4 [&::-webkit-scrollbar]:hidden" style={{ height: STRIP_H }}>
+        {loading ? Array.from({ length: 10 }, (_, i) => (
+          <div key={i} className="flex w-[72px] shrink-0 flex-col items-center justify-center gap-1.5"><div className="h-9 w-9 animate-pulse rounded-full bg-gray-100" /><div className="h-2.5 w-12 animate-pulse rounded bg-gray-100" /></div>
+        )) : categories.map(c => {
+          const on = active === c.name;
+          return (
+            <button key={c.name} type="button" data-pill={c.name} onClick={() => onPick(c.name)} aria-current={on || undefined}
+              className="group relative flex w-[76px] shrink-0 flex-col items-center justify-center gap-1 px-1 md:w-[84px]">
+              <span className={`relative inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full transition ${on ? 'ring-2 ring-[#0DA366] ring-offset-2' : 'group-hover:scale-105'}`} style={{ background: `${c.color || '#0DA366'}1F` }}>
+                {c.image ? <img src={c.image} alt="" loading="lazy" decoding="async" draggable={false} className="h-full w-full object-cover" /> : <CategoryIcon category={c} />}
+              </span>
+              <span className={`line-clamp-2 w-full text-center text-[11px] leading-[1.15] ${on ? 'font-bold text-gray-900' : 'font-medium text-gray-600 group-hover:text-gray-900'}`}>{c.name}</span>
+              {on && <span aria-hidden className="absolute inset-x-3 bottom-0 h-[3px] rounded-t-full" style={{ background: G }} />}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Banner row: the main promise (wide) + coupon and deals tiles ─── */
+function BannerRow({ productCount, hero, deals, maxDeal, coupon, categories, onShopDeals, onShopAll, onDismissCoupon }: {
+  productCount: string; hero: Product[]; deals: Product[]; maxDeal: number; coupon?: { code: string; desc: string };
+  categories: Category[]; onShopDeals: () => void; onShopAll: () => void; onDismissCoupon: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => { if (!coupon) return; navigator.clipboard?.writeText(coupon.code).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800); }).catch(() => {}); };
+  return (
+    <section aria-label="Today on Zyphix Now" className="grid gap-3 md:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)] md:gap-4">
+      {/* main banner */}
+      <div className="relative isolate flex min-h-[208px] overflow-hidden rounded-[22px] text-white md:min-h-[300px]" style={{ background: 'linear-gradient(125deg, #0B7F50 0%, #0DA366 48%, #2CC584 100%)' }}>
+        <div aria-hidden className="absolute -right-16 -top-24 h-72 w-72 rounded-full bg-white/10" />
+        <div aria-hidden className="absolute -bottom-28 right-24 h-64 w-64 rounded-full bg-black/10" />
+        <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-between p-5 md:p-8">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11.5px] font-bold uppercase tracking-[0.08em] backdrop-blur"><Zap size={12} className="fill-current" /> Delivery in 10 minutes</span>
+            <h1 className="mt-3 max-w-[14ch] text-[30px] font-extrabold leading-[1.02] tracking-[-0.035em] md:mt-4 md:text-[46px]">Your corner store, in minutes.</h1>
+            <p className="mt-2.5 max-w-[38ch] text-[13.5px] font-medium leading-snug text-white/85 md:text-[15.5px]">
+              {productCount ? `${productCount} products` : 'Fresh produce, dairy and daily staples'} from shops near you, at shelf prices.
+            </p>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button type="button" onClick={onShopAll} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-[13.5px] font-bold text-[#0B7F50] shadow-[0_8px_20px_-8px_rgba(0,0,0,.35)] transition hover:-translate-y-px">Start shopping <ArrowRight size={14} /></button>
+            <span className="hidden h-10 items-center gap-1.5 rounded-full border border-white/30 px-3.5 text-[12.5px] font-semibold text-white/90 sm:inline-flex"><Clock size={13} /> Free delivery above ₹149</span>
+          </div>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {chips.map(c => (
-            <span key={c.text} className="inline-flex h-8 items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 text-[12.5px] font-medium text-white/90 backdrop-blur-md">
-              <span className="text-emerald-300">{c.icon}</span>{c.text}
-            </span>
-          ))}
+        {hero.length > 0 && (
+          <div aria-hidden className="relative hidden w-[42%] shrink-0 items-center justify-center sm:flex">
+            <div className="grid w-full max-w-[260px] grid-cols-2 gap-2.5 p-4 md:gap-3">
+              {hero.slice(0, 4).map((p, i) => <BannerTile key={p.id} p={p} categories={categories} className={i % 2 ? 'translate-y-4' : ''} />)}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* side tiles */}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-1 md:gap-4">
+        <div className="relative flex min-h-[140px] flex-col justify-between overflow-hidden rounded-[22px] bg-[#FFF3D6] p-4 md:p-5">
+          <div aria-hidden className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[#FFE3A3]" />
+          {coupon ? (
+            <>
+              <div className="relative min-w-0">
+                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-amber-700">First order</p>
+                <p className="mt-1 line-clamp-3 text-[14px] font-bold leading-tight tracking-[-0.02em] text-gray-900 md:line-clamp-2 md:text-[18px]">{coupon.desc}</p>
+              </div>
+              <div className="relative mt-3 flex items-center gap-2">
+                <button type="button" onClick={copy} aria-label={`Copy code ${coupon.code}`} className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-dashed border-amber-600/60 bg-white px-2.5 text-[11.5px] font-extrabold tracking-wide text-amber-800 md:px-3 md:text-[12.5px]">
+                  {coupon.code}{copied ? <Check size={13} /> : <Copy size={13} />}
+                </button>
+                <button type="button" onClick={onDismissCoupon} aria-label="Hide offer" className="ml-auto hidden h-7 w-7 items-center justify-center rounded-full text-amber-800/60 transition hover:bg-white/70 md:inline-flex"><X size={13} /></button>
+              </div>
+            </>
+          ) : (
+            <div className="relative">
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-amber-700">Every day</p>
+              <p className="mt-1 text-[16px] font-bold leading-tight tracking-[-0.02em] text-gray-900 md:text-[18px]">No markup on shelf prices</p>
+            </div>
+          )}
         </div>
+        <button type="button" onClick={onShopDeals} disabled={!deals.length}
+          className="group relative flex min-h-[140px] flex-col justify-between overflow-hidden rounded-[22px] bg-[#FDE8EC] p-4 text-left md:p-5">
+          <div className="relative z-10 min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-rose-700">Deals of the day</p>
+            <p className="mt-1 text-[15px] font-bold leading-tight tracking-[-0.02em] text-gray-900 md:text-[18px]">{maxDeal > 0 ? <>Up to {maxDeal}% off</> : 'Fresh offers daily'}</p>
+          </div>
+          <span className="relative z-10 mt-3 inline-flex h-9 w-fit items-center gap-1 rounded-full bg-gray-900 px-3.5 text-[12.5px] font-bold text-white transition group-hover:-translate-y-px"><Percent size={12} /> Shop deals</span>
+          {deals.length > 0 && (
+            <div aria-hidden className="absolute -bottom-3 -right-3 hidden w-[46%] rotate-[-6deg] gap-1.5 md:flex">
+              {deals.slice(0, 2).map(p => <BannerTile key={p.id} p={p} categories={categories} className="flex-1" />)}
+            </div>
+          )}
+        </button>
       </div>
     </section>
+  );
+}
+
+function BannerTile({ p, categories, className = '' }: { p: Product; categories: Category[]; className?: string }) {
+  const { src, isFallback } = productImageFor(p, categories);
+  return (
+    <div className={`aspect-square overflow-hidden rounded-2xl bg-white shadow-[0_14px_30px_-12px_rgba(0,0,0,.35)] ${className}`}>
+      <img src={src} alt="" loading="eager" decoding="async" draggable={false} className={isFallback ? 'h-full w-full object-cover' : 'h-full w-full object-contain p-2.5'} />
+    </div>
+  );
+}
+
+/* ─── Category groups ("Grocery & Kitchen", "Snacks & Drinks"…) built from category names ─── */
+const GROUPS: { title: string; re: RegExp }[] = [
+  { title: 'Grocery & Kitchen', re: /fruit|veg|dairy|egg|atta|rice|dal|oil|ghee|masala|spice|dry fruit|nut|bakery|bread|biscuit|breakfast|cereal|frozen|meat|fish|sauce|spread|instant|noodle|pasta|kitchen|staple|sugar|salt/i },
+  { title: 'Snacks & Drinks', re: /snack|munch|drink|juice|tea|coffee|chocolate|sweet|ice cream|namkeen|beverage|soda|water|paan/i },
+  { title: 'Beauty & Personal Care', re: /personal|beauty|cosmetic|skin|hair|bath|baby|pharma|health|wellness|hygiene/i },
+  { title: 'Household Essentials', re: /household|clean|home|pet|stationery|pooja|electric|kitchenware|laundry|detergent/i },
+];
+function groupCategories(categories: Category[]): { title: string; items: Category[] }[] {
+  const out = GROUPS.map(g => ({ title: g.title, items: [] as Category[] }));
+  const more: Category[] = [];
+  for (const c of categories) {
+    const i = GROUPS.findIndex(g => g.re.test(c.name));
+    (i >= 0 ? out[i].items : more).push(c);
+  }
+  if (more.length) out.push({ title: 'More to explore', items: more });
+  return out.filter(g => g.items.length > 0);
+}
+
+function CategoryTiles({ categories, counts, onPick }: { categories: Category[]; counts: Map<string, number>; onPick: (name: string) => void }) {
+  return (
+    <div className="grid grid-cols-4 gap-x-2.5 gap-y-4 sm:grid-cols-6 md:grid-cols-8 md:gap-x-4">
+      {categories.map(c => (
+        <button key={c.name} type="button" onClick={() => onPick(c.name)} className="group flex flex-col items-center text-center">
+          <span className="relative block aspect-square w-full overflow-hidden rounded-[18px] transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_28px_-14px_rgba(11,15,25,.35)]"
+            style={{ background: `linear-gradient(160deg, ${c.color || '#0DA366'}24, ${c.color || '#0DA366'}0D)` }}>
+            {c.image
+              ? <img src={c.image} alt="" loading="lazy" decoding="async" draggable={false} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]" />
+              : <span className="flex h-full w-full items-center justify-center text-[30px]"><CategoryIcon category={c} /></span>}
+          </span>
+          <span className="mt-2 line-clamp-2 text-[12px] font-semibold leading-[1.2] text-gray-800 md:text-[13px]">{c.name}</span>
+          <span className="mt-0.5 text-[11px] font-medium tabular-nums text-gray-400">{num(counts.get(c.name) || 0)} items</span>
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -521,7 +585,7 @@ function SearchField({ onSearch, initial = '', compact = false }: { onSearch: (q
       {v && (
         <button type="button" onClick={() => { setV(''); if (compact) onSearch(''); }} aria-label="Clear" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700"><X size={15} /></button>
       )}
-      {compact ? <SearchSubmit compact /> : <Magnetic strength={0.2}><SearchSubmit /></Magnetic>}
+      <SearchSubmit compact={compact} />
     </form>
   );
 }
@@ -696,9 +760,9 @@ function ProductRow({ products, categories, cart, add, remove, tagTone }: {
   products: Product[]; categories: Category[]; cart: Record<string, number>; add: (id: string) => void; remove: (id: string) => void; tagTone?: 'green' | 'red';
 }) {
   return (
-    <div className="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-2 pt-1 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden">
+    <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-3 pt-1 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden">
       {products.map((p, i) => (
-        <Reveal key={p.id} delay={Math.min(i * 0.05, 0.4)} y={14} amount={0.1} className="w-[140px] shrink-0 snap-start md:w-[164px]">
+        <Reveal key={p.id} delay={Math.min(i * 0.05, 0.4)} y={14} amount={0.1} className="w-[148px] shrink-0 snap-start md:w-[178px]">
           <ProductCard product={p} categories={categories} qty={cart[p.id] || 0} onAdd={() => add(p.id)} onRemove={() => remove(p.id)} tagTone={tagTone} />
         </Reveal>
       ))}
@@ -791,7 +855,7 @@ function ProductGrid({ products, categories, cart, add, remove }: {
   products: Product[]; categories: Category[]; cart: Record<string, number>; add: (id: string) => void; remove: (id: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-3 gap-2.5 md:grid-cols-4 lg:grid-cols-6 lg:gap-3">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
       {products.map((p, i) => (
         <Reveal key={p.id} delay={Math.min((i % 12) * 0.04, 0.4)} y={14} amount={0.1}>
           <ProductCard product={p} categories={categories} qty={cart[p.id] || 0} onAdd={() => add(p.id)} onRemove={() => remove(p.id)} />
@@ -842,47 +906,46 @@ const ProductCard = React.memo(function ProductCard({ product: p, categories, qt
   const { src, isFallback } = productImageFor(p, categories);
   const brand = (p.brand || '').trim();
   const showBrand = !!brand && brand !== 'Local Farm';
-  const sub = p.weight || (showBrand ? '' : brand);
   // Catalogue names usually start with the brand ("Amul Butter Salted"); drop it when the brand line is shown.
   const stripped = showBrand && p.name.toLowerCase().startsWith(brand.toLowerCase() + ' ') ? p.name.slice(brand.length + 1) : p.name;
   const displayName = stripped.trim() || p.name;
+  const save = p.origPrice && p.origPrice > p.price ? p.origPrice - p.price : 0;
 
   return (
-    <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-1 hover:border-gray-300 hover:shadow-[0_14px_30px_-8px_rgba(11,15,25,.16)]">
-      <Link href={`/now/product/${p.id}`} className="relative block aspect-square overflow-hidden bg-[#F4F5F7] no-underline">
-        <img src={src} alt={p.name} loading="lazy" decoding="async" draggable={false}
-          className={`transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.04] ${isFallback ? 'h-full w-full object-cover' : 'h-full w-full rounded-[14px] object-contain p-3 mix-blend-multiply'}`} />
+    <div className="group flex h-full flex-col rounded-[18px] bg-white p-2 ring-1 ring-gray-200/80 transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-1 hover:shadow-[0_18px_34px_-16px_rgba(11,15,25,.22)] hover:ring-gray-300">
+      <div className="relative">
+        <Link href={`/now/product/${p.id}`} aria-label={p.name} className="block aspect-square overflow-hidden rounded-[14px] bg-[#F4F5F7] no-underline">
+          <img src={src} alt={p.name} loading="lazy" decoding="async" draggable={false}
+            className={`transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.05] ${isFallback ? 'h-full w-full object-cover' : 'h-full w-full object-contain p-3 mix-blend-multiply'}`} />
+        </Link>
         {discount > 0 && (
-          <span className={`absolute left-1.5 top-1.5 rounded-md px-1.5 py-0.5 text-[10.5px] font-semibold leading-none text-white ${tagTone === 'red' ? 'bg-red-600' : 'bg-emerald-600'}`}>{discount}% off</span>
+          <span className={`absolute left-0 top-2.5 rounded-r-lg px-1.5 py-[3px] text-[10.5px] font-extrabold uppercase leading-none tracking-wide text-white ${tagTone === 'red' ? 'bg-rose-600' : 'bg-[#2563EB]'}`}>{discount}% off</span>
         )}
-      </Link>
-
-      <div className="flex flex-1 flex-col p-2.5">
-        {showBrand && <p className="mb-0.5 truncate text-[12px] text-gray-500">{brand}</p>}
-        <Link href={`/now/product/${p.id}`} className="line-clamp-2 min-h-[2.5em] text-[13px] font-medium leading-[1.25] text-gray-900 no-underline">{displayName}</Link>
-        {sub && <p className="mt-0.5 truncate text-[12px] text-gray-500">{sub}</p>}
-
-        <div className="mt-auto flex items-end justify-between gap-2 pt-2">
-          <div className="min-w-0 leading-none">
-            <span className="text-[14px] font-semibold text-gray-900">₹{num(p.price)}</span>
-            {p.origPrice && p.origPrice > p.price && (
-              <span className="ml-1 text-[12px] text-gray-400 line-through">₹{num(p.origPrice)}</span>
-            )}
-          </div>
-
+        {/* ADD sits on the photo, bottom-right */}
+        <div className="absolute -bottom-3 right-1.5">
           {qty > 0 ? (
-            <div className="flex h-7 shrink-0 items-center overflow-hidden rounded-full text-white" style={{ background: G }}>
-              <button type="button" onClick={onRemove} aria-label="Remove one" className="flex h-full w-7 items-center justify-center transition hover:bg-black/10"><Minus size={12} strokeWidth={2.5} /></button>
-              <span className="min-w-[18px] text-center text-[12.5px] font-semibold tabular-nums">{qty}</span>
-              <button type="button" onClick={onAdd} aria-label="Add one" className="flex h-full w-7 items-center justify-center transition hover:bg-black/10"><Plus size={12} strokeWidth={2.5} /></button>
+            <div className="flex h-8 items-center overflow-hidden rounded-[10px] text-white shadow-[0_6px_16px_-6px_rgba(13,163,102,.7)]" style={{ background: G }}>
+              <button type="button" onClick={onRemove} aria-label={`Remove one ${p.name}`} className="flex h-full w-8 items-center justify-center transition hover:bg-black/10"><Minus size={13} strokeWidth={3} /></button>
+              <span className="min-w-[18px] text-center text-[13px] font-bold tabular-nums" aria-live="polite">{qty}</span>
+              <button type="button" onClick={onAdd} aria-label={`Add one more ${p.name}`} className="flex h-full w-8 items-center justify-center transition hover:bg-black/10"><Plus size={13} strokeWidth={3} /></button>
             </div>
           ) : (
-            <button type="button" onClick={onAdd}
-              className="inline-flex h-7 shrink-0 items-center gap-0.5 rounded-full border border-emerald-500 bg-white px-2.5 text-[12px] font-semibold text-emerald-700 transition hover:bg-emerald-50">
-              <Plus size={12} strokeWidth={2.5} /> Add
+            <button type="button" onClick={onAdd} aria-label={`Add ${p.name} to cart`}
+              className="inline-flex h-8 items-center rounded-[10px] border border-[#0DA366] bg-white px-4 text-[12.5px] font-extrabold tracking-[0.04em] text-[#0B8A57] shadow-[0_4px_12px_-6px_rgba(11,15,25,.25)] transition hover:bg-emerald-50">
+              ADD
             </button>
           )}
         </div>
+      </div>
+
+      <div className="flex flex-1 flex-col px-1 pb-1 pt-4">
+        <div className="flex items-baseline gap-1.5 leading-none">
+          <span className="text-[15px] font-extrabold tracking-[-0.01em] text-gray-900">₹{num(p.price)}</span>
+          {save > 0 && <span className="text-[12px] font-medium text-gray-400 line-through">₹{num(p.origPrice!)}</span>}
+        </div>
+        {save > 0 && <p className="mt-1 text-[11px] font-bold text-[#0B8A57]">Save ₹{num(save)}</p>}
+        <Link href={`/now/product/${p.id}`} className="mt-1.5 line-clamp-2 min-h-[2.5em] text-[13px] font-semibold leading-[1.25] text-gray-900 no-underline">{displayName}</Link>
+        <p className="mt-auto truncate pt-1 text-[11.5px] font-medium text-gray-500">{[p.weight, showBrand ? brand : ''].filter(Boolean).join(' · ')}</p>
       </div>
     </div>
   );

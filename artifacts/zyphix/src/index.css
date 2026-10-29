@@ -4,6 +4,7 @@
 @font-face { font-family: 'Instrument Serif Fallback'; src: local('Georgia Italic'), local('Times New Roman Italic'), local('Liberation Serif Italic'); font-style: italic; size-adjust: 89.51%; ascent-override: 110.60%; descent-override: 34.63%; }
 @font-face { font-family: 'Geist Fallback'; src: local('Arial'), local('Helvetica Neue'), local('Helvetica'), local('Liberation Sans'); size-adjust: 102.37%; ascent-override: 98.17%; descent-override: 28.82%; line-gap-override: 0%; }
 @font-face { font-family: 'Instrument Serif'; src: url('/fonts/instrument-serif-italic.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Plus Jakarta Sans'; src: url('/fonts/jakarta-latin.woff2') format('woff2'); font-weight: 200 800; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Outfit'; src: url('/fonts/outfit-800.woff2') format('woff2'); font-weight: 800; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Outfit'; src: url('/fonts/outfit-900.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
 
@@ -250,3 +251,11 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible { outline: 
   .zx-rv { opacity: 1 !important; transform: none !important; filter: none !important; transition: none !important; }
 }
 @media print { .zx-rv { opacity: 1 !important; transform: none !important; } }
+
+/* Zyphix Now has its own typeface (Plus Jakarta Sans): a rounder, friendlier grocery voice.
+   The logo, the serif accent and the footer wordmark keep the brand fonts. */
+html[data-site="now"] body,
+html[data-site="now"] body *:not(.zx-logo):not(.zx-logo *):not(.font-serif-accent):not(.zx-wm-letter):not(svg):not(svg *) {
+  font-family: 'Plus Jakarta Sans', 'Geist', 'Geist Fallback', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif !important;
+}
+html[data-site="now"] body { letter-spacing: -0.005em; }

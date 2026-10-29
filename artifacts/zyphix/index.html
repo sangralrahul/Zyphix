@@ -74,6 +74,7 @@
         var l = document.createElement('link'); l.rel = 'preload'; l.as = 'image'; l.href = url; l.setAttribute('fetchpriority', 'high');
         document.head.appendChild(l);
         /* Zyphix Now: start downloading the catalogue now, in parallel with the app, instead of after it boots. */
+        if (s === 'now') { var fl = document.createElement('link'); fl.rel = 'preload'; fl.as = 'font'; fl.type = 'font/woff2'; fl.href = '/fonts/jakarta-latin.woff2'; fl.crossOrigin = 'anonymous'; document.head.appendChild(fl); document.documentElement.setAttribute('data-site', 'now'); }
         if (s === 'now' && location.pathname === '/') ['/api/products?preview=8', '/api/categories'].forEach(function (u) {
           var f = document.createElement('link'); f.rel = 'preload'; f.as = 'fetch'; f.href = u; f.crossOrigin = 'anonymous'; document.head.appendChild(f);
         });
