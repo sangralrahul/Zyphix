@@ -129,12 +129,15 @@ export default {
    */
   async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
     ctx.waitUntil((async () => {
+      // Category tiles first, on their own: a slow or failing product-image batch must not starve them.
+      try {
+        const cats = await generateCategoryArt(env, (k, b, ct) => putImage(env, k, b, ct), 3);
+        if (cats.done.length || cats.failed.length) console.log(JSON.stringify({ cron: 'category-art', done: cats.done, failed: cats.failed, remaining: cats.remaining }));
+      } catch (err) { console.error('cron category art failed', (err as Error).message); }
       try {
         const packaged = await syncImages(env, 5, 'packaged');
         const produce = await syncImages(env, 10, 'produce');
         const thumbs = await makeMissingThumbs(env, 40);
-        const cats = await generateCategoryArt(env, (k, b, ct) => putImage(env, k, b, ct), 2).catch(e => ({ error: (e as Error).message }));
-        console.log(JSON.stringify({ cron: 'category-art', cats }));
         console.log(JSON.stringify({ cron: 'images', packaged: packaged.processed, produce: produce.processed, remaining: produce.remaining, thumbs }));
       } catch (err) { console.error('cron images failed', (err as Error).message); }
     })());
