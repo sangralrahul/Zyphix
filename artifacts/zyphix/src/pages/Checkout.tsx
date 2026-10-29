@@ -108,7 +108,7 @@ export function Checkout() {
       address: { name: name.trim(), phone: phone.trim(), line1: line1.trim(), city: city.trim(), pincode: pincode.trim(), notes: notes.trim() || undefined },
       paymentMode: payment,
       status: 'CONFIRMED',
-      etaMinutes: 30,
+      etaMinutes: 10,
     };
     // The order only counts once our server has it. If it can't be sent, nothing is charged,
     // the cart stays as it is, and the shopper is told to retry.

@@ -25,6 +25,7 @@ import { PhotonImage, resize, SamplingFilter } from '@cf-wasm/photon';
  */
 import { sendPartnerMails } from './partnerMail';
 import { edge } from './edge';
+import { sendOrderMails, sendPartnerStatusMail } from './notifyMail';
 
 export interface Env {
   DB: D1Database;
@@ -81,7 +82,7 @@ async function handleRequest(request: Request, env: Env, ctx: ExecutionContext):
         return new Response(null, { status: 204, headers: { ...cors, 'access-control-allow-headers': 'content-type, authorization', 'access-control-allow-methods': 'GET,POST,PATCH,DELETE,OPTIONS', 'access-control-max-age': '86400' } });
       }
       try {
-        const res = await handleAccount(request, env, url);
+        const res = await handleAccount(request, env, url, ctx);
         const h = new Headers(res.headers);
         for (const [k, v] of Object.entries(cors)) h.set(k, v);
         return new Response(res.body, { status: res.status, headers: h });
@@ -101,7 +102,7 @@ async function handleRequest(request: Request, env: Env, ctx: ExecutionContext):
       if (pathname.startsWith('/media/')) return await handleMedia(request, env, ctx, url);
       // The admin page itself (SPA) vs the admin API: only API paths go to handleAdmin.
       if (pathname === '/admin/' || pathname === '/admin/index.html') return env.ASSETS.fetch(new Request(new URL('/', url).toString(), request));
-      if (pathname.startsWith('/admin/')) return await handleAdmin(request, env, url);
+      if (pathname.startsWith('/admin/')) return await handleAdmin(request, env, url, ctx);
     } catch (err) {
       console.error(err);
       return json({ error: (err as Error).message }, 500);
@@ -352,7 +353,7 @@ async function hit(env: Env, key: string, limit: number, windowSec: number, reco
 const ipOf = (r: Request) => r.headers.get('cf-connecting-ip') || 'local';
 const tooMany = () => json({ error: 'Too many requests. Please wait a few minutes and try again.' }, 429, { 'retry-after': '600' });
 
-async function handleAdmin(request: Request, env: Env, url: URL): Promise<Response> {
+async function handleAdmin(request: Request, env: Env, url: URL, ctx: ExecutionContext): Promise<Response> {
   const ip = ipOf(request);
   // 10 wrong keys in 15 minutes locks that IP out of the admin API
   if (await hit(env, `admin-fail:${ip}`, 10, 900, false)) return json({ error: 'Too many wrong attempts. Try again in 15 minutes.' }, 429, { 'retry-after': '900' });
@@ -394,8 +395,14 @@ async function handleAdmin(request: Request, env: Env, url: URL): Promise<Respon
   if (pm && request.method === 'POST') {
     const status = url.searchParams.get('status');
     if (!status || !['live', 'hidden', 'pending', 'rejected'].includes(status)) return json({ error: 'status must be live | hidden | pending | rejected' }, 400);
-    const r = await env.DB.prepare("UPDATE partners SET status = ?, updated_at = datetime('now') WHERE id = ?").bind(status, decodeURIComponent(pm[1])).run();
-    return json({ updated: r.meta.changes });
+    const pid = decodeURIComponent(pm[1]);
+    const before = await env.DB.prepare('SELECT id, type, name, business_name, email, phone, city, status FROM partners WHERE id = ?').bind(pid).first<{ id: string; type: string; name: string; business_name: string; email: string; phone: string; city: string; status: string }>();
+    const r = await env.DB.prepare("UPDATE partners SET status = ?, updated_at = datetime('now') WHERE id = ?").bind(status, pid).run();
+    // Tell the applicant when the decision changes (approved → live, or rejected). Hiding a live listing sends nothing.
+    if (before && before.status !== status && (status === 'live' || status === 'rejected') && !(status === 'live' && before.status === 'hidden')) {
+      ctx.waitUntil(sendPartnerStatusMail(env, before, status, mailLogger(env)));
+    }
+    return json({ updated: r.meta.changes, emailed: !!(before?.email && before.status !== status && (status === 'live' || status === 'rejected')) });
   }
 
   if (p === '/admin/images/status') {
@@ -802,7 +809,7 @@ async function readJson(request: Request): Promise<Record<string, any> | null> {
   try { const b = await request.json(); return b && typeof b === 'object' ? b as Record<string, any> : {}; } catch { return null; }
 }
 
-async function handleAccount(request: Request, env: Env, url: URL): Promise<Response> {
+async function handleAccount(request: Request, env: Env, url: URL, ctx: ExecutionContext): Promise<Response> {
   const p = url.pathname;
   const m = request.method;
 
@@ -818,7 +825,7 @@ async function handleAccount(request: Request, env: Env, url: URL): Promise<Resp
   }
 
   /* ── orders: POST works for guests too; GET /api/orders/:id allows guest lookup of guest orders ── */
-  if (p === '/api/orders' && m === 'POST') return await createOrder(request, env);
+  if (p === '/api/orders' && m === 'POST') return await createOrder(request, env, ctx);
   if (p === '/api/waitlist' && m === 'POST') return await joinWaitlist(request, env);
   const om = p.match(/^\/api\/orders\/([^/]+)$/);
   if (om && m === 'GET') {
@@ -1193,7 +1200,7 @@ async function listAddresses(env: Env, userId: string) {
 
 const num = (v: unknown) => { const n = Number(v); return Number.isFinite(n) ? Math.round(n) : 0; };
 
-async function createOrder(request: Request, env: Env): Promise<Response> {
+async function createOrder(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const body = await readJson(request); if (!body) return json({ error: 'invalid JSON' }, 400);
   const items = Array.isArray(body.items) ? body.items : [];
   if (items.length === 0) return json({ error: 'items are required' }, 400);
@@ -1204,7 +1211,7 @@ async function createOrder(request: Request, env: Env): Promise<Response> {
   const total = num(body.total);
   const paymentMode = str(body.paymentMode, 20) || 'COD';
   const address = body.address && typeof body.address === 'object' ? body.address : {};
-  const eta = num(body.etaMinutes) || 30;
+  const eta = num(body.etaMinutes) || 10;
   const status = str(body.status, 20) || 'placed';
   const email = user?.email ?? (str(body.email, 160).toLowerCase() || null);
   const existing = await env.DB.prepare('SELECT id FROM orders WHERE id = ?').bind(id).first<{ id: string }>();
@@ -1212,6 +1219,12 @@ async function createOrder(request: Request, env: Env): Promise<Response> {
   await env.DB.prepare('INSERT INTO orders (id, user_id, email, status, items, subtotal, delivery_fee, discount, total, payment_mode, address, eta_minutes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
     .bind(id, user?.id ?? null, email, status, JSON.stringify(items).slice(0, 60000), subtotal, deliveryFee, discount, total, paymentMode, JSON.stringify(address).slice(0, 4000), eta).run();
   const row = await env.DB.prepare('SELECT created_at FROM orders WHERE id = ?').bind(id).first<{ created_at: string }>();
+  // Confirmation to the customer and an alert to the team, after the response is sent.
+  ctx.waitUntil(sendOrderMails(env, {
+    id, email, subtotal, deliveryFee, discount, total, paymentMode, eta,
+    items: items.slice(0, 60).map((i: any) => ({ name: str(i.name, 120), qty: Math.max(1, Math.round(num(i.qty) || 1)), price: num(i.price), weight: str(i.weight, 40) || undefined, brand: str(i.brand, 60) || undefined })),
+    address: { name: str(address.name, 120), phone: str(address.phone, 20), line1: str(address.line1, 240), line2: str(address.line2, 240), city: str(address.city, 80), pincode: str(address.pincode, 10), notes: str(address.notes, 300) },
+  }, mailLogger(env)));
   return json({ id, createdAt: sqliteToIso(row?.created_at) }, 201);
 }
 

@@ -236,9 +236,10 @@ export function Admin() {
     // a decision on a new application closes the drawer so the next one is a click away
     if (prev === 'pending' && (status === 'live' || status === 'rejected')) setTimeout(() => setOpen(o => (o && o.id === p.id ? null : o)), 900);
     try {
-      await api(`/admin/partners/${encodeURIComponent(p.id)}/status?status=${status}`, token, { method: 'POST' });
+      const r = await api<{ updated: number; emailed?: boolean }>(`/admin/partners/${encodeURIComponent(p.id)}/status?status=${status}`, token, { method: 'POST' });
       const name = p.business_name || p.name;
-      toast(status === 'live' ? `${name} approved. It's now visible on Zyphix.` : status === 'rejected' ? `${name} rejected.` : status === 'hidden' ? `${name} hidden from the sites.` : `${name} moved back to review.`);
+      const mailed = r?.emailed ? ' Applicant emailed.' : '';
+      toast(status === 'live' ? `${name} approved. It's now visible on Zyphix.${mailed}` : status === 'rejected' ? `${name} rejected.${mailed}` : status === 'hidden' ? `${name} hidden from the sites.` : `${name} moved back to review.`);
     } catch (x) {
       setPartners(ps => ps.map(x2 => x2.id === p.id ? { ...x2, status: prev } : x2));
       toast(`Couldn't update: ${(x as Error).message}`, 'err');
