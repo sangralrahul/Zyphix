@@ -235,7 +235,12 @@ export function VideoHero({ clip, children, height = 'min-h-[92svh]', dim = 0.5,
         <BgVideo clip={clip} dim={dim} position={position} priority />
       </motion.div>
       {gradient && (
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.55) 0%, rgba(5,8,14,.05) 35%, rgba(5,8,14,.25) 70%, rgba(5,8,14,.95) 100%)' }} />
+        <>
+          {/* Top-to-bottom scrim: keeps the nav, headline and copy readable over bright footage. */}
+          <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.6) 0%, rgba(5,8,14,.32) 30%, rgba(5,8,14,.42) 62%, rgba(5,8,14,.96) 100%)' }} />
+          {/* Side scrim behind the text column on wider screens. */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 hidden md:block" style={{ background: 'linear-gradient(90deg, rgba(5,8,14,.55) 0%, rgba(5,8,14,.25) 45%, rgba(5,8,14,0) 70%)' }} />
+        </>
       )}
       <motion.div className="relative z-10 w-full" style={stat ? undefined : { opacity: fg }}>
         {children}
@@ -292,7 +297,13 @@ export function Counter({ to, duration = 1.6, format = (n: number) => Math.round
     return () => c.stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView, to]);
-  return <span ref={ref} className={className}>{txt}</span>;
+  // The animated digits are decorative; screen readers and search engines get the real value.
+  return (
+    <span ref={ref} className={className}>
+      <span aria-hidden="true">{txt}</span>
+      <span className="sr-only">{format(to)}</span>
+    </span>
+  );
 }
 
 /* ── Scroll progress bar (top of page) ───────────────────────────────────── */

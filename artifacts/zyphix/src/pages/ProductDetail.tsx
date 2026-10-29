@@ -67,9 +67,9 @@ export function ProductDetail() {
       <div className="mt-5 grid items-start gap-6 md:grid-cols-[minmax(260px,440px)_1fr] md:gap-10">
         {/* image */}
         <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white">
-          <div className="relative aspect-square bg-[#FAFAFA]">
+          <div className="relative aspect-square bg-[#F4F5F7]">
             <img src={mainImage?.src || product.image} alt={product.name}
-              className={mainImage?.isFallback ? 'h-full w-full object-cover' : 'h-full w-full bg-white object-contain p-4'} />
+              className={mainImage?.isFallback ? 'h-full w-full object-cover' : 'h-full w-full rounded-2xl object-contain p-6 mix-blend-multiply'} />
             {discount > 0 && (
               <span className="absolute left-3 top-3 rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] font-semibold text-white">{discount}% off</span>
             )}
@@ -159,8 +159,8 @@ export function ProductDetail() {
               const d = r.origPrice && r.origPrice > r.price ? Math.round((1 - r.price / r.origPrice) * 100) : 0;
               return (
                 <Link key={r.id} href={`/now/product/${r.id}`} className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-inherit no-underline transition hover:border-gray-300">
-                  <div className="relative aspect-square bg-[#FAFAFA]">
-                    <img src={img.src} alt={r.name} loading="lazy" className={img.isFallback ? 'h-full w-full object-cover' : 'h-full w-full bg-white object-contain p-2'} />
+                  <div className="relative aspect-square bg-[#F4F5F7]">
+                    <img src={img.src} alt={r.name} loading="lazy" className={img.isFallback ? 'h-full w-full object-cover' : 'h-full w-full rounded-[14px] object-contain p-3 mix-blend-multiply'} />
                     {d > 0 && <span className="absolute left-1.5 top-1.5 rounded-md bg-emerald-600 px-1.5 py-0.5 text-[10.5px] font-semibold leading-none text-white">{d}% off</span>}
                   </div>
                   <div className="p-2.5">

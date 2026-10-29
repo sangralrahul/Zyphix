@@ -847,9 +847,9 @@ const ProductCard = React.memo(function ProductCard({ product: p, categories, qt
 
   return (
     <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-1 hover:border-gray-300 hover:shadow-[0_14px_30px_-8px_rgba(11,15,25,.16)]">
-      <Link href={`/now/product/${p.id}`} className="relative block aspect-square overflow-hidden bg-[#FAFAFA] no-underline">
+      <Link href={`/now/product/${p.id}`} className="relative block aspect-square overflow-hidden bg-[#F4F5F7] no-underline">
         <img src={src} alt={p.name} loading="lazy" decoding="async" draggable={false}
-          className={`transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.04] ${isFallback ? 'h-full w-full object-cover' : 'h-full w-full bg-white object-contain p-2'}`} />
+          className={`transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.04] ${isFallback ? 'h-full w-full object-cover' : 'h-full w-full rounded-[14px] object-contain p-3 mix-blend-multiply'}`} />
         {discount > 0 && (
           <span className={`absolute left-1.5 top-1.5 rounded-md px-1.5 py-0.5 text-[10.5px] font-semibold leading-none text-white ${tagTone === 'red' ? 'bg-red-600' : 'bg-emerald-600'}`}>{discount}% off</span>
         )}

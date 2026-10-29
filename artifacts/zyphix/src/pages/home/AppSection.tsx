@@ -3,7 +3,7 @@ import { Link } from 'wouter';
 import { ArrowUpRight, Bike, Smartphone, Wallet, BellRing } from 'lucide-react';
 import { Dark, Light, Glow, Grain, Kicker, Sub, Reveal, VideoCard, PhotoTile, Counter } from '@/ui/cinema';
 import { Accent } from '@/ui/motion2';
-import { Container, Phone } from '@/ui/kit';
+import { Container, Phone, StatusIcons } from '@/ui/kit';
 import { VIDEOS, landscape } from '@/data/media';
 import { NUM, PARTNER_SITE, ADVERTISE_SITE, SUPPORT_SITE, Display } from './shared';
 
@@ -28,7 +28,7 @@ function PhoneScreen() {
     <div className="absolute inset-0">
       <VideoCard clip={VIDEOS.rider} ratio="auto" rounded="rounded-none" className="h-full" />
       <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,8,14,.35) 0%, rgba(5,8,14,0) 30%, rgba(5,8,14,.85) 100%)' }} />
-      <div aria-hidden className="absolute inset-x-0 top-0 flex h-[44px] items-end justify-between px-6 pb-1 text-[11px] font-semibold text-white"><span>9:41</span><span className="tracking-tight">●●● ◔ ▮</span></div>
+      <div aria-hidden className="absolute inset-x-0 top-0 flex h-[44px] items-end justify-between px-6 pb-1 text-[11px] font-semibold text-white"><span>9:41</span><StatusIcons /></div>
       <div className="absolute inset-x-3 top-14 flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-[12px] font-medium text-white backdrop-blur-xl">
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Delivering to Home · 1.2 km
       </div>
@@ -37,7 +37,7 @@ function PhoneScreen() {
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-emerald-400/20 text-emerald-200"><Bike size={17} /></span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-[13px] font-semibold">Rider on the way</p>
-            <p className="text-[11.5px] text-white/60">Live tracking · pay on delivery</p>
+            <p className="truncate text-[11.5px] text-white/60">Live tracking · 6 min away</p>
           </div>
           <span className="rounded-full bg-emerald-400/20 px-2 py-0.5 text-[11px] font-semibold text-emerald-200">Order</span>
         </div>

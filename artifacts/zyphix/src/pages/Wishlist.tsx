@@ -41,7 +41,7 @@ export function Wishlist() {
           return (
             <div key={p.id} className="flex h-full flex-col overflow-hidden rounded-xl border border-[#E6E8EC] bg-white transition hover:border-gray-300">
               <Link href={`/now/product/${p.id}`} className="relative block aspect-square overflow-hidden bg-[#FAFAFA] no-underline">
-                <img src={p.image} alt={p.name} loading="lazy" draggable={false} className="h-full w-full bg-white object-contain p-2" />
+                <img src={p.image} alt={p.name} loading="lazy" draggable={false} className="h-full w-full rounded-[14px] bg-[#F4F5F7] object-contain p-3 mix-blend-multiply" />
                 <button type="button" onClick={e => { e.preventDefault(); remove(p.id); }} aria-label="Remove from wishlist"
                   className="absolute right-1.5 top-1.5 inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#E6E8EC] bg-white text-gray-500 transition hover:text-red-600">
                   <X size={13} />

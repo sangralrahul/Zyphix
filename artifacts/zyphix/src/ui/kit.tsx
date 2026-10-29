@@ -172,7 +172,7 @@ export function Phone({ children, className = '', dark = false }: { children: Re
     <div className={`relative mx-auto w-[300px] rounded-[44px] p-[10px] ${dark ? 'bg-[#1b1f2a]' : 'bg-[#0B0F19]'} shadow-[0_30px_80px_rgba(11,15,25,.35),inset_0_0_0_1px_rgba(255,255,255,.08)] ${className}`}>
       <div className="absolute left-1/2 top-[14px] z-20 h-[22px] w-[90px] -translate-x-1/2 rounded-full bg-black" />
       <div className="relative overflow-hidden rounded-[36px] bg-white" style={{ aspectRatio: '9 / 19' }}>
-        <div className="flex h-[44px] items-end justify-between px-6 pb-1 text-[11px] font-semibold text-gray-900"><span>9:41</span><span className="tracking-tight">●●● ◔ ▮</span></div>
+        <div aria-hidden className="flex h-[44px] items-end justify-between px-6 pb-1 text-[11px] font-semibold text-gray-900"><span>9:41</span><StatusIcons /></div>
         {children}
       </div>
     </div>
@@ -226,4 +226,15 @@ export function Sparkline({ data, color = G, className = '' }: { data: number[];
   const w = 120, h = 36, max = Math.max(...data), min = Math.min(...data);
   const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / (max - min || 1)) * (h - 4) - 2}`).join(' ');
   return <svg viewBox={`0 0 ${w} ${h}`} className={`h-9 w-[120px] ${className}`}><polyline fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" points={pts} /></svg>;
+}
+
+/** Phone status-bar glyphs (signal, Wi-Fi, battery) for device mock-ups. */
+export function StatusIcons({ className = '' }: { className?: string }) {
+  return (
+    <span className={`inline-flex items-center gap-[5px] ${className}`} aria-hidden="true">
+      <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx=".8" /><rect x="4.5" y="5" width="3" height="6" rx=".8" /><rect x="9" y="2.5" width="3" height="8.5" rx=".8" /><rect x="13.5" y="0" width="3" height="11" rx=".8" /></svg>
+      <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor"><path d="M7.5 2.2c2.1 0 4 .8 5.5 2.1l1.1-1.2A9.7 9.7 0 0 0 7.5.5 9.7 9.7 0 0 0 .9 3.1L2 4.3a8 8 0 0 1 5.5-2.1Z" /><path d="M7.5 5.4c1.2 0 2.3.4 3.2 1.2l1.1-1.2a6.4 6.4 0 0 0-8.6 0l1.1 1.2c.9-.8 2-1.2 3.2-1.2Z" /><path d="M7.5 8.4c.4 0 .8.2 1.1.4L7.5 10 6.4 8.8c.3-.2.7-.4 1.1-.4Z" /></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3" stroke="currentColor" opacity=".4" /><rect x="2" y="2" width="16" height="8" rx="1.8" fill="currentColor" /><path d="M23 4v4c.8-.3 1.3-1.1 1.3-2S23.8 4.3 23 4Z" fill="currentColor" opacity=".45" /></svg>
+    </span>
+  );
 }
