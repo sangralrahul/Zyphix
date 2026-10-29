@@ -131,6 +131,11 @@ export function resolvePage(site: SiteKey, rawPath: string): { page: Page | null
   }
   if (site === 'now' || site === 'main') {
     if (/^\/(now\/)?product\/[^/]+$/.test(path)) return { page: P(path, 'Product · Zyphix Now', DESC.now, { crumbs: [['Product', path]] }), found: true };
+    const cm = path.match(/^\/(?:now\/)?c\/([a-z0-9-]+)$/);
+    if (cm) {
+      const name = cm[1].split('-').map(w => (w === 'and' ? '&' : w.charAt(0).toUpperCase() + w.slice(1))).join(' ');
+      return { page: P(path, `${name} · Zyphix Now`, `Shop ${name.toLowerCase()} from stores near you on Zyphix Now, delivered in about 10 minutes at shelf prices.`, { crumbs: [[name, path]] }), found: true };
+    }
     if (/^\/(now\/)?order\/[^/]+$/.test(path)) return { page: P(path, 'Your order · Zyphix', 'Your Zyphix order.', NOINDEX), found: true };
   }
   return { page: null, found: false };
@@ -157,7 +162,7 @@ export function redirectFor(site: SiteKey, path: string, search: string): string
     if (p === '/account') return `${ORIGIN.accounts}/${search}`;
     if (['/about', '/contact', '/blog', '/investors', '/privacy', '/terms', '/app', '/offers', '/kirana-map'].includes(p)) return `${ORIGIN.main}${p}`;
     if (p === '/now' || p === '/eats' || p === '/book') return `${ORIGIN[p.slice(1) as SiteKey]}/`;
-    const m = p.match(/^\/now\/(product|order)\/([^/]+)$/); if (m) return `${ORIGIN.now}/${m[1]}/${m[2]}${m[1] === 'order' ? search : ''}`;
+    const m = p.match(/^\/now\/(product|order|c)\/([^/]+)$/); if (m) return `${ORIGIN.now}/${m[1]}/${m[2]}${m[1] === 'order' ? search : ''}`;
     if (p === '/now/cart' || p === '/now/checkout') return `${ORIGIN.now}/${p.split('/')[2]}`;
     if (['/partner', '/merchant-setup', '/restaurant-setup', '/delivery-setup', '/service-setup', '/advertise', '/support', '/auth'].includes(p)) return redirectFor('main', p, search);
   }

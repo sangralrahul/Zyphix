@@ -6,6 +6,9 @@ import { Plus, Minus, ChevronDown, ShoppingBag, ArrowRight, Store, X, Search, Cl
 import { Link, useSearch, useLocation } from 'wouter';
 import { useCatalog, type Product, type Category } from '@/lib/catalog';
 import { productImageFor } from '@/lib/productImage';
+import { ProductCard, CategoryIcon } from '@/components/now/ProductCard';
+import { categorySlug } from '@/lib/subcats';
+import { openCart } from '@/lib/cartEvents';
 import { useCart } from '@/context/CartContext';
 import { COUPONS } from '@/data/coupons';
 import { usePartners, type PartnerListing } from '@/lib/partners';
@@ -56,9 +59,6 @@ export function ZyphixNow() {
   const [sortBy, setSortBy] = useState<SortKey>('featured');
   const [onlyDiscounted, setOnlyDiscounted] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
-  /* Render the first few aisles straight away and the rest in idle time, so the
-     page is usable before the whole catalogue is on screen. */
-  const [allAisles, setAllAisles] = useState(false);
   const [activeCat, setActiveCat] = useState<string>('');
   const mobileRailRef = useRef<HTMLDivElement>(null);
 
@@ -136,7 +136,6 @@ export function ZyphixNow() {
 
   /* ── Category navigation ── */
   const scrollToId = useCallback((id: string) => {
-    setAllAisles(true);
     const go = () => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -146,10 +145,10 @@ export function ZyphixNow() {
     if (q) { clearSearch(); setTimeout(go, 50); } else requestAnimationFrame(go);
   }, [q, clearSearch]);
 
+  // Categories open their own page (subcategory rail + grid), like a quick-commerce app.
   const jumpTo = useCallback((name: string) => {
-    setActiveCat(name);
-    scrollToId(sectionId(name));
-  }, [scrollToId]);
+    navigate(`/c/${categorySlug(name)}`);
+  }, [navigate]);
 
   /** Route to ?q= the same way the Navbar does, keeping any other params (e.g. ?site=) intact. */
   const goSearch = useCallback((term: string) => {
@@ -208,8 +207,8 @@ export function ZyphixNow() {
   const productCount = num(total || products.length);
 
   const maxDeal = dealsRow.reduce((m, p) => Math.max(m, discountOf(p)), 0);
-  // Grouped tiles show every category, including new ones that have no products yet ("Coming soon").
-  const groups = useMemo(() => groupCategories(allCategories), [allCategories]);
+  // Grouped tiles show only categories that have products (new, empty ones stay hidden).
+  const groups = useMemo(() => groupCategories(categories), [categories]);
 
   return (
     <div className="relative mx-auto w-full max-w-[1240px] pt-0 text-gray-900">
@@ -278,7 +277,7 @@ export function ZyphixNow() {
             <SkeletonCategories />
           ) : groups.map(g => (
             <section key={g.title} aria-labelledby={`grp-${slug(g.title)}`}>
-              <h2 id={`grp-${slug(g.title)}`} className="mb-3.5 text-[19px] font-bold tracking-[-0.025em] md:text-[22px]">{g.title}</h2>
+              <h2 id={`grp-${slug(g.title)}`} className="mb-3 text-[17px] font-bold tracking-[-0.025em] md:text-[20px]">{g.title}</h2>
               <CategoryTiles categories={g.items} counts={countByCategory} onPick={jumpTo} />
             </section>
           ))}
@@ -354,25 +353,17 @@ export function ZyphixNow() {
             </section>
           )}
 
-          {/* ── Every aisle ── */}
-          <section aria-labelledby="all-aisles">
-            <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-t border-gray-200 pt-8">
-              <div>
-                <h2 id="all-aisles" className="text-[19px] font-bold tracking-[-0.025em] md:text-[22px]">Every aisle</h2>
-                <p className="mt-0.5 text-[13px] text-gray-500">{productCount ? `${productCount} products across ${categories.length} categories` : 'Loading the catalogue…'}</p>
-              </div>
-              <SortControls sortBy={sortBy} setSortBy={setSortBy} onlyDiscounted={onlyDiscounted} setOnlyDiscounted={setOnlyDiscounted} />
-            </div>
-            {catalogLoading ? (
-              <div className="space-y-8">{[0, 1, 2].map(i => <SkeletonSection key={i} />)}</div>
-            ) : categories.length === 0 ? (
-              <SkeletonSection />
-            ) : (
-              <div className="space-y-9">
-                <AisleList categories={categories} byCategory={byCategory} expanded={expanded} showAll={allAisles} toggle={toggleExpanded} cart={cart} add={add} remove={remove} />
-              </div>
-            )}
-          </section>
+          {/* ── One row per category, "See all" opens the category page ── */}
+          {!catalogLoading && categories.map(c => {
+            const list = (byCategory.get(c.name) || []).slice(0, 14);
+            if (!list.length) return null;
+            return (
+              <section key={c.name} id={sectionId(c.name)} data-cat={c.name}>
+                <SectionHead title={c.name} sub={`${num(countByCategory.get(c.name) || 0)} items`} action={<SeeAll onClick={() => jumpTo(c.name)} />} />
+                <ProductRow products={list} categories={categories} cart={cart} add={add} remove={remove} />
+              </section>
+            );
+          })}
         </div>
       )}
 
@@ -388,7 +379,7 @@ export function ZyphixNow() {
                 <p className="text-[12px] text-gray-500">Delivery in 10 min · Free above ₹149</p>
               </div>
             </div>
-            <Button href="/now/cart" size="sm">View cart <ArrowRight size={14} /></Button>
+            <Button size="sm" onClick={openCart}>View cart <ArrowRight size={14} /></Button>
           </div>
         </motion.div>
       )}
@@ -399,12 +390,6 @@ export function ZyphixNow() {
 /* ─────────────────────────── Sub-components ─────────────────────────── */
 
 /** Category icon from the API (often an emoji) rendered small; falls back to the initial. */
-function CategoryIcon({ category: c }: { category: Category }) {
-  const icon = (c.icon || '').trim();
-  return icon
-    ? <span className="text-[16px] leading-none">{icon}</span>
-    : <span className="text-[12px] font-semibold text-gray-600">{c.name.charAt(0).toUpperCase()}</span>;
-}
 
 function SectionHead({ title, sub, action }: { title: string; sub?: string; action?: React.ReactNode }) {
   return (
@@ -555,31 +540,20 @@ function groupCategories(categories: Category[]): { title: string; items: Catego
     .map(([title, items]) => ({ title, items }));
 }
 
-function CategoryTiles({ categories, counts, onPick }: { categories: Category[]; counts: Map<string, number>; onPick: (name: string) => void }) {
+function CategoryTiles({ categories, onPick }: { categories: Category[]; counts?: Map<string, number>; onPick: (name: string) => void }) {
   return (
-    <div className="grid grid-cols-4 gap-x-2.5 gap-y-4 sm:grid-cols-6 md:grid-cols-8 md:gap-x-4">
-      {categories.map(c => {
-        const n = counts.get(c.name) || 0;
-        const art = (
-          <span className="relative block aspect-square w-full overflow-hidden rounded-[18px] bg-[#F1F2F4] transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_28px_-14px_rgba(11,15,25,.35)]">
+    <div className="grid grid-cols-4 gap-x-2 gap-y-3.5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 md:gap-x-3">
+      {categories.map(c => (
+        <button key={c.name} type="button" onClick={() => onPick(c.name)} className="group flex flex-col items-center text-center">
+          <span className="relative block aspect-square w-full overflow-hidden rounded-2xl bg-[#EEF1F4] transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover:-translate-y-0.5 group-hover:shadow-[0_10px_22px_-12px_rgba(11,15,25,.35)]"
+            style={{ background: `linear-gradient(170deg, ${c.color || '#0DA366'}1F, #F1F2F4 70%)` }}>
             {c.image
-              ? <img src={c.image} alt="" loading="lazy" decoding="async" draggable={false} className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05] ${n ? '' : 'opacity-70 grayscale-[35%]'}`} />
-              : <span className="flex h-full w-full items-center justify-center pb-4 [&>span]:!text-[40px]"><CategoryIcon category={c} /></span>}
-            {!n && <span className="absolute inset-x-1.5 bottom-1.5 rounded-full bg-white/90 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-gray-600 backdrop-blur">Coming soon</span>}
+              ? <img src={c.image} alt="" loading="lazy" decoding="async" draggable={false} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]" />
+              : <span className="flex h-full w-full items-center justify-center [&>span]:!text-[30px]"><CategoryIcon category={c} /></span>}
           </span>
-        );
-        const label = <span className="mt-2 line-clamp-2 text-[12px] font-semibold leading-[1.2] text-gray-800 md:text-[13px]">{c.name}</span>;
-        return n ? (
-          <button key={c.name} type="button" onClick={() => onPick(c.name)} className="group flex flex-col items-center text-center">
-            {art}{label}
-            <span className="mt-0.5 text-[11px] font-medium tabular-nums text-gray-400">{num(n)} items</span>
-          </button>
-        ) : (
-          <div key={c.name} className="flex flex-col items-center text-center" aria-label={`${c.name}, coming soon`}>
-            {art}{label}
-          </div>
-        );
-      })}
+          <span className="mt-1.5 line-clamp-2 text-[11.5px] font-semibold leading-[1.2] text-gray-800 md:text-[12.5px]">{c.name}</span>
+        </button>
+      ))}
     </div>
   );
 }
@@ -826,50 +800,6 @@ function SortControls({ sortBy, setSortBy, onlyDiscounted, setOnlyDiscounted }: 
   );
 }
 
-/* Aisles render a few at a time in idle callbacks, inside their own component so
-   each batch only touches the new aisles, not the whole page. */
-const AisleList = React.memo(function AisleList({ categories, byCategory, expanded, showAll, toggle, cart, add, remove }: {
-  categories: Category[]; byCategory: Map<string, Product[]>; expanded: Set<string>; showAll: boolean;
-  toggle: (name: string) => void; cart: Record<string, number>; add: (id: string) => void; remove: (id: string) => void;
-}) {
-  const [n, setN] = useState(3);
-  const count = showAll ? categories.length : n;
-  useEffect(() => {
-    if (count >= categories.length) return;
-    const w = window as any;
-    // Two aisles per tick; a short timeout so a busy phone (images decoding) still makes progress.
-    const id = w.requestIdleCallback ? w.requestIdleCallback(() => setN(v => v + 2), { timeout: 120 }) : setTimeout(() => setN(v => v + 2), 40);
-    return () => (w.cancelIdleCallback ? w.cancelIdleCallback(id) : clearTimeout(id));
-  }, [count, categories.length]);
-  return <>{categories.slice(0, count).map(c => (
-    <Aisle key={c.name} cat={c} list={byCategory.get(c.name) || []} open={expanded.has(c.name)} toggle={toggle} categories={categories} cart={cart} add={add} remove={remove} />
-  ))}</>;
-});
-
-const Aisle = React.memo(function Aisle({ cat, list, open, toggle, categories, cart, add, remove }: {
-  cat: Category; list: Product[]; open: boolean; toggle: (name: string) => void;
-  categories: Category[]; cart: Record<string, number>; add: (id: string) => void; remove: (id: string) => void;
-}) {
-  if (!list.length) return null;
-  const canExpand = list.length > ROW_LIMIT;
-  const shown = open || !canExpand ? list : list.slice(0, ROW_LIMIT);
-  return (
-    <section id={sectionId(cat.name)} data-cat={cat.name} className="zx-aisle">
-      <SectionHead
-        title={cat.name}
-        sub={`${list.length} ${list.length === 1 ? 'product' : 'products'}`}
-        action={canExpand ? (
-          <button type="button" onClick={() => toggle(cat.name)}
-            className="group inline-flex items-center gap-1 text-[13.5px] font-semibold text-emerald-700 hover:text-emerald-800">
-            {open ? <>Show less <ChevronDown size={14} className="rotate-180" /></> : <>View all <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" /></>}
-          </button>
-        ) : undefined}
-      />
-      <ProductGrid products={shown} categories={categories} cart={cart} add={add} remove={remove} />
-    </section>
-  );
-});
-
 function ProductGrid({ products, categories, cart, add, remove }: {
   products: Product[]; categories: Category[]; cart: Record<string, number>; add: (id: string) => void; remove: (id: string) => void;
 }) {
@@ -918,54 +848,4 @@ function SkeletonSection() {
 
 /* ─── Product card ─── */
 
-const ProductCard = React.memo(function ProductCard({ product: p, categories, qty, onAdd, onRemove, tagTone = 'green' }: {
-  product: Product; categories: Category[]; qty: number; onAdd: () => void; onRemove: () => void; tagTone?: 'green' | 'red';
-}) {
-  const discount = discountOf(p);
-  const { src, isFallback } = productImageFor(p, categories);
-  const brand = (p.brand || '').trim();
-  const showBrand = !!brand && brand !== 'Local Farm';
-  // Catalogue names usually start with the brand ("Amul Butter Salted"); drop it when the brand line is shown.
-  const stripped = showBrand && p.name.toLowerCase().startsWith(brand.toLowerCase() + ' ') ? p.name.slice(brand.length + 1) : p.name;
-  const displayName = stripped.trim() || p.name;
-  const save = p.origPrice && p.origPrice > p.price ? p.origPrice - p.price : 0;
 
-  return (
-    <div className="group flex h-full flex-col rounded-[18px] bg-white p-2 ring-1 ring-gray-200/80 transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-1 hover:shadow-[0_18px_34px_-16px_rgba(11,15,25,.22)] hover:ring-gray-300">
-      <div className="relative">
-        <Link href={`/now/product/${p.id}`} aria-label={p.name} className="block aspect-square overflow-hidden rounded-[14px] bg-[#F4F5F7] no-underline">
-          <img src={src} alt={p.name} loading="lazy" decoding="async" draggable={false}
-            className={`transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.05] ${isFallback ? 'h-full w-full object-cover' : 'h-full w-full object-contain p-3 mix-blend-multiply'}`} />
-        </Link>
-        {discount > 0 && (
-          <span className={`absolute left-0 top-2.5 rounded-r-lg px-1.5 py-[3px] text-[10.5px] font-extrabold uppercase leading-none tracking-wide text-white ${tagTone === 'red' ? 'bg-rose-600' : 'bg-[#2563EB]'}`}>{discount}% off</span>
-        )}
-        {/* ADD sits on the photo, bottom-right */}
-        <div className="absolute -bottom-3 right-1.5">
-          {qty > 0 ? (
-            <div className="flex h-8 items-center overflow-hidden rounded-[10px] text-white shadow-[0_6px_16px_-6px_rgba(13,163,102,.7)]" style={{ background: G }}>
-              <button type="button" onClick={onRemove} aria-label={`Remove one ${p.name}`} className="flex h-full w-8 items-center justify-center transition hover:bg-black/10"><Minus size={13} strokeWidth={3} /></button>
-              <span className="min-w-[18px] text-center text-[13px] font-bold tabular-nums" aria-live="polite">{qty}</span>
-              <button type="button" onClick={onAdd} aria-label={`Add one more ${p.name}`} className="flex h-full w-8 items-center justify-center transition hover:bg-black/10"><Plus size={13} strokeWidth={3} /></button>
-            </div>
-          ) : (
-            <button type="button" onClick={onAdd} aria-label={`Add ${p.name} to cart`}
-              className="inline-flex h-8 items-center rounded-[10px] border border-[#0DA366] bg-white px-4 text-[12.5px] font-extrabold tracking-[0.04em] text-[#0B8A57] shadow-[0_4px_12px_-6px_rgba(11,15,25,.25)] transition hover:bg-emerald-50">
-              ADD
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-1 flex-col px-1 pb-1 pt-4">
-        <div className="flex items-baseline gap-1.5 leading-none">
-          <span className="text-[15px] font-extrabold tracking-[-0.01em] text-gray-900">₹{num(p.price)}</span>
-          {save > 0 && <span className="text-[12px] font-medium text-gray-400 line-through">₹{num(p.origPrice!)}</span>}
-        </div>
-        {save > 0 && <p className="mt-1 text-[11px] font-bold text-[#0B8A57]">Save ₹{num(save)}</p>}
-        <Link href={`/now/product/${p.id}`} className="mt-1.5 line-clamp-2 min-h-[2.5em] text-[13px] font-semibold leading-[1.25] text-gray-900 no-underline">{displayName}</Link>
-        <p className="mt-auto truncate pt-1 text-[11.5px] font-medium text-gray-500">{[p.weight, showBrand ? brand : ''].filter(Boolean).join(' · ')}</p>
-      </div>
-    </div>
-  );
-});

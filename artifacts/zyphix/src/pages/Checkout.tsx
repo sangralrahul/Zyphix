@@ -1,7 +1,7 @@
 import { useSeo } from '@/lib/seo';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
-import { ChevronLeft, MapPin, Wallet, CreditCard, Check } from 'lucide-react';
+import { ChevronLeft, MapPin, Wallet, CreditCard, Check, Zap, CalendarClock } from 'lucide-react';
 import { useCart, saveOrder, type Order } from '@/context/CartContext';
 import { usePromo, maxWalletUsable, cashbackFor } from '@/context/PromoContext';
 import { findCoupon, evaluateCoupon } from '@/data/coupons';
@@ -48,6 +48,8 @@ export function Checkout() {
   const [pincode, setPincode] = useState('');
   const [notes, setNotes] = useState('');
   const [payment, setPayment] = useState<'COD' | 'ONLINE'>('COD');
+  const slots = useMemo(() => deliverySlots(), []);
+  const [slot, setSlot] = useState('now');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [placing, setPlacing] = useState(false);
   const [placeError, setPlaceError] = useState('');
@@ -105,10 +107,10 @@ export function Checkout() {
       walletUsed: walletApplied,
       cashbackEarned: cashback,
       total: grand,
-      address: { name: name.trim(), phone: phone.trim(), line1: line1.trim(), city: city.trim(), pincode: pincode.trim(), notes: notes.trim() || undefined },
+      address: { name: name.trim(), phone: phone.trim(), line1: line1.trim(), city: city.trim(), pincode: pincode.trim(), notes: [slot === 'now' ? '' : `Deliver ${slots.find(x => x.id === slot)?.label ?? ''}`, notes.trim()].filter(Boolean).join(' · ') || undefined },
       paymentMode: payment,
       status: 'CONFIRMED',
-      etaMinutes: 10,
+      etaMinutes: slot === 'now' ? 10 : Math.max(10, Math.round(((slots.find(x => x.id === slot)?.start ?? Date.now()) - Date.now()) / 60000)),
     };
     // The order only counts once our server has it. If it can't be sent, nothing is charged,
     // the cart stays as it is, and the shopper is told to retry.
@@ -181,6 +183,21 @@ export function Checkout() {
               <Field label="Pincode" value={pincode} onChange={v => setPincode(v.replace(/\D/g, '').slice(0, 6))} error={errors.pincode} inputMode="numeric" autoComplete="postal-code" />
             </div>
             <Field label="Delivery notes (optional)" value={notes} onChange={setNotes} placeholder="e.g. Ring the bell twice" />
+          </Section>
+
+          <Section title="Delivery time" icon={<CalendarClock size={14} className="text-emerald-700" />}>
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {slots.map(t => {
+                const on = slot === t.id;
+                return (
+                  <button key={t.id} type="button" onClick={() => setSlot(t.id)} aria-pressed={on}
+                    className={`w-[150px] shrink-0 rounded-xl border px-3 py-2.5 text-left transition ${on ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500' : 'border-[#E6E8EC] bg-white hover:border-gray-300'}`}>
+                    <p className="flex items-center gap-1.5 text-[13px] font-bold text-gray-900">{t.id === 'now' && <Zap size={13} className="fill-current text-emerald-600" />}{t.title}</p>
+                    <p className="mt-0.5 text-[12px] text-gray-500">{t.sub}</p>
+                  </button>
+                );
+              })}
+            </div>
           </Section>
 
           <Section title="Payment">
@@ -284,4 +301,21 @@ function Row({ label, value, green }: { label: string; value: string; green?: bo
       <span className={`font-medium tabular-nums ${green ? 'text-emerald-700' : 'text-gray-900'}`}>{value}</span>
     </div>
   );
+}
+
+/** "Now (10 min)" plus hourly slots for the rest of today (8 am to 10 pm) and tomorrow morning. */
+function deliverySlots(): { id: string; title: string; sub: string; label: string; start: number }[] {
+  const out = [{ id: 'now', title: 'Now', sub: 'In about 10 minutes', label: 'now', start: Date.now() }];
+  const fmt = (d: Date) => d.toLocaleTimeString('en-IN', { hour: 'numeric', hour12: true }).replace(/\s?(am|pm)/i, m => m.trim().toLowerCase());
+  const base = new Date(); base.setMinutes(0, 0, 0);
+  for (let h = 1; out.length < 9 && h < 40; h++) {
+    const s = new Date(base.getTime() + h * 3600_000);
+    if (s.getTime() - Date.now() < 45 * 60_000) continue;
+    const hr = s.getHours(); if (hr < 8 || hr > 21) continue;
+    const e = new Date(s.getTime() + 3600_000);
+    const today = s.getDate() === new Date().getDate();
+    const day = today ? 'Today' : 'Tomorrow';
+    out.push({ id: String(s.getTime()), title: `${fmt(s)} – ${fmt(e)}`, sub: day, label: `${day.toLowerCase()} ${fmt(s)}–${fmt(e)}`, start: s.getTime() });
+  }
+  return out;
 }

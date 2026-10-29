@@ -1,7 +1,16 @@
 /** Which Zyphix site this page is serving (hostname based; ?site= overrides for previews). */
 export function detectSite(): "main" | "partner" | "advertise" | "now" | "eats" | "book" | "auth" | "support" | "admin" | "accounts" {
   if (typeof window === "undefined") return "main";
-  const override = new URLSearchParams(window.location.search).get("site");
+  const SITES = ["main", "partner", "advertise", "now", "eats", "book", "auth", "support", "admin", "accounts"];
+  // Previews (localhost / workers.dev): ?site= picks the site and is remembered for the tab, so in-app links keep it.
+  const isPreview = !/(^|\.)zyphix\.in$/.test(window.location.hostname);
+  let override = new URLSearchParams(window.location.search).get("site");
+  if (isPreview) {
+    try {
+      if (override && SITES.includes(override)) sessionStorage.setItem("zx-site", override);
+      else override = sessionStorage.getItem("zx-site");
+    } catch { /* storage blocked */ }
+  }
   if (override === "partner" || override === "advertise" || override === "now" || override === "eats" || override === "book" || override === "auth" || override === "support" || override === "admin" || override === "accounts") return override;
   const host = window.location.hostname.toLowerCase();
   if (host.startsWith("admin.")) return "admin";

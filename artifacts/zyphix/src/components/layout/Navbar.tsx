@@ -4,6 +4,8 @@ import { Search, MapPin, ShoppingCart, User, ChevronDown, Menu, X, LogOut, Setti
 import { ZyphixLogo } from '../ZyphixLogo';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
+import { openCart } from '@/lib/cartEvents';
+import { detectSite } from '@/lib/site';
 import { useWishlist } from '@/context/WishlistContext';
 import { useNotifications } from '@/context/NotificationsContext';
 import { authUrl } from '@/lib/account';
@@ -112,7 +114,7 @@ export function Navbar() {
             </Link>
 
             {/* Cart */}
-            <button type="button" onClick={() => nav('/now')} aria-label="Cart" className={iconBtn}>
+            <button type="button" onClick={() => (detectSite() === 'now' ? openCart() : nav('/now'))} aria-label="Cart" className={iconBtn}>
               <ShoppingCart size={20} strokeWidth={1.75} />
               {cartCount > 0 && <span className={badge} style={{ background: G }}>{cartCount}</span>}
             </button>

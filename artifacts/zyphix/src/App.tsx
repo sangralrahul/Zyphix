@@ -48,6 +48,8 @@ const DeliverySetup = lazy(() => import("@/pages/DeliverySetup").then(m => ({ de
 const RestaurantSetup = lazy(() => import("@/pages/RestaurantSetup").then(m => ({ default: m.RestaurantSetup })));
 const SplashVideo = lazy(() => import("@/pages/SplashVideo").then(m => ({ default: m.SplashVideo })));
 const ZyphixNow = lazy(() => import("@/pages/ZyphixNow").then(m => ({ default: m.ZyphixNow })));
+const CategoryPage = lazy(() => import("@/pages/now/CategoryPage"));
+const CartDrawer = lazy(() => import("@/components/now/CartDrawer").then(m => ({ default: m.CartDrawer })));
 const ZyphixEats = lazy(() => import("@/pages/ZyphixEats").then(m => ({ default: m.ZyphixEats })));
 const ZyphixBook = lazy(() => import("@/pages/ZyphixBook").then(m => ({ default: m.ZyphixBook })));
 const KiranaMap = lazy(() => import("@/pages/KiranaMap").then(m => ({ default: m.KiranaMap })));
@@ -111,6 +113,7 @@ function LightLayout({ children }: { children: React.ReactNode }) {
       </div>
       <div className="pb-16 md:pb-0"><SiteFooter /></div>
       <Suspense fallback={null}><BottomNav /></Suspense>
+      {detectSite() === "now" && <Suspense fallback={null}><CartDrawer /></Suspense>}
     </div>
   );
 }
@@ -167,6 +170,8 @@ function Router() {
     <Switch>
       {appRoot && <Route path="/">{appRoot}</Route>}
       {site === "now" && <Route path="/product/:id">{() => <LightLayout><ProductDetail /></LightLayout>}</Route>}
+      {site === "now" && <Route path="/c/:slug">{() => <LightLayout><CategoryPage /></LightLayout>}</Route>}
+      {site === "now" && <Route path="/now/c/:slug">{() => <LightLayout><CategoryPage /></LightLayout>}</Route>}
       {site === "now" && <Route path="/cart"><LightLayout><CartPage /></LightLayout></Route>}
       {site === "now" && <Route path="/checkout"><LightLayout><CheckoutPage /></LightLayout></Route>}
       {site === "now" && <Route path="/order/:id">{() => <LightLayout><OrderConfirmation /></LightLayout>}</Route>}
