@@ -61,7 +61,7 @@ export function Landing() {
           <Container className="grid items-center gap-10 py-12 md:py-16 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-14 lg:py-20">
             <div>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[12.5px] font-semibold text-emerald-800 ring-1 ring-inset ring-emerald-100">The SuperLocal app</span>
-              <h1 className="mt-5 text-[40px] font-semibold leading-[1.02] tracking-[-0.045em] text-gray-900 sm:text-[52px] md:text-[60px]">Your neighbourhood,<br /> <span className="text-[#0DA366]">delivered.</span></h1>
+              <h1 className="mt-5 text-[40px] font-semibold leading-[1.02] tracking-[-0.045em] text-gray-900 sm:text-[50px] md:text-[54px] xl:text-[60px]">Your neighbourhood,<br /> <span className="text-[#0DA366]">delivered.</span></h1>
               <p className="mt-5 max-w-[50ch] text-[16px] leading-[1.6] text-gray-500 md:text-[18px]">Groceries from the corner store, dinner from your favourite kitchen and a verified pro for the weekend. One app, one account, every shop near you.</p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <a href={NOW} className="inline-flex h-12 items-center gap-2 rounded-full bg-[#0DA366] px-6 text-[15px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(13,163,102,.6)] transition hover:-translate-y-px">Order on Zyphix Now <ArrowRight size={16} /></a>
