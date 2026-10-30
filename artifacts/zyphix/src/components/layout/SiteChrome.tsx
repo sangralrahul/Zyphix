@@ -196,6 +196,25 @@ export function SiteFooter() {
   const onNow = detectSite() === 'now';
   return (
     <footer className={`border-t ${BORDER} bg-white`} style={{ fontFamily: FONT }}>
+      {/* All categories, like a store directory */}
+      <div className={`border-b ${BORDER}`}>
+        <Container className="py-10">
+          <div className="flex items-baseline justify-between gap-4">
+            <p className="text-[12.5px] font-semibold tracking-[-0.01em] text-gray-900">Categories</p>
+            <a href="https://now.zyphix.in/" className="text-[12.5px] font-semibold text-[#0B7F50] hover:text-[#086A42]">Shop on Zyphix Now</a>
+          </div>
+          <ul className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {CATEGORIES.map(c => (
+              <li key={c} className="min-w-0">
+                {onNow
+                  ? <Link href={`/c/${catSlug(c)}`} className={`${link} truncate`}>{c}</Link>
+                  : <a href={`https://now.zyphix.in/c/${catSlug(c)}`} className={`${link} truncate`}>{c}</a>}
+              </li>
+            ))}
+          </ul>
+        </Container>
+      </div>
+
       {/* Every Zyphix product */}
       <Container className="pt-12 md:pt-14">
         <div className="flex items-end justify-between gap-4">
@@ -248,25 +267,6 @@ export function SiteFooter() {
           </div>
         ))}
       </Container>
-
-      {/* All categories, like a store directory */}
-      <div className={`border-t ${BORDER}`}>
-        <Container className="py-10">
-          <div className="flex items-baseline justify-between gap-4">
-            <p className="text-[12.5px] font-semibold tracking-[-0.01em] text-gray-900">Categories</p>
-            <a href="https://now.zyphix.in/" className="text-[12.5px] font-semibold text-[#0B7F50] hover:text-[#086A42]">Shop on Zyphix Now</a>
-          </div>
-          <ul className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-            {CATEGORIES.map(c => (
-              <li key={c} className="min-w-0">
-                {onNow
-                  ? <Link href={`/c/${catSlug(c)}`} className={`${link} truncate`}>{c}</Link>
-                  : <a href={`https://now.zyphix.in/c/${catSlug(c)}`} className={`${link} truncate`}>{c}</a>}
-              </li>
-            ))}
-          </ul>
-        </Container>
-      </div>
 
       <div className={`border-t ${BORDER}`}>
         <Container className="flex flex-col gap-4 py-5 text-[13px] text-gray-500 sm:flex-row sm:items-center sm:justify-between">

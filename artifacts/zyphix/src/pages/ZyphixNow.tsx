@@ -5,7 +5,7 @@ import { motion } from '@/lib/motion';
 import { Plus, Minus, ChevronDown, ShoppingBag, ArrowRight, Store, X, Search, Clock, Copy, Check, Zap, Percent } from 'lucide-react';
 import { Link, useSearch, useLocation } from 'wouter';
 import { useCatalog, type Product, type Category } from '@/lib/catalog';
-import { productImageFor } from '@/lib/productImage';
+import { productImageFor, hasRealImage } from '@/lib/productImage';
 import { ProductCard, CategoryIcon } from '@/components/now/ProductCard';
 import { categorySlug } from '@/lib/subcats';
 import { openCart } from '@/lib/cartEvents';
@@ -122,17 +122,15 @@ export function ZyphixNow() {
   }, [visible, q]);
 
   /* ── Merchandised home layer (all derived from the live catalogue) ── */
-  const bestsellerRow = useMemo(() => pickBestsellers(products, categories), [products, categories]);
+  // The home page shows only a hand-picked set (~48 products, each with a real photo, spread across
+  // aisles); everything else lives on the category pages (/c/<slug>).
+  const showcase = useMemo(() => pickShowcase(products, categories, SHOWCASE_SIZE), [products, categories]);
+  const dealsRow = useMemo(() => showcase.filter(p => discountOf(p) > 0).sort((a, b) => discountOf(b) - discountOf(a)).slice(0, 12), [showcase]);
+  const restRow = useMemo(() => { const d = new Set(dealsRow.map(p => p.id)); return showcase.filter(p => !d.has(p.id)); }, [showcase, dealsRow]);
+  const bestsellerRow = useMemo(() => restRow.slice(0, 12), [restRow]);
+  const exploreGrid = useMemo(() => restRow.slice(12), [restRow]);
   const offers = useMemo(() => buildOffers(products, categories, coupon, bestsellerRow), [products, categories, coupon, bestsellerRow]);
-  const dealsRow = useMemo(() => dealsOfTheDay(products), [products]);
-  const under49 = useMemo(() => underPrice(products, 49), [products]);
-  const under99 = useMemo(() => underPrice(products, 99), [products]);
-  const brands = useMemo(() => topBrands(products), [products]);
-  const produceRow = useMemo(() => freshProduce(products, 12, PRODUCE_CATEGORY), [products]);
   const dealsCount = useMemo(() => products.filter(p => discountOf(p) > 0).length, [products]);
-  const under49Count = useMemo(() => products.filter(p => p.price <= 49).length, [products]);
-  const under99Count = useMemo(() => products.filter(p => p.price <= 99).length, [products]);
-  const [priceTab, setPriceTab] = useState<49 | 99>(49);
 
   /* ── Category navigation ── */
   const scrollToId = useCallback((id: string) => {
@@ -276,6 +274,7 @@ export function ZyphixNow() {
           </div>
 
           {/* ── Category tiles, grouped like the store's own aisles ── */}
+          <div id="home-categories" className="scroll-mt-40" />
           {categories.length === 0 ? (
             <SkeletonCategories />
           ) : packRows(groups).map(row => (
@@ -312,44 +311,17 @@ export function ZyphixNow() {
 
               {offers.length > 0 && <OfferCarousel offers={offers} categories={categories} onShop={openOffer} />}
 
-              {(under49.length > 0 || under99.length > 0) && (
+              {FEATURES[0] && <FeatureBanner feature={FEATURES[0]} categories={categories} onPick={jumpTo} />}
+
+              {exploreGrid.length > 0 && (
                 <section>
-                  <SectionHead title="Budget picks" sub={`${num(priceTab === 49 ? under49Count : under99Count)} products`}
-                    action={<SeeAll label="Low to high" onClick={() => { setSortBy('price_asc'); jumpTo((priceTab === 49 ? under49 : under99)[0]?.category || categories[0].name); }} />} />
-                  <div className="mb-3 flex gap-1.5">
-                    {([49, 99] as const).map(v => (
-                      <button key={v} type="button" onClick={() => setPriceTab(v)} aria-pressed={priceTab === v}
-                        className={`h-8 rounded-full border px-3.5 text-[13px] font-semibold transition ${priceTab === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'}`}>
-                        Under ₹{v}
-                      </button>
-                    ))}
-                  </div>
-                  <ProductRow products={priceTab === 49 ? under49 : under99} categories={categories} cart={cart} add={add} remove={remove} />
+                  <SectionHead title="Picked for you" sub="a few favourites from every aisle"
+                    action={<SeeAll label="All categories" onClick={() => document.getElementById('home-categories')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />} />
+                  <ProductGrid products={exploreGrid} categories={categories} cart={cart} add={add} remove={remove} />
                 </section>
               )}
 
-              {produceRow.length > 0 && (
-                <section>
-                  <SectionHead title="Fresh from local farms" sub={`${num(countByCategory.get(PRODUCE_CATEGORY) || 0)} products`}
-                    action={<SeeAll onClick={() => jumpTo(PRODUCE_CATEGORY)} />} />
-                  <ProductRow products={produceRow} categories={categories} cart={cart} add={add} remove={remove} />
-                </section>
-              )}
-
-              {brands.length > 0 && (
-                <section>
-                  <SectionHead title="Popular brands" />
-                  <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:flex-wrap md:px-0 [&::-webkit-scrollbar]:hidden">
-                    {brands.map(b => (
-                      <button key={b.brand} type="button" onClick={() => searchBrand(b.brand)}
-                        className="inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-gray-200 bg-white pl-1.5 pr-3.5 text-[13px] font-semibold text-gray-800 transition hover:border-gray-300 hover:shadow-sm">
-                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-[11px] font-bold text-gray-600">{b.brand.charAt(0)}</span>
-                        {b.brand}<span className="text-[11.5px] font-medium tabular-nums text-gray-400">{b.count}</span>
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              )}
+              {FEATURES.slice(1, 3).map(f => <FeatureBanner key={f.title} feature={f} categories={categories} onPick={jumpTo} />)}
             </>
           )}
 
@@ -363,20 +335,6 @@ export function ZyphixNow() {
             </section>
           )}
 
-          {/* ── One row per category, "See all" opens the category page ── */}
-          {!catalogLoading && categories.filter(c => (byCategory.get(c.name) || []).length > 0).map((c, i) => {
-            const list = (byCategory.get(c.name) || []).slice(0, 14);
-            const feature = FEATURES.find(f => f.after === i);
-            return (
-              <React.Fragment key={c.name}>
-                <section id={sectionId(c.name)} data-cat={c.name}>
-                  <SectionHead title={c.name} sub={`${num(countByCategory.get(c.name) || 0)} items`} action={<SeeAll onClick={() => jumpTo(c.name)} />} />
-                  <ProductRow products={list} categories={categories} cart={cart} add={add} remove={remove} />
-                </section>
-                {feature && <FeatureBanner feature={feature} categories={categories} onPick={jumpTo} />}
-              </React.Fragment>
-            );
-          })}
         </div>
       )}
 
@@ -536,6 +494,32 @@ function BannerRow({ productCount, hero, deals, art = [], dealArt = [], maxDeal,
       </div>
     </section>
   );
+}
+
+/* ─── Home showcase: a small curated set with real photos, round-robin across aisles ─── */
+const SHOWCASE_SIZE = 48;
+function pickShowcase(products: Product[], categories: Category[], size: number): Product[] {
+  const seen = new Set<string>();
+  const pools = new Map<string, Product[]>();
+  for (const p of products) {
+    if (!hasRealImage(p)) continue;
+    const key = `${p.brand}|${p.name}`.toLowerCase();
+    if (seen.has(key)) continue; // one size per product
+    seen.add(key);
+    if (!pools.has(p.category)) pools.set(p.category, []);
+    pools.get(p.category)!.push(p);
+  }
+  pools.forEach(list => list.sort((a, b) => discountOf(b) - discountOf(a)));
+  const order = categories.map(c => c.name).filter(n => pools.has(n));
+  const out: Product[] = [];
+  for (let round = 0; out.length < size && round < 8; round++) {
+    for (const n of order) {
+      const next = pools.get(n)![round];
+      if (next) out.push(next);
+      if (out.length >= size) break;
+    }
+  }
+  return out;
 }
 
 /* ─── Full-width picture banners that break up the long run of product rows ─── */
