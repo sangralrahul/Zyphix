@@ -263,6 +263,8 @@ export function ZyphixNow() {
             productCount={catalogLoading ? '' : productCount}
             hero={bestsellerRow.slice(0, 4)}
             deals={dealsRow.slice(0, 3)}
+            art={artFor(categories, ['Fruits & Veg', 'Dairy & Eggs', 'Atta, Rice & Dal', 'Oils & Ghee'])}
+            dealArt={artFor(categories, ['Snacks & Munchies', 'Chocolates & Sweets'])}
             maxDeal={maxDeal}
             coupon={coupon && !couponDismissed ? coupon : undefined}
             categories={categories}
@@ -432,8 +434,21 @@ function CategoryStrip({ categories, active, onPick, railRef, loading }: {
 }
 
 /* ─── Banner row: the main promise (wide) + coupon and deals tiles ─── */
-function BannerRow({ productCount, hero, deals, maxDeal, coupon, categories, onShopDeals, onShopAll, onDismissCoupon }: {
-  productCount: string; hero: Product[]; deals: Product[]; maxDeal: number; coupon?: { code: string; desc: string };
+/** Our generated category artwork (when it exists) for the given categories, in order. */
+function artFor(categories: Category[], names: string[]): string[] {
+  return names.map(n => categories.find(c => c.name === n)?.image ?? '').filter(src => src.includes('/img/categories/'));
+}
+
+function ArtTile({ src, className = '' }: { src: string; className?: string }) {
+  return (
+    <div className={`aspect-square overflow-hidden rounded-2xl bg-white shadow-[0_14px_30px_-12px_rgba(0,0,0,.35)] ${className}`}>
+      <img src={src} alt="" loading="eager" decoding="async" draggable={false} className="h-full w-full scale-[1.18] object-cover" />
+    </div>
+  );
+}
+
+function BannerRow({ productCount, hero, deals, art = [], dealArt = [], maxDeal, coupon, categories, onShopDeals, onShopAll, onDismissCoupon }: {
+  productCount: string; hero: Product[]; deals: Product[]; art?: string[]; dealArt?: string[]; maxDeal: number; coupon?: { code: string; desc: string };
   categories: Category[]; onShopDeals: () => void; onShopAll: () => void; onDismissCoupon: () => void;
 }) {
   const [copied, setCopied] = useState(false);
@@ -457,10 +472,12 @@ function BannerRow({ productCount, hero, deals, maxDeal, coupon, categories, onS
             <span className="hidden h-10 items-center gap-1.5 rounded-full border border-white/30 px-3.5 text-[12.5px] font-semibold text-white/90 sm:inline-flex"><Clock size={13} /> Free delivery above ₹149</span>
           </div>
         </div>
-        {hero.length > 0 && (
+        {(art.length >= 4 || hero.length > 0) && (
           <div aria-hidden className="relative hidden w-[42%] shrink-0 items-center justify-center sm:flex">
-            <div className="grid w-full max-w-[260px] grid-cols-2 gap-2.5 p-4 md:gap-3">
-              {hero.slice(0, 4).map((p, i) => <BannerTile key={p.id} p={p} categories={categories} className={i % 2 ? 'translate-y-4' : ''} />)}
+            <div className="grid w-full max-w-[280px] grid-cols-2 gap-2.5 p-4 md:gap-3">
+              {art.length >= 4
+                ? art.slice(0, 4).map((src, i) => <ArtTile key={src} src={src} className={i % 2 ? 'translate-y-4' : ''} />)
+                : hero.slice(0, 4).map((p, i) => <BannerTile key={p.id} p={p} categories={categories} className={i % 2 ? 'translate-y-4' : ''} />)}
             </div>
           </div>
         )}
@@ -497,9 +514,11 @@ function BannerRow({ productCount, hero, deals, maxDeal, coupon, categories, onS
             <p className="mt-1 text-[15px] font-bold leading-tight tracking-[-0.02em] text-gray-900 md:text-[18px]">{maxDeal > 0 ? <>Up to {maxDeal}% off</> : 'Fresh offers daily'}</p>
           </div>
           <span className="relative z-10 mt-3 inline-flex h-9 w-fit items-center gap-1 rounded-full bg-gray-900 px-3.5 text-[12.5px] font-bold text-white transition group-hover:-translate-y-px"><Percent size={12} /> Shop deals</span>
-          {deals.length > 0 && (
+          {(dealArt.length >= 2 || deals.length > 0) && (
             <div aria-hidden className="absolute -bottom-3 -right-3 hidden w-[46%] rotate-[-6deg] gap-1.5 md:flex">
-              {deals.slice(0, 2).map(p => <BannerTile key={p.id} p={p} categories={categories} className="flex-1" />)}
+              {dealArt.length >= 2
+                ? dealArt.slice(0, 2).map(src => <ArtTile key={src} src={src} className="flex-1" />)
+                : deals.slice(0, 2).map(p => <BannerTile key={p.id} p={p} categories={categories} className="flex-1" />)}
             </div>
           )}
         </button>

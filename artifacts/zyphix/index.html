@@ -60,12 +60,20 @@
       (function () {
         var P = {
           main: '7362583/action-adult-appoint-architecture-7362583.jpeg', partner: '7362583/action-adult-appoint-architecture-7362583.jpeg',
-          now: '29376327/pexels-photo-29376327.jpeg', advertise: '29376327/pexels-photo-29376327.jpeg', eats: '4912725/cooking-eastern-cuisine-food-blog-food-blogger-4912725.jpeg',
+          advertise: '29376327/pexels-photo-29376327.jpeg', eats: '4912725/cooking-eastern-cuisine-food-blog-food-blogger-4912725.jpeg',
           book: '7551100/pexels-photo-7551100.jpeg', support: '6994864/attractive-beautiful-black-black-female-6994864.jpeg', auth: '8938170/pexels-photo-8938170.jpeg'
         };
         var A = { www: 'main', zyphix: 'main', localhost: 'main', account: 'auth', help: 'support', partners: 'partner', ads: 'advertise', shop: 'now', food: 'eats', services: 'book' };
         var h = location.hostname.toLowerCase(), q = new URLSearchParams(location.search).get('site');
         var s = q || h.split('.')[0]; s = A[s] || s;
+        /* Zyphix Now (a light store): its font, and the catalogue download started in parallel with the app. No boot image. */
+        if (s === 'now') {
+          var fl = document.createElement('link'); fl.rel = 'preload'; fl.as = 'font'; fl.type = 'font/woff2'; fl.href = '/fonts/jakarta-latin.woff2'; fl.crossOrigin = 'anonymous'; document.head.appendChild(fl);
+          document.documentElement.setAttribute('data-site', 'now');
+          if (location.pathname === '/') ['/api/products?preview=8', '/api/categories'].forEach(function (u) {
+            var pf = document.createElement('link'); pf.rel = 'preload'; pf.as = 'fetch'; pf.href = u; pf.crossOrigin = 'anonymous'; document.head.appendChild(pf);
+          });
+        }
         var f = P[s]; if (!f) return;
         var w = innerWidth > 900 ? 1280 : innerWidth > 500 ? 960 : 640;
         var proxy = /(^|\.)zyphix\.in$/.test(h);
@@ -73,11 +81,6 @@
         var url = proxy ? '/media/vp/' + f + '?w=' + w : 'https://images.pexels.com/videos/' + id + '/' + name + '?auto=compress&cs=tinysrgb&w=' + w;
         var l = document.createElement('link'); l.rel = 'preload'; l.as = 'image'; l.href = url; l.setAttribute('fetchpriority', 'high');
         document.head.appendChild(l);
-        /* Zyphix Now: start downloading the catalogue now, in parallel with the app, instead of after it boots. */
-        if (s === 'now') { var fl = document.createElement('link'); fl.rel = 'preload'; fl.as = 'font'; fl.type = 'font/woff2'; fl.href = '/fonts/jakarta-latin.woff2'; fl.crossOrigin = 'anonymous'; document.head.appendChild(fl); document.documentElement.setAttribute('data-site', 'now'); }
-        if (s === 'now' && location.pathname === '/') ['/api/products?preview=8', '/api/categories'].forEach(function (u) {
-          var f = document.createElement('link'); f.rel = 'preload'; f.as = 'fetch'; f.href = u; f.crossOrigin = 'anonymous'; document.head.appendChild(f);
-        });
         if (location.pathname === '/' && !/noanim/.test(location.search)) { window.__zxBoot = url; window.__zxSite = s; }
       })();
     </script>
