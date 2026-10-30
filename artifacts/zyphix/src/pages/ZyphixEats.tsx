@@ -7,6 +7,7 @@ import { restaurants, menuItems, FOOD_CUISINE_TYPES } from '@/data/localData';
 import { usePartners, tagList } from '@/lib/partners';
 import { Chip, Card, Button, G, FONT } from '@/ui/kit';
 import { VideoHero, Reveal, Kicker, BgVideo } from '@/ui/cinema';
+import { StepCards, SectionTitle } from '@/components/StepCards';
 import { Spotlight, SplitHeadline } from '@/ui/motion2';
 import { VIDEOS } from '@/data/media';
 import { TonightsPicks, CuisineTiles, PartnerStrip, RestaurantCta, photoForCuisine, fallbackPhoto, EatsHeroLiveOrder, HungryBand, EatsTrackBand, DISPLAY } from './eats/picks';
@@ -192,6 +193,11 @@ export function ZyphixEats() {
                     {openingSoon ? 'Notify me' : 'Search'}
                   </button>
                 </form>
+                <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-medium text-gray-600">
+                  {['Cooked to order', 'Live order tracking', 'Kitchens from your area'].map(t => (
+                    <li key={t} className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#E2562B]" />{t}</li>
+                  ))}
+                </ul>
               </div>
               <div className="relative order-1 h-[170px] overflow-hidden rounded-[18px] bg-[#2A140A] sm:h-[220px] md:order-2 md:h-auto md:min-h-[330px]">
                 <BgVideo clip={VIDEOS.food} dim={0} priority />
@@ -201,7 +207,7 @@ export function ZyphixEats() {
 
           {/* What's on your mind? (round cuisine photos) */}
           <section className="mt-8 md:mt-10" aria-label="Cuisines">
-            <h2 className="text-[20px] font-semibold tracking-[-0.025em] md:text-[24px]">What's on your mind?</h2>
+            <SectionTitle title="What's on your mind?" sub="Pick a cuisine to see kitchens that cook it." />
             <div className="-mx-4 mt-4 flex gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-10 md:gap-3 md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
               {FOOD_CUISINE_TYPES.filter(c => c !== 'All').map((c, i) => {
                 const on = activeCuisine === c;
@@ -268,19 +274,8 @@ export function ZyphixEats() {
 
           {/* How it works + restaurant owners (light) */}
           <section className="mt-12 md:mt-16">
-            <h2 className="text-[20px] font-semibold tracking-[-0.025em] md:text-[24px]">How Zyphix Eats works</h2>
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3 md:gap-4">
-              {EATS_STEPS.map((st, i) => (
-                <div key={st.t} className="rounded-3xl border border-gray-200 bg-white p-5 md:p-6">
-                  <div className="flex items-center justify-between">
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-50 text-[#C2410C]"><st.icon size={18} /></span>
-                    <span className="text-[12px] font-semibold tabular-nums text-gray-300">0{i + 1}</span>
-                  </div>
-                  <p className="mt-5 text-[16px] font-semibold tracking-[-0.015em] text-gray-900">{st.t}</p>
-                  <p className="mt-1.5 text-[13.5px] leading-[1.55] text-gray-500">{st.s}</p>
-                </div>
-              ))}
-            </div>
+            <SectionTitle title="How Zyphix Eats works" sub="From a kitchen down the road to your door." />
+            <StepCards steps={EATS_STEPS} accent="#C2410C" />
           </section>
 
           <section className="mt-12 overflow-hidden rounded-3xl border border-gray-200 bg-white md:mt-16">
@@ -443,7 +438,7 @@ function MenuRow({ item: m, qty, onAdd, onRemove }: { item: MenuItem; qty: numbe
 }
 
 const EATS_STEPS = [
-  { icon: ChefHat, t: 'Order from a local kitchen', s: 'The restaurant confirms and starts cooking right away.' },
-  { icon: Flame, t: 'Packed hot', s: 'Sealed at the counter the moment it leaves the pan.' },
-  { icon: Bike, t: 'Brought to your gate', s: 'Follow your rider with a live ETA until it arrives.' },
+  { photo: 36870973, t: 'A local kitchen cooks it', s: 'The restaurant confirms your order and starts cooking right away.' },
+  { photo: 6969967, t: 'Packed hot at the counter', s: 'Sealed the moment it leaves the pan, so it travels well.' },
+  { photo: 31332062, t: 'Brought to your gate', s: 'Follow your rider with a live ETA until it arrives.' },
 ];

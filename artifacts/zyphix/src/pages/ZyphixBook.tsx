@@ -1,5 +1,6 @@
 import { sendRequest, OFFLINE_MSG } from '@/lib/requests';
 import { WaitlistForm } from '@/components/RequestForms';
+import { StepCards, SectionTitle } from '@/components/StepCards';
 import { useSeo } from '@/lib/seo';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, ArrowUpRight, BadgeCheck, CalendarClock, Clock, MapPin, Search, ShieldCheck, X } from 'lucide-react';
@@ -270,7 +271,7 @@ export function ZyphixBook() {
         <div className="min-w-0">
           <section id="services" className="scroll-mt-24">
             <div className="flex items-end justify-between gap-4">
-              <h2 className={H2L}>Book a service</h2>
+              <SectionTitle title="Book a service" sub="Pick one to see today's and tomorrow's slots." />
               <span className="hidden shrink-0 text-[13px] text-gray-500 sm:block">{services.length} services</span>
             </div>
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -301,7 +302,7 @@ export function ZyphixBook() {
           {/* ── Pros near you (live partner directory) ── */}
           <section id="pros" className="mt-14 scroll-mt-24 md:mt-20">
             <div className="flex items-end justify-between gap-4">
-              <h2 className={H2L}>Pros near you</h2>
+              <SectionTitle title="Pros near you" sub="Verified professionals listed in your area." />
               {!prosLoading && pros.length > 0 && <span className="hidden shrink-0 text-[13px] text-gray-500 sm:block">{pros.length} pro{pros.length > 1 ? 's' : ''}</span>}
             </div>
             {prosLoading ? (
@@ -343,24 +344,13 @@ export function ZyphixBook() {
 
       {/* ── How it works ── */}
       <section id="how" className="mt-16 md:mt-24">
-        <h2 className={H2L}>How it works</h2>
-        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-4">
-          {STEPS.map((st, i) => (
-            <div key={st.t} className="rounded-3xl border border-gray-200 bg-white p-5 md:p-6">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><st.icon size={18} /></span>
-                <span className="text-[12px] font-semibold tabular-nums text-gray-300">0{i + 1}</span>
-              </div>
-              <p className="mt-5 text-[16px] font-semibold tracking-[-0.015em] text-gray-900">{st.t}</p>
-              <p className="mt-1.5 text-[13.5px] leading-[1.55] text-gray-500">{st.s}</p>
-            </div>
-          ))}
-        </div>
+        <SectionTitle title="How it works" sub="Four steps, the same on every booking." />
+        <StepCards steps={STEPS} />
       </section>
 
       {/* ── Our promise ── */}
       <section className="mt-16 md:mt-24">
-        <h2 className={H2L}>The Zyphix promise</h2>
+        <SectionTitle title="The Zyphix promise" sub="Rules on every job, decided in advance." />
         <div className="mt-5 grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
           {POLICIES.map(c => (
             <div key={c.t} className="rounded-3xl bg-[#F3F8F5] p-5 md:p-6">
@@ -407,9 +397,9 @@ export function ZyphixBook() {
 
 /* ── How it works steps ── */
 const STEPS = [
-  { icon: Search, t: 'Pick a service', s: 'Plumbing, electrical, cleaning, AC and more, each with a clear scope.' },
-  { icon: CalendarClock, t: 'Choose a slot', s: 'Today or tomorrow. The visit charge is shown before you confirm.' },
-  { icon: ShieldCheck, t: 'A verified pro arrives', s: 'Extra parts or time are quoted before the job starts, never after.' },
-  { icon: BadgeCheck, t: 'Done, and guaranteed', s: 'An issue within 7 days? A pro comes back and fixes it, free.' },
+  { photo: 16052344, t: 'Pick a service', s: 'Plumbing, electrical, cleaning, AC and more, each with a clear scope.' },
+  { photo: 5077068, t: 'Choose a slot', s: 'Today or tomorrow. The visit charge is shown before you confirm.' },
+  { photo: 27928761, t: 'A verified pro arrives', s: 'Extra parts or time are quoted before the job starts, never after.' },
+  { photo: 4239125, t: 'Done, and guaranteed', s: 'An issue within 7 days? A pro comes back and fixes it, free.' },
 ];
 const H2L = 'text-[22px] font-semibold tracking-[-0.03em] text-gray-900 md:text-[28px]';
