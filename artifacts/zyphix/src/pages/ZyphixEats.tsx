@@ -8,6 +8,7 @@ import { usePartners, tagList } from '@/lib/partners';
 import { Chip, Card, Button, G, FONT } from '@/ui/kit';
 import { VideoHero, Reveal, Kicker, BgVideo } from '@/ui/cinema';
 import { StepCards, SectionTitle } from '@/components/StepCards';
+import { pexelsPhoto } from '@/data/media';
 import { Spotlight, SplitHeadline } from '@/ui/motion2';
 import { VIDEOS } from '@/data/media';
 import { TonightsPicks, CuisineTiles, PartnerStrip, RestaurantCta, photoForCuisine, fallbackPhoto, EatsHeroLiveOrder, HungryBand, EatsTrackBand, DISPLAY } from './eats/picks';
@@ -226,6 +227,27 @@ export function ZyphixEats() {
             </div>
           </section>
 
+          {/* Popular dishes: a visual menu of what's coming */}
+          <section className="mt-10 md:mt-14" aria-label="Popular dishes">
+            <SectionTitle title="Favourite dishes" sub="A taste of what local kitchens will serve on Zyphix Eats." />
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
+              {DISHES.map(d => (
+                <figure key={d.id} className="group overflow-hidden rounded-3xl border border-gray-200 bg-white">
+                  <div className="aspect-[4/3] overflow-hidden bg-gray-100">
+                    <img src={pexelsPhoto(d.id, 640)} alt={d.name} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]" />
+                  </div>
+                  <figcaption className="flex items-center justify-between gap-2 p-3.5 md:p-4">
+                    <span className="min-w-0">
+                      <span className="block truncate text-[14.5px] font-semibold tracking-[-0.01em] text-gray-900">{d.name}</span>
+                      <span className="block truncate text-[12.5px] text-gray-500">{d.cuisine}</span>
+                    </span>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${d.veg ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>{d.veg ? 'Veg' : 'Non-veg'}</span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </section>
+
           {/* Tonight's picks (when kitchens are live) */}
           {showPopular && <TonightsPicks picks={popular.slice(0, 3)} onOpen={setActiveRestaurant} />}
 
@@ -441,4 +463,15 @@ const EATS_STEPS = [
   { photo: 36870973, t: 'A local kitchen cooks it', s: 'The restaurant confirms your order and starts cooking right away.' },
   { photo: 6969967, t: 'Packed hot at the counter', s: 'Sealed the moment it leaves the pan, so it travels well.' },
   { photo: 31332062, t: 'Brought to your gate', s: 'Follow your rider with a live ETA until it arrives.' },
+];
+
+const DISHES = [
+  { id: 12737656, name: 'Chicken biryani', cuisine: 'Biryani', veg: false },
+  { id: 9609844, name: 'Butter chicken', cuisine: 'North Indian', veg: false },
+  { id: 5560763, name: 'Masala dosa', cuisine: 'South Indian', veg: true },
+  { id: 2147491, name: 'Margherita pizza', cuisine: 'Pizza', veg: true },
+  { id: 1639557, name: 'Cheeseburger', cuisine: 'Burgers', veg: false },
+  { id: 5409010, name: 'Steamed momos', cuisine: 'Momos', veg: true },
+  { id: 2347311, name: 'Hakka noodles', cuisine: 'Chinese', veg: true },
+  { id: 15014918, name: 'Gulab jamun', cuisine: 'Sweets', veg: true },
 ];

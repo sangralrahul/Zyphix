@@ -234,24 +234,14 @@ export function ZyphixBook() {
             <h1 className="mt-4 max-w-[16ch] text-[34px] font-semibold leading-[1.05] tracking-[-0.04em] text-gray-900 sm:text-[44px] md:text-[52px]">Home services, at your doorstep.</h1>
             <p className="mt-3 max-w-[48ch] text-[15px] leading-[1.55] text-gray-500 md:text-[16.5px]">Plumbers, electricians, cleaners and more from your own neighbourhood. Price shown before you confirm.</p>
             <ServicePicker onPick={pickFromHero} />
-            <div className="mt-6 rounded-3xl border border-gray-200 bg-white p-4 shadow-[0_1px_2px_rgba(16,24,40,.04)] md:p-5">
-              <p className="text-[14px] font-semibold text-gray-900">What are you looking for?</p>
-              <div className="mt-3 grid grid-cols-3 gap-x-2 gap-y-4 sm:grid-cols-5">
-                {list.map(sv => {
-                  const m = metaFor(sv);
-                  return (
-                    <button key={sv.id} type="button" onClick={() => pickFromHero(sv)} className="group flex flex-col items-center text-center">
-                      <span className="block aspect-square w-full max-w-[84px] overflow-hidden rounded-2xl bg-gray-100 ring-1 ring-black/5">
-                        <img src={m.photo.src} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.08]" />
-                      </span>
-                      <span className="mt-1.5 line-clamp-2 text-[12px] font-medium leading-tight text-gray-700 group-hover:text-gray-900">{sv.title}</span>
-                    </button>
-                  );
-                })}
-              </div>
+            <div className="mt-6 flex flex-wrap gap-2">
+              {list.slice(0, 6).map(sv => (
+                <button key={sv.id} type="button" onClick={() => pickFromHero(sv)}
+                  className="inline-flex h-9 items-center rounded-full border border-gray-200 bg-white px-3.5 text-[13px] font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900">{sv.title}</button>
+              ))}
             </div>
           </div>
-          <div aria-hidden className="hidden grid-cols-2 grid-rows-2 gap-3 lg:grid">
+          <div aria-hidden className="hidden h-[440px] grid-cols-2 grid-rows-2 gap-3 lg:grid">
             <div className="row-span-2 overflow-hidden rounded-3xl bg-gray-100"><img src={heroPhotos[0].src} alt="" className="h-full w-full object-cover" /></div>
             <div className="overflow-hidden rounded-3xl bg-gray-100"><img src={heroPhotos[1].src} alt="" className="h-full w-full object-cover" /></div>
             <div className="overflow-hidden rounded-3xl bg-gray-100"><img src={heroPhotos[2].src} alt="" className="h-full w-full object-cover" /></div>
