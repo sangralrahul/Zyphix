@@ -27,6 +27,7 @@ export const CATEGORY_DEFS: CategoryDef[] = [
   { name: 'Ready to Cook & Eat', group: 'Grocery & Kitchen', icon: '🥘', color: '#0891b2', prompt: 'a bowl of creamy dal makhani and a bowl of steamed rice beside two plain unlabelled ready-meal pouches' },
   { name: 'Frozen Food', group: 'Grocery & Kitchen', icon: '🧊', color: '#0369a1', prompt: 'frozen french fries, frozen green peas and frozen samosas on a small tray with a light frost' },
   { name: 'Meat & Seafood', group: 'Grocery & Kitchen', icon: '🍗', color: '#b45309', prompt: 'fresh raw chicken pieces, fish fillets and prawns on a bed of crushed ice in a shallow bowl' },
+  { name: 'Organic & Healthy', group: 'Grocery & Kitchen', icon: '🌱', color: '#15803d', prompt: 'a glass jar of rolled oats, a small bowl of chia seeds, quinoa in a wooden scoop, almonds and a plain kraft paper pouch of millet flour' },
 
   // Snacks & Drinks
   { name: 'Snacks & Munchies', group: 'Snacks & Drinks', icon: '🍿', color: '#9333ea', prompt: 'two plain unlabelled foil snack bags, a bowl of potato chips, a bowl of crunchy namkeen mixture and roasted peanuts' },
@@ -44,6 +45,7 @@ export const CATEGORY_DEFS: CategoryDef[] = [
   { name: 'Fragrances', group: 'Beauty & Personal Care', icon: '🌸', color: '#c026d3', prompt: 'two elegant unlabelled glass perfume bottles and a plain deodorant spray can' },
   { name: 'Bath & Body', group: 'Beauty & Personal Care', icon: '🛁', color: '#0ea5e9', prompt: 'a plain body wash bottle, a natural loofah, a jar of bath salts and stacked handmade soap bars' },
   { name: 'Feminine Hygiene', group: 'Beauty & Personal Care', icon: '🌷', color: '#ec4899', prompt: 'minimal pastel packs of sanitary pads, a menstrual cup and a plain intimate wash bottle' },
+  { name: "Men's Grooming", group: 'Beauty & Personal Care', icon: '🪒', color: '#334155', prompt: 'a classic safety razor, a shaving brush, a plain white tube of shaving cream, a small glass bottle of beard oil and a folded towel' },
   { name: 'Pharmacy', group: 'Beauty & Personal Care', icon: '💊', color: '#0891b2', prompt: 'a white first aid box, pill blister packs, a digital thermometer, bandage rolls and a plain bottle of antiseptic' },
   { name: 'Health & Wellness', group: 'Beauty & Personal Care', icon: '💪', color: '#059669', prompt: 'a plain tub of protein powder, a shaker bottle, a plain multivitamin bottle and a measuring scoop' },
   { name: 'Baby Care', group: 'Beauty & Personal Care', icon: '👶', color: '#f43f5e', prompt: 'a stack of baby diapers, a plain baby lotion bottle, a baby feeding bottle and a soft pack of baby wipes' },
@@ -52,6 +54,7 @@ export const CATEGORY_DEFS: CategoryDef[] = [
   { name: 'Household', group: 'Household Essentials', icon: '🧹', color: '#64748b', prompt: 'a plain detergent bottle, dishwashing liquid, a sponge, a scrub brush and a roll of garbage bags' },
   { name: 'Cleaning Essentials', group: 'Household Essentials', icon: '🧽', color: '#0d9488', prompt: 'a plain floor cleaner bottle, a spray bottle, scrub pads and yellow rubber gloves' },
   { name: 'Home Needs', group: 'Household Essentials', icon: '🏠', color: '#0f766e', prompt: 'a box of tissues, a small potted green plant, a spin mop with bucket and stacked storage containers' },
+  { name: 'Pooja Needs', group: 'Household Essentials', icon: '🪔', color: '#ea580c', prompt: 'a lit brass oil lamp diya, incense sticks in a holder, marigold flowers, a small bowl of red kumkum powder and camphor tablets on a brass plate' },
   { name: 'Kitchenware & Appliances', group: 'Household Essentials', icon: '🍳', color: '#475569', prompt: 'a steel pressure cooker, a mixer grinder, a non-stick frying pan and a steel ladle' },
   { name: 'Electronics & Accessories', group: 'Household Essentials', icon: '🔌', color: '#334155', prompt: 'wireless earbuds with case, a power bank, a coiled charging cable, an LED bulb and AA batteries' },
   { name: 'Pet Care', group: 'Household Essentials', icon: '🐾', color: '#7c3aed', prompt: 'a plain bag of dog food, a bowl of kibble, a tennis ball toy and a plain cat food tin' },
@@ -65,6 +68,7 @@ export const CATEGORY_DEFS: CategoryDef[] = [
   { name: 'Stationery & Crafts', group: 'Hobbies & Interests', icon: '✏️', color: '#eab308', prompt: 'plain notebooks, colour pencils, highlighter pens, scissors and a glue stick' },
   { name: 'Sports & Fitness', group: 'Hobbies & Interests', icon: '⚽', color: '#16a34a', prompt: 'a football, a red cricket ball, a rolled yoga mat, a pair of dumbbells and a skipping rope' },
   { name: 'Books', group: 'Hobbies & Interests', icon: '📚', color: '#7c2d12', prompt: 'a neat stack of hardcover and paperback books with plain covers and a pair of reading glasses' },
+  { name: 'Party & Gifting', group: 'Hobbies & Interests', icon: '🎁', color: '#db2777', prompt: 'a wrapped gift box with a satin ribbon, colourful party balloons, birthday candles and a small box of chocolates' },
 ];
 
 const DEF = new Map(CATEGORY_DEFS.map(d => [d.name, d]));

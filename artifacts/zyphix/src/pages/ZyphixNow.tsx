@@ -576,13 +576,23 @@ function groupCategories(categories: Category[]): { title: string; items: Catego
 /** Packs category groups into rows of at most 11 tiles (wide screens); big groups get a row each. */
 const ROW_TILES = 11;
 function packRows<T extends { items: unknown[] }>(groups: T[]): T[][] {
-  const rows: { list: T[]; used: number }[] = [];
-  for (const g of groups) {
-    const n = g.items.length;
-    const fit = n < ROW_TILES ? rows.find(r => r.used + n <= ROW_TILES && r.list.every(x => x.items.length < ROW_TILES)) : undefined;
-    if (fit) { fit.list.push(g); fit.used += n; } else rows.push({ list: [g], used: n });
+  const left = [...groups];
+  const rows: T[][] = [];
+  while (left.length) {
+    const first = left.shift()!;
+    const row = [first];
+    let room = ROW_TILES - first.items.length;
+    // Fill the rest of the row with the largest later groups that still fit.
+    while (room > 0 && first.items.length < ROW_TILES) {
+      let best = -1;
+      left.forEach((g, i) => { if (g.items.length <= room && (best < 0 || g.items.length > left[best].items.length)) best = i; });
+      if (best < 0) break;
+      const [g] = left.splice(best, 1);
+      row.push(g); room -= g.items.length;
+    }
+    rows.push(row);
   }
-  return rows.map(r => r.list);
+  return rows;
 }
 
 function CategoryTiles({ categories, onPick, span = false }: { categories: Category[]; counts?: Map<string, number>; onPick: (name: string) => void; span?: boolean }) {

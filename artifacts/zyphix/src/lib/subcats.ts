@@ -80,6 +80,56 @@ const RULES: Record<string, Rule[]> = {
     { name: 'Ready Meals & Parathas', icon: '🫓', re: /paratha|roti|chapati|naan|meal|biryani|rice|pizza/i },
     { name: 'Frozen Vegetables', icon: '🫛', re: /peas|corn|vegetable|veggies|mixed veg|spinach/i },
   ],
+  'Noodles & Pasta': [
+    { name: 'Instant Noodles', icon: '🍜', re: /noodle|ramen|maggi|yippee|wai wai/i },
+    { name: 'Pasta & Vermicelli', icon: '🍝', re: /pasta|penne|fusilli|spaghetti|macaroni|vermicelli/i },
+  ],
+  'Ready to Cook & Eat': [
+    { name: 'Ready Meals', icon: '🍛', re: /ready to eat|minute khana|biryani/i },
+    { name: 'Instant Mixes', icon: '🥣', re: /mix|poha|oats/i },
+    { name: 'Soups', icon: '🍲', re: /soup/i },
+  ],
+  'Skincare': [
+    { name: 'Face Wash', icon: '🫧', re: /face wash|cleanser/i },
+    { name: 'Moisturisers & Lotions', icon: '🧴', re: /moistur|lotion|cream/i },
+    { name: 'Sunscreen & Serums', icon: '☀️', re: /sunscreen|serum|spf/i },
+  ],
+  'Haircare': [
+    { name: 'Shampoo & Conditioner', icon: '🧴', re: /shampoo|conditioner/i },
+    { name: 'Hair Oil & Serum', icon: '💧', re: /oil|serum/i },
+    { name: 'Styling & Colour', icon: '💇', re: /gel|colou?r/i },
+  ],
+  'Bath & Body': [
+    { name: 'Soaps', icon: '🧼', re: /soap|bar/i },
+    { name: 'Body Wash & Lotion', icon: '🛁', re: /shower|body wash|lotion|body milk/i },
+    { name: 'Handwash', icon: '🫧', re: /handwash/i },
+  ],
+  'Cleaning Essentials': [
+    { name: 'Laundry', icon: '🧺', re: /detergent|liquid|fabric|conditioner/i },
+    { name: 'Dishwash', icon: '🍽️', re: /dish|scrub/i },
+    { name: 'Floor & Toilet', icon: '🧽', re: /floor|toilet|disinfect|glass|broom/i },
+  ],
+  'Kitchenware & Appliances': [
+    { name: 'Cookware', icon: '🍳', re: /cooker|pan|tawa|kadai/i },
+    { name: 'Appliances', icon: '🔌', re: /mixer|grinder|kettle|toaster/i },
+    { name: 'Bottles & Storage', icon: '🥤', re: /bottle|flask|lunch|bowl|container/i },
+  ],
+  'Electronics & Accessories': [
+    { name: 'Audio', icon: '🎧', re: /earbud|earphone|headphone|speaker|airdopes/i },
+    { name: 'Chargers & Cables', icon: '🔋', re: /charger|cable|power bank/i },
+    { name: 'Storage & Computer', icon: '💾', re: /microsd|drive|mouse|keyboard/i },
+    { name: 'Lighting & Power', icon: '💡', re: /led|bulb|batten|torch|batter|extension/i },
+  ],
+  'Stationery & Crafts': [
+    { name: 'Notebooks & Paper', icon: '📒', re: /notebook|paper|sticky/i },
+    { name: 'Pens & Pencils', icon: '✏️', re: /pen|pencil|eraser/i },
+    { name: 'Art & Craft', icon: '🎨', re: /crayon|sketch|glue|fevi/i },
+  ],
+  'Sports & Fitness': [
+    { name: 'Cricket', icon: '🏏', re: /cricket/i },
+    { name: 'Badminton & Football', icon: '🏸', re: /badminton|shuttle|football|racquet|yonex/i },
+    { name: 'Fitness', icon: '🏋️', re: /yoga|dumbbell|skipping|resistance|shaker/i },
+  ],
 };
 
 export type Subcat = { name: string; icon: string; products: Product[] };
