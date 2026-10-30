@@ -593,7 +593,6 @@ export const PHOTOS: Record<string, Photo[]> = {
     p(33958627, "AC repair training at an institute in New Delhi"),
     p(34099331, "Technician repairing an AC circuit board in a Delhi workshop"),
     p(31800980, "Technician in an electronics and AC repair lab"),
-    p(5463577, "Technicians checking a rooftop AC outdoor unit"),
     p(14522790, "Air conditioner with a ladder set up for servicing"),
   ],
   carpenter: [

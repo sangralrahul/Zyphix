@@ -1,4 +1,5 @@
 import { sendRequest, OFFLINE_MSG } from '@/lib/requests';
+import { WaitlistForm } from '@/components/RequestForms';
 import { useSeo } from '@/lib/seo';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, ArrowUpRight, BadgeCheck, CalendarClock, Clock, MapPin, Search, ShieldCheck, X } from 'lucide-react';
@@ -300,18 +301,32 @@ export function ZyphixBook() {
               </div>
             ) : (
               <Reveal className="mt-8">
-                <div className="relative overflow-hidden rounded-3xl bg-[#05080E] text-white">
-                  <img src={PHOTOS.plumbing[0].src} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-40" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#05080E] via-[#05080E]/80 to-[#05080E]/30" />
-                  <Grain />
-                  <div className="relative p-6 md:p-10">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[12px] font-semibold text-white/85"><MapPin size={12} /> Opening area by area</span>
-                    <p className="mt-4 max-w-[22ch] text-balance text-[24px] font-semibold leading-[1.1] tracking-[-0.035em] md:text-[30px]">No professionals are listed in your area yet.</p>
-                    <p className="mt-3 max-w-[48ch] text-[14.5px] leading-[1.6] text-white/70">Pros appear here the moment they pass verification. If you work in home services, listing is free.</p>
-                    <div className="mt-6 flex flex-wrap gap-3">
-                      <GlowButton href={`${PARTNER_URL}/services`} size="md">Join as a professional <ArrowUpRight size={15} /></GlowButton>
-                      <GhostButton href="#services" size="md">Browse services</GhostButton>
-                    </div>
+                <div className="grid overflow-hidden rounded-3xl border border-gray-200 bg-white md:grid-cols-[1.05fr_1fr]">
+                  {/* left: what every pro goes through, over a calm photo */}
+                  <div className="relative isolate min-h-[260px] overflow-hidden bg-[#05080E] p-6 text-white md:p-8">
+                    <img src={PHOTOS.plumbing[0].src} alt="" loading="lazy" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-45" />
+                    <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-[#05080E] via-[#05080E]/75 to-[#05080E]/20" />
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[12px] font-semibold text-white/85 backdrop-blur"><MapPin size={12} /> Opening area by area</span>
+                    <p className="mt-4 max-w-[20ch] text-[24px] font-semibold leading-[1.1] tracking-[-0.035em] md:text-[30px]">Every pro is checked before their first booking.</p>
+                    <ol className="mt-6 space-y-3">
+                      {[
+                        { icon: <BadgeCheck size={15} />, t: 'ID and address check' },
+                        { icon: <ShieldCheck size={15} />, t: 'Police verification' },
+                        { icon: <CalendarClock size={15} />, t: 'Then listed here, with live slots' },
+                      ].map((st, i) => (
+                        <li key={st.t} className="flex items-center gap-3 text-[14px] text-white/85">
+                          <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-emerald-300 ring-1 ring-white/15">{st.icon}</span>
+                          <span><span className="mr-1.5 text-[12px] tabular-nums text-white/45">0{i + 1}</span>{st.t}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                  {/* right: get told when pros go live nearby */}
+                  <div className="flex flex-col justify-center p-6 md:p-8">
+                    <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-emerald-700">Coming to your area</p>
+                    <p className="mt-2 text-[20px] font-semibold leading-[1.15] tracking-[-0.025em] text-gray-900 md:text-[24px]">Get a message when verified pros are bookable near you.</p>
+                    <div className="mt-5"><WaitlistForm product="book" cta="Notify me" /></div>
+                    <a href={`${PARTNER_URL}/services`} className="mt-4 inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-emerald-700 hover:text-emerald-800">Work in home services? Listing is free <ArrowUpRight size={14} /></a>
                   </div>
                 </div>
               </Reveal>
