@@ -452,67 +452,44 @@ function BannerRow({ productCount, hero, deals, art = [], dealArt = [], maxDeal,
   const [copied, setCopied] = useState(false);
   const copy = () => { if (!coupon) return; navigator.clipboard?.writeText(coupon.code).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800); }).catch(() => {}); };
   return (
-    <section aria-label="Today on Zyphix Now" className="grid gap-3 md:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)] md:gap-4">
-      {/* main banner */}
-      <div className="relative isolate flex min-h-[260px] overflow-hidden rounded-[22px] text-white md:min-h-[340px]"
-        style={{ background: 'radial-gradient(120% 140% at 0% 0%, #0E8A58 0%, #08623F 45%, #053D28 100%)' }}>
-        {/* Cinematic footage: hands packing fresh groceries (Pexels, served through our own /media proxy) */}
-        <BgVideo clip={VIDEOS.packing} dim={0} position="62% 50%" priority />
-        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,48,31,.94)_0%,rgba(6,72,46,.82)_36%,rgba(6,72,46,.28)_66%,rgba(6,72,46,0)_100%)] max-sm:bg-[linear-gradient(180deg,rgba(4,48,31,.35)_0%,rgba(4,48,31,.9)_62%)]" />
-        <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-between p-5 sm:max-w-[60%] md:p-8">
-          <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11.5px] font-bold uppercase tracking-[0.08em] backdrop-blur"><Zap size={12} className="fill-current" /> Delivery in 10 minutes</span>
-            <h1 className="mt-3 max-w-[14ch] text-[30px] font-extrabold leading-[1.02] tracking-[-0.035em] md:mt-4 md:text-[46px]">Your corner store,<br className="max-sm:hidden" /> in minutes.</h1>
-            <p className="mt-2.5 max-w-[38ch] text-[13.5px] font-medium leading-snug text-white/85 md:text-[15.5px]">
-              {productCount ? `${productCount} products` : 'Fresh produce, dairy and daily staples'} from shops near you, at shelf prices.
-            </p>
+    <section aria-label="Today on Zyphix Now" className="relative isolate overflow-hidden rounded-[24px] bg-[#06402A] text-white">
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_120%_at_0%_0%,rgba(19,184,116,.35),transparent_60%)]" />
+      <div className="relative grid gap-5 p-3 sm:p-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.04fr)] md:gap-6 md:p-5">
+        {/* copy */}
+        <div className="order-2 flex flex-col justify-center px-2 pb-3 sm:px-3 md:order-1 md:py-6 md:pl-5 md:pr-0">
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/12 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.1em] text-[#B6F2D4] ring-1 ring-inset ring-white/15"><Zap size={12} className="fill-current" /> Delivery in 10 minutes</span>
+          <h1 className="mt-3 text-[32px] font-extrabold leading-[1.0] tracking-[-0.04em] md:mt-4 md:text-[50px]">Your corner store,<br /> <span className="text-[#5EE0A6]">in minutes.</span></h1>
+          <p className="mt-3 max-w-[40ch] text-[14px] font-medium leading-snug text-white/75 md:text-[16px]">
+            {productCount ? `${productCount} products` : 'Fresh produce, dairy and daily staples'} from shops near you, at shelf prices.
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-2.5">
+            <button type="button" onClick={onShopAll} className="inline-flex h-11 items-center gap-1.5 rounded-full bg-white px-5 text-[14px] font-bold text-[#06402A] shadow-[0_10px_24px_-10px_rgba(0,0,0,.5)] transition hover:-translate-y-px">Start shopping <ArrowRight size={15} /></button>
+            <span className="hidden h-11 items-center gap-1.5 px-1 text-[13px] font-semibold text-white/70 sm:inline-flex"><Clock size={14} /> Free delivery above ₹149</span>
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button type="button" onClick={onShopAll} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-[13.5px] font-bold text-[#0B7F50] shadow-[0_8px_20px_-8px_rgba(0,0,0,.35)] transition hover:-translate-y-px">Start shopping <ArrowRight size={14} /></button>
-            <span className="hidden h-10 items-center gap-1.5 rounded-full border border-white/30 px-3.5 text-[12.5px] font-semibold text-white/90 sm:inline-flex"><Clock size={13} /> Free delivery above ₹149</span>
-          </div>
+          {coupon && (
+            <div className="mt-4 flex w-fit max-w-full items-center gap-3 rounded-2xl border border-dashed md:mt-5 border-white/25 bg-white/[.06] py-2 pl-3 pr-2">
+              <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FFD66B] text-[#5B3B00]"><Percent size={15} /></span>
+              <p className="min-w-0 text-[12.5px] leading-tight text-white/80 md:text-[13px]"><span className="font-bold text-white">First order?</span> {coupon.desc}</p>
+              <button type="button" onClick={copy} aria-label={`Copy code ${coupon.code}`} className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg bg-white px-2.5 text-[12px] font-extrabold tracking-wide text-[#06402A]">
+                {coupon.code}{copied ? <Check size={12} /> : <Copy size={12} />}
+              </button>
+              <button type="button" onClick={onDismissCoupon} aria-label="Hide offer" className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/50 transition hover:bg-white/10 hover:text-white sm:inline-flex"><X size={13} /></button>
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* side tiles */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-1 md:gap-4">
-        <div className="relative flex min-h-[140px] flex-col justify-between overflow-hidden rounded-[22px] bg-[#FFF3D6] p-4 md:p-5">
-          <span aria-hidden className="absolute right-4 top-4 hidden h-10 w-10 items-center justify-center rounded-xl bg-white/70 text-amber-700 md:inline-flex"><Percent size={18} /></span>
-          {coupon ? (
-            <>
-              <div className="relative min-w-0 md:pr-12">
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-amber-700">First order</p>
-                <p className="mt-1 line-clamp-3 text-[14px] font-bold leading-tight tracking-[-0.02em] text-gray-900 md:line-clamp-2 md:text-[18px]">{coupon.desc}</p>
-              </div>
-              <div className="relative mt-3 flex items-center gap-2">
-                <button type="button" onClick={copy} aria-label={`Copy code ${coupon.code}`} className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-dashed border-amber-600/60 bg-white px-2.5 text-[11.5px] font-extrabold tracking-wide text-amber-800 md:px-3 md:text-[12.5px]">
-                  {coupon.code}{copied ? <Check size={13} /> : <Copy size={13} />}
-                </button>
-                <button type="button" onClick={onDismissCoupon} aria-label="Hide offer" className="ml-auto hidden h-7 w-7 items-center justify-center rounded-full text-amber-800/60 transition hover:bg-white/70 md:inline-flex"><X size={13} /></button>
-              </div>
-            </>
-          ) : (
-            <div className="relative">
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-amber-700">Every day</p>
-              <p className="mt-1 text-[16px] font-bold leading-tight tracking-[-0.02em] text-gray-900 md:text-[18px]">No markup on shelf prices</p>
-            </div>
+        {/* footage, framed rather than washed out behind the words */}
+        <div className="relative order-1 h-[150px] overflow-hidden rounded-[18px] bg-[#0A5236] sm:h-[240px] md:order-2 md:h-auto md:min-h-[340px]">
+          <BgVideo clip={VIDEOS.packing} dim={0} position="60% 45%" priority />
+          <div aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,transparent_55%,rgba(3,30,20,.55)_100%)]" />
+          {maxDeal > 0 && (
+            <button type="button" onClick={onShopDeals} disabled={!deals.length}
+              className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-white/95 py-1.5 pl-1.5 pr-3.5 text-left text-gray-900 shadow-[0_10px_30px_-10px_rgba(0,0,0,.5)] backdrop-blur transition hover:-translate-y-px md:bottom-4 md:left-4">
+              <span className="inline-flex h-8 items-center rounded-full bg-[#E11D48] px-2.5 text-[12px] font-extrabold text-white">{maxDeal}% off</span>
+              <span className="text-[12.5px] font-bold">Deals of the day <ArrowRight size={12} className="inline" /></span>
+            </button>
           )}
         </div>
-        <button type="button" onClick={onShopDeals} disabled={!deals.length}
-          className="group relative flex min-h-[140px] flex-col justify-between overflow-hidden rounded-[22px] bg-[#FDE8EC] p-4 text-left md:p-5">
-          <div className="relative z-10 min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-rose-700">Deals of the day</p>
-            <p className="mt-1 text-[15px] font-bold leading-tight tracking-[-0.02em] text-gray-900 md:text-[18px]">{maxDeal > 0 ? <>Up to {maxDeal}% off</> : 'Fresh offers daily'}</p>
-          </div>
-          <span className="relative z-10 mt-3 inline-flex h-9 w-fit items-center gap-1 rounded-full bg-gray-900 px-3.5 text-[12.5px] font-bold text-white transition group-hover:-translate-y-px"><Percent size={12} /> Shop deals</span>
-          {(dealArt.length >= 2 || deals.length > 0) && (
-            <div aria-hidden className="absolute bottom-4 right-4 hidden w-[40%] max-w-[176px] gap-2 md:flex">
-              {dealArt.length >= 2
-                ? dealArt.slice(0, 2).map(src => <ArtTile key={src} src={src} className="flex-1" />)
-                : deals.slice(0, 2).map(p => <BannerTile key={p.id} p={p} categories={categories} className="flex-1" />)}
-            </div>
-          )}
-        </button>
       </div>
     </section>
   );
@@ -584,24 +561,25 @@ function FeatureBanner({ feature: f, categories, onPick }: { feature: Feature; c
 
 /* ─── Three image cards under the banner (category artwork as the picture) ─── */
 const PROMOS: { cat: string; title: string; sub: string; bg: string; ink: string }[] = [
+  { cat: 'Snacks & Munchies', title: 'Snack attack', sub: 'Chips, namkeen and cold drinks for movie night', bg: '#FDE9EE', ink: '#9F1239' },
   { cat: 'Pharmacy', title: 'Pharmacy at your door', sub: 'Medicines, vitamins and first aid from chemists near you', bg: '#E3F4F1', ink: '#0F5F55' },
   { cat: 'Pet Care', title: 'Everything for your pet', sub: 'Food, treats and care in a few taps', bg: '#FFF0D9', ink: '#8A4B08' },
   { cat: 'Baby Care', title: 'Baby care, sorted', sub: 'Diapers, wipes, baby food and more', bg: '#E8EDFF', ink: '#2F3F8F' },
 ];
 function PromoCards({ categories, onPick }: { categories: Category[]; onPick: (name: string) => void }) {
   const cards = PROMOS.map(p => ({ ...p, img: categories.find(c => c.name === p.cat)?.image ?? '' })).filter(p => p.img.includes('/img/categories/'));
-  if (cards.length < 3) return null;
+  if (cards.length < 4) return null;
   return (
-    <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
+    <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-2 md:gap-4 md:overflow-visible md:px-0 lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
       {cards.map(p => (
         <button key={p.cat} type="button" onClick={() => onPick(p.cat)}
-          className="group relative isolate flex h-[150px] w-[84%] shrink-0 snap-start overflow-hidden rounded-[20px] text-left md:h-[172px] md:w-auto"
+          className="group relative isolate flex h-[150px] w-[80%] shrink-0 snap-start overflow-hidden rounded-[20px] text-left ring-1 ring-inset ring-black/[.04] md:h-[164px] md:w-auto"
           style={{ background: p.bg }}>
           <img src={p.img} alt="" loading="lazy" decoding="async" draggable={false}
             className="absolute inset-y-0 right-0 -z-10 h-full w-[50%] scale-[1.12] object-cover mix-blend-multiply transition-transform duration-700 ease-[cubic-bezier(.22,1,.36,1)] [mask-image:linear-gradient(90deg,transparent,#000_38%)] group-hover:scale-[1.2]" />
           <div className="relative flex w-[60%] flex-col justify-between p-4 md:p-5">
             <div>
-              <p className="text-[16px] font-extrabold leading-tight tracking-[-0.02em] md:text-[18px]" style={{ color: p.ink }}>{p.title}</p>
+              <p className="text-[16px] font-extrabold leading-tight tracking-[-0.02em] md:text-[17px]" style={{ color: p.ink }}>{p.title}</p>
               <p className="mt-1 line-clamp-2 text-[12px] font-medium leading-snug text-gray-600 md:text-[13px]">{p.sub}</p>
             </div>
             <span className="inline-flex h-8 w-fit items-center gap-1 rounded-full px-3 text-[12px] font-bold text-white transition group-hover:-translate-y-px" style={{ background: p.ink }}>Order now <ArrowRight size={12} /></span>
