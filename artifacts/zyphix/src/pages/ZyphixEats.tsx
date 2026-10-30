@@ -2,14 +2,14 @@ import { OrderRequestForm, WaitlistForm } from '@/components/RequestForms';
 import { useSeo } from '@/lib/seo';
 import React, { useState, useEffect } from 'react';
 import { motion } from '@/lib/motion';
-import { Search, Star, X, Plus, Minus, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Star, X, Plus, Minus, ShoppingBag, ChevronLeft, ChevronRight, ChefHat, Flame, Bike } from 'lucide-react';
 import { restaurants, menuItems, FOOD_CUISINE_TYPES } from '@/data/localData';
 import { usePartners, tagList } from '@/lib/partners';
 import { Chip, Card, Button, G, FONT } from '@/ui/kit';
-import { VideoHero, Reveal, Kicker } from '@/ui/cinema';
+import { VideoHero, Reveal, Kicker, BgVideo } from '@/ui/cinema';
 import { Spotlight, SplitHeadline } from '@/ui/motion2';
 import { VIDEOS } from '@/data/media';
-import { TonightsPicks, CuisineTiles, PartnerStrip, RestaurantCta, fallbackPhoto, EatsHeroLiveOrder, HungryBand, EatsTrackBand, DISPLAY } from './eats/picks';
+import { TonightsPicks, CuisineTiles, PartnerStrip, RestaurantCta, photoForCuisine, fallbackPhoto, EatsHeroLiveOrder, HungryBand, EatsTrackBand, DISPLAY } from './eats/picks';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Zyphix Eats — restaurants near you.
@@ -171,85 +171,69 @@ export function ZyphixEats() {
       ) : (
         /* ── Restaurant list ── */
         <motion.div key="list" {...enter}>
-          {/* Hero: video, headline, search, cuisine chips */}
-          <div className="zx-bleed -mx-4 md:-mt-4">
-            <VideoHero clip={VIDEOS.food} height="min-h-[56svh] md:min-h-[78svh]" dim={0.4}>
-              {!openingSoon && <EatsHeroLiveOrder />}
-              <div className="zx-bleed-inner px-4 pb-7 pt-14 md:pb-14 md:pt-24">
-                <Kicker light>Zyphix Eats</Kicker>
-                <SplitHeadline className={`${DISPLAY} max-w-[15ch] text-[38px] leading-[1.0] text-white sm:text-[48px] md:text-[64px]`}
-                  parts={["Your city's best kitchens, at your", { accent: 'door.', green: true }]} />
-                <p className="mt-3 max-w-[520px] text-[15px] leading-[1.55] text-white/75 md:text-[17px]">
-                  Biryani houses, pizza ovens, momo stalls and cafés near you, cooked to order and tracked to your door.
-                </p>
+          {/* Hero: headline + search on a warm card, food footage framed on the right */}
+          <section className="mt-4 overflow-hidden rounded-[24px] bg-[#FFF3EA] md:mt-2">
+            <div className="grid gap-4 p-3 sm:p-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-6 md:p-5">
+              <div className="order-2 flex flex-col justify-center px-2 pb-3 sm:px-3 md:order-1 md:py-6 md:pl-5">
+                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white px-3 py-1 text-[12px] font-semibold text-[#B4410C] ring-1 ring-inset ring-orange-100">
+                  {openingSoon ? 'Opening soon near you' : `${allRestaurants.length} kitchens open now`}
+                </span>
+                <h1 className="mt-4 max-w-[15ch] text-[32px] font-semibold leading-[1.05] tracking-[-0.04em] text-gray-900 sm:text-[42px] md:text-[50px]">Food from the best kitchens near you.</h1>
+                <p className="mt-3 max-w-[44ch] text-[15px] leading-[1.55] text-gray-600 md:text-[16px]">Biryani houses, pizza ovens, momo stalls and cafés, cooked to order and brought to your door.</p>
                 <form role="search" onSubmit={e => e.preventDefault()}
-                  className="relative z-10 mt-5 flex h-12 max-w-[640px] items-center gap-2 rounded-2xl bg-white pl-4 pr-1.5 text-gray-900 shadow-[0_20px_60px_-15px_rgba(0,0,0,.6)] md:mt-6 md:h-14">
+                  className="mt-5 flex h-12 max-w-[560px] items-center gap-2 rounded-2xl border border-orange-100 bg-white pl-4 pr-1.5 shadow-[0_10px_30px_-18px_rgba(120,53,15,.4)] md:h-14">
                   <Search size={18} className="shrink-0 text-gray-400" />
-                  <input
-                    value={search}
-                    onChange={e => { setSearch(e.target.value); setActiveRestaurant(null); }}
-                    placeholder="Search restaurants or dishes"
-                    aria-label="Search restaurants"
-                    className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-gray-400 md:text-[16px]"
-                  />
-                  {search && (
-                    <button type="button" onClick={() => setSearch('')} aria-label="Clear search" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700"><X size={15} /></button>
-                  )}
-                  <span className="hidden h-9 items-center rounded-xl px-4 text-[13.5px] font-semibold text-white md:inline-flex md:h-11 md:px-5" style={{ background: `linear-gradient(180deg, #13B874 0%, ${G} 100%)` }}>
-                    {openingSoon ? 'Opening soon' : `${allRestaurants.length} open`}
-                  </span>
+                  <input value={search} onChange={e => { setSearch(e.target.value); setActiveRestaurant(null); }}
+                    placeholder="Search restaurants or dishes" aria-label="Search restaurants"
+                    className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-gray-400 md:text-[16px]" />
+                  {search && <button type="button" onClick={() => setSearch('')} aria-label="Clear search" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700"><X size={15} /></button>}
+                  <button type="button" onClick={() => document.getElementById('eats-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                    className="inline-flex h-9 shrink-0 items-center rounded-xl bg-[#E2562B] px-4 text-[13.5px] font-semibold text-white md:h-11 md:px-5">
+                    {openingSoon ? 'Notify me' : 'Search'}
+                  </button>
                 </form>
-                {!openingSoon && <div className="mt-4 flex gap-1.5 overflow-x-auto pb-0.5 no-scrollbar xl:max-w-[calc(100%-340px)]">
-                  {FOOD_CUISINE_TYPES.map(c => {
-                    const active = activeCuisine === c;
-                    return (
-                      <button key={c} type="button" aria-pressed={active}
-                        onClick={() => { setActiveCuisine(c); setActiveRestaurant(null); }}
-                        className={`h-9 shrink-0 rounded-full border px-3.5 text-[13px] font-medium backdrop-blur-md transition ${
-                          active ? 'border-white bg-white text-gray-900' : 'border-white/20 bg-white/10 text-white/90 hover:bg-white/20'
-                        }`}>
-                        {c}
-                      </button>
-                    );
-                  })}
-                </div>}
               </div>
-            </VideoHero>
-          </div>
+              <div className="relative order-1 h-[170px] overflow-hidden rounded-[18px] bg-[#2A140A] sm:h-[220px] md:order-2 md:h-auto md:min-h-[330px]">
+                <BgVideo clip={VIDEOS.food} dim={0} priority />
+              </div>
+            </div>
+          </section>
 
-          {/* Tonight's picks + cuisine tiles (home state only) */}
-          {showPopular && (
-            <>
-              <TonightsPicks picks={popular.slice(0, 3)} onOpen={setActiveRestaurant} />
-              <CuisineTiles cuisines={FOOD_CUISINE_TYPES.filter(c => c !== 'All')} active={activeCuisine}
-                onPick={c => { setActiveCuisine(c); setActiveRestaurant(null); document.getElementById('eats-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} />
-              <HungryBand />
-            </>
-          )}
+          {/* What's on your mind? (round cuisine photos) */}
+          <section className="mt-8 md:mt-10" aria-label="Cuisines">
+            <h2 className="text-[20px] font-semibold tracking-[-0.025em] md:text-[24px]">What's on your mind?</h2>
+            <div className="-mx-4 mt-4 flex gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-10 md:gap-3 md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
+              {FOOD_CUISINE_TYPES.filter(c => c !== 'All').map((c, i) => {
+                const on = activeCuisine === c;
+                const ph = photoForCuisine(c, i);
+                return (
+                  <button key={c} type="button" aria-pressed={on}
+                    onClick={() => { if (!openingSoon) { setActiveCuisine(on ? 'All' : c); setActiveRestaurant(null); } document.getElementById('eats-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+                    className="group flex w-[84px] shrink-0 flex-col items-center text-center md:w-auto">
+                    <span className={`block aspect-square w-full overflow-hidden rounded-full bg-gray-100 ring-offset-2 transition ${on ? 'ring-2 ring-[#E2562B]' : 'ring-1 ring-black/5'}`}>
+                      <img src={ph.src} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.08]" />
+                    </span>
+                    <span className={`mt-2 text-[12.5px] leading-tight ${on ? 'font-semibold text-gray-900' : 'font-medium text-gray-600 group-hover:text-gray-900'}`}>{c}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Tonight's picks (when kitchens are live) */}
+          {showPopular && <TonightsPicks picks={popular.slice(0, 3)} onOpen={setActiveRestaurant} />}
 
           {openingSoon && (
             <section id="eats-grid" className="mt-8 scroll-mt-20 md:mt-10">
               <div className="grid gap-6 overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 md:grid-cols-[1fr_1.1fr] md:gap-10 md:p-10">
                 <div>
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-emerald-700">Opening soon near you</p>
-                  <h2 className="mt-3 text-[28px] font-semibold leading-[1.08] tracking-[-0.035em] text-gray-900 md:text-[36px]">Your favourite kitchens are joining Zyphix Eats.</h2>
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#C2410C]">Opening soon near you</p>
+                  <h2 className="mt-3 text-[26px] font-semibold leading-[1.1] tracking-[-0.035em] text-gray-900 md:text-[34px]">Your favourite kitchens are joining Zyphix Eats.</h2>
                   <p className="mt-3 text-[15px] leading-[1.6] text-gray-500">We're onboarding restaurants neighbourhood by neighbourhood. Leave your number and we'll tell you the day Eats opens where you live.</p>
-                  <a href="https://partner.zyphix.in/restaurant" className="mt-5 inline-flex items-center gap-1.5 text-[14px] font-semibold text-emerald-700 hover:text-emerald-800">Own a restaurant? List it free <ChevronRight size={15} /></a>
                 </div>
                 <div className="md:pt-2"><WaitlistForm product="eats" cta="Notify me when Eats opens" /></div>
               </div>
             </section>
-          )}
-
-          {/* Opening soon: show what's coming instead of an empty page */}
-          {openingSoon && (
-            <>
-              <CuisineTiles cuisines={FOOD_CUISINE_TYPES.filter(c => c !== 'All')} active=""
-                onPick={() => document.getElementById('eats-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
-              <EatsTrackBand />
-              <HungryBand label="Get notified" note="Cooked to order in kitchens near you. Opening neighbourhood by neighbourhood." />
-              <RestaurantCta />
-            </>
           )}
 
           {/* Grid */}
@@ -282,13 +266,36 @@ export function ZyphixEats() {
             )}
           </section>}
 
-          {showPopular && (
-            <>
-              <EatsTrackBand />
-              <PartnerStrip registeredCount={registered.length} />
-              <RestaurantCta />
-            </>
-          )}
+          {/* How it works + restaurant owners (light) */}
+          <section className="mt-12 md:mt-16">
+            <h2 className="text-[20px] font-semibold tracking-[-0.025em] md:text-[24px]">How Zyphix Eats works</h2>
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3 md:gap-4">
+              {EATS_STEPS.map((st, i) => (
+                <div key={st.t} className="rounded-3xl border border-gray-200 bg-white p-5 md:p-6">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-50 text-[#C2410C]"><st.icon size={18} /></span>
+                    <span className="text-[12px] font-semibold tabular-nums text-gray-300">0{i + 1}</span>
+                  </div>
+                  <p className="mt-5 text-[16px] font-semibold tracking-[-0.015em] text-gray-900">{st.t}</p>
+                  <p className="mt-1.5 text-[13.5px] leading-[1.55] text-gray-500">{st.s}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="mt-12 overflow-hidden rounded-3xl border border-gray-200 bg-white md:mt-16">
+            <div className="grid md:grid-cols-[1.1fr_1fr]">
+              <div className="flex flex-col justify-center p-6 md:p-10">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#C2410C]">For restaurants</p>
+                <h2 className="mt-2 max-w-[18ch] text-[26px] font-semibold leading-[1.1] tracking-[-0.035em] text-gray-900 md:text-[34px]">Put your kitchen on every phone nearby.</h2>
+                <p className="mt-3 max-w-[46ch] text-[14.5px] leading-[1.6] text-gray-500">No joining fee, commission explained before you go live, and a real-time order dashboard.{registered.length > 0 ? ` ${registered.length} kitchen${registered.length === 1 ? ' has' : 's have'} already joined.` : ''}</p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Button href="https://partner.zyphix.in/restaurant">List your restaurant <ChevronRight size={15} /></Button>
+                </div>
+              </div>
+              <div className="relative min-h-[220px] bg-gray-100"><img src={fallbackPhoto(0).src} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" /></div>
+            </div>
+          </section>
         </motion.div>
       )}
 
@@ -434,3 +441,9 @@ function MenuRow({ item: m, qty, onAdd, onRemove }: { item: MenuItem; qty: numbe
     </div>
   );
 }
+
+const EATS_STEPS = [
+  { icon: ChefHat, t: 'Order from a local kitchen', s: 'The restaurant confirms and starts cooking right away.' },
+  { icon: Flame, t: 'Packed hot', s: 'Sealed at the counter the moment it leaves the pan.' },
+  { icon: Bike, t: 'Brought to your gate', s: 'Follow your rider with a live ETA until it arrives.' },
+];

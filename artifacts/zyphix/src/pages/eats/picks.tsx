@@ -41,7 +41,7 @@ const CUISINE_PHOTO: Record<string, () => Photo> = {
   'Chai & Snacks': () => landscape('chai', 1),
   'Healthy': () => landscape('produce', 0),
 };
-const photoForCuisine = (c: string, i: number): Photo => CUISINE_PHOTO[c]?.() || cuisinePhoto(i);
+export const photoForCuisine = (c: string, i: number): Photo => CUISINE_PHOTO[c]?.() || cuisinePhoto(i);
 
 export type PickRestaurant = { id: string; name: string; cuisine: string; eta: string; rating?: number; image: string };
 
