@@ -272,6 +272,7 @@ export function ZyphixNow() {
             onShopAll={() => categories[0] && jumpTo(categories[0].name)}
             onDismissCoupon={dismissCoupon}
           />
+          <PromoCards categories={categories} onPick={jumpTo} />
           </div>
 
           {/* ── Category tiles, grouped like the store's own aisles ── */}
@@ -470,13 +471,14 @@ function BannerRow({ productCount, hero, deals, art = [], dealArt = [], maxDeal,
   return (
     <section aria-label="Today on Zyphix Now" className="grid gap-3 md:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)] md:gap-4">
       {/* main banner */}
-      <div className="relative isolate flex min-h-[208px] overflow-hidden rounded-[22px] text-white md:min-h-[300px]" style={{ background: 'linear-gradient(125deg, #0B7F50 0%, #0DA366 48%, #2CC584 100%)' }}>
-        <div aria-hidden className="absolute -right-16 -top-24 h-72 w-72 rounded-full bg-white/10" />
-        <div aria-hidden className="absolute -bottom-28 right-24 h-64 w-64 rounded-full bg-black/10" />
+      <div className="relative isolate flex min-h-[220px] overflow-hidden rounded-[22px] bg-[#0B6B44] text-white md:min-h-[300px]">
+        <HeroVideo />
+        {/* Brand-green scrim: solid behind the words, opening up to the produce on the right */}
+        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,92,58,.96)_0%,rgba(9,112,70,.9)_38%,rgba(11,127,80,.45)_68%,rgba(11,127,80,.08)_100%)] max-sm:bg-[linear-gradient(180deg,rgba(7,92,58,.55)_0%,rgba(7,92,58,.92)_70%)]" />
         <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-between p-5 md:p-8">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11.5px] font-bold uppercase tracking-[0.08em] backdrop-blur"><Zap size={12} className="fill-current" /> Delivery in 10 minutes</span>
-            <h1 className="mt-3 max-w-[14ch] text-[30px] font-extrabold leading-[1.02] tracking-[-0.035em] md:mt-4 md:text-[46px]">Your corner store, in minutes.</h1>
+            <h1 className="mt-3 max-w-[14ch] text-[30px] font-extrabold leading-[1.02] tracking-[-0.035em] md:mt-4 md:text-[46px]">Your corner store,<br className="max-sm:hidden" /> in minutes.</h1>
             <p className="mt-2.5 max-w-[38ch] text-[13.5px] font-medium leading-snug text-white/85 md:text-[15.5px]">
               {productCount ? `${productCount} products` : 'Fresh produce, dairy and daily staples'} from shops near you, at shelf prices.
             </p>
@@ -486,15 +488,6 @@ function BannerRow({ productCount, hero, deals, art = [], dealArt = [], maxDeal,
             <span className="hidden h-10 items-center gap-1.5 rounded-full border border-white/30 px-3.5 text-[12.5px] font-semibold text-white/90 sm:inline-flex"><Clock size={13} /> Free delivery above ₹149</span>
           </div>
         </div>
-        {(art.length >= 4 || hero.length > 0) && (
-          <div aria-hidden className="relative hidden w-[42%] shrink-0 items-center justify-center sm:flex">
-            <div className="grid w-full max-w-[280px] grid-cols-2 gap-2.5 p-4 md:gap-3">
-              {art.length >= 4
-                ? art.slice(0, 4).map((src, i) => <ArtTile key={src} src={src} className={i % 2 ? 'translate-y-4' : ''} />)
-                : hero.slice(0, 4).map((p, i) => <BannerTile key={p.id} p={p} categories={categories} className={i % 2 ? 'translate-y-4' : ''} />)}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* side tiles */}
@@ -538,6 +531,59 @@ function BannerRow({ productCount, hero, deals, art = [], dealArt = [], maxDeal,
         </button>
       </div>
     </section>
+  );
+}
+
+/* ─── Three image cards under the banner (category artwork as the picture) ─── */
+const PROMOS: { cat: string; title: string; sub: string; bg: string; ink: string }[] = [
+  { cat: 'Pharmacy', title: 'Pharmacy at your door', sub: 'Medicines, vitamins and first aid from chemists near you', bg: '#E3F4F1', ink: '#0F5F55' },
+  { cat: 'Pet Care', title: 'Everything for your pet', sub: 'Food, treats and care in a few taps', bg: '#FFF0D9', ink: '#8A4B08' },
+  { cat: 'Baby Care', title: 'Baby care, sorted', sub: 'Diapers, wipes, baby food and more', bg: '#E8EDFF', ink: '#2F3F8F' },
+];
+function PromoCards({ categories, onPick }: { categories: Category[]; onPick: (name: string) => void }) {
+  const cards = PROMOS.map(p => ({ ...p, img: categories.find(c => c.name === p.cat)?.image ?? '' })).filter(p => p.img.includes('/img/categories/'));
+  if (cards.length < 3) return null;
+  return (
+    <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
+      {cards.map(p => (
+        <button key={p.cat} type="button" onClick={() => onPick(p.cat)}
+          className="group relative isolate flex h-[150px] w-[84%] shrink-0 snap-start overflow-hidden rounded-[20px] text-left md:h-[172px] md:w-auto"
+          style={{ background: p.bg }}>
+          <img src={p.img} alt="" loading="lazy" decoding="async" draggable={false}
+            className="absolute inset-y-0 right-0 -z-10 h-full w-[50%] scale-[1.12] object-cover mix-blend-multiply transition-transform duration-700 ease-[cubic-bezier(.22,1,.36,1)] [mask-image:linear-gradient(90deg,transparent,#000_38%)] group-hover:scale-[1.2]" />
+          <div className="relative flex w-[60%] flex-col justify-between p-4 md:p-5">
+            <div>
+              <p className="text-[16px] font-extrabold leading-tight tracking-[-0.02em] md:text-[18px]" style={{ color: p.ink }}>{p.title}</p>
+              <p className="mt-1 line-clamp-2 text-[12px] font-medium leading-snug text-gray-600 md:text-[13px]">{p.sub}</p>
+            </div>
+            <span className="inline-flex h-8 w-fit items-center gap-1 rounded-full px-3 text-[12px] font-bold text-white transition group-hover:-translate-y-px" style={{ background: p.ink }}>Order now <ArrowRight size={12} /></span>
+          </div>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Muted, looping produce footage behind the main banner. The still poster paints first; the clip
+    starts only when the banner is on screen, and never for reduced-motion or data-saver users. */
+function HeroVideo() {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const save = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    if (reduce || save) return;
+    const el = ref.current; if (!el) return;
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) { el.pause(); return; }
+      if (!el.src) el.src = '/videos/now-hero.mp4';
+      el.play().catch(() => {});
+    }, { threshold: 0.2 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <video ref={ref} aria-hidden tabIndex={-1} muted loop playsInline preload="none" poster="/images/now-hero.webp"
+      className="absolute inset-0 h-full w-full object-cover object-[70%_50%]" />
   );
 }
 
