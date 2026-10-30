@@ -277,11 +277,18 @@ export function ZyphixNow() {
           {/* ── Category tiles, grouped like the store's own aisles ── */}
           {categories.length === 0 ? (
             <SkeletonCategories />
-          ) : groups.map(g => (
-            <section key={g.title} aria-labelledby={`grp-${slug(g.title)}`}>
-              <h2 id={`grp-${slug(g.title)}`} className="mb-3 text-[17px] font-bold tracking-[-0.025em] md:text-[20px]">{g.title}</h2>
-              <CategoryTiles categories={g.items} counts={countByCategory} onPick={jumpTo} />
-            </section>
+          ) : packRows(groups).map(row => (
+            // Wide screens: small groups share a row on one 11-column grid, so tiles stay the same size
+            // and line up, with no half-empty rows. Smaller screens stack the groups.
+            <div key={row.map(g => g.title).join('|')} className="space-y-9 md:space-y-11 lg:grid lg:grid-cols-11 lg:gap-x-3 lg:space-y-0">
+              {row.map(g => (
+                <section key={g.title} aria-labelledby={`grp-${slug(g.title)}`} style={{ '--n': row.length > 1 ? g.items.length : ROW_TILES } as React.CSSProperties}
+                  className="min-w-0 lg:[grid-column:span_var(--n)]">
+                  <h2 id={`grp-${slug(g.title)}`} className="mb-3 truncate text-[17px] font-bold tracking-[-0.025em] md:text-[20px]">{g.title}</h2>
+                  <CategoryTiles categories={g.items} counts={countByCategory} onPick={jumpTo} span={row.length > 1} />
+                </section>
+              ))}
+            </div>
           ))}
 
           {/* ── Merchandised rows (all computed from the live catalogue) ── */}
@@ -420,10 +427,10 @@ function CategoryStrip({ categories, active, onPick, railRef, loading }: {
           return (
             <button key={c.name} type="button" data-pill={c.name} onClick={() => onPick(c.name)} aria-current={on || undefined}
               className="group relative flex w-[76px] shrink-0 flex-col items-center justify-center gap-1 px-1 md:w-[84px]">
-              <span className={`relative inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full transition ${on ? 'ring-2 ring-[#0DA366] ring-offset-2' : 'group-hover:scale-105'}`} style={{ background: `${c.color || '#0DA366'}1F` }}>
+              <span className={`relative inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#F1F3F5] transition ${on ? 'ring-2 ring-[#0DA366] ring-offset-2' : 'group-hover:scale-105'}`}>
                 {c.image ? <img src={c.image} alt="" loading="lazy" decoding="async" draggable={false} className={`h-full w-full object-cover ${c.image.includes('/img/categories/') ? 'scale-[1.3] mix-blend-multiply' : ''}`} /> : <CategoryIcon category={c} />}
               </span>
-              <span className={`line-clamp-2 w-full text-center text-[11px] leading-[1.15] ${on ? 'font-bold text-gray-900' : 'font-medium text-gray-600 group-hover:text-gray-900'}`}>{c.name}</span>
+              <span className={`line-clamp-2 w-full text-center text-[11px] leading-[1.15] ${on ? 'font-bold text-gray-900' : 'font-medium text-gray-600 group-hover:text-gray-900'}`}>{shortName(c.name)}</span>
               {on && <span aria-hidden className="absolute inset-x-3 bottom-0 h-[3px] rounded-t-full" style={{ background: G }} />}
             </button>
           );
@@ -432,6 +439,13 @@ function CategoryStrip({ categories, active, onPick, railRef, loading }: {
     </div>
   );
 }
+
+/** Shorter labels for the sticky strip, where space is tight. */
+const SHORT_NAMES: Record<string, string> = {
+  'Sauces, Spreads & Ketchup': 'Sauces & Spreads', 'Cold Drinks & Juices': 'Cold Drinks', 'Snacks & Munchies': 'Snacks',
+  'Chocolates & Sweets': 'Chocolates', 'Bakery & Biscuits': 'Bakery', 'Beauty & Cosmetics': 'Beauty', 'Breakfast & Soya': 'Breakfast',
+};
+const shortName = (name: string) => SHORT_NAMES[name] || name;
 
 /* ─── Banner row: the main promise (wide) + coupon and deals tiles ─── */
 /** Our generated category artwork (when it exists) for the given categories, in order. */
@@ -486,10 +500,10 @@ function BannerRow({ productCount, hero, deals, art = [], dealArt = [], maxDeal,
       {/* side tiles */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-1 md:gap-4">
         <div className="relative flex min-h-[140px] flex-col justify-between overflow-hidden rounded-[22px] bg-[#FFF3D6] p-4 md:p-5">
-          <div aria-hidden className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[#FFE3A3]" />
+          <span aria-hidden className="absolute right-4 top-4 hidden h-10 w-10 items-center justify-center rounded-xl bg-white/70 text-amber-700 md:inline-flex"><Percent size={18} /></span>
           {coupon ? (
             <>
-              <div className="relative min-w-0">
+              <div className="relative min-w-0 md:pr-12">
                 <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-amber-700">First order</p>
                 <p className="mt-1 line-clamp-3 text-[14px] font-bold leading-tight tracking-[-0.02em] text-gray-900 md:line-clamp-2 md:text-[18px]">{coupon.desc}</p>
               </div>
@@ -515,7 +529,7 @@ function BannerRow({ productCount, hero, deals, art = [], dealArt = [], maxDeal,
           </div>
           <span className="relative z-10 mt-3 inline-flex h-9 w-fit items-center gap-1 rounded-full bg-gray-900 px-3.5 text-[12.5px] font-bold text-white transition group-hover:-translate-y-px"><Percent size={12} /> Shop deals</span>
           {(dealArt.length >= 2 || deals.length > 0) && (
-            <div aria-hidden className="absolute -bottom-3 -right-3 hidden w-[46%] rotate-[-6deg] gap-1.5 md:flex">
+            <div aria-hidden className="absolute bottom-4 right-4 hidden w-[40%] max-w-[176px] gap-2 md:flex">
               {dealArt.length >= 2
                 ? dealArt.slice(0, 2).map(src => <ArtTile key={src} src={src} className="flex-1" />)
                 : deals.slice(0, 2).map(p => <BannerTile key={p.id} p={p} categories={categories} className="flex-1" />)}
@@ -559,18 +573,29 @@ function groupCategories(categories: Category[]): { title: string; items: Catego
     .map(([title, items]) => ({ title, items }));
 }
 
-function CategoryTiles({ categories, onPick }: { categories: Category[]; counts?: Map<string, number>; onPick: (name: string) => void }) {
+/** Packs category groups into rows of at most 11 tiles (wide screens); big groups get a row each. */
+const ROW_TILES = 11;
+function packRows<T extends { items: unknown[] }>(groups: T[]): T[][] {
+  const rows: { list: T[]; used: number }[] = [];
+  for (const g of groups) {
+    const n = g.items.length;
+    const fit = n < ROW_TILES ? rows.find(r => r.used + n <= ROW_TILES && r.list.every(x => x.items.length < ROW_TILES)) : undefined;
+    if (fit) { fit.list.push(g); fit.used += n; } else rows.push({ list: [g], used: n });
+  }
+  return rows.map(r => r.list);
+}
+
+function CategoryTiles({ categories, onPick, span = false }: { categories: Category[]; counts?: Map<string, number>; onPick: (name: string) => void; span?: boolean }) {
   return (
-    <div className="grid grid-cols-4 gap-x-2 gap-y-3.5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 md:gap-x-3">
+    <div className={`grid grid-cols-4 gap-x-2 gap-y-4 sm:grid-cols-6 md:grid-cols-8 md:gap-x-3 ${span ? 'lg:grid-cols-[repeat(var(--n),minmax(0,1fr))]' : 'lg:grid-cols-11'}`}>
       {categories.map(c => (
         <button key={c.name} type="button" onClick={() => onPick(c.name)} className="group flex flex-col items-center text-center">
-          <span className="relative block aspect-square w-full overflow-hidden rounded-2xl bg-[#EEF1F4] transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover:-translate-y-0.5 group-hover:shadow-[0_10px_22px_-12px_rgba(11,15,25,.35)]"
-            style={{ background: `linear-gradient(170deg, ${c.color || '#0DA366'}1F, #F1F2F4 70%)` }}>
+          <span className="relative block aspect-square w-full overflow-hidden rounded-2xl bg-[#F1F3F5] ring-1 ring-inset ring-black/[0.03] transition duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover:-translate-y-0.5 group-hover:shadow-[0_10px_22px_-12px_rgba(11,15,25,.35)]">
             {c.image
               ? <img src={c.image} alt="" loading="lazy" decoding="async" draggable={false} className={`h-full w-full object-cover transition-transform duration-500 ${c.image.includes('/img/categories/') ? 'scale-[1.22] mix-blend-multiply group-hover:scale-[1.3]' : 'group-hover:scale-[1.06]'}`} />
               : <span className="flex h-full w-full items-center justify-center [&>span]:!text-[30px]"><CategoryIcon category={c} /></span>}
           </span>
-          <span className="mt-1.5 line-clamp-2 text-[11.5px] font-semibold leading-[1.2] text-gray-800 md:text-[12.5px]">{c.name}</span>
+          <span className="mt-2 line-clamp-2 text-[11.5px] font-semibold leading-[1.25] text-gray-800 md:text-[12.5px]">{c.name}</span>
         </button>
       ))}
     </div>
