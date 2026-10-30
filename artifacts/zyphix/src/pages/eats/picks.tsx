@@ -7,7 +7,7 @@ import React from 'react';
 import { ArrowRight, Star, Clock, CheckCircle2, ClipboardList, Zap, ChefHat, Flame, Bike } from 'lucide-react';
 import { Reveal, Kicker, Sub, GlowButton, Dark, Glow, Grain, PhotoTile } from '@/ui/cinema';
 import { Accent, ClipWall, VideoText, RouteMap, LiveOrder, Magnetic } from '@/ui/motion2';
-import { VIDEOS, PHOTOS, landscape, type Photo } from '@/data/media';
+import { VIDEOS, PHOTOS, landscape, pexelsPhoto, type Photo } from '@/data/media';
 
 /** Display headline style for Eats bands (Geist, tight tracking). */
 export const DISPLAY = 'font-semibold tracking-[-0.04em] text-balance';
@@ -29,17 +29,18 @@ export const cuisinePhoto = (i: number): Photo => {
 };
 
 /** Hand-matched photo per cuisine chip; falls back to the index-based pool. */
+const dish = (id: number, alt: string): Photo => ({ id: String(id), src: pexelsPhoto(id, 480), alt });
 const CUISINE_PHOTO: Record<string, () => Photo> = {
-  'North Indian': () => landscape('thali', 0),
-  'South Indian': () => PHOTOS.indianFood[5] || landscape('indianFood', 0),
-  'Biryani': () => landscape('biryani', 0),
-  'Pizza': () => landscape('restaurant', 0),
-  'Burgers': () => landscape('restaurant', 2),
-  'Momos': () => PHOTOS.indianFood[4] || landscape('streetFood', 0),
-  'Chinese': () => landscape('chef', 0),
-  'Sweets': () => landscape('streetFood', 3),
-  'Chai & Snacks': () => landscape('chai', 1),
-  'Healthy': () => landscape('produce', 0),
+  'North Indian': () => dish(9609844, 'Butter chicken curry in a bowl'),
+  'South Indian': () => dish(5560763, 'Crisp dosas with chutneys on a banana leaf'),
+  'Biryani': () => dish(12737656, 'Plate of chicken biryani'),
+  'Pizza': () => dish(2147491, 'Two margherita pizzas'),
+  'Burgers': () => dish(1639557, 'Cheeseburger close-up'),
+  'Momos': () => dish(5409010, 'Steamed dumplings on a slate'),
+  'Chinese': () => dish(2347311, 'Bowl of stir-fried noodles'),
+  'Sweets': () => dish(15014918, 'Bowl of gulab jamun'),
+  'Chai & Snacks': () => dish(5410400, 'Pav with spicy curry'),
+  'Healthy': () => dish(1640777, 'Fresh salad bowl'),
 };
 export const photoForCuisine = (c: string, i: number): Photo => CUISINE_PHOTO[c]?.() || cuisinePhoto(i);
 
