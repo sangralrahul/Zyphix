@@ -42,10 +42,13 @@ export function FinalCta() {
       <Container className="relative text-center">
         <Reveal><Headline size="lg" light className="mx-auto max-w-[18ch] text-balance">Pick a track and apply in <Accent green>ten</Accent> minutes.</Headline></Reveal>
         <Reveal delay={0.05}><Sub light className="mx-auto mt-5 max-w-[520px]">Free to apply. A real person calls you within two working days.</Sub></Reveal>
-        <Reveal delay={0.1} className="mx-auto mt-10 flex max-w-[760px] flex-wrap justify-center gap-3">
-          {TRACKS.map((t, i) => i === 0
-            ? <Magnetic key={t.id}><GlowButton href={t.href} size="md">{t.name} <ArrowRight size={15} /></GlowButton></Magnetic>
-            : <GhostButton key={t.id} href={t.href} size="md">{t.name} <ArrowRight size={15} /></GhostButton>)}
+        <Reveal delay={0.1} className="mx-auto mt-10 grid max-w-[640px] grid-cols-1 gap-3 sm:grid-cols-2">
+          {TRACKS.map(t => (
+            <a key={t.id} href={t.href} className="group flex items-center justify-between gap-3 rounded-2xl border border-white/12 bg-white/[.05] px-5 py-4 text-left backdrop-blur transition hover:border-emerald-400/50 hover:bg-white/[.08]">
+              <span className="text-[15px] font-semibold tracking-[-0.01em] text-white">{t.name}</span>
+              <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white transition group-hover:translate-x-0.5"><ArrowRight size={15} /></span>
+            </a>
+          ))}
         </Reveal>
       </Container>
     </section>

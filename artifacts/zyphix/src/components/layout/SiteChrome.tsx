@@ -194,10 +194,11 @@ const NOW_HREF = 'https://now.zyphix.in';
 export function SiteFooter() {
   const link = 'inline-flex items-center gap-1 text-[13.5px] text-gray-600 transition-colors hover:text-gray-900';
   const onNow = detectSite() === 'now';
+  const showCategories = onNow || detectSite() === 'main';
   return (
     <footer className={`border-t ${BORDER} bg-white`} style={{ fontFamily: FONT }}>
-      {/* All categories, like a store directory */}
-      <div className={`border-b ${BORDER}`}>
+      {/* All categories, like a store directory (shopping sites only: zyphix.in and Zyphix Now) */}
+      {showCategories && <div className={`border-b ${BORDER}`}>
         <Container className="py-10">
           <div className="flex items-baseline justify-between gap-4">
             <p className="text-[12.5px] font-semibold tracking-[-0.01em] text-gray-900">Categories</p>
@@ -213,7 +214,7 @@ export function SiteFooter() {
             ))}
           </ul>
         </Container>
-      </div>
+      </div>}
 
       {/* Every Zyphix product */}
       <Container className="pt-12 md:pt-14">
