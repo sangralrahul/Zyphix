@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import { motion } from '@/lib/motion';
-import { Menu, X, Instagram, Linkedin, Twitter, ArrowUpRight } from 'lucide-react';
+import { Menu, X, Instagram, Linkedin, Twitter, ArrowUpRight, ShoppingBasket, UtensilsCrossed, CalendarCheck, Store, Megaphone, LifeBuoy, UserRound, Smartphone } from 'lucide-react';
 import { ZyphixLogo } from '@/components/ZyphixLogo';
 import { Button, Container, Display, Eyebrow, Lead, Mesh, FONT, G as KIT_G, G_DEEP, INK as KIT_INK } from '@/ui/kit';
 import { authUrl } from '@/lib/account';
@@ -108,8 +108,32 @@ export function SiteHeader({ variant = 'solid' }: { variant?: 'solid' | 'transpa
 }
 
 /* ── Footer ───────────────────────────────────────────────────────────────── */
+/** Every Zyphix product, each on its own subdomain. */
+const APPS: Array<{ name: string; desc: string; href: string; host: string; icon: React.ReactNode; tint: string; ink: string }> = [
+  { name: 'Zyphix Now', desc: 'Groceries in minutes', href: 'https://now.zyphix.in/', host: 'now.zyphix.in', icon: <ShoppingBasket size={17} />, tint: '#E7F7EF', ink: '#0B7F50' },
+  { name: 'Zyphix Eats', desc: 'Food from nearby restaurants', href: 'https://eats.zyphix.in/', host: 'eats.zyphix.in', icon: <UtensilsCrossed size={17} />, tint: '#FFF0E6', ink: '#C2410C' },
+  { name: 'Zyphix Book', desc: 'Local home services', href: 'https://book.zyphix.in/', host: 'book.zyphix.in', icon: <CalendarCheck size={17} />, tint: '#EEF0FF', ink: '#4338CA' },
+  { name: 'Zyphix Partner', desc: 'Sell, cook or deliver with us', href: 'https://partner.zyphix.in/', host: 'partner.zyphix.in', icon: <Store size={17} />, tint: '#E6F6F8', ink: '#0E7490' },
+  { name: 'Zyphix Ads', desc: 'Reach local shoppers', href: 'https://advertise.zyphix.in/', host: 'advertise.zyphix.in', icon: <Megaphone size={17} />, tint: '#FDECF3', ink: '#BE185D' },
+  { name: 'Help Centre', desc: 'Orders, refunds and help', href: 'https://support.zyphix.in/', host: 'support.zyphix.in', icon: <LifeBuoy size={17} />, tint: '#FFF6DB', ink: '#A16207' },
+  { name: 'My Account', desc: 'Orders and addresses', href: 'https://accounts.zyphix.in/', host: 'accounts.zyphix.in', icon: <UserRound size={17} />, tint: '#F1F3F5', ink: '#334155' },
+  { name: 'Mobile app', desc: 'Everything in one app', href: '/app', host: 'zyphix.in/app', icon: <Smartphone size={17} />, tint: '#E7F7EF', ink: '#0B7F50' },
+];
+
+/** Every Zyphix Now aisle, in store order (kept in step with worker/categoryArt.ts). */
+const CATEGORIES = [
+  'Fruits & Veg', 'Dairy & Eggs', 'Atta, Rice & Dal', 'Bakery & Biscuits', 'Oils & Ghee', 'Masalas & Spices', 'Dry Fruits & Nuts',
+  'Breakfast & Soya', 'Sauces, Spreads & Ketchup', 'Noodles & Pasta', 'Ready to Cook & Eat', 'Frozen Food', 'Meat & Seafood',
+  'Organic & Healthy', 'Snacks & Munchies', 'Cold Drinks & Juices', 'Tea & Coffee', 'Chocolates & Sweets', 'Ice Creams', 'Paan Corner',
+  'Personal Care', 'Skincare', 'Haircare', 'Beauty & Cosmetics', 'Fragrances', 'Bath & Body', 'Feminine Hygiene', "Men's Grooming",
+  'Pharmacy', 'Health & Wellness', 'Baby Care', 'Household', 'Cleaning Essentials', 'Home Needs', 'Pooja Needs',
+  'Kitchenware & Appliances', 'Electronics & Accessories', 'Pet Care', 'Apparel', 'Jewellery & Accessories', 'Toys & Games',
+  'Stationery & Crafts', 'Sports & Fitness', 'Books', 'Party & Gifting',
+];
+const catSlug = (name: string) => name.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
 const FOOT: Array<[string, Array<[string, string]>]> = [
-  ['Products', [['Zyphix Now', 'https://now.zyphix.in/'], ['Zyphix Eats', 'https://eats.zyphix.in/'], ['Zyphix Book', 'https://book.zyphix.in/'], ['Offers', '/offers'], ['Store map', '/kirana-map'], ['Mobile app', '/app']]],
+  ['Shop', [['Zyphix Now', 'https://now.zyphix.in/'], ['Zyphix Eats', 'https://eats.zyphix.in/'], ['Zyphix Book', 'https://book.zyphix.in/'], ['Offers', '/offers'], ['Store map', '/kirana-map'], ['Mobile app', '/app']]],
   ['Partners', [['Partner portal', 'https://partner.zyphix.in/'], ['Deliver with us', 'https://partner.zyphix.in/delivery'], ['Register a restaurant', 'https://partner.zyphix.in/restaurant'], ['Join as a professional', 'https://partner.zyphix.in/services'], ['List your store', 'https://partner.zyphix.in/store']]],
   ['Company', [['About', '/about'], ['Investors', '/investors'], ['Contact', '/contact'], ['Press', 'mailto:press@zyphix.in']]],
   ['Resources', [['Blog', '/blog'], ['Advertise', 'https://advertise.zyphix.in'], ['Help centre', 'https://support.zyphix.in'], ['Partnerships', 'mailto:partnerships@zyphix.in']]],
@@ -169,9 +193,40 @@ const NOW_HREF = 'https://now.zyphix.in';
 
 export function SiteFooter() {
   const link = 'inline-flex items-center gap-1 text-[13.5px] text-gray-600 transition-colors hover:text-gray-900';
+  const onNow = detectSite() === 'now';
   return (
     <footer className={`border-t ${BORDER} bg-white`} style={{ fontFamily: FONT }}>
-      <Container className="grid grid-cols-2 gap-x-6 gap-y-10 py-14 sm:grid-cols-3 lg:grid-cols-[1.2fr_repeat(5,1fr)]">
+      {/* Every Zyphix product */}
+      <Container className="pt-12 md:pt-14">
+        <div className="flex items-end justify-between gap-4">
+          <p className="text-[18px] font-bold tracking-[-0.025em] text-gray-900 md:text-[20px]">One app for your whole neighbourhood</p>
+          <span className="hidden text-[13px] text-gray-500 md:block">{APPS.length} Zyphix products</span>
+        </div>
+        <ul className="mt-5 grid grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-4">
+          {APPS.map(a => {
+            const inner = (
+              <>
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10" style={{ background: a.tint, color: a.ink }}>{a.icon}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-1 whitespace-nowrap text-[13px] font-semibold sm:text-[14px] tracking-[-0.01em] text-gray-900">{a.name}<ArrowUpRight size={13} className="hidden text-gray-300 sm:block transition group-hover:-translate-y-px group-hover:translate-x-px group-hover:text-gray-500" /></span>
+                  <span className="hidden truncate text-[12.5px] text-gray-500 sm:block">{a.desc}</span>
+                </span>
+              </>
+            );
+            const cls = `group flex items-center gap-2.5 rounded-2xl border ${BORDER} bg-white p-2.5 transition sm:gap-3 sm:p-3 hover:border-gray-300 hover:shadow-[0_8px_24px_-16px_rgba(16,24,40,.25)]`;
+            return (
+              <li key={a.name}>
+                {a.href.startsWith('http')
+                  ? <a href={a.href} className={cls} aria-label={`${a.name}, ${a.host}`}>{inner}</a>
+                  : <SmartLink href={a.href} className={cls} aria-label={`${a.name}, ${a.host}`}>{inner}</SmartLink>}
+              </li>
+            );
+          })}
+        </ul>
+      </Container>
+
+      {/* Useful links */}
+      <Container className="grid grid-cols-2 gap-x-6 gap-y-10 py-12 sm:grid-cols-3 lg:grid-cols-[1.2fr_repeat(5,1fr)]">
         <div className="col-span-2 sm:col-span-3 lg:col-span-1">
           <ZyphixLogo size={28} />
           <p className="mt-4 max-w-[260px] text-[13.5px] leading-[1.6] text-gray-500">The SuperLocal app. Groceries, food and home services from the businesses already in your neighbourhood.</p>
@@ -193,6 +248,25 @@ export function SiteFooter() {
           </div>
         ))}
       </Container>
+
+      {/* All categories, like a store directory */}
+      <div className={`border-t ${BORDER}`}>
+        <Container className="py-10">
+          <div className="flex items-baseline justify-between gap-4">
+            <p className="text-[12.5px] font-semibold tracking-[-0.01em] text-gray-900">Categories</p>
+            <a href="https://now.zyphix.in/" className="text-[12.5px] font-semibold text-[#0B7F50] hover:text-[#086A42]">Shop on Zyphix Now</a>
+          </div>
+          <ul className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {CATEGORIES.map(c => (
+              <li key={c} className="min-w-0">
+                {onNow
+                  ? <Link href={`/c/${catSlug(c)}`} className={`${link} truncate`}>{c}</Link>
+                  : <a href={`https://now.zyphix.in/c/${catSlug(c)}`} className={`${link} truncate`}>{c}</a>}
+              </li>
+            ))}
+          </ul>
+        </Container>
+      </div>
 
       <div className={`border-t ${BORDER}`}>
         <Container className="flex flex-col gap-4 py-5 text-[13px] text-gray-500 sm:flex-row sm:items-center sm:justify-between">
