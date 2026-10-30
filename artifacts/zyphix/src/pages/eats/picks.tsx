@@ -196,14 +196,14 @@ export function EatsHeroLiveOrder() {
 }
 
 /* ── "HUNGRY?" video-in-letters band ── */
-export function HungryBand() {
+export function HungryBand({ label = "See what's open", href = '#eats-grid', note = 'Cooked to order in kitchens near you.' }: { label?: string; href?: string; note?: string } = {}) {
   return (
     <section aria-label="Hungry?" className="relative -mx-4 mt-10 overflow-hidden bg-[#05080E] md:mx-0 md:mt-12 md:rounded-3xl">
       <VideoText clip={VIDEOS.cooking} text="HUNGRY?" size="text-[19vw] md:text-[190px] lg:text-[226px]" className="pt-6 md:pt-8" />
       <div className="relative flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-4 text-white md:px-8">
-        <p className="text-[14px] text-white/70">Cooked to order in kitchens near you.</p>
-        <a href="#eats-grid" className="inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-[13.5px] font-semibold text-gray-900 no-underline transition hover:-translate-y-px hover:bg-emerald-50">
-          See what's open <ArrowRight size={14} />
+        <p className="text-[14px] text-white/70">{note}</p>
+        <a href={href} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-[13.5px] font-semibold text-gray-900 no-underline transition hover:-translate-y-px hover:bg-emerald-50">
+          {label} <ArrowRight size={14} />
         </a>
       </div>
     </section>

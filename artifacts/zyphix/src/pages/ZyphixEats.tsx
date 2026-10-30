@@ -241,6 +241,17 @@ export function ZyphixEats() {
             </section>
           )}
 
+          {/* Opening soon: show what's coming instead of an empty page */}
+          {openingSoon && (
+            <>
+              <CuisineTiles cuisines={FOOD_CUISINE_TYPES.filter(c => c !== 'All')} active=""
+                onPick={() => document.getElementById('eats-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
+              <EatsTrackBand />
+              <HungryBand label="Get notified" note="Cooked to order in kitchens near you. Opening neighbourhood by neighbourhood." />
+              <RestaurantCta />
+            </>
+          )}
+
           {/* Grid */}
           {!openingSoon && <section id="eats-grid" className="mt-8 scroll-mt-20 md:mt-10">
             <Reveal y={12} amount={0.4} className="flex items-baseline justify-between gap-3">

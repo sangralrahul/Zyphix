@@ -13,9 +13,9 @@ import { useCart } from '@/context/CartContext';
 import { COUPONS } from '@/data/coupons';
 import { usePartners, type PartnerListing } from '@/lib/partners';
 import { Button, IconTile, G } from '@/ui/kit';
-import { Reveal, isStatic } from '@/ui/cinema';
+import { Reveal, isStatic, BgVideo } from '@/ui/cinema';
 import { useRotatingWord } from './now/bands';
-import { landscape, type Photo } from '@/data/media';
+import { landscape, VIDEOS, type Photo } from '@/data/media';
 import {
   discountOf, buildOffers, dealsOfTheDay, bestsellers as pickBestsellers, underPrice, topBrands, freshProduce,
   type Offer, type OfferTheme,
@@ -474,10 +474,12 @@ function BannerRow({ productCount, hero, deals, art = [], dealArt = [], maxDeal,
   return (
     <section aria-label="Today on Zyphix Now" className="grid gap-3 md:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)] md:gap-4">
       {/* main banner */}
-      <div className="relative isolate flex min-h-[236px] overflow-hidden rounded-[22px] text-white md:min-h-[320px]"
+      <div className="relative isolate flex min-h-[260px] overflow-hidden rounded-[22px] text-white md:min-h-[340px]"
         style={{ background: 'radial-gradient(120% 140% at 0% 0%, #0E8A58 0%, #08623F 45%, #053D28 100%)' }}>
-        <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#2CC584]/25 blur-3xl" />
-        <HeroArt images={art} />        <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-between p-5 pb-[104px] sm:max-w-[58%] sm:pb-5 md:p-8">
+        {/* Cinematic footage: hands packing fresh groceries (Pexels, served through our own /media proxy) */}
+        <BgVideo clip={VIDEOS.packing} dim={0} position="62% 50%" priority />
+        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,48,31,.94)_0%,rgba(6,72,46,.82)_36%,rgba(6,72,46,.28)_66%,rgba(6,72,46,0)_100%)] max-sm:bg-[linear-gradient(180deg,rgba(4,48,31,.35)_0%,rgba(4,48,31,.9)_62%)]" />
+        <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-between p-5 sm:max-w-[60%] md:p-8">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11.5px] font-bold uppercase tracking-[0.08em] backdrop-blur"><Zap size={12} className="fill-current" /> Delivery in 10 minutes</span>
             <h1 className="mt-3 max-w-[14ch] text-[30px] font-extrabold leading-[1.02] tracking-[-0.035em] md:mt-4 md:text-[46px]">Your corner store,<br className="max-sm:hidden" /> in minutes.</h1>
@@ -601,42 +603,6 @@ function PromoCards({ categories, onPick }: { categories: Category[]; onPick: (n
         </button>
       ))}
     </div>
-  );
-}
-
-/** Endless columns of our category artwork on the right of the banner (a strip on phones).
-    Pure CSS motion; it pauses on hover and stays still for reduced-motion users. */
-function HeroArt({ images }: { images: string[] }) {
-  if (images.length < 6) return null;
-  const cols = [0, 1, 2].map(k => images.filter((_, i) => i % 3 === k));
-  const Tile = ({ src }: { src: string }) => (
-    <div className="aspect-square w-full overflow-hidden rounded-2xl bg-[#F4F5F2] shadow-[0_18px_40px_-18px_rgba(0,0,0,.55)] ring-1 ring-white/10">
-      <img src={src} alt="" decoding="async" draggable={false} className="h-full w-full scale-[1.14] object-cover" />
-    </div>
-  );
-  return (
-    <>
-      {/* wide screens: three columns drifting in opposite directions */}
-      <div aria-hidden className="zx-marquee absolute inset-y-0 right-0 hidden w-[46%] sm:block [mask-image:linear-gradient(90deg,transparent,#000_22%),linear-gradient(180deg,transparent,#000_14%,#000_86%,transparent)] [mask-composite:intersect] [-webkit-mask-composite:source-in]">
-        <div className="absolute -inset-y-10 right-6 grid w-[min(100%,420px)] rotate-[-8deg] grid-cols-3 gap-3 md:right-10">
-          {cols.map((col, k) => (
-            <div key={k} className="relative overflow-hidden">
-              <div className={`flex flex-col gap-3 ${k === 1 ? 'zx-col-down' : 'zx-col-up'}`} style={{ '--d': `${36 + k * 7}s` } as React.CSSProperties}>
-                {[...col, ...col].map((src, i) => <Tile key={i} src={src} />)}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      {/* phones: one strip along the bottom */}
-      <div aria-hidden className="zx-marquee absolute inset-x-0 bottom-0 h-[86px] overflow-hidden opacity-90 sm:hidden [mask-image:linear-gradient(90deg,transparent,#000_12%,#000_88%,transparent)]">
-        <div className="zx-row-left flex w-max gap-2.5 px-2" style={{ '--d': '46s' } as React.CSSProperties}>
-          {[...images, ...images].map((src, i) => (
-            <div key={i} className="h-[74px] w-[74px] shrink-0 overflow-hidden rounded-xl bg-[#F4F5F2]"><img src={src} alt="" decoding="async" draggable={false} className="h-full w-full scale-[1.14] object-cover" /></div>
-          ))}
-        </div>
-      </div>
-    </>
   );
 }
 
