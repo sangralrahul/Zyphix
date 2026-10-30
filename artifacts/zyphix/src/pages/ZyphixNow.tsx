@@ -263,7 +263,7 @@ export function ZyphixNow() {
             productCount={catalogLoading ? '' : productCount}
             hero={bestsellerRow.slice(0, 4)}
             deals={dealsRow.slice(0, 3)}
-            art={artFor(categories, ['Fruits & Veg', 'Dairy & Eggs', 'Atta, Rice & Dal', 'Oils & Ghee'])}
+            art={artFor(categories, ['Fruits & Veg', 'Dairy & Eggs', 'Snacks & Munchies', 'Atta, Rice & Dal', 'Cold Drinks & Juices', 'Bakery & Biscuits', 'Oils & Ghee', 'Chocolates & Sweets', 'Tea & Coffee', 'Personal Care', 'Dry Fruits & Nuts', 'Ice Creams'])}
             dealArt={artFor(categories, ['Snacks & Munchies', 'Chocolates & Sweets'])}
             maxDeal={maxDeal}
             coupon={coupon && !couponDismissed ? coupon : undefined}
@@ -364,14 +364,17 @@ export function ZyphixNow() {
           )}
 
           {/* ── One row per category, "See all" opens the category page ── */}
-          {!catalogLoading && categories.map(c => {
+          {!catalogLoading && categories.filter(c => (byCategory.get(c.name) || []).length > 0).map((c, i) => {
             const list = (byCategory.get(c.name) || []).slice(0, 14);
-            if (!list.length) return null;
+            const feature = FEATURES.find(f => f.after === i);
             return (
-              <section key={c.name} id={sectionId(c.name)} data-cat={c.name}>
-                <SectionHead title={c.name} sub={`${num(countByCategory.get(c.name) || 0)} items`} action={<SeeAll onClick={() => jumpTo(c.name)} />} />
-                <ProductRow products={list} categories={categories} cart={cart} add={add} remove={remove} />
-              </section>
+              <React.Fragment key={c.name}>
+                <section id={sectionId(c.name)} data-cat={c.name}>
+                  <SectionHead title={c.name} sub={`${num(countByCategory.get(c.name) || 0)} items`} action={<SeeAll onClick={() => jumpTo(c.name)} />} />
+                  <ProductRow products={list} categories={categories} cart={cart} add={add} remove={remove} />
+                </section>
+                {feature && <FeatureBanner feature={feature} categories={categories} onPick={jumpTo} />}
+              </React.Fragment>
             );
           })}
         </div>
@@ -471,11 +474,10 @@ function BannerRow({ productCount, hero, deals, art = [], dealArt = [], maxDeal,
   return (
     <section aria-label="Today on Zyphix Now" className="grid gap-3 md:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)] md:gap-4">
       {/* main banner */}
-      <div className="relative isolate flex min-h-[220px] overflow-hidden rounded-[22px] bg-[#0B6B44] text-white md:min-h-[300px]">
-        <HeroVideo />
-        {/* Brand-green scrim: solid behind the words, opening up to the produce on the right */}
-        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,92,58,.96)_0%,rgba(9,112,70,.9)_38%,rgba(11,127,80,.45)_68%,rgba(11,127,80,.08)_100%)] max-sm:bg-[linear-gradient(180deg,rgba(7,92,58,.55)_0%,rgba(7,92,58,.92)_70%)]" />
-        <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-between p-5 md:p-8">
+      <div className="relative isolate flex min-h-[236px] overflow-hidden rounded-[22px] text-white md:min-h-[320px]"
+        style={{ background: 'radial-gradient(120% 140% at 0% 0%, #0E8A58 0%, #08623F 45%, #053D28 100%)' }}>
+        <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#2CC584]/25 blur-3xl" />
+        <HeroArt images={art} />        <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-between p-5 pb-[104px] sm:max-w-[58%] sm:pb-5 md:p-8">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11.5px] font-bold uppercase tracking-[0.08em] backdrop-blur"><Zap size={12} className="fill-current" /> Delivery in 10 minutes</span>
             <h1 className="mt-3 max-w-[14ch] text-[30px] font-extrabold leading-[1.02] tracking-[-0.035em] md:mt-4 md:text-[46px]">Your corner store,<br className="max-sm:hidden" /> in minutes.</h1>
@@ -534,6 +536,44 @@ function BannerRow({ productCount, hero, deals, art = [], dealArt = [], maxDeal,
   );
 }
 
+/* ─── Full-width picture banners that break up the long run of product rows ─── */
+type Feature = { after: number; eyebrow: string; title: string; sub: string; cats: string[]; bg: string; ink: string };
+const FEATURES: Feature[] = [
+  { after: 2, eyebrow: 'Kitchen staples', title: 'Stock up your kitchen', sub: 'Atta, rice, dal, oils and masalas at shelf prices', cats: ['Atta, Rice & Dal', 'Oils & Ghee', 'Masalas & Spices', 'Dry Fruits & Nuts'], bg: '#FFF3DF', ink: '#8A4B08' },
+  { after: 7, eyebrow: 'Snack time', title: 'Cravings, covered', sub: 'Chips, chocolates, cold drinks and ice creams', cats: ['Snacks & Munchies', 'Chocolates & Sweets', 'Cold Drinks & Juices', 'Ice Creams'], bg: '#F1EBFF', ink: '#5B2DA8' },
+  { after: 13, eyebrow: 'Self-care', title: 'Look after yourself', sub: 'Skincare, haircare, bath and grooming essentials', cats: ['Skincare', 'Haircare', 'Bath & Body', "Men's Grooming"], bg: '#FDEBF1', ink: '#9D174D' },
+  { after: 20, eyebrow: 'For the home', title: 'Home, sorted', sub: 'Cleaning supplies, kitchenware and everyday home needs', cats: ['Cleaning Essentials', 'Kitchenware & Appliances', 'Home Needs', 'Pooja Needs'], bg: '#E4F3F6', ink: '#155E75' },
+  { after: 28, eyebrow: 'Just for fun', title: 'Gifts, toys and more', sub: 'Party supplies, toys, stationery and books', cats: ['Party & Gifting', 'Toys & Games', 'Stationery & Crafts', 'Books'], bg: '#FFF0E8', ink: '#9A3412' },
+];
+function FeatureBanner({ feature: f, categories, onPick }: { feature: Feature; categories: Category[]; onPick: (name: string) => void }) {
+  const tiles = f.cats.map(n => ({ n, img: categories.find(c => c.name === n)?.image ?? '' })).filter(t => t.img.includes('/img/categories/'));
+  if (tiles.length < 3) return null;
+  return (
+    <Reveal y={16} amount={0.25}>
+      <section aria-label={f.title} className="relative overflow-hidden rounded-[24px] p-5 md:p-7" style={{ background: f.bg }}>
+        <div className="grid items-center gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] md:gap-8">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.12em]" style={{ color: f.ink, opacity: 0.75 }}>{f.eyebrow}</p>
+            <h2 className="mt-1.5 text-[24px] font-extrabold leading-[1.05] tracking-[-0.03em] md:text-[34px]" style={{ color: f.ink }}>{f.title}</h2>
+            <p className="mt-2 max-w-[34ch] text-[13.5px] font-medium leading-snug text-gray-600 md:text-[15px]">{f.sub}</p>
+            <button type="button" onClick={() => onPick(tiles[0].n)} className="mt-4 inline-flex h-10 items-center gap-1.5 rounded-full px-4 text-[13px] font-bold text-white transition hover:-translate-y-px" style={{ background: f.ink }}>Shop now <ArrowRight size={14} /></button>
+          </div>
+          <div className="grid grid-cols-4 gap-2 md:gap-3">
+            {tiles.slice(0, 4).map(t => (
+              <button key={t.n} type="button" onClick={() => onPick(t.n)} className="group text-center">
+                <span className="block aspect-[4/5] overflow-hidden rounded-2xl bg-white/70 shadow-[0_14px_30px_-20px_rgba(0,0,0,.45)]">
+                  <img src={t.img} alt="" loading="lazy" decoding="async" draggable={false} className="h-full w-full scale-[1.18] object-cover mix-blend-multiply transition-transform duration-700 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.26]" />
+                </span>
+                <span className="mt-1.5 line-clamp-2 block text-[11px] font-semibold leading-tight text-gray-700 md:text-[12.5px]">{t.n}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+    </Reveal>
+  );
+}
+
 /* ─── Three image cards under the banner (category artwork as the picture) ─── */
 const PROMOS: { cat: string; title: string; sub: string; bg: string; ink: string }[] = [
   { cat: 'Pharmacy', title: 'Pharmacy at your door', sub: 'Medicines, vitamins and first aid from chemists near you', bg: '#E3F4F1', ink: '#0F5F55' },
@@ -564,26 +604,39 @@ function PromoCards({ categories, onPick }: { categories: Category[]; onPick: (n
   );
 }
 
-/** Muted, looping produce footage behind the main banner. The still poster paints first; the clip
-    starts only when the banner is on screen, and never for reduced-motion or data-saver users. */
-function HeroVideo() {
-  const ref = useRef<HTMLVideoElement>(null);
-  useEffect(() => {
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    const save = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
-    if (reduce || save) return;
-    const el = ref.current; if (!el) return;
-    const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) { el.pause(); return; }
-      if (!el.src) el.src = '/videos/now-hero.mp4';
-      el.play().catch(() => {});
-    }, { threshold: 0.2 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+/** Endless columns of our category artwork on the right of the banner (a strip on phones).
+    Pure CSS motion; it pauses on hover and stays still for reduced-motion users. */
+function HeroArt({ images }: { images: string[] }) {
+  if (images.length < 6) return null;
+  const cols = [0, 1, 2].map(k => images.filter((_, i) => i % 3 === k));
+  const Tile = ({ src }: { src: string }) => (
+    <div className="aspect-square w-full overflow-hidden rounded-2xl bg-[#F4F5F2] shadow-[0_18px_40px_-18px_rgba(0,0,0,.55)] ring-1 ring-white/10">
+      <img src={src} alt="" decoding="async" draggable={false} className="h-full w-full scale-[1.14] object-cover" />
+    </div>
+  );
   return (
-    <video ref={ref} aria-hidden tabIndex={-1} muted loop playsInline preload="none" poster="/images/now-hero.webp"
-      className="absolute inset-0 h-full w-full object-cover object-[70%_50%]" />
+    <>
+      {/* wide screens: three columns drifting in opposite directions */}
+      <div aria-hidden className="zx-marquee absolute inset-y-0 right-0 hidden w-[46%] sm:block [mask-image:linear-gradient(90deg,transparent,#000_22%),linear-gradient(180deg,transparent,#000_14%,#000_86%,transparent)] [mask-composite:intersect] [-webkit-mask-composite:source-in]">
+        <div className="absolute -inset-y-10 right-6 grid w-[min(100%,420px)] rotate-[-8deg] grid-cols-3 gap-3 md:right-10">
+          {cols.map((col, k) => (
+            <div key={k} className="relative overflow-hidden">
+              <div className={`flex flex-col gap-3 ${k === 1 ? 'zx-col-down' : 'zx-col-up'}`} style={{ '--d': `${36 + k * 7}s` } as React.CSSProperties}>
+                {[...col, ...col].map((src, i) => <Tile key={i} src={src} />)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* phones: one strip along the bottom */}
+      <div aria-hidden className="zx-marquee absolute inset-x-0 bottom-0 h-[86px] overflow-hidden opacity-90 sm:hidden [mask-image:linear-gradient(90deg,transparent,#000_12%,#000_88%,transparent)]">
+        <div className="zx-row-left flex w-max gap-2.5 px-2" style={{ '--d': '46s' } as React.CSSProperties}>
+          {[...images, ...images].map((src, i) => (
+            <div key={i} className="h-[74px] w-[74px] shrink-0 overflow-hidden rounded-xl bg-[#F4F5F2]"><img src={src} alt="" decoding="async" draggable={false} className="h-full w-full scale-[1.14] object-cover" /></div>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
 

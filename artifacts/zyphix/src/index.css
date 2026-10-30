@@ -259,3 +259,13 @@ html[data-site="now"] body *:not(.zx-logo):not(.zx-logo *):not(.font-serif-accen
   font-family: 'Plus Jakarta Sans', 'Geist', 'Geist Fallback', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif !important;
 }
 html[data-site="now"] body { letter-spacing: -0.005em; }
+
+/* Zyphix Now hero: endless columns of category artwork (one copy scrolls, the twin fills the gap) */
+@keyframes zx-col-up { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, -50%, 0); } }
+@keyframes zx-col-down { from { transform: translate3d(0, -50%, 0); } to { transform: translate3d(0, 0, 0); } }
+@keyframes zx-row-left { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
+.zx-col-up { animation: zx-col-up var(--d, 38s) linear infinite; }
+.zx-col-down { animation: zx-col-down var(--d, 44s) linear infinite; }
+.zx-row-left { animation: zx-row-left var(--d, 40s) linear infinite; }
+.zx-marquee:hover .zx-col-up, .zx-marquee:hover .zx-col-down, .zx-marquee:hover .zx-row-left { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .zx-col-up, .zx-col-down, .zx-row-left { animation: none; } }
