@@ -7,7 +7,7 @@ import { Link, useSearch, useLocation } from 'wouter';
 import { useCatalog, type Product, type Category } from '@/lib/catalog';
 import { productImageFor, hasRealImage } from '@/lib/productImage';
 import { ProductCard, CategoryIcon } from '@/components/now/ProductCard';
-import { categorySlug } from '@/lib/subcats';
+import { categorySlug, subcategoriesFor } from '@/lib/subcats';
 import { openCart } from '@/lib/cartEvents';
 import { useCart } from '@/context/CartContext';
 import { COUPONS } from '@/data/coupons';
@@ -129,6 +129,10 @@ export function ZyphixNow() {
   const restRow = useMemo(() => { const d = new Set(dealsRow.map(p => p.id)); return showcase.filter(p => !d.has(p.id)); }, [showcase, dealsRow]);
   const bestsellerRow = useMemo(() => restRow.slice(0, 12), [restRow]);
   const exploreGrid = useMemo(() => restRow.slice(12), [restRow]);
+  // Home shows fresh produce only (like a quick-commerce home page); every other aisle has its own page.
+  const produce = useMemo(() => products.filter(p => p.category === PRODUCE_CATEGORY), [products]);
+  const produceRows = useMemo(() => subcategoriesFor(PRODUCE_CATEGORY, produce).filter(r => r.products.length > 0), [produce]);
+  const produceDeals = useMemo(() => produce.filter(p => discountOf(p) > 0).sort((a, b) => discountOf(b) - discountOf(a)).slice(0, 14), [produce]);
   const offers = useMemo(() => buildOffers(products, categories, coupon, bestsellerRow), [products, categories, coupon, bestsellerRow]);
   const dealsCount = useMemo(() => products.filter(p => discountOf(p) > 0).length, [products]);
 
@@ -294,34 +298,52 @@ export function ZyphixNow() {
           {/* ── Merchandised rows (all computed from the live catalogue) ── */}
           {!catalogLoading && products.length > 0 && (
             <>
-              {dealsRow.length > 0 && (
+              {produce.length > 0 && (
+                <div className="flex flex-wrap items-end justify-between gap-3 border-t border-gray-200/80 pt-8 md:pt-10">
+                  <div>
+                    <p className="text-[11.5px] font-bold uppercase tracking-[0.12em] text-[#0B7F50]">Fresh today</p>
+                    <h2 className="mt-1 text-[24px] font-extrabold tracking-[-0.03em] md:text-[32px]">Fruits &amp; vegetables</h2>
+                    <p className="mt-1 text-[13.5px] text-gray-500">{num(produce.length)} items from local farms and sabzi sellers near you</p>
+                  </div>
+                  <button type="button" onClick={() => jumpTo(PRODUCE_CATEGORY)} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#0B7F50] px-4 text-[13px] font-bold text-white transition hover:-translate-y-px">Shop all fresh <ArrowRight size={14} /></button>
+                </div>
+              )}
+
+              {produceDeals.length > 0 && (
                 <section id="home-deals">
-                  <SectionHead title="Deals of the day" sub={`${num(dealsCount)} on offer`}
-                    action={<SeeAll onClick={() => { setSortBy('discount'); setOnlyDiscounted(true); jumpTo(dealsRow[0].category); }} />} />
-                  <ProductRow products={dealsRow} categories={categories} cart={cart} add={add} remove={remove} tagTone="red" />
+                  <SectionHead title="Fresh deals" sub={`${num(produce.filter(p => discountOf(p) > 0).length)} on offer`} action={<SeeAll onClick={() => { setSortBy('discount'); setOnlyDiscounted(true); jumpTo(PRODUCE_CATEGORY); }} />} />
+                  <ProductRow products={produceDeals} categories={categories} cart={cart} add={add} remove={remove} tagTone="red" />
                 </section>
               )}
 
-              {bestsellerRow.length > 0 && (
-                <section id="home-bestsellers">
-                  <SectionHead title="Bestsellers" sub="what the neighbourhood buys most" />
-                  <ProductRow products={bestsellerRow} categories={categories} cart={cart} add={add} remove={remove} />
+              {produceRows.map(r => (
+                <section key={r.name}>
+                  <SectionHead title={r.name} sub={`${num(r.products.length)} items`} action={<SeeAll onClick={() => jumpTo(PRODUCE_CATEGORY)} />} />
+                  <ProductRow products={r.products.slice(0, 14)} categories={categories} cart={cart} add={add} remove={remove} />
                 </section>
-              )}
+              ))}
 
-              {offers.length > 0 && <OfferCarousel offers={offers} categories={categories} onShop={openOffer} />}
-
-              {FEATURES[0] && <FeatureBanner feature={FEATURES[0]} categories={categories} onPick={jumpTo} />}
-
-              {exploreGrid.length > 0 && (
-                <section>
-                  <SectionHead title="Picked for you" sub="a few favourites from every aisle"
-                    action={<SeeAll label="All categories" onClick={() => document.getElementById('home-categories')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />} />
-                  <ProductGrid products={exploreGrid} categories={categories} cart={cart} add={add} remove={remove} />
-                </section>
-              )}
-
-              {FEATURES.slice(1, 3).map(f => <FeatureBanner key={f.title} feature={f} categories={categories} onPick={jumpTo} />)}
+              {/* Everything else: one tap to its own page */}
+              <section aria-label="Shop other categories" className="rounded-[24px] border border-gray-200 bg-white p-5 md:p-7">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <h2 className="text-[19px] font-extrabold tracking-[-0.025em] md:text-[22px]">Looking for something else?</h2>
+                    <p className="mt-1 text-[13.5px] text-gray-500">Every aisle has its own page with the full range.</p>
+                  </div>
+                  <button type="button" onClick={() => document.getElementById('home-categories')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="text-[13px] font-semibold text-[#0B7F50] hover:text-[#086A42]">All categories ↑</button>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {categories.filter(c => c.name !== PRODUCE_CATEGORY && (countByCategory.get(c.name) || 0) > 0).map(c => (
+                    <button key={c.name} type="button" onClick={() => jumpTo(c.name)}
+                      className="inline-flex h-10 items-center gap-2 rounded-full border border-gray-200 bg-[#FAFAFA] pl-1 pr-3.5 text-[13px] font-semibold text-gray-800 transition hover:border-gray-300 hover:bg-white hover:shadow-sm">
+                      <span className="inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#F1F3F5]">
+                        {c.image ? <img src={c.image} alt="" loading="lazy" decoding="async" className={`h-full w-full object-cover ${c.image.includes('/img/categories/') ? 'scale-[1.25] mix-blend-multiply' : ''}`} /> : <CategoryIcon category={c} />}
+                      </span>
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              </section>
             </>
           )}
 
