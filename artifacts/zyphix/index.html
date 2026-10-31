@@ -67,6 +67,10 @@
         var h = location.hostname.toLowerCase(), q = new URLSearchParams(location.search).get('site');
         var s = q || h.split('.')[0]; s = A[s] || s;
         /* Zyphix Now (a light store): its font, and the catalogue download started in parallel with the app. No boot image. */
+        if (s === 'eats' || s === 'book') {
+          var fe = document.createElement('link'); fe.rel = 'preload'; fe.as = 'font'; fe.type = 'font/woff2'; fe.href = '/fonts/jakarta-latin.woff2'; fe.crossOrigin = 'anonymous'; document.head.appendChild(fe);
+          document.documentElement.setAttribute('data-site', s);
+        }
         if (s === 'now') {
           var fl = document.createElement('link'); fl.rel = 'preload'; fl.as = 'font'; fl.type = 'font/woff2'; fl.href = '/fonts/jakarta-latin.woff2'; fl.crossOrigin = 'anonymous'; document.head.appendChild(fl);
           document.documentElement.setAttribute('data-site', 'now');

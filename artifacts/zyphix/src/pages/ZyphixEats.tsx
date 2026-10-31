@@ -2,7 +2,7 @@ import { OrderRequestForm, WaitlistForm } from '@/components/RequestForms';
 import { useSeo } from '@/lib/seo';
 import React, { useState, useEffect } from 'react';
 import { motion } from '@/lib/motion';
-import { Search, Star, X, Plus, Minus, ShoppingBag, ChevronLeft, ChevronRight, ChefHat, Flame, Bike } from 'lucide-react';
+import { Search, Star, X, Plus, Minus, ShoppingBag, ChevronLeft, ChevronRight, ChefHat, Flame, Bike, Check, ArrowRight } from 'lucide-react';
 import { restaurants, menuItems, FOOD_CUISINE_TYPES } from '@/data/localData';
 import { usePartners, tagList } from '@/lib/partners';
 import { Chip, Card, Button, G, FONT } from '@/ui/kit';
@@ -173,37 +173,59 @@ export function ZyphixEats() {
       ) : (
         /* ── Restaurant list ── */
         <motion.div key="list" {...enter}>
-          {/* Hero: headline + search on a warm card, food footage framed on the right */}
-          <section className="mt-4 overflow-hidden rounded-[24px] bg-[#FFF3EA] md:mt-2">
-            <div className="grid gap-4 p-3 sm:p-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-6 md:p-5">
-              <div className="order-2 flex flex-col justify-center px-2 pb-3 sm:px-3 md:order-1 md:py-6 md:pl-5">
-                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white px-3 py-1 text-[12px] font-semibold text-[#B4410C] ring-1 ring-inset ring-orange-100">
+          {/* Hero: Swiggy-style warm banner, search, and floating dish photos (static, paints instantly) */}
+          <section className="relative mt-4 overflow-hidden rounded-[28px] md:mt-2" style={{ background: 'linear-gradient(120deg, #F25C24 0%, #FB7A2E 55%, #FF9A4D 100%)' }}>
+            <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-white/10" />
+            <div aria-hidden className="pointer-events-none absolute -bottom-32 right-40 h-72 w-72 rounded-full bg-black/5" />
+            <div className="relative grid items-center gap-6 px-5 py-8 sm:px-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:px-12 md:py-14">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/18 px-3 py-1 text-[12px] font-bold text-white ring-1 ring-inset ring-white/30">
                   {openingSoon ? 'Opening soon near you' : `${allRestaurants.length} kitchens open now`}
                 </span>
-                <h1 className="mt-4 max-w-[15ch] text-[32px] font-semibold leading-[1.05] tracking-[-0.04em] text-gray-900 sm:text-[42px] md:text-[50px]">Food from the best kitchens near you.</h1>
-                <p className="mt-3 max-w-[44ch] text-[15px] leading-[1.55] text-gray-600 md:text-[16px]">Biryani houses, pizza ovens, momo stalls and cafés, cooked to order and brought to your door.</p>
+                <h1 className="mt-4 max-w-[16ch] text-[34px] font-extrabold leading-[1.04] tracking-[-0.035em] text-white sm:text-[44px] md:text-[54px]">Hungry? Your local kitchens deliver.</h1>
+                <p className="mt-3 max-w-[44ch] text-[15px] font-medium leading-[1.55] text-white/90 md:text-[16.5px]">Biryani houses, pizza ovens, momo stalls and cafés near you, cooked to order and brought to your door.</p>
                 <form role="search" onSubmit={e => e.preventDefault()}
-                  className="mt-5 flex h-12 max-w-[560px] items-center gap-2 rounded-2xl border border-orange-100 bg-white pl-4 pr-1.5 shadow-[0_10px_30px_-18px_rgba(120,53,15,.4)] md:h-14">
-                  <Search size={18} className="shrink-0 text-gray-400" />
+                  className="mt-6 flex h-[54px] max-w-[560px] items-center gap-2 rounded-2xl bg-white pl-4 pr-1.5 shadow-[0_18px_40px_-18px_rgba(90,30,0,.55)] md:h-[58px]">
+                  <Search size={19} className="shrink-0 text-gray-400" />
                   <input value={search} onChange={e => { setSearch(e.target.value); setActiveRestaurant(null); }}
-                    placeholder="Search restaurants or dishes" aria-label="Search restaurants"
-                    className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-gray-400 md:text-[16px]" />
+                    placeholder="Search for restaurant, cuisine or a dish" aria-label="Search restaurants"
+                    className="h-full min-w-0 flex-1 bg-transparent text-[15px] font-medium text-gray-900 outline-none placeholder:font-normal placeholder:text-gray-400 md:text-[16px]" />
                   {search && <button type="button" onClick={() => setSearch('')} aria-label="Clear search" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700"><X size={15} /></button>}
                   <button type="button" onClick={() => document.getElementById('eats-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                    className="inline-flex h-9 shrink-0 items-center rounded-xl bg-[#E2562B] px-4 text-[13.5px] font-semibold text-white md:h-11 md:px-5">
+                    className="inline-flex h-10 shrink-0 items-center rounded-xl bg-gray-900 px-4 text-[13.5px] font-bold text-white md:h-11 md:px-5">
                     {openingSoon ? 'Notify me' : 'Search'}
                   </button>
                 </form>
-                <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-medium text-gray-600">
+                <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-semibold text-white/90">
                   {['Cooked to order', 'Live order tracking', 'Kitchens from your area'].map(t => (
-                    <li key={t} className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#E2562B]" />{t}</li>
+                    <li key={t} className="inline-flex items-center gap-1.5"><Check size={14} />{t}</li>
                   ))}
                 </ul>
               </div>
-              <div className="relative order-1 h-[170px] overflow-hidden rounded-[18px] bg-[#2A140A] sm:h-[220px] md:order-2 md:h-auto md:min-h-[330px]">
-                <BgVideo clip={VIDEOS.food} dim={0} priority />
+              {/* floating plates */}
+              <div aria-hidden className="relative hidden h-[340px] md:block">
+                <img src={pexelsPhoto(12737656, 640)} alt="" className="absolute right-[18%] top-0 h-[250px] w-[250px] rounded-full object-cover shadow-[0_30px_60px_-20px_rgba(60,20,0,.6)] ring-[6px] ring-white/90" />
+                <img src={pexelsPhoto(2147491, 480)} alt="" className="absolute bottom-0 left-[4%] h-[170px] w-[170px] rounded-full object-cover shadow-[0_24px_50px_-18px_rgba(60,20,0,.6)] ring-[6px] ring-white/90" />
+                <img src={pexelsPhoto(5409010, 480)} alt="" className="absolute bottom-4 right-0 h-[150px] w-[150px] rounded-full object-cover shadow-[0_24px_50px_-18px_rgba(60,20,0,.6)] ring-[6px] ring-white/90" />
               </div>
             </div>
+          </section>
+
+          {/* Collections: three colourful banners (Swiggy-style) */}
+          <section aria-label="Collections" className="-mx-4 mt-6 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 md:gap-4 [&::-webkit-scrollbar]:hidden">
+            {COLLECTIONS.map(c => (
+              <button key={c.t} type="button" onClick={() => { if (!openingSoon) setActiveCuisine(c.cuisine); document.getElementById('eats-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+                className="group relative flex h-[150px] w-[82%] shrink-0 snap-start overflow-hidden rounded-[22px] text-left transition hover:-translate-y-0.5 sm:w-auto" style={{ background: c.bg }}>
+                <div className="relative z-10 flex w-[58%] flex-col justify-between p-5">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em]" style={{ color: c.ink, opacity: 0.8 }}>{c.k}</p>
+                    <p className="mt-1 text-[18px] font-extrabold leading-tight tracking-[-0.02em]" style={{ color: c.ink }}>{c.t}</p>
+                  </div>
+                  <span className="inline-flex w-fit items-center gap-1 text-[12.5px] font-bold" style={{ color: c.ink }}>Explore <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" /></span>
+                </div>
+                <img src={pexelsPhoto(c.photo, 480)} alt="" loading="lazy" className="absolute -right-6 top-1/2 h-[170px] w-[170px] -translate-y-1/2 rounded-full object-cover shadow-[0_18px_40px_-16px_rgba(0,0,0,.45)] transition-transform duration-700 group-hover:scale-105" />
+              </button>
+            ))}
           </section>
 
           {/* What's on your mind? (round cuisine photos) */}
@@ -255,6 +277,9 @@ export function ZyphixEats() {
             <section id="eats-grid" className="mt-8 scroll-mt-20 md:mt-10">
               <div className="grid gap-6 overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 md:grid-cols-[1fr_1.1fr] md:gap-10 md:p-10">
                 <div>
+                  <div aria-hidden className="mb-5 flex -space-x-3">
+                    {[12737656, 2147491, 5560763, 1639557].map(id => <img key={id} src={pexelsPhoto(id, 160)} alt="" loading="lazy" className="h-11 w-11 rounded-full object-cover ring-[3px] ring-white" />)}
+                  </div>
                   <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#C2410C]">Opening soon near you</p>
                   <h2 className="mt-3 text-[26px] font-semibold leading-[1.1] tracking-[-0.035em] text-gray-900 md:text-[34px]">Your favourite kitchens are joining Zyphix Eats.</h2>
                   <p className="mt-3 text-[15px] leading-[1.6] text-gray-500">We're onboarding restaurants neighbourhood by neighbourhood. Leave your number and we'll tell you the day Eats opens where you live.</p>
@@ -474,4 +499,10 @@ const DISHES = [
   { id: 5409010, name: 'Steamed momos', cuisine: 'Momos', veg: true },
   { id: 2347311, name: 'Hakka noodles', cuisine: 'Chinese', veg: true },
   { id: 15014918, name: 'Gulab jamun', cuisine: 'Sweets', veg: true },
+];
+
+const COLLECTIONS = [
+  { k: 'Comfort food', t: 'Biryani & curries', cuisine: 'Biryani', photo: 12737656, bg: '#FFF1E6', ink: '#9A3412' },
+  { k: 'Quick bites', t: 'Pizzas, burgers & rolls', cuisine: 'Pizza', photo: 1639557, bg: '#FEF3C7', ink: '#92400E' },
+  { k: 'Something sweet', t: 'Desserts & mithai', cuisine: 'Sweets', photo: 15014918, bg: '#FCE7F3', ink: '#9D174D' },
 ];

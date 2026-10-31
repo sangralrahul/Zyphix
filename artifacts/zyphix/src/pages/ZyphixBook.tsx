@@ -1,5 +1,6 @@
 import { sendRequest, OFFLINE_MSG } from '@/lib/requests';
 import { WaitlistForm } from '@/components/RequestForms';
+import { pexelsPhoto } from '@/data/media';
 import { StepCards, SectionTitle } from '@/components/StepCards';
 import { useSeo } from '@/lib/seo';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -226,32 +227,66 @@ export function ZyphixBook() {
   const heroPhotos = [list[0], list[1], list[2]].map(sv => metaFor(sv).photo);
   return (
     <div className="w-full text-gray-900" style={{ fontFamily: FONT }}>
-      {/* ── Hero: headline + service picker on the left, photo collage on the right ── */}
-      <section className="pt-5 md:pt-8">
-        <div className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-10">
-          <div className="flex flex-col justify-center">
-            <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[12px] font-semibold text-emerald-800 ring-1 ring-inset ring-emerald-100"><ShieldCheck size={13} /> ID &amp; police-verified pros</span>
-            <h1 className="mt-4 max-w-[16ch] text-[34px] font-semibold leading-[1.05] tracking-[-0.04em] text-gray-900 sm:text-[44px] md:text-[52px]">Home services, at your doorstep.</h1>
-            <p className="mt-3 max-w-[48ch] text-[15px] leading-[1.55] text-gray-500 md:text-[16.5px]">Plumbers, electricians, cleaners and more from your own neighbourhood. Price shown before you confirm.</p>
+      {/* ── Hero (Urban Company-style): headline + "What are you looking for?" grid, photo collage ── */}
+      <section className="pt-6 md:pt-10">
+        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-12">
+          <div>
+            <h1 className="max-w-[16ch] text-[34px] font-extrabold leading-[1.05] tracking-[-0.035em] text-gray-900 sm:text-[44px] md:text-[50px]">Home services at your doorstep</h1>
+            <p className="mt-3 max-w-[48ch] text-[15px] leading-[1.55] text-gray-500 md:text-[16px]">Verified plumbers, electricians, cleaners and more from your own neighbourhood. Price shown before you confirm.</p>
             <ServicePicker onPick={pickFromHero} />
-            <div className="mt-6 flex flex-wrap gap-2">
-              {list.slice(0, 6).map(sv => (
-                <button key={sv.id} type="button" onClick={() => pickFromHero(sv)}
-                  className="inline-flex h-9 items-center rounded-full border border-gray-200 bg-white px-3.5 text-[13px] font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900">{sv.title}</button>
-              ))}
+            <div className="mt-6 rounded-[24px] border border-gray-200 bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,.04)] md:p-6">
+              <p className="text-[16px] font-bold text-gray-900">What are you looking for?</p>
+              <div className="mt-4 grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-5">
+                {list.map(sv => {
+                  const m = metaFor(sv); const Icon = m.icon;
+                  return (
+                    <button key={sv.id} type="button" onClick={() => pickFromHero(sv)} className="group flex flex-col items-center text-center">
+                      <span className="flex h-[64px] w-[64px] items-center justify-center rounded-2xl bg-[#F5F6F8] text-gray-800 ring-1 ring-black/[.04] transition group-hover:bg-emerald-50 group-hover:text-emerald-700 md:h-[72px] md:w-[72px]">
+                        <Icon size={26} strokeWidth={1.7} />
+                      </span>
+                      <span className="mt-2 line-clamp-2 text-[12px] font-semibold leading-tight text-gray-700 group-hover:text-gray-900">{sv.title}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
-          <div aria-hidden className="hidden h-[440px] grid-cols-2 grid-rows-2 gap-3 lg:grid">
-            <div className="row-span-2 overflow-hidden rounded-3xl bg-gray-100"><img src={heroPhotos[0].src} alt="" className="h-full w-full object-cover" /></div>
-            <div className="overflow-hidden rounded-3xl bg-gray-100"><img src={heroPhotos[1].src} alt="" className="h-full w-full object-cover" /></div>
-            <div className="overflow-hidden rounded-3xl bg-gray-100"><img src={heroPhotos[2].src} alt="" className="h-full w-full object-cover" /></div>
+          <div aria-hidden className="hidden h-[560px] grid-cols-2 grid-rows-[1.2fr_1fr] gap-3 lg:grid">
+            {[6195951, 7218683, 27928761, 1249611].map((id, k) => (
+              <div key={id} className={`overflow-hidden rounded-[24px] bg-gray-100 ${k === 0 ? 'row-span-1' : ''}`}><img src={pexelsPhoto(id, 640)} alt="" className="h-full w-full object-cover" /></div>
+            ))}
           </div>
         </div>
-        <div className="mt-6 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] md:flex-wrap md:overflow-visible [&::-webkit-scrollbar]:hidden">
-          {PROMISES.map(t => (
-            <span key={t} className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 text-[13px] font-medium text-gray-700">
-              <BadgeCheck size={14} className="text-emerald-600" />{t}
-            </span>
+
+        {/* Promise row */}
+        <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
+          {[
+            { icon: ShieldCheck, t: 'Verified pros', s: 'ID & police-checked' },
+            { icon: BadgeCheck, t: 'Upfront price', s: 'Shown before you confirm' },
+            { icon: CalendarClock, t: 'Free reschedule', s: 'Up to 1 hour before' },
+            { icon: Clock, t: '7-day guarantee', s: 'On every completed job' },
+          ].map(p => (
+            <div key={p.t} className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3.5">
+              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700"><p.icon size={18} /></span>
+              <span><span className="block text-[14px] font-bold text-gray-900">{p.t}</span><span className="block text-[12.5px] text-gray-500">{p.s}</span></span>
+            </div>
+          ))}
+        </div>
+
+        {/* Offer-style banners (no prices or discounts invented) */}
+        <div className="-mx-4 mt-6 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 md:gap-4 [&::-webkit-scrollbar]:hidden">
+          {BANNERS.map(b => (
+            <button key={b.t} type="button" onClick={() => pickById(b.id)}
+              className="group relative flex h-[170px] w-[84%] shrink-0 snap-start overflow-hidden rounded-[22px] text-left transition hover:-translate-y-0.5 sm:w-auto" style={{ background: b.bg }}>
+              <div className="relative z-10 flex w-[56%] flex-col justify-between p-5">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/80">{b.k}</p>
+                  <p className="mt-1 text-[19px] font-extrabold leading-tight tracking-[-0.02em] text-white">{b.t}</p>
+                </div>
+                <span className="inline-flex h-9 w-fit items-center gap-1 rounded-full bg-white px-3.5 text-[12.5px] font-bold text-gray-900">Book now <ArrowRight size={13} /></span>
+              </div>
+              <img src={pexelsPhoto(b.photo, 480)} alt="" loading="lazy" className="absolute inset-y-0 right-0 h-full w-[48%] object-cover transition-transform duration-700 group-hover:scale-105 [mask-image:linear-gradient(90deg,transparent,#000_30%)]" />
+            </button>
           ))}
         </div>
       </section>
@@ -393,3 +428,10 @@ const STEPS = [
   { photo: 4239125, t: 'Done, and guaranteed', s: 'An issue within 7 days? A pro comes back and fixes it, free.' },
 ];
 const H2L = 'text-[22px] font-semibold tracking-[-0.03em] text-gray-900 md:text-[28px]';
+
+/* Colourful service banners under the hero (link straight into booking). */
+const BANNERS = [
+  { id: 'sv3', k: 'Home cleaning', t: 'A spotless home, done for you', photo: 6195951, bg: '#0F766E' },
+  { id: 'sv5', k: 'AC service', t: 'Get your AC ready for summer', photo: 5463575, bg: '#1D4ED8' },
+  { id: 'sv2', k: 'Electrician', t: 'Switches, fans and wiring fixed', photo: 27928761, bg: '#7C3AED' },
+];

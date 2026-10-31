@@ -254,11 +254,13 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible { outline: 
 
 /* Zyphix Now has its own typeface (Plus Jakarta Sans): a rounder, friendlier grocery voice.
    The logo, the serif accent and the footer wordmark keep the brand fonts. */
-html[data-site="now"] body,
-html[data-site="now"] body *:not(.zx-logo):not(.zx-logo *):not(.font-serif-accent):not(.zx-wm-letter):not(svg):not(svg *) {
+html[data-site="now"] body, html[data-site="eats"] body, html[data-site="book"] body,
+html[data-site="now"] body *:not(.zx-logo):not(.zx-logo *):not(.font-serif-accent):not(.zx-wm-letter):not(svg):not(svg *),
+html[data-site="eats"] body *:not(.zx-logo):not(.zx-logo *):not(.font-serif-accent):not(.zx-wm-letter):not(svg):not(svg *),
+html[data-site="book"] body *:not(.zx-logo):not(.zx-logo *):not(.font-serif-accent):not(.zx-wm-letter):not(svg):not(svg *) {
   font-family: 'Plus Jakarta Sans', 'Geist', 'Geist Fallback', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif !important;
 }
-html[data-site="now"] body { letter-spacing: -0.005em; }
+html[data-site="now"] body, html[data-site="eats"] body, html[data-site="book"] body { letter-spacing: -0.005em; }
 
 /* Zyphix Now hero: endless columns of category artwork (one copy scrolls, the twin fills the gap) */
 @keyframes zx-col-up { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, -50%, 0); } }
