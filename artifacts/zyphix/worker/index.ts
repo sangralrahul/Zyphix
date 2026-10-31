@@ -266,6 +266,13 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   if (p === '/api/support' && request.method === 'POST') return await saveMessage(request, env, 'support');
   if (p === '/api/contact' && request.method === 'POST') return await saveMessage(request, env, 'contact');
   if (p === '/api/notify' && request.method === 'POST') return await saveMessage(request, env, 'notify');
+  /* ── Feature APIs: restaurant menus, partner status, support tickets ── */
+  const rm = p.match(/^\/api\/restaurants\/([^/]+)$/);
+  if (rm && request.method === 'GET') return await getRestaurant(env, decodeURIComponent(rm[1]));
+  if (p === '/api/partner-status' && request.method === 'POST') return await partnerStatus(request, env);
+  if (p === '/api/tickets' && request.method === 'POST') return await createTicket(request, env);
+  const tm = p.match(/^\/api\/tickets\/([^/]+)$/);
+  if (tm && request.method === 'POST') return await getTicket(request, env, decodeURIComponent(tm[1]));
   if (p === '/api/client-error' && request.method === 'POST') {
     const b = await readJson(request); if (!b) return json({ ok: false }, 400);
     await ensureMessages(env);
@@ -391,6 +398,44 @@ async function handleAdmin(request: Request, env: Env, url: URL, ctx: ExecutionC
     return json((results ?? []).map(orderToClient));
   }
   if (p === '/admin/whoami') return json({ ok: true });
+  if (p === '/admin/tickets' && request.method === 'GET') {
+    await ensureFeatureTables(env);
+    const { results } = await env.DB.prepare('SELECT * FROM tickets ORDER BY created_at DESC LIMIT 300').all();
+    return json(results);
+  }
+  const atm = p.match(/^\/admin\/tickets\/([^/]+)$/);
+  if (atm && request.method === 'POST') {
+    await ensureFeatureTables(env);
+    const b = await readJson(request); if (!b) return json({ error: 'invalid JSON' }, 400);
+    const status = str(b.status, 20);
+    if (status && !['open', 'in_progress', 'resolved'].includes(status)) return json({ error: 'status must be open | in_progress | resolved' }, 400);
+    await env.DB.prepare("UPDATE tickets SET status = COALESCE(NULLIF(?, ''), status), reply = COALESCE(?, reply), updated_at = datetime('now') WHERE id = ?")
+      .bind(status, b.reply === undefined ? null : str(b.reply, 2000), decodeURIComponent(atm[1])).run();
+    return json(await env.DB.prepare('SELECT * FROM tickets WHERE id = ?').bind(decodeURIComponent(atm[1])).first());
+  }
+  if (p === '/admin/menu' && request.method === 'GET') {
+    await ensureFeatureTables(env);
+    const partner = str(url.searchParams.get('partner'), 60);
+    const { results } = await env.DB.prepare('SELECT * FROM menu_items WHERE partner_id = ? ORDER BY sort, created_at').bind(partner).all();
+    return json(results);
+  }
+  if (p === '/admin/menu' && request.method === 'POST') {
+    await ensureFeatureTables(env);
+    const b = await readJson(request); if (!b) return json({ error: 'invalid JSON' }, 400);
+    const partner = str(b.partnerId, 60), name = str(b.name, 120);
+    if (!partner || !name) return json({ error: 'partnerId and name are required' }, 400);
+    const id = str(b.id, 40) || randomId('mi_');
+    await env.DB.prepare(`INSERT INTO menu_items (id, partner_id, name, description, price, veg, section, image_url, available, sort) VALUES (?,?,?,?,?,?,?,?,?,?)
+      ON CONFLICT(id) DO UPDATE SET name=excluded.name, description=excluded.description, price=excluded.price, veg=excluded.veg, section=excluded.section, image_url=excluded.image_url, available=excluded.available, sort=excluded.sort`)
+      .bind(id, partner, name, str(b.description, 300) || null, Math.max(0, num(b.price)), b.veg === false ? 0 : 1, str(b.section, 60) || 'Menu', str(b.imageUrl, 400) || null, b.available === false ? 0 : 1, num(b.sort)).run();
+    return json(await env.DB.prepare('SELECT * FROM menu_items WHERE id = ?').bind(id).first(), 201);
+  }
+  const amm = p.match(/^\/admin\/menu\/([^/]+)$/);
+  if (amm && request.method === 'DELETE') {
+    await ensureFeatureTables(env);
+    await env.DB.prepare('DELETE FROM menu_items WHERE id = ?').bind(decodeURIComponent(amm[1])).run();
+    return json({ ok: true });
+  }
   if (p === '/admin/waitlist' && request.method === 'GET') {
     await ensureWaitlist(env);
     const { results } = await env.DB.prepare('SELECT * FROM waitlist ORDER BY created_at DESC LIMIT 1000').all();
@@ -1299,4 +1344,69 @@ function orderToClient(r: OrderRow) {
     paymentMode: r.payment_mode ?? 'COD', address: parseJson<Record<string, unknown>>(r.address, {}), etaMinutes: r.eta_minutes ?? 30,
     email: r.email, userId: r.user_id,
   };
+}
+
+/* ───────────────────────── Feature APIs ─────────────────────────
+   menu_items: restaurant menus (managed in admin), shown on eats.zyphix.in
+   tickets:    support tickets raised on support.zyphix.in
+   Tables are created on first use. */
+async function ensureFeatureTables(env: Env) {
+  await env.DB.batch([
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS menu_items (id TEXT PRIMARY KEY, partner_id TEXT NOT NULL, name TEXT NOT NULL, description TEXT, price INTEGER NOT NULL DEFAULT 0,
+      veg INTEGER NOT NULL DEFAULT 1, section TEXT, image_url TEXT, available INTEGER NOT NULL DEFAULT 1, sort INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT (datetime('now')))`),
+    env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_menu_partner ON menu_items(partner_id)'),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS tickets (id TEXT PRIMARY KEY, name TEXT, email TEXT NOT NULL, phone TEXT, topic TEXT NOT NULL, order_id TEXT, message TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'open', reply TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now')))`),
+  ]);
+}
+
+/** Public restaurant page: a live restaurant partner and its available menu. Contact details are never returned. */
+async function getRestaurant(env: Env, id: string): Promise<Response> {
+  await ensureFeatureTables(env);
+  const r = await env.DB.prepare("SELECT id, business_name, city, locality, category, tags, details FROM partners WHERE id = ? AND type = 'restaurant' AND status = 'live'").bind(id).first<Record<string, any>>();
+  if (!r) return json({ error: 'not found' }, 404);
+  const d = parseJson<Record<string, any>>(r.details, {});
+  const { results } = await env.DB.prepare('SELECT id, name, description, price, veg, section, image_url FROM menu_items WHERE partner_id = ? AND available = 1 ORDER BY sort, created_at').bind(id).all<Record<string, any>>();
+  return json({
+    id: r.id, name: r.business_name, city: r.city, locality: r.locality, type: d.restaurantType || r.category || '', cuisines: r.tags || d.cuisines || '',
+    menu: results.map(m => ({ id: m.id, name: m.name, description: m.description || '', price: m.price, veg: m.veg === 1, section: m.section || 'Menu', image: m.image_url || '' })),
+  }, 200, { 'cache-control': 'public, max-age=30' });
+}
+
+/** Partner application status: phone + email must both match the application. */
+async function partnerStatus(request: Request, env: Env): Promise<Response> {
+  if (await hit(env, `pstatus:${ipOf(request)}`, 20, 600)) return tooMany();
+  const b = await readJson(request); if (!b) return json({ error: 'invalid JSON' }, 400);
+  const phone = str(b.phone, 20).replace(/\D/g, '').slice(-10);
+  const email = str(b.email, 160).toLowerCase();
+  if (phone.length !== 10 || !email.includes('@')) return json({ error: 'Enter the 10-digit mobile number and email you applied with.' }, 400);
+  const { results } = await env.DB.prepare("SELECT id, type, business_name, status, created_at, updated_at, phone FROM partners WHERE lower(email) = ? ORDER BY created_at DESC LIMIT 10").bind(email).all<Record<string, any>>();
+  const mine = results.filter(r => String(r.phone || '').replace(/\D/g, '').slice(-10) === phone);
+  return json({ applications: mine.map(r => ({ id: r.id, type: r.type, name: r.business_name, status: r.status, createdAt: sqliteToIso(r.created_at), updatedAt: sqliteToIso(r.updated_at) })) });
+}
+
+async function createTicket(request: Request, env: Env): Promise<Response> {
+  if (await hit(env, `form:${ipOf(request)}`, 12, 600)) return tooMany();
+  const b = await readJson(request); if (!b) return json({ error: 'invalid JSON' }, 400);
+  if (str(b.website, 200)) return json({ id: 'ZTK0' }, 201); // honeypot
+  const email = str(b.email, 160).toLowerCase();
+  const message = str(b.message, 4000);
+  const topic = str(b.topic, 60) || 'Other';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'Enter a valid email address' }, 400);
+  if (message.length < 10) return json({ error: 'Tell us a little more (at least a sentence).' }, 400);
+  await ensureFeatureTables(env);
+  const id = 'ZTK' + Date.now().toString(36).toUpperCase().slice(-6) + Math.random().toString(36).slice(2, 4).toUpperCase();
+  await env.DB.prepare('INSERT INTO tickets (id, name, email, phone, topic, order_id, message) VALUES (?,?,?,?,?,?,?)')
+    .bind(id, str(b.name, 120) || null, email, str(b.phone, 20) || null, topic, str(b.orderId, 40) || null, message).run();
+  await notifyOwner(env, 'support', { ticket: id, topic, name: b.name, email, phone: b.phone, order: b.orderId, message });
+  return json({ id, status: 'open' }, 201);
+}
+
+async function getTicket(request: Request, env: Env, id: string): Promise<Response> {
+  if (await hit(env, `tstatus:${ipOf(request)}`, 30, 600)) return tooMany();
+  const b = await readJson(request); if (!b) return json({ error: 'invalid JSON' }, 400);
+  await ensureFeatureTables(env);
+  const t = await env.DB.prepare('SELECT * FROM tickets WHERE id = ? AND lower(email) = ?').bind(id.toUpperCase(), str(b.email, 160).toLowerCase()).first<Record<string, any>>();
+  if (!t) return json({ error: 'No ticket matches that number and email.' }, 404);
+  return json({ id: t.id, topic: t.topic, status: t.status, reply: t.reply || '', orderId: t.order_id || '', createdAt: sqliteToIso(t.created_at), updatedAt: sqliteToIso(t.updated_at) });
 }

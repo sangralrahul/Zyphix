@@ -12,6 +12,7 @@ import { Hero, Signals } from './partner/Hero';
 import { TrackBento, ListedAutomatically, LiveDirectory } from './partner/Tracks';
 import { WhatYouGet, TermsBand, Steps, WhoPartners } from './partner/Terms';
 import { Faq, FinalCta } from './partner/Faq';
+import { PartnerStatus } from './partner/Status';
 
 /* ────────────────────────────────────────────────────────────────────────────
    partner.zyphix.in — partner portal. Mounted at the root for that hostname.
@@ -57,6 +58,7 @@ export default function PartnerSite() {
   return (
     <Switch>
       <Route path="/"><Shell sticky hero><PartnerHome /></Shell></Route>
+      <Route path="/status"><Shell><PartnerStatus /></Shell></Route>
       <Route path="/delivery" component={DeliverySetup} />
       <Route path="/restaurant" component={RestaurantSetup} />
       <Route path="/store" component={MerchantSetup} />

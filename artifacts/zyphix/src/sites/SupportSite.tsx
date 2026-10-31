@@ -8,6 +8,7 @@ import { Reveal, Stagger, Kicker, Headline, Sub, Glow, Grain, GhostButton, Photo
 import { Accent, Magnetic, Spotlight, LiveOrder, GiantMarquee, SplitHeadline } from '@/ui/motion2';
 import { VIDEOS, landscape, type Clip } from '@/data/media';
 import { apiFetch } from '@/lib/api';
+import { HelpDesk } from './support/HelpDesk';
 import { ARTICLES, TOPICS, POPULAR, HOURS, SUPPORT_EMAIL, PARTNERS_EMAIL, articleBySlug, articlesForTopic, searchArticles, topicById, type Article, type Block, type Topic } from './support/articles';
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -182,6 +183,9 @@ function Home() {
               ))}
             </div>
           </div>
+
+          {/* Help desk: order lookup + tickets */}
+          <HelpDesk />
 
           {/* Topics */}
           <div className="mt-24 md:mt-32">

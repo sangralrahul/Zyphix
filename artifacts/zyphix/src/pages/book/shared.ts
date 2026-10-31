@@ -33,6 +33,20 @@ export const SERVICE_META: Record<string, Meta> = {
   sv9:  { icon: Truck,      photo: PHOTOS.people[2],      blurb: 'Local shifting, packing' },
   sv10: { icon: Wrench,     photo: PHOTOS.plumbing[5],    blurb: 'Small fixes, mounting' },
 };
+/** What a visit covers, shown in the booking panel (the pro quotes anything beyond this before starting). */
+export const INCLUDED: Record<string, string[]> = {
+  sv1: ['Inspection of the leak or fitting', 'Minor tap, pipe and joint repairs', 'Quote before any part is replaced'],
+  sv2: ['Fault finding at the switchboard', 'Switch, socket, fan and light fixes', 'Safety check of the circuit worked on'],
+  sv3: ['Dusting, mopping and surface cleaning', 'Kitchen and bathroom cleaning', 'Cleaning supplies brought by the pro'],
+  sv4: ['Site visit and colour consultation', 'Wall prep, touch-ups or full rooms', 'Written quote for paint and labour'],
+  sv5: ['Filter and coil cleaning', 'Cooling and gas pressure check', 'Quote before a gas refill or part'],
+  sv6: ['Filter and membrane check', 'Cartridge change if needed', 'Water taste and TDS check'],
+  sv7: ['Repairs to doors, drawers and furniture', 'Fitting and assembly', 'Quote before any material is bought'],
+  sv8: ['Meals cooked in your kitchen', 'Menu agreed in advance', 'Daily or one-off parties'],
+  sv9: ['Survey of what is being moved', 'Packing and loading', 'Written quote for the move'],
+  sv10: ['Mounting TVs, shelves and curtains', 'Small repairs around the home', 'Drill and basic tools brought'],
+};
+
 const FALLBACK: Meta = { icon: Wrench, photo: PHOTOS.cleaning[1], blurb: 'Verified professionals' };
 export const metaFor = (s: Service): Meta => SERVICE_META[s.id] || FALLBACK;
 

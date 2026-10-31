@@ -1,5 +1,6 @@
 import { sendRequest, OFFLINE_MSG } from '@/lib/requests';
 import { WaitlistForm } from '@/components/RequestForms';
+import { MyBookings, rememberBooking } from './book/MyBookings';
 import { pexelsPhoto } from '@/data/media';
 import { StepCards, SectionTitle } from '@/components/StepCards';
 import { useSeo } from '@/lib/seo';
@@ -174,6 +175,8 @@ export function ZyphixBook() {
   const [contactPhone, setContactPhone] = useState('');
   const [sending, setSending] = useState(false);
   const [bookError, setBookError] = useState('');
+  const [bookingId, setBookingId] = useState('');
+  const [bookingsTick, setBookingsTick] = useState(0);
 
 
   const handleBook = async () => {
@@ -184,7 +187,8 @@ export function ZyphixBook() {
     if (address.trim().length < 6) { setBookError('Add the address where the work is needed.'); return; }
     setSending(true); setBookError('');
     try {
-      await sendRequest('book', { name: contactName, phone: contactPhone, address }, [{ name: svc.title, note: `${day}, ${selectedSlot}` }], { slot: `${day}, ${selectedSlot}`, service: svc.title });
+      const id = await sendRequest('book', { name: contactName, phone: contactPhone, address }, [{ name: svc.title, note: `${day}, ${selectedSlot}` }], { slot: `${day}, ${selectedSlot}`, service: svc.title });
+      rememberBooking(id); setBookingId(id); setBookingsTick(t => t + 1);
       setBooked(true);
     } catch { setBookError(OFFLINE_MSG); }
     setSending(false);
@@ -221,7 +225,7 @@ export function ZyphixBook() {
   const pickById = (id: string) => { const s = services.find(x => x.id === id); if (s) pickFromHero(s); };
 
   const booking: BookingState = { activeService, day, setDay, slot: selectedSlot, setSlot: setSelectedSlot, address, setAddress, booked, onBook: handleBook,
-    name: contactName, setName: setContactName, phone: contactPhone, setPhone: setContactPhone, sending, error: bookError, onReset: () => { setBooked(false); setSelectedSlot(null); } };
+    name: contactName, setName: setContactName, phone: contactPhone, setPhone: setContactPhone, sending, error: bookError, bookingId, onReset: () => { setBooked(false); setSelectedSlot(null); setBookingId(''); } };
 
   const list = orderedServices();
   const heroPhotos = [list[0], list[1], list[2]].map(sv => metaFor(sv).photo);
@@ -323,6 +327,8 @@ export function ZyphixBook() {
           <div className="mt-8 lg:hidden">
             <BookingPanel id={PANEL_ID_MOBILE} state={booking} />
           </div>
+
+          <MyBookings refresh={bookingsTick} />
 
           {/* ── Pros near you (live partner directory) ── */}
           <section id="pros" className="mt-14 scroll-mt-24 md:mt-20">

@@ -50,6 +50,7 @@ export function FinalCta() {
             </a>
           ))}
         </Reveal>
+        <Reveal delay={0.15}><a href="/status" className="mt-8 inline-flex items-center gap-1.5 text-[14px] font-semibold text-emerald-300 hover:text-emerald-200">Already applied? Check your application status <ArrowRight size={15} /></a></Reveal>
       </Container>
     </section>
   );

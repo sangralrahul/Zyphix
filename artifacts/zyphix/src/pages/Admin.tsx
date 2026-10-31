@@ -321,14 +321,14 @@ export function Admin() {
                 {view === 'partners' && <Partners partners={partners} onOpen={setOpen} onStatus={setStatus} fresh={fresh} loading={loading} />}
                 {view === 'orders' && <Orders orders={orders} loading={loading} />}
                 {view === 'waitlist' && <Waitlist rows={waitlist} loading={loading} />}
-                {view === 'inbox' && <><EmailHealth token={token} /><CategoryArt token={token} /><InboxView rows={messages} loading={loading} /></>}
+                {view === 'inbox' && <><Tickets token={token} /><EmailHealth token={token} /><CategoryArt token={token} /><InboxView rows={messages} loading={loading} /></>}
               </div>
             </div>
           )}
         </motion.main>
       </AnimatePresence>
 
-      <Drawer partner={open} onClose={() => setOpen(null)} onStatus={setStatus} />
+      <Drawer partner={open} token={token} onClose={() => setOpen(null)} onStatus={setStatus} />
 
       {/* ── Toasts ── */}
       <div className="zx-dark pointer-events-none fixed bottom-5 left-1/2 z-[80] flex w-[min(380px,calc(100vw-40px))] -translate-x-1/2 flex-col gap-2">
@@ -537,7 +537,7 @@ function Partners({ partners, onOpen, onStatus, fresh, loading }: { partners: Pa
 }
 
 /* ── Partner detail drawer ──────────────────────────────────────────────── */
-function Drawer({ partner: p, onClose, onStatus }: { partner: Partner | null; onClose: () => void; onStatus: (p: Partner, s: Status) => void }) {
+function Drawer({ partner: p, token, onClose, onStatus }: { partner: Partner | null; token: string; onClose: () => void; onStatus: (p: Partner, s: Status) => void }) {
   const [confirm, setConfirm] = useState(false);
   useEffect(() => { setConfirm(false); }, [p?.id]);
   useEffect(() => {
@@ -580,6 +580,7 @@ function Drawer({ partner: p, onClose, onStatus }: { partner: Partner | null; on
               <Block title="Business" rows={[['Business name', p.business_name], ['Category', p.category], ['Tags', p.tags]]} />
               {Object.keys(d).length > 0 && <Block title="Everything they submitted" rows={Object.entries(d).filter(([, v]) => v !== '' && v != null).map(([k, v]) => [pretty(k), Array.isArray(v) ? v.join(', ') : typeof v === 'object' ? JSON.stringify(v) : String(v)] as [string, string])} />}
               <p className="mt-2 text-[12px] text-white/35">Reference {p.id}</p>
+              {p.type === 'restaurant' && <MenuEditor partnerId={p.id} token={token} />}
             </div>
 
             <div className="border-t border-white/[.06] bg-[#0B0F12] px-6 py-4">
@@ -843,3 +844,93 @@ function InboxView({ rows, loading }: { rows: Msg[]; loading: boolean }) {
 
 /* Light theme: remaps the dark palette; anything inside .zx-dark (video hero, drawer header, toasts) stays dark. */
 const LIGHT_CSS = '.zx-admin[data-theme=light]{background:#F4F5F2;color:rgb(11,15,18);--zx-bg:#F4F5F2;--zx-tag:100%;--zx-fade:rgba(244,245,242,.35)}\n.zx-admin[data-theme=light] .text-white:not(.zx-dark *):not(.zx-dark){color:rgb(11,15,18)}\n.zx-admin[data-theme=light] .text-white\\/35:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.50)}\n.zx-admin[data-theme=light] .text-white\\/40:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.55)}\n.zx-admin[data-theme=light] .text-white\\/45:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.60)}\n.zx-admin[data-theme=light] .text-white\\/50:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.65)}\n.zx-admin[data-theme=light] .text-white\\/55:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.70)}\n.zx-admin[data-theme=light] .text-white\\/60:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.75)}\n.zx-admin[data-theme=light] .text-white\\/65:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.80)}\n.zx-admin[data-theme=light] .text-white\\/70:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.85)}\n.zx-admin[data-theme=light] .text-white\\/75:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.90)}\n.zx-admin[data-theme=light] .text-white\\/80:not(.zx-dark *):not(.zx-dark){color:rgba(11,15,18,0.95)}\n.zx-admin[data-theme=light] .hover\\:text-white:not(.zx-dark *):not(.zx-dark):hover{color:rgb(11,15,18)}\n.zx-admin[data-theme=light] .ring-white\\/10:not(.zx-dark *):not(.zx-dark){--tw-ring-color:rgba(11,15,18,.09)}\n.zx-admin[data-theme=light] .ring-white\\/15:not(.zx-dark *):not(.zx-dark){--tw-ring-color:rgba(11,15,18,.09)}\n.zx-admin[data-theme=light] .border-white\\/15:not(.zx-dark *):not(.zx-dark){border-color:rgba(11,15,18,.09)}\n.zx-admin[data-theme=light] .border-white\\/10:not(.zx-dark *):not(.zx-dark){border-color:rgba(11,15,18,.09)}\n.zx-admin[data-theme=light] .border-white\\/\\[\\.08\\]:not(.zx-dark *):not(.zx-dark){border-color:rgba(11,15,18,.09)}\n.zx-admin[data-theme=light] .border-white\\/\\[\\.06\\]:not(.zx-dark *):not(.zx-dark){border-color:rgba(11,15,18,.09)}\n.zx-admin[data-theme=light] .divide-white\\/\\[\\.06\\]:not(.zx-dark *):not(.zx-dark){border-color:rgba(11,15,18,.07)}\n.zx-admin[data-theme=light] .divide-white\\/\\[\\.06\\]:not(.zx-dark *):not(.zx-dark)>:not(:last-child){border-color:rgba(11,15,18,.07)}\n.zx-admin[data-theme=light] .bg-white\\/\\[\\.035\\]:not(.zx-dark *):not(.zx-dark){background-color:#fff;box-shadow:0 1px 2px rgba(16,24,40,.04),0 18px 40px -30px rgba(16,24,40,.25)}\n.zx-admin[data-theme=light] .bg-white\\/\\[\\.04\\]:not(.zx-dark *):not(.zx-dark){background-color:#fff;box-shadow:0 1px 2px rgba(16,24,40,.04),0 18px 40px -30px rgba(16,24,40,.25)}\n.zx-admin[data-theme=light] .bg-white\\/\\[\\.02\\]:not(.zx-dark *):not(.zx-dark){background-color:#fff;box-shadow:0 1px 2px rgba(16,24,40,.04),0 18px 40px -30px rgba(16,24,40,.25)}\n.zx-admin[data-theme=light] .bg-white\\/\\[\\.06\\]:not(.zx-dark *):not(.zx-dark){background-color:rgba(11,15,18,.05)}\n.zx-admin[data-theme=light] .bg-white\\/10:not(.zx-dark *):not(.zx-dark){background-color:rgba(11,15,18,.05)}\n.zx-admin[data-theme=light] .hover\\:bg-white\\/5:not(.zx-dark *):not(.zx-dark):hover{background-color:rgba(11,15,18,.05)}\n.zx-admin[data-theme=light] .hover\\:bg-white\\/\\[\\.03\\]:not(.zx-dark *):not(.zx-dark):hover{background-color:rgba(11,15,18,.05)}\n.zx-admin[data-theme=light] .hover\\:bg-white\\/10:not(.zx-dark *):not(.zx-dark):hover{background-color:rgba(11,15,18,.05)}\n.zx-admin[data-theme=light] .hover\\:bg-white\\/15:not(.zx-dark *):not(.zx-dark):hover{background-color:rgba(11,15,18,.05)}\n.zx-admin[data-theme=light] .hover\\:bg-white\\/\\[\\.055\\]:not(.zx-dark *):not(.zx-dark):hover{background-color:rgba(11,15,18,.05)}\n.zx-admin[data-theme=light] .bg-black\\/30:not(.zx-dark *):not(.zx-dark){background-color:rgba(255,255,255,.9)}\n.zx-admin[data-theme=light] .bg-\\[\\#0D1215\\]\\/70:not(.zx-dark *):not(.zx-dark){background-color:rgba(255,255,255,.88)}\n.zx-admin[data-theme=light] .bg-\\[\\#06080A\\]\\/80:not(.zx-dark *):not(.zx-dark){background-color:rgba(250,250,248,.85)}\n.zx-admin[data-theme=light] .bg-\\[\\#0B0F12\\]:not(.zx-dark *):not(.zx-dark){background-color:#fff}\n.zx-admin[data-theme=light] .bg-\\[\\#06080A\\]:not(.zx-dark *):not(.zx-dark){background-color:#F4F5F2}\n.zx-admin[data-theme=light] .placeholder\\:text-white\\/35:not(.zx-dark *):not(.zx-dark)::placeholder{color:rgba(11,15,18,.4)}\n.zx-admin[data-theme=light] .text-emerald-300:not(.zx-dark *):not(.zx-dark){color:#047857}\n.zx-admin[data-theme=light] .text-amber-300:not(.zx-dark *):not(.zx-dark){color:#B45309}\n.zx-admin[data-theme=light] .text-rose-300:not(.zx-dark *):not(.zx-dark){color:#BE123C}\n.zx-admin[data-theme=light] .hover\\:text-rose-300:not(.zx-dark *):not(.zx-dark):hover{color:#BE123C}\n.zx-admin[data-theme=light] button.text-gray-950:not(.zx-dark *):not(.zx-dark){color:#fff}\n.zx-admin[data-theme=light] button.text-gray-950:not(.zx-dark *):not(.zx-dark)>span.bg-white{background:#0B0F12}\n.zx-admin[data-theme=light]{color-scheme:light}';
+
+/* ── Restaurant menu editor (inside the partner drawer): items show on eats.zyphix.in ── */
+type MenuRowT = { id: string; name: string; description: string | null; price: number; veg: number; section: string | null; image_url: string | null; available: number; sort: number };
+function MenuEditor({ partnerId, token }: { partnerId: string; token: string }) {
+  const [rows, setRows] = useState<MenuRowT[]>([]);
+  const [f, setF] = useState({ name: '', price: '', section: '', description: '', imageUrl: '', veg: true });
+  const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
+  const load = useCallback(() => { api<MenuRowT[]>(`/admin/menu?partner=${encodeURIComponent(partnerId)}`, token).then(setRows).catch(() => {}); }, [partnerId, token]);
+  useEffect(() => { load(); }, [load]);
+  const save = async () => {
+    if (!f.name.trim() || !Number(f.price)) { setErr('Name and price are required.'); return; }
+    setBusy(true); setErr('');
+    try { await api('/admin/menu', token, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ partnerId, name: f.name, price: Number(f.price), section: f.section || 'Menu', description: f.description, imageUrl: f.imageUrl, veg: f.veg, sort: rows.length }) }); setF({ name: '', price: '', section: f.section, description: '', imageUrl: '', veg: f.veg }); load(); }
+    catch (e) { setErr((e as Error).message); }
+    setBusy(false);
+  };
+  const del = async (id: string) => { await api(`/admin/menu/${encodeURIComponent(id)}`, token, { method: 'DELETE' }).catch(() => {}); load(); };
+  const inp = 'h-10 w-full rounded-xl border border-white/10 bg-white/[.04] px-3 text-[13.5px] text-white outline-none placeholder:text-white/35 focus:border-emerald-400/50';
+  return (
+    <div className="mt-6 rounded-2xl border border-white/10 bg-white/[.03] p-4">
+      <p className="text-[14px] font-semibold">Menu on Zyphix Eats <span className="text-white/45">({rows.length})</span></p>
+      <p className="mt-0.5 text-[12px] text-white/45">Approved restaurants show these dishes on their page. Without a menu, customers can still order by request.</p>
+      <ul className="mt-3 divide-y divide-white/[.06]">
+        {rows.map(r => (
+          <li key={r.id} className="flex items-center gap-3 py-2 text-[13px]">
+            <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${r.veg ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+            <span className="min-w-0 flex-1 truncate">{r.name} <span className="text-white/40">· {r.section}</span></span>
+            <span className="font-semibold">₹{r.price}</span>
+            <button onClick={() => del(r.id)} className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-rose-300" aria-label={`Delete ${r.name}`}><X size={14} /></button>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <input className={`${inp} col-span-2`} placeholder="Dish name" value={f.name} onChange={e => setF({ ...f, name: e.target.value })} />
+        <input className={inp} placeholder="Price (₹)" inputMode="numeric" value={f.price} onChange={e => setF({ ...f, price: e.target.value.replace(/\D/g, '') })} />
+        <input className={inp} placeholder="Section (e.g. Mains)" value={f.section} onChange={e => setF({ ...f, section: e.target.value })} />
+        <input className={`${inp} col-span-2`} placeholder="Short description (optional)" value={f.description} onChange={e => setF({ ...f, description: e.target.value })} />
+        <input className={`${inp} col-span-2`} placeholder="Photo URL (optional)" value={f.imageUrl} onChange={e => setF({ ...f, imageUrl: e.target.value })} />
+        <label className="flex items-center gap-2 text-[13px] text-white/75"><input type="checkbox" checked={f.veg} onChange={e => setF({ ...f, veg: e.target.checked })} /> Vegetarian</label>
+        <button onClick={save} disabled={busy} className="h-10 rounded-xl text-[13.5px] font-semibold text-white disabled:opacity-60" style={{ background: G }}>{busy ? 'Saving…' : 'Add dish'}</button>
+      </div>
+      {err && <p className="mt-2 text-[12.5px] text-rose-300">{err}</p>}
+    </div>
+  );
+}
+
+/* ── Support tickets raised on support.zyphix.in ── */
+type TicketT = { id: string; name: string | null; email: string; phone: string | null; topic: string; order_id: string | null; message: string; status: string; reply: string | null; created_at: string };
+function Tickets({ token }: { token: string }) {
+  const [rows, setRows] = useState<TicketT[]>([]);
+  const [draft, setDraft] = useState<Record<string, string>>({});
+  const load = useCallback(() => { api<TicketT[]>('/admin/tickets', token).then(setRows).catch(() => {}); }, [token]);
+  useEffect(() => { load(); }, [load]);
+  const update = async (t: TicketT, status: string) => {
+    await api(`/admin/tickets/${encodeURIComponent(t.id)}`, token, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status, reply: draft[t.id] ?? t.reply ?? '' }) }).catch(() => {});
+    load();
+  };
+  const tone: Record<string, string> = { open: 'bg-amber-400/15 text-amber-300', in_progress: 'bg-sky-400/15 text-sky-300', resolved: 'bg-emerald-400/15 text-emerald-300' };
+  return (
+    <section className={`${PANEL} mb-6 p-5 sm:p-6`}>
+      <h2 className="text-[17px] font-semibold">Support tickets <span className="text-white/45">({rows.filter(r => r.status !== 'resolved').length} open)</span></h2>
+      <p className="text-[13px] text-white/50">Raised on support.zyphix.in. Customers see the status and your reply when they check their ticket.</p>
+      {rows.length === 0 ? <p className="mt-4 text-[13.5px] text-white/45">No tickets yet.</p> : (
+        <ul className="mt-4 space-y-3">
+          {rows.map(t => (
+            <li key={t.id} className="rounded-2xl border border-white/10 bg-white/[.03] p-4">
+              <div className="flex flex-wrap items-center gap-2 text-[13px]">
+                <span className="font-semibold">{t.id}</span>
+                <span className={`rounded-full px-2 py-0.5 text-[11.5px] font-semibold ${tone[t.status] ?? 'bg-white/10'}`}>{t.status.replace('_', ' ')}</span>
+                <span className="text-white/50">{t.topic}{t.order_id ? ` · ${t.order_id}` : ''}</span>
+                <span className="ml-auto text-white/40">{ago(t.created_at)}</span>
+              </div>
+              <p className="mt-2 whitespace-pre-wrap text-[13.5px] text-white/80">{t.message}</p>
+              <p className="mt-1 text-[12px] text-white/45">{t.name ? `${t.name} · ` : ''}{t.email}{t.phone ? ` · ${t.phone}` : ''}</p>
+              <textarea rows={2} placeholder="Reply the customer will see" defaultValue={t.reply ?? ''} onChange={e => setDraft(d => ({ ...d, [t.id]: e.target.value }))}
+                className="mt-3 w-full rounded-xl border border-white/10 bg-white/[.04] px-3 py-2 text-[13px] text-white outline-none placeholder:text-white/35 focus:border-emerald-400/50" />
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(['in_progress', 'resolved', 'open'] as const).map(s => (
+                  <button key={s} onClick={() => update(t, s)} className={`h-9 rounded-full px-3.5 text-[12.5px] font-semibold ${t.status === s ? 'bg-white text-gray-900' : 'border border-white/15 text-white/75 hover:bg-white/10'}`}>
+                    {s === 'in_progress' ? 'In progress' : s === 'resolved' ? 'Resolve' : 'Reopen'}
+                  </button>
+                ))}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}

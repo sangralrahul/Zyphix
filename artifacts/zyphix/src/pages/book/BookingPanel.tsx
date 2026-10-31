@@ -4,7 +4,7 @@ import { Check, MapPin, Receipt, ShieldCheck, CalendarClock } from 'lucide-react
 import { Chip } from '@/ui/kit';
 import { EASE, G, isStatic } from '@/ui/cinema';
 import { PHOTOS } from '@/data/media';
-import { DAYS, TIME_SLOTS, metaFor, type Day, type Service } from './shared';
+import { DAYS, TIME_SLOTS, INCLUDED, metaFor, type Day, type Service } from './shared';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Booking panel — service → day (Today / Tomorrow) → slot → address → confirm.
@@ -20,10 +20,11 @@ export type BookingState = {
   booked: boolean; onBook: () => void;
   name: string; setName: (v: string) => void; phone: string; setPhone: (v: string) => void;
   sending: boolean; error: string; onReset: () => void;
+  bookingId?: string;
 };
 
 export function BookingPanel({ id, state }: { id: string; state: BookingState }) {
-  const { activeService, day, setDay, slot, setSlot, address, setAddress, booked, onBook, name, setName, phone, setPhone, sending, error, onReset } = state;
+  const { activeService, day, setDay, slot, setSlot, address, setAddress, booked, onBook, name, setName, phone, setPhone, sending, error, onReset, bookingId } = state;
   const stat = isStatic();
   const anim = stat ? {} : { initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -10 }, transition: { duration: 0.25, ease: EASE } };
 
@@ -46,6 +47,14 @@ export function BookingPanel({ id, state }: { id: string; state: BookingState })
                 <p className="truncate text-[12.5px] text-gray-500">{activeService.category} · next slot {activeService.nextSlot}</p>
               </div>
             </div>
+
+            {/* What the visit covers */}
+            {INCLUDED[activeService.id] && (
+              <ul className="mt-3 space-y-1.5 rounded-2xl bg-emerald-50/60 p-3.5 text-[12.5px] text-gray-700">
+                <li className="text-[11.5px] font-bold uppercase tracking-[0.1em] text-emerald-800">What's included</li>
+                {INCLUDED[activeService.id].map(t => <li key={t} className="flex items-start gap-2"><Check size={13} className="mt-0.5 shrink-0 text-emerald-700" />{t}</li>)}
+              </ul>
+            )}
 
             {/* Day tabs */}
             <div className="mt-4 flex rounded-xl bg-gray-100 p-1">
@@ -110,8 +119,8 @@ export function BookingPanel({ id, state }: { id: string; state: BookingState })
                     className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white" style={{ background: G }}><Check size={20} strokeWidth={3} /></span>
                     <div>
-                      <p className="text-[14px] font-semibold text-emerald-900">Request received</p>
-                      <p className="text-[12.5px] text-emerald-800/80">{activeService.title} · {day}, {slot}. We'll call +91 {phone} to confirm the pro and the price.</p>
+                      <p className="text-[14px] font-semibold text-emerald-900">Request received{bookingId ? ` · ${bookingId}` : ''}</p>
+                      <p className="text-[12.5px] text-emerald-800/80">{activeService.title} · {day}, {slot}. We'll call +91 {phone} to confirm the pro and the price. Track it under My bookings below.</p>
                       <button type="button" onClick={onReset} className="mt-1 text-[12px] font-semibold text-emerald-800 underline underline-offset-2">Book another</button>
                     </div>
                   </motion.div>

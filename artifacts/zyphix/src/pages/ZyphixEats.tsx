@@ -8,6 +8,7 @@ import { usePartners, tagList } from '@/lib/partners';
 import { Chip, Card, Button, G, FONT } from '@/ui/kit';
 import { VideoHero, Reveal, Kicker, BgVideo } from '@/ui/cinema';
 import { StepCards, SectionTitle } from '@/components/StepCards';
+import { RestaurantPage } from './eats/RestaurantPage';
 import { pexelsPhoto } from '@/data/media';
 import { Spotlight, SplitHeadline } from '@/ui/motion2';
 import { VIDEOS } from '@/data/media';
@@ -121,54 +122,9 @@ export function ZyphixEats() {
   return (
     <div className="relative mx-auto min-h-[70vh] w-full max-w-[1180px] pt-0 text-gray-900 md:pt-4" style={{ fontFamily: FONT }}>
       {activeR ? (
-        /* ── Restaurant detail / menu ── */
-        <motion.div key={activeR.id} {...enter} className="pt-4 md:pt-0">
-          <button onClick={() => setActiveRestaurant(null)}
-            className="inline-flex items-center gap-1 text-[13px] font-medium text-gray-600 transition hover:text-gray-900">
-            <ChevronLeft size={15} /> All restaurants
-          </button>
-
-          <Card hover={false} className="mt-3 rounded-xl p-4">
-            <div className="flex items-start gap-4">
-              <div className="w-[120px] shrink-0 overflow-hidden rounded-lg border border-gray-200 sm:w-[160px]" style={{ aspectRatio: '16 / 10' }}>
-                {activeR.image
-                  ? <img src={activeR.image} alt={activeR.name} loading="lazy" className="h-full w-full object-cover" />
-                  : <InitialsTile name={activeR.name} />}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-[18px] font-semibold tracking-[-0.01em] text-gray-900">{activeR.name}</h1>
-                  {activeR.registered && <Chip tone="green">New</Chip>}
-                </div>
-                <p className="mt-0.5 truncate text-[13px] text-gray-500">{activeR.cuisine}</p>
-                <p className="mt-2 text-[12px] text-gray-600">
-                  {activeR.eta} · Min order ₹{activeR.minOrder} · {feeLabel(activeR.deliveryFee)}
-                  {activeR.rating !== undefined && (
-                    <span className="ml-2 inline-flex items-center gap-1 text-gray-900"><Star size={11} className="fill-gray-900 text-gray-900" />{activeR.rating}</span>
-                  )}
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <div className="mt-5 flex items-baseline justify-between">
-            <h2 className="text-[17px] font-semibold tracking-[-0.01em] text-gray-900">Menu</h2>
-            <span className="text-[13px] text-gray-500">{activeMenu.length} item{activeMenu.length === 1 ? '' : 's'}</span>
-          </div>
-
-          {activeMenu.length > 0 ? (
-            <Card hover={false} className="mt-3 divide-y divide-gray-100 rounded-xl">
-              {activeMenu.map(item => (
-                <MenuRow key={item.id} item={item} qty={cart[item.id] || 0} onAdd={() => add(item.id)} onRemove={() => remove(item.id)} />
-              ))}
-            </Card>
-          ) : (
-            <Card hover={false} className="mt-3 rounded-2xl p-5 md:p-6">
-              <p className="text-[16px] font-semibold text-gray-900">Order by request</p>
-              <p className="mt-1 mb-4 text-[13.5px] text-gray-500">{activeR.name} is setting up its full menu on Zyphix. Tell us what you'd like and we'll call you to confirm it with the kitchen.</p>
-              <OrderRequestForm restaurant={activeR.name} />
-            </Card>
-          )}
+        /* ── Restaurant page: menu, veg filter, cart and checkout ── */
+        <motion.div key={activeR.id} {...enter}>
+          <RestaurantPage partnerId={activeR.id.replace(/^p-/, '')} fallbackName={activeR.name} onBack={() => setActiveRestaurant(null)} />
         </motion.div>
       ) : (
         /* ── Restaurant list ── */
