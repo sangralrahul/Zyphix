@@ -26,7 +26,7 @@ function Phone({ value, onChange }: { value: string; onChange: (v: string) => vo
 }
 
 /** "Tell me when it opens near me" */
-export function WaitlistForm({ product, cta = 'Notify me' }: { product: 'now' | 'eats' | 'book'; cta?: string }) {
+export function WaitlistForm({ product, cta = 'Notify me', accent }: { product: 'now' | 'eats' | 'book'; cta?: string; accent?: string }) {
   const [name, setName] = useState(''); const [phone, setPhone] = useState(''); const [city, setCity] = useState('');
   const [state, setState] = useState<'idle' | 'busy' | 'done'>('idle'); const [err, setErr] = useState('');
   const submit = async (e: React.FormEvent) => {
@@ -44,7 +44,7 @@ export function WaitlistForm({ product, cta = 'Notify me' }: { product: 'now' | 
       <Phone value={phone} onChange={setPhone} />
       <input value={city} onChange={e => setCity(e.target.value)} placeholder="City and area" aria-label="City and area" className={`${input} sm:col-span-2`} />
       <AnimatePresence>{err && <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} role="alert" className="text-[13px] font-medium text-red-600 sm:col-span-2">{err}</motion.p>}</AnimatePresence>
-      <button disabled={state === 'busy'} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl px-6 text-[15px] font-semibold text-white disabled:opacity-70 sm:col-span-2" style={{ background: `linear-gradient(180deg, #19C27C 0%, ${G} 100%)` }}>
+      <button disabled={state === 'busy'} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl px-6 text-[15px] font-semibold text-white disabled:opacity-70 sm:col-span-2" style={{ background: accent || `linear-gradient(180deg, #19C27C 0%, ${G} 100%)` }}>
         {state === 'busy' && <Loader2 size={17} className="animate-spin" />}{cta}
       </button>
     </form>

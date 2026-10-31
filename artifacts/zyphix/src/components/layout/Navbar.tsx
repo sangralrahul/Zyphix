@@ -77,7 +77,8 @@ export function Navbar() {
           </button>
 
           {/* ── Search bar ── */}
-          <div className="relative min-w-0 flex-1" style={{ maxWidth: 520 }}>
+          {/* On Eats and Book the page has its own big search, so phones skip this squeezed one */}
+          <div className={`relative min-w-0 flex-1 ${detectSite() === 'eats' || detectSite() === 'book' ? 'max-sm:invisible' : ''}`} style={{ maxWidth: 520 }}>
             <Search className={`pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 ${focused ? 'text-gray-600' : 'text-gray-400'}`} size={16} />
             <input
               type="text"

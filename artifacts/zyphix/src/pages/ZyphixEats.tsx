@@ -133,18 +133,18 @@ export function ZyphixEats() {
           <section className="relative mt-4 overflow-hidden rounded-[28px] md:mt-2" style={{ background: 'linear-gradient(120deg, #F25C24 0%, #FB7A2E 55%, #FF9A4D 100%)' }}>
             <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-white/10" />
             <div aria-hidden className="pointer-events-none absolute -bottom-32 right-40 h-72 w-72 rounded-full bg-black/5" />
-            <div className="relative grid items-center gap-6 px-5 py-8 sm:px-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:px-12 md:py-14">
-              <div>
+            <div className="relative grid grid-cols-1 items-center gap-6 px-5 py-7 sm:px-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:px-12 md:py-14">
+              <div className="min-w-0">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white/18 px-3 py-1 text-[12px] font-bold text-white ring-1 ring-inset ring-white/30">
                   {openingSoon ? 'Opening soon near you' : `${allRestaurants.length} kitchens open now`}
                 </span>
-                <h1 className="mt-4 max-w-[16ch] text-[34px] font-extrabold leading-[1.04] tracking-[-0.035em] text-white sm:text-[44px] md:text-[54px]">Hungry? Your local kitchens deliver.</h1>
-                <p className="mt-3 max-w-[44ch] text-[15px] font-medium leading-[1.55] text-white/90 md:text-[16.5px]">Biryani houses, pizza ovens, momo stalls and cafés near you, cooked to order and brought to your door.</p>
+                <h1 className="mt-3 max-w-[16ch] text-[30px] font-extrabold leading-[1.05] tracking-[-0.035em] text-white sm:text-[44px] md:mt-4 md:text-[54px]">Hungry? Your local kitchens deliver.</h1>
+                <p className="mt-2.5 max-w-[44ch] text-[14px] font-medium leading-[1.55] text-white/90 md:mt-3 md:text-[16.5px]">Biryani houses, pizza ovens, momo stalls and cafés near you, cooked to order and brought to your door.</p>
                 <form role="search" onSubmit={e => e.preventDefault()}
                   className="mt-6 flex h-[54px] max-w-[560px] items-center gap-2 rounded-2xl bg-white pl-4 pr-1.5 shadow-[0_18px_40px_-18px_rgba(90,30,0,.55)] md:h-[58px]">
                   <Search size={19} className="shrink-0 text-gray-400" />
                   <input value={search} onChange={e => { setSearch(e.target.value); setActiveRestaurant(null); }}
-                    placeholder="Search for restaurant, cuisine or a dish" aria-label="Search restaurants"
+                    placeholder="Search for food" aria-label="Search restaurants"
                     className="h-full min-w-0 flex-1 bg-transparent text-[15px] font-medium text-gray-900 outline-none placeholder:font-normal placeholder:text-gray-400 md:text-[16px]" />
                   {search && <button type="button" onClick={() => setSearch('')} aria-label="Clear search" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700"><X size={15} /></button>}
                   <button type="button" onClick={() => document.getElementById('eats-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
@@ -152,7 +152,7 @@ export function ZyphixEats() {
                     {openingSoon ? 'Notify me' : 'Search'}
                   </button>
                 </form>
-                <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-semibold text-white/90">
+                <ul className="mt-4 hidden flex-wrap gap-x-5 gap-y-2 text-[13px] font-semibold text-white/90 sm:flex">
                   {['Cooked to order', 'Live order tracking', 'Kitchens from your area'].map(t => (
                     <li key={t} className="inline-flex items-center gap-1.5"><Check size={14} />{t}</li>
                   ))}
@@ -211,15 +211,16 @@ export function ZyphixEats() {
             <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
               {DISHES.map(d => (
                 <figure key={d.id} className="group overflow-hidden rounded-3xl border border-gray-200 bg-white">
-                  <div className="aspect-[4/3] overflow-hidden bg-gray-100">
+                  <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
                     <img src={pexelsPhoto(d.id, 640)} alt={d.name} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]" />
-                  </div>
-                  <figcaption className="flex items-center justify-between gap-2 p-3.5 md:p-4">
-                    <span className="min-w-0">
-                      <span className="block truncate text-[14.5px] font-semibold tracking-[-0.01em] text-gray-900">{d.name}</span>
-                      <span className="block truncate text-[12.5px] text-gray-500">{d.cuisine}</span>
+                    <span aria-label={d.veg ? 'Vegetarian' : 'Non-vegetarian'} className="absolute left-2.5 top-2.5 inline-flex h-6 items-center gap-1.5 rounded-full bg-white/95 px-2 text-[11px] font-bold shadow-sm">
+                      <span className={`inline-flex h-3.5 w-3.5 items-center justify-center rounded-[3px] border-[1.5px] ${d.veg ? 'border-emerald-600' : 'border-rose-600'}`}><span className={`h-1.5 w-1.5 rounded-full ${d.veg ? 'bg-emerald-600' : 'bg-rose-600'}`} /></span>
+                      <span className={d.veg ? 'text-emerald-700' : 'text-rose-700'}>{d.veg ? 'Veg' : 'Non-veg'}</span>
                     </span>
-                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${d.veg ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>{d.veg ? 'Veg' : 'Non-veg'}</span>
+                  </div>
+                  <figcaption className="p-3 md:p-4">
+                    <span className="block text-[14px] font-bold leading-tight tracking-[-0.01em] text-gray-900 md:text-[15px]">{d.name}</span>
+                    <span className="mt-0.5 block text-[12.5px] text-gray-500">{d.cuisine}</span>
                   </figcaption>
                 </figure>
               ))}
@@ -240,7 +241,7 @@ export function ZyphixEats() {
                   <h2 className="mt-3 text-[26px] font-semibold leading-[1.1] tracking-[-0.035em] text-gray-900 md:text-[34px]">Your favourite kitchens are joining Zyphix Eats.</h2>
                   <p className="mt-3 text-[15px] leading-[1.6] text-gray-500">We're onboarding restaurants neighbourhood by neighbourhood. Leave your number and we'll tell you the day Eats opens where you live.</p>
                 </div>
-                <div className="md:pt-2"><WaitlistForm product="eats" cta="Notify me when Eats opens" /></div>
+                <div className="md:pt-2"><WaitlistForm product="eats" cta="Notify me when Eats opens" accent="#E2562B" /></div>
               </div>
             </section>
           )}
@@ -288,7 +289,7 @@ export function ZyphixEats() {
                 <h2 className="mt-2 max-w-[18ch] text-[26px] font-semibold leading-[1.1] tracking-[-0.035em] text-gray-900 md:text-[34px]">Put your kitchen on every phone nearby.</h2>
                 <p className="mt-3 max-w-[46ch] text-[14.5px] leading-[1.6] text-gray-500">No joining fee, commission explained before you go live, and a real-time order dashboard.{registered.length > 0 ? ` ${registered.length} kitchen${registered.length === 1 ? ' has' : 's have'} already joined.` : ''}</p>
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <Button href="https://partner.zyphix.in/restaurant">List your restaurant <ChevronRight size={15} /></Button>
+                  <a href="https://partner.zyphix.in/restaurant" className="inline-flex h-12 items-center gap-1.5 rounded-full bg-[#E2562B] px-6 text-[15px] font-bold text-white transition hover:-translate-y-px">List your restaurant <ChevronRight size={15} /></a>
                 </div>
               </div>
               <div className="relative min-h-[220px] bg-gray-100"><img src={fallbackPhoto(0).src} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" /></div>
